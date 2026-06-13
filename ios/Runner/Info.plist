@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Jobzone uses your location to show jobs near you.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Jobzone needs access to your photos to set a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Jobzone needs camera access to take a profile picture.</string>
 </dict>
 </plist>

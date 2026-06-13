@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/config/env.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 
@@ -49,7 +50,9 @@ class WelcomePage extends StatelessWidget {
               const Spacer(),
               JzPrimaryButton(
                 label: l.getStarted,
-                onPressed: () => context.go(Routes.home),
+                onPressed: () => context.go(
+                  Env.hasSupabase ? Routes.createAccount : Routes.home,
+                ),
               ),
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(

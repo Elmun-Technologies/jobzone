@@ -15,4 +15,5 @@ abstract final class CacheKeys {
   static const String locale = 'pref_locale';
   static const String themeMode = 'pref_theme_mode';
   static const String onboardingComplete = 'pref_onboarding_complete';
+  static const String profileSetupComplete = 'pref_profile_setup_complete';
 }
