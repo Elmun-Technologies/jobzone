@@ -1,0 +1,114 @@
+// Shared contract: how a Postgres `jobs` row maps to a Meilisearch document,
+// plus the index settings. Used by meili-sync and meili-reindex.
+
+export const JOBS_INDEX = "jobs";
+
+export interface JobRow {
+  id: string;
+  title: string;
+  description?: string | null;
+  company_id: string;
+  category_id?: string | null;
+  job_type?: string | null;
+  experience_level?: string | null;
+  working_model?: string | null;
+  country?: string | null;
+  city?: string | null;
+  location?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  currency?: string | null;
+  skills_required?: string[] | null;
+  applicants_count?: number | null;
+  posted_at?: string | null;
+  expires_at?: string | null;
+  status?: string | null;
+}
+
+export interface CompanyFields {
+  name?: string | null;
+  logo_url?: string | null;
+  is_verified?: boolean | null;
+}
+
+const toEpoch = (v?: string | null) =>
+  v ? Math.floor(new Date(v).getTime() / 1000) : null;
+
+export function toJobDocument(
+  job: JobRow,
+  company?: CompanyFields,
+  categoryName?: string | null,
+) {
+  const doc: Record<string, unknown> = {
+    id: job.id,
+    title: job.title,
+    description: job.description ?? "",
+    company_id: job.company_id,
+    company_name: company?.name ?? "",
+    company_logo_url: company?.logo_url ?? null,
+    company_is_verified: company?.is_verified ?? false,
+    category_id: job.category_id ?? null,
+    category_name: categoryName ?? "",
+    job_type: job.job_type ?? null,
+    experience_level: job.experience_level ?? null,
+    working_model: job.working_model ?? null,
+    country: job.country ?? null,
+    city: job.city ?? null,
+    location: job.location ?? null,
+    salary_min: job.salary_min ?? null,
+    salary_max: job.salary_max ?? null,
+    currency: job.currency ?? null,
+    skills_required: job.skills_required ?? [],
+    applicants_count: job.applicants_count ?? 0,
+    posted_at: toEpoch(job.posted_at),
+    expires_at: toEpoch(job.expires_at),
+    status: job.status ?? "open",
+  };
+  if (job.lat != null && job.lng != null) {
+    doc._geo = { lat: job.lat, lng: job.lng };
+  }
+  return doc;
+}
+
+export const JOBS_SETTINGS = {
+  searchableAttributes: [
+    "title",
+    "company_name",
+    "skills_required",
+    "category_name",
+    "description",
+  ],
+  filterableAttributes: [
+    "job_type",
+    "experience_level",
+    "working_model",
+    "category_id",
+    "company_id",
+    "country",
+    "city",
+    "salary_min",
+    "salary_max",
+    "currency",
+    "company_is_verified",
+    "status",
+    "_geo",
+  ],
+  sortableAttributes: [
+    "posted_at",
+    "salary_max",
+    "salary_min",
+    "applicants_count",
+    "_geo",
+  ],
+  rankingRules: [
+    "words",
+    "typo",
+    "proximity",
+    "attribute",
+    "sort",
+    "exactness",
+    "posted_at:desc",
+  ],
+};
