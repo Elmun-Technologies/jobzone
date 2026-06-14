@@ -70,6 +70,11 @@ class ProfilePage extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
           _Tile(
+            icon: Icons.account_circle_outlined,
+            label: l.yourProfile,
+            onTap: () => context.push(Routes.yourProfile),
+          ),
+          _Tile(
             icon: Icons.language_rounded,
             label: l.language,
             onTap: () => context.push(Routes.accountLanguage),

@@ -11,6 +11,9 @@ import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/verify_code_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/jobs/presentation/bookmarks_page.dart';
+import '../../features/jobs/presentation/job_details_page.dart';
+import '../../features/jobs/presentation/see_all_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/onboarding/presentation/welcome_page.dart';
 import '../../features/permissions/presentation/location_access_page.dart';
@@ -21,6 +24,7 @@ import '../../features/preferences/presentation/job_title_page.dart';
 import '../../features/preferences/presentation/job_type_page.dart';
 import '../../features/preferences/presentation/working_model_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
+import '../../features/profile/presentation/your_profile_page.dart';
 import '../../features/search/presentation/explore_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
@@ -148,10 +152,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       _stub(Routes.filter, 'Filter'),
 
       // Jobs (static before parameterized)
-      _stub(Routes.suggestedJobs, 'Suggested Jobs'),
-      _stub(Routes.recentJobs, 'Recent Jobs'),
-      _stub(Routes.bookmarks, 'Bookmarks'),
-      _stub('/jobs/:id', 'Job Details'),
+      GoRoute(
+        path: Routes.suggestedJobs,
+        builder: (c, s) => const SeeAllJobsPage(kind: SeeAllKind.suggested),
+      ),
+      GoRoute(
+        path: Routes.recentJobs,
+        builder: (c, s) => const SeeAllJobsPage(kind: SeeAllKind.recent),
+      ),
+      GoRoute(path: Routes.bookmarks, builder: (c, s) => const BookmarksPage()),
+      GoRoute(
+        path: '/jobs/:id',
+        builder: (c, s) => JobDetailsPage(jobId: s.pathParameters['id']!),
+      ),
       _stub('/jobs/:id/apply', 'Apply for Job'),
       _stub('/jobs/:id/apply/success', 'Application Sent'),
       _stub('/jobs/:id/review/new', 'Write Company Review'),
@@ -168,6 +181,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // Notifications
       _stub(Routes.notifications, 'Notifications'),
+
+      // Your Profile (CV read view)
+      GoRoute(
+        path: Routes.yourProfile,
+        builder: (c, s) => const YourProfilePage(),
+      ),
 
       // Profile (CV) subtree
       _stub(Routes.profileContactInfo, 'Contact Info'),

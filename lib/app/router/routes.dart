@@ -57,6 +57,7 @@ abstract final class Routes {
   static const notifications = '/notifications';
 
   // Profile (CV) subtree
+  static const yourProfile = '/your-profile';
   static const profileContactInfo = '/profile/contact-info';
   static const profileAbout = '/profile/about';
   static const profileExperience = '/profile/experience';
