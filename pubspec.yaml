@@ -41,6 +41,7 @@ dependencies:
   go_router: ^17.3.0
   shared_preferences: ^2.5.5
   cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.17
   intl: ^0.20.2
   permission_handler: ^12.0.3
   geolocator: ^14.0.3
@@ -105,6 +106,13 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Asset folders. Figma-exported icons/illustrations drop into these dirs and
+  # are referenced via the JzSvgAsset widget. See docs/design-integration.md.
+  # (Add `- assets/images/` here once raster images are exported.)
+  assets:
+    - assets/icon/
+    - assets/illustrations/
 
   # Generate localized AppLocalizations from lib/localization/l10n/*.arb
   # (configured in l10n.yaml). Output lands in lib/localization/generated/.
