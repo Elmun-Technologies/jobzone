@@ -18,7 +18,12 @@ class BookmarksPage extends ConsumerWidget {
       title: l.bookmarks,
       body: jobsAsync.when(
         loading: () => const JobListSkeleton(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(bookmarkedJobsProvider),
+        ),
         data: (jobs) => jobs.isEmpty
             ? JzEmptyState(
                 icon: Icons.bookmark_border_rounded,

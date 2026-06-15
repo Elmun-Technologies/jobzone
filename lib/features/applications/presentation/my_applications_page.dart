@@ -21,7 +21,12 @@ class MyApplicationsPage extends ConsumerWidget {
       title: l.myApplications,
       body: async.when(
         loading: () => const JobListSkeleton(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(applicationsControllerProvider),
+        ),
         data: (apps) => apps.isEmpty
             ? JzEmptyState(
                 icon: Icons.description_outlined,

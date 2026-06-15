@@ -82,7 +82,10 @@ class HomePage extends ConsumerWidget {
                       itemBuilder: (_, _) => const JobCardSkeleton(width: 260),
                     ),
                   ),
-                  error: (_, _) => _ErrorBox(message: l.errUnknown),
+                  error: (_, _) => _ErrorBox(
+                    message: l.errUnknown,
+                    onRetry: () => ref.invalidate(suggestedJobsProvider),
+                  ),
                   data: (jobs) => jobs.isEmpty
                       ? _EmptyBox(message: l.noJobsTitle)
                       : ListView.separated(
@@ -105,7 +108,10 @@ class HomePage extends ConsumerWidget {
               recent.when(
                 loading: () =>
                     const JobListSkeleton(count: 3, padding: EdgeInsets.zero),
-                error: (_, _) => _ErrorBox(message: l.errUnknown),
+                error: (_, _) => _ErrorBox(
+                  message: l.errUnknown,
+                  onRetry: () => ref.invalidate(recentJobsProvider),
+                ),
                 data: (jobs) => jobs.isEmpty
                     ? _EmptyBox(message: l.noJobsTitle)
                     : Column(
@@ -182,15 +188,26 @@ class _EmptyBox extends StatelessWidget {
 }
 
 class _ErrorBox extends StatelessWidget {
-  const _ErrorBox({required this.message});
+  const _ErrorBox({required this.message, this.onRetry});
   final String message;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        message,
-        style: context.text.bodyMedium?.copyWith(color: context.colors.danger),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: context.text.bodyMedium?.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
+          if (onRetry != null)
+            TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
+        ],
       ),
     );
   }

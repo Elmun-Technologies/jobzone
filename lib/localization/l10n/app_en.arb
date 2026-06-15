@@ -319,5 +319,7 @@
   "copyCode": "Copy code",
   "codeCopied": "Code copied to clipboard",
   "addBookmark": "Save job",
-  "removeBookmark": "Remove from saved"
+  "removeBookmark": "Remove from saved",
+  "errorTitle": "Something went wrong",
+  "retry": "Retry"
 }

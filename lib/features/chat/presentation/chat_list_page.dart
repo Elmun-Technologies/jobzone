@@ -21,8 +21,13 @@ class ChatListPage extends ConsumerWidget {
       title: l.navChat,
       showBack: false,
       body: async.when(
-        loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        loading: () => const TileListSkeleton(),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(conversationsProvider),
+        ),
         data: (convos) => convos.isEmpty
             ? JzEmptyState(
                 icon: Icons.chat_bubble_outline_rounded,
