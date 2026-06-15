@@ -78,7 +78,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ],
       ),
       body: results.when(
-        loading: () => const JzLoader(),
+        loading: () => const JobListSkeleton(),
         error: (_, _) => Center(child: Text(l.errUnknown)),
         data: (jobs) => jobs.isEmpty
             ? JzEmptyState(

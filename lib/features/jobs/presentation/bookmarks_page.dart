@@ -17,7 +17,7 @@ class BookmarksPage extends ConsumerWidget {
     return JzScaffold(
       title: l.bookmarks,
       body: jobsAsync.when(
-        loading: () => const JzLoader(),
+        loading: () => const JobListSkeleton(),
         error: (_, _) => Center(child: Text(l.errUnknown)),
         data: (jobs) => jobs.isEmpty
             ? JzEmptyState(

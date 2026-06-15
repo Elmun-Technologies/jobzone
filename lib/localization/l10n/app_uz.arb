@@ -317,5 +317,7 @@
   "inviteBody": "Kodingizni doʻstlaringiz bilan ulashing. Ular Jobzone'ga qoʻshilganda, ikkalangiz ham bonus olasiz.",
   "yourReferralCode": "Sizning taklif kodingiz",
   "copyCode": "Kodni nusxalash",
-  "codeCopied": "Kod nusxalandi"
+  "codeCopied": "Kod nusxalandi",
+  "addBookmark": "Vakansiyani saqlash",
+  "removeBookmark": "Saqlanganlardan olib tashlash"
 }

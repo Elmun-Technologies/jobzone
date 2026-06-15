@@ -20,7 +20,7 @@ class MyApplicationsPage extends ConsumerWidget {
     return JzScaffold(
       title: l.myApplications,
       body: async.when(
-        loading: () => const JzLoader(),
+        loading: () => const JobListSkeleton(),
         error: (_, _) => Center(child: Text(l.errUnknown)),
         data: (apps) => apps.isEmpty
             ? JzEmptyState(
