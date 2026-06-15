@@ -1,99 +1,106 @@
+<div align="center">
+
 # Jobzone
 
-A production-grade **job-finder** mobile app built with **Flutter** + **Supabase** + **Meilisearch**, with full **Uzbek / Russian / English** localization and real-time chat.
+**Find your next job.** A production-grade job-finder mobile app built with **Flutter**, **Supabase**, and **Meilisearch** — with real-time chat, full **Uzbek / Russian / English** localization, and light/dark theming.
 
-> This repository is being built in phases. **Phase 0 (this foundation)** ships the project scaffold, design system, localization, the bottom-navigation shell, and the complete backend-as-code (Supabase schema + Meilisearch sync). Feature modules (auth, jobs, search, profile, chat, …) land in subsequent PRs.
+</div>
+
+---
+
+## Highlights
+
+- **~60 screens** across auth, jobs, search, applications, profile/CV, companies, chat, notifications, and account management.
+- **Offline-first demo**: runs end-to-end on built-in mock data with **no backend** — and activates Supabase + Meilisearch the moment env credentials are added (`Env.hasSupabase` gates every call).
+- **Clean, feature-first architecture** (`data / domain / presentation` per feature) with Riverpod state management and go_router navigation.
+- **Backend-as-code**: the entire Postgres schema, RLS, triggers, storage buckets, and Edge Functions live in `supabase/` as versioned migrations.
+- **Quality bar**: `flutter analyze` clean, 50+ unit/widget tests, `dart format` enforced — gated in CI on every PR.
+
+## Feature tour
+
+| Area | What's included |
+|------|-----------------|
+| **Onboarding & Auth** | Splash/session-restore · welcome · 3-slide onboarding · email sign-in / sign-up / OTP verify / password reset / complete-profile · preference setup (job type, experience, working model, titles) · location & notification permission flows |
+| **Home & Jobs** | Suggested + recent feeds · job details (About/Company/Reviews tabs) · bookmark toggle · see-all |
+| **Search** | Meilisearch-backed Explore + debounced Search · filters (type/level/model/category/salary/remote/verified) · sort |
+| **Applications** | Apply (cover letter + default CV) → success · My Applications · status timeline |
+| **Profile / CV** | Read view + full editing for Experience, Education, Projects, Certifications, Volunteer, Awards, Skills, About, Contact Info, and Resume upload |
+| **Companies** | Company details with Open Jobs / About / Reviews / People / Gallery tabs · intro-video player · full-screen gallery viewer · write-a-review |
+| **Chat & Notifications** | Real-time conversations (Supabase Postgres Changes) · message composer · UI for voice/video calls · notifications list + per-channel settings |
+| **Account** | Personal info · analytics dashboard · job-seeking status · settings · password manager · help center · privacy policy · invite friends · logout |
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| Mobile | Flutter (Dart 3), Material 3 |
-| State / DI | Riverpod 3 |
-| Routing | go_router (`StatefulShellRoute`) |
-| Backend | Supabase — Auth, PostgreSQL, Storage, Realtime |
-| Search | Meilisearch (synced from Postgres via Edge Functions) |
-| i18n | `flutter_localizations` + `intl` (ARB), runtime locale switch |
+- **Flutter** (Dart 3), Material 3, iOS + Android
+- **Riverpod** for state/DI · **go_router** (`StatefulShellRoute`) for navigation
+- **Supabase** — Auth, PostgreSQL (+RLS), Storage, Realtime
+- **Meilisearch** for job search (synced from Postgres via an Edge Function; the client only ever talks to a scoped proxy)
+- **flutter_localizations** + ARB (uz/ru/en), runtime locale switch
+- Design tokens as a `ThemeExtension` (`JzColors`), indigo accent `#2563EB`
+
+## Getting started
+
+```bash
+flutter pub get
+flutter gen-l10n          # generate localizations
+flutter run               # runs in offline/mock mode out of the box
+```
+
+The app boots straight into the shell with realistic mock data — no setup required.
+
+### With a real backend
+
+1. Provision a Supabase project and apply the schema:
+   ```bash
+   supabase db reset                                 # migrations/* + seed.sql
+   psql "$DATABASE_URL" -f supabase/seed_dev.sql      # optional demo companies + jobs
+   supabase functions deploy meili-sync meili-reindex search-jobs send-notification
+   ```
+2. Deploy Meilisearch (Railway/Render) and set the Edge Function secrets (Meili host + admin key — never shipped to the client).
+3. Create `env/dev.json` (gitignored — see `env/dev.example.json`):
+   ```json
+   { "SUPABASE_URL": "...", "SUPABASE_ANON_KEY": "...", "SEARCH_PROXY_URL": "..." }
+   ```
+4. Run against it:
+   ```bash
+   flutter run --dart-define-from-file=env/dev.json
+   ```
 
 ## Project structure
 
 ```
 lib/
-  app/            MaterialApp.router, GoRouter, bottom-nav shell
-  core/           config (env/flavors), supabase client, storage
-  localization/   ARB files (en/ru/uz), locale controller, generated/
-  design_system/  theme tokens (colors/typography/spacing) + widgets
-  shared/         cross-feature enums, models, widgets
-  features/<f>/   feature slices: data / domain / presentation
+├─ app/            MaterialApp, router (shell + guards), routes
+├─ core/           config (env/flavors), supabase client, storage, utils
+├─ design_system/  theme tokens + reusable widgets (buttons, inputs, feedback…)
+├─ localization/   ARB files (en/ru/uz) + locale controller
+├─ shared/         enums, app-flags, shared widgets
+└─ features/       auth · onboarding · preferences · permissions · home · jobs ·
+                   search · applications · profile · companies · reviews · chat ·
+                   notifications · calls · account · splash
 supabase/
-  migrations/     full Postgres schema + RLS + triggers + storage buckets
-  functions/      Edge Functions: meili-sync, meili-reindex, search-jobs, send-notification
-  seed.sql        reference data (job categories)
+├─ migrations/     0001…0008  (schema, RLS, triggers, buckets, devices)
+├─ functions/      meili-sync · meili-reindex · search-jobs · send-notification ·
+                   agora-token · push-dispatch
+└─ seed.sql · seed_dev.sql
+docs/
+└─ phase-8-realtime-and-push.md   real calls (Agora) + push (FCM) wiring guide
 ```
-
-Each feature is a vertical slice: `presentation` (pages + Riverpod controllers) → `domain` (immutable models + repository interfaces) → `data` (Supabase/Meili implementations).
-
-## Getting started
-
-### 1. Prerequisites
-- Flutter 3.44+ (Dart 3.12+)
-- [Supabase CLI](https://supabase.com/docs/guides/cli) + Docker (for the local backend)
-- [Meilisearch](https://www.meilisearch.com/docs/learn/getting_started/installation) (Docker is fine)
-
-### 2. Install & generate
-```bash
-flutter pub get
-flutter gen-l10n        # generates lib/localization/generated/ (gitignored)
-```
-
-### 3. Configure env
-Copy the templates and fill in your values (do **not** commit the non-example files):
-```bash
-cp env/dev.example.json env/dev.json
-```
-```jsonc
-{
-  "FLAVOR": "dev",
-  "SUPABASE_URL": "https://<project-ref>.supabase.co",
-  "SUPABASE_ANON_KEY": "<publishable key>",
-  "SEARCH_PROXY_URL": "https://<project-ref>.functions.supabase.co/search-jobs"
-}
-```
-> The app **boots without a backend** too (offline mode) — handy for UI work and CI.
-
-### 4. Run
-```bash
-flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=env/dev.json
-```
-
-## Backend (Supabase)
-
-```bash
-supabase start                 # local Postgres + Auth + Storage + Realtime
-supabase db reset              # applies migrations/ + seed.sql
-supabase functions serve       # serve Edge Functions locally
-```
-
-**Meilisearch sync.** `jobs` rows are mirrored into a Meilisearch `jobs` index. In production set these DB settings (or use the Database Webhooks UI) so the `meili-sync` function is called on changes:
-```sql
-alter database postgres set "app.meili_webhook_url"  = 'https://<ref>.functions.supabase.co/meili-sync';
-alter database postgres set "app.edge_shared_secret" = '<shared-secret>';
-```
-Function secrets required: `MEILI_HOST`, `MEILI_ADMIN_KEY`, `MEILI_SEARCH_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `EDGE_SHARED_SECRET`. Run `meili-reindex` once (and nightly via `pg_cron`) to (re)build the index.
 
 ## Localization
 
-Strings live in `lib/localization/l10n/app_{en,ru,uz}.arb`. After editing, run `flutter gen-l10n`. The in-app **Profile → Language** screen switches locale at runtime (no restart).
+Three locales (`en`, `ru`, `uz`) live in `lib/localization/l10n/*.arb` and switch at runtime from the Language screen. Run `flutter gen-l10n` after editing. A test (`test/localization/arb_parity_test.dart`) enforces that every locale defines the same keys.
 
 ## Testing
 
 ```bash
 flutter analyze
 flutter test
-dart format --set-exit-if-changed $(git ls-files '*.dart')
+dart format --set-exit-if-changed lib test
 ```
-CI (`.github/workflows/ci.yml`) runs all of the above on every push/PR.
 
-## Roadmap
+CI (`.github/workflows/ci.yml`) runs all of the above on every PR.
 
-Phase 1 Auth & onboarding · Phase 2 Home/Jobs/Profile · Phase 3 Search/Filter/Explore · Phase 4 Applications & profile editing · Phase 5 Companies & media · Phase 6 Chat & notifications · Phase 7 Account hub & polish · Phase 8 (later) real video/voice calls + push.
+## Roadmap status
+
+Phases 0–7 are **complete** (foundation → auth → jobs/profile → search → applications → CV editing → companies/media → chat/notifications → account hub), plus polish (shimmer skeletons, error-states-with-retry, accessibility). **Phase 8** (real WebRTC/Agora calls + FCM push) is **scaffolded** behind provider seams — see [`docs/phase-8-realtime-and-push.md`](docs/phase-8-realtime-and-push.md) for the drop-in wiring guide.
