@@ -4,6 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/supabase/supabase_providers.dart';
 import '../../features/account/presentation/language_page.dart';
+import '../../features/applications/domain/application.dart';
+import '../../features/applications/presentation/application_status_page.dart';
+import '../../features/applications/presentation/application_success_page.dart';
+import '../../features/applications/presentation/apply_job_page.dart';
+import '../../features/applications/presentation/my_applications_page.dart';
 import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/new_password_page.dart';
@@ -167,8 +172,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/jobs/:id',
         builder: (c, s) => JobDetailsPage(jobId: s.pathParameters['id']!),
       ),
-      _stub('/jobs/:id/apply', 'Apply for Job'),
-      _stub('/jobs/:id/apply/success', 'Application Sent'),
+      GoRoute(
+        path: '/jobs/:id/apply',
+        builder: (c, s) => ApplyJobPage(jobId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/jobs/:id/apply/success',
+        builder: (c, s) => const ApplicationSuccessPage(),
+      ),
       _stub('/jobs/:id/review/new', 'Write Company Review'),
 
       // Companies
@@ -205,7 +216,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Account subtree
       _stub(Routes.accountPersonalInfo, 'Personal Information'),
       _stub(Routes.accountAnalytics, 'Analytics'),
-      _stub(Routes.accountApplications, 'My Applications'),
+      GoRoute(
+        path: Routes.accountApplications,
+        builder: (c, s) => const MyApplicationsPage(),
+      ),
+      GoRoute(
+        path: '/account/my-applications/:id',
+        builder: (c, s) =>
+            ApplicationStatusPage(application: s.extra as Application?),
+      ),
       _stub(Routes.accountSeekingStatus, 'Job Seeking Status'),
       _stub(Routes.accountSettings, 'Settings'),
       _stub(Routes.accountNotificationSettings, 'Notification Settings'),

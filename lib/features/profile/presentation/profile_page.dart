@@ -86,7 +86,7 @@ class ProfilePage extends ConsumerWidget {
           ),
           _Tile(
             icon: Icons.description_outlined,
-            label: 'My Applications',
+            label: l.myApplications,
             onTap: () => context.push(Routes.accountApplications),
           ),
           _Tile(
