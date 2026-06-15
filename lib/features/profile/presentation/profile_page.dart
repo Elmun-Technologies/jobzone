@@ -95,6 +95,11 @@ class ProfilePage extends ConsumerWidget {
             onTap: () => context.push(Routes.bookmarks),
           ),
           _Tile(
+            icon: Icons.notifications_none_rounded,
+            label: l.notificationSettings,
+            onTap: () => context.push(Routes.accountNotificationSettings),
+          ),
+          _Tile(
             icon: Icons.settings_outlined,
             label: l.settings,
             onTap: () => context.push(Routes.accountSettings),
