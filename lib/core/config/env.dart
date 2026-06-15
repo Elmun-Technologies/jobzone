@@ -16,6 +16,10 @@ class Env {
     'SEARCH_PROXY_URL',
   );
 
+  /// Agora App ID for real voice/video calls (Phase 8). Empty → calls use the
+  /// simulated service. The App Certificate stays server-side (agora-token fn).
+  static const String agoraAppId = String.fromEnvironment('AGORA_APP_ID');
+
   static const String flavor = String.fromEnvironment(
     'FLAVOR',
     defaultValue: 'dev',
@@ -24,4 +28,7 @@ class Env {
   /// True only when Supabase credentials are present.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
+
+  /// True when an Agora App ID is configured (enables real calls).
+  static bool get hasAgora => agoraAppId.isNotEmpty;
 }
