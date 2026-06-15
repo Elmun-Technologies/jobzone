@@ -26,6 +26,8 @@ import '../../features/preferences/presentation/working_model_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/profile/presentation/your_profile_page.dart';
 import '../../features/search/presentation/explore_page.dart';
+import '../../features/search/presentation/filter_page.dart';
+import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
 import '../../shared/widgets/placeholder_page.dart';
@@ -148,8 +150,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Explore children
-      _stub(Routes.search, 'Search'),
-      _stub(Routes.filter, 'Filter'),
+      GoRoute(path: Routes.search, builder: (c, s) => const SearchPage()),
+      GoRoute(path: Routes.filter, builder: (c, s) => const FilterPage()),
 
       // Jobs (static before parameterized)
       GoRoute(

@@ -1,0 +1,100 @@
+/// Sort options offered on Explore / Search (mapped to Meilisearch
+/// `sortableAttributes`).
+enum SearchSort { newest, salaryHigh, salaryLow }
+
+/// The user's current search criteria. Drives both the live Meilisearch query
+/// and the offline mock filtering.
+class SearchFilters {
+  const SearchFilters({
+    this.query = '',
+    this.jobTypes = const {},
+    this.experienceLevels = const {},
+    this.workingModels = const {},
+    this.salaryMin,
+    this.city,
+    this.sort = SearchSort.newest,
+  });
+
+  final String query;
+  final Set<String> jobTypes;
+  final Set<String> experienceLevels;
+  final Set<String> workingModels;
+  final num? salaryMin;
+  final String? city;
+  final SearchSort sort;
+
+  /// Number of active facet filters (excludes the free-text query & sort).
+  int get activeCount =>
+      jobTypes.length +
+      experienceLevels.length +
+      workingModels.length +
+      (salaryMin != null ? 1 : 0) +
+      (city != null && city!.isNotEmpty ? 1 : 0);
+
+  SearchFilters copyWith({
+    String? query,
+    Set<String>? jobTypes,
+    Set<String>? experienceLevels,
+    Set<String>? workingModels,
+    num? salaryMin,
+    bool clearSalary = false,
+    String? city,
+    bool clearCity = false,
+    SearchSort? sort,
+  }) => SearchFilters(
+    query: query ?? this.query,
+    jobTypes: jobTypes ?? this.jobTypes,
+    experienceLevels: experienceLevels ?? this.experienceLevels,
+    workingModels: workingModels ?? this.workingModels,
+    salaryMin: clearSalary ? null : (salaryMin ?? this.salaryMin),
+    city: clearCity ? null : (city ?? this.city),
+    sort: sort ?? this.sort,
+  );
+}
+
+/// Serializable payload sent to the `search-jobs` Edge Function.
+class SearchQuery {
+  const SearchQuery({
+    required this.q,
+    required this.filters,
+    required this.sort,
+    this.limit = 30,
+    this.offset = 0,
+  });
+
+  final String q;
+  final List<String> filters;
+  final List<String> sort;
+  final int limit;
+  final int offset;
+
+  Map<String, dynamic> toJson() => {
+    'q': q,
+    'filters': filters,
+    'sort': sort,
+    'limit': limit,
+    'offset': offset,
+  };
+
+  factory SearchQuery.from(SearchFilters f) {
+    String inList(String attr, Set<String> values) =>
+        '$attr IN [${values.map((e) => '"$e"').join(',')}]';
+
+    final filters = <String>[
+      if (f.jobTypes.isNotEmpty) inList('job_type', f.jobTypes),
+      if (f.experienceLevels.isNotEmpty)
+        inList('experience_level', f.experienceLevels),
+      if (f.workingModels.isNotEmpty) inList('working_model', f.workingModels),
+      if (f.salaryMin != null) 'salary_max >= ${f.salaryMin}',
+      if (f.city != null && f.city!.isNotEmpty) 'city = "${f.city}"',
+    ];
+
+    final sort = switch (f.sort) {
+      SearchSort.newest => ['posted_at:desc'],
+      SearchSort.salaryHigh => ['salary_max:desc'],
+      SearchSort.salaryLow => ['salary_min:asc'],
+    };
+
+    return SearchQuery(q: f.query, filters: filters, sort: sort);
+  }
+}
