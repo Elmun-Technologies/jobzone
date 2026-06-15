@@ -69,6 +69,21 @@ class JobsRepositoryImpl implements JobsRepository {
         .inFilter('id', ids.toList());
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
+
+  @override
+  Future<List<Job>> byCompany(String companyId, {int limit = 20}) async {
+    if (!_live) {
+      return mockJobs.where((j) => j.companyId == companyId).toList();
+    }
+    final rows = await _client
+        .from('job_feed')
+        .select()
+        .eq('company_id', companyId)
+        .eq('status', 'open')
+        .order('posted_at', ascending: false)
+        .limit(limit);
+    return rows.map<Job>((r) => Job.fromMap(r)).toList();
+  }
 }
 
 final jobsRepositoryProvider = Provider<JobsRepository>(

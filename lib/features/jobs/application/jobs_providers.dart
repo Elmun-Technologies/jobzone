@@ -21,3 +21,8 @@ final bookmarkedJobsProvider = FutureProvider<List<Job>>((ref) async {
   final ids = await ref.watch(bookmarksControllerProvider.future);
   return ref.watch(jobsRepositoryProvider).byIds(ids);
 });
+
+/// Open jobs posted by a given company (Company Details → Open Jobs tab).
+final companyJobsProvider = FutureProvider.family<List<Job>, String>(
+  (ref, companyId) => ref.watch(jobsRepositoryProvider).byCompany(companyId),
+);

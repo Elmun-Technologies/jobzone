@@ -237,5 +237,21 @@
   "consLabel": "Kamchiliklar",
   "yourJobTitleLabel": "Sizning lavozimingiz",
   "currentEmployee": "Hozir shu yerda ishlayman",
-  "submitReview": "Sharhni yuborish"
+  "submitReview": "Sharhni yuborish",
+  "viewCompany": "Kompaniya haqida",
+  "companyNotFound": "Kompaniya topilmadi",
+  "tabOpenJobs": "Vakansiyalar",
+  "tabPeople": "Jamoa",
+  "tabGallery": "Galereya",
+  "aboutCompany": "Kompaniya haqida",
+  "industryLabel": "Soha",
+  "companySizeLabel": "Kompaniya hajmi",
+  "foundedLabel": "Tashkil etilgan",
+  "headquartersLabel": "Bosh ofis",
+  "watchIntroVideo": "Tanishtiruv videosini koʻrish",
+  "introVideoTitle": "Tanishtiruv videosi",
+  "videoUnavailable": "Bu video hozircha mavjud emas.",
+  "noPeopleTitle": "Hozircha jamoa aʼzolari yoʻq",
+  "noGalleryTitle": "Hozircha rasmlar yoʻq",
+  "recruiterBadge": "Rekruter"
 }

@@ -237,5 +237,21 @@
   "consLabel": "Минусы",
   "yourJobTitleLabel": "Ваша должность",
   "currentEmployee": "Я работаю здесь сейчас",
-  "submitReview": "Отправить отзыв"
+  "submitReview": "Отправить отзыв",
+  "viewCompany": "О компании",
+  "companyNotFound": "Компания не найдена",
+  "tabOpenJobs": "Вакансии",
+  "tabPeople": "Команда",
+  "tabGallery": "Галерея",
+  "aboutCompany": "О компании",
+  "industryLabel": "Отрасль",
+  "companySizeLabel": "Размер компании",
+  "foundedLabel": "Основана",
+  "headquartersLabel": "Штаб-квартира",
+  "watchIntroVideo": "Смотреть видео о компании",
+  "introVideoTitle": "Видео о компании",
+  "videoUnavailable": "Это видео сейчас недоступно.",
+  "noPeopleTitle": "Пока нет участников команды",
+  "noGalleryTitle": "Пока нет фотографий",
+  "recruiterBadge": "Рекрутёр"
 }

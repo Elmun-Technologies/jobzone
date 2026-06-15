@@ -15,6 +15,9 @@ import '../../features/auth/presentation/pages/new_password_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/verify_code_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
+import '../../features/companies/presentation/company_details_page.dart';
+import '../../features/companies/presentation/gallery_page.dart';
+import '../../features/companies/presentation/intro_video_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/jobs/presentation/bookmarks_page.dart';
 import '../../features/jobs/presentation/job_details_page.dart';
@@ -192,9 +195,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => const ApplicationSuccessPage(),
       ),
       // Companies
-      _stub('/companies/:id', 'Company Details'),
-      _stub('/companies/:id/intro-video', 'Intro Video'),
-      _stub('/companies/:id/gallery', 'Gallery'),
+      GoRoute(
+        path: '/companies/:id',
+        builder: (c, s) =>
+            CompanyDetailsPage(companyId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/companies/:id/intro-video',
+        builder: (c, s) => IntroVideoPage(
+          companyId: s.pathParameters['id']!,
+          videoUrl: s.extra as String?,
+        ),
+      ),
+      GoRoute(
+        path: '/companies/:id/gallery',
+        builder: (c, s) => GalleryPage(companyId: s.pathParameters['id']!),
+      ),
       GoRoute(
         path: '/companies/:id/review/new',
         builder: (c, s) => WriteReviewPage(
