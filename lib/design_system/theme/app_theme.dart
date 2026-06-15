@@ -36,6 +36,12 @@ abstract final class AppTheme {
     OutlinedBorder rounded([double r = AppRadius.md]) =>
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(r));
 
+    // The reference design uses fully-rounded (pill) CTAs with a bold label.
+    const pill = StadiumBorder();
+    final ctaLabel = textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -60,27 +66,28 @@ abstract final class AppTheme {
           backgroundColor: c.primary,
           foregroundColor: c.onPrimary,
           disabledBackgroundColor: c.primary.withValues(alpha: 0.5),
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(54),
           elevation: 0,
-          textStyle: textTheme.labelLarge,
-          shape: rounded(AppRadius.md),
+          textStyle: ctaLabel,
+          shape: pill,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: c.primary,
           foregroundColor: c.onPrimary,
-          minimumSize: const Size.fromHeight(52),
-          shape: rounded(AppRadius.md),
+          minimumSize: const Size.fromHeight(54),
+          textStyle: ctaLabel,
+          shape: pill,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: c.textPrimary,
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size.fromHeight(54),
           side: BorderSide(color: c.border),
-          textStyle: textTheme.labelLarge,
-          shape: rounded(AppRadius.md),
+          textStyle: ctaLabel,
+          shape: pill,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
