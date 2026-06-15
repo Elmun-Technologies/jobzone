@@ -17,6 +17,8 @@ class JzTextField extends StatelessWidget {
     this.onChanged,
     this.validator,
     this.textInputAction,
+    this.maxLines = 1,
+    this.minLines,
   });
 
   final String? label;
@@ -29,6 +31,8 @@ class JzTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
+  final int? maxLines;
+  final int? minLines;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +50,8 @@ class JzTextField extends StatelessWidget {
           onChanged: onChanged,
           validator: validator,
           textInputAction: textInputAction,
+          maxLines: obscureText ? 1 : maxLines,
+          minLines: minLines,
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),

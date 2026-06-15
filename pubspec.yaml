@@ -47,6 +47,13 @@ dependencies:
   flutter_local_notifications: ^22.0.0
   pinput: ^6.0.2
   image_picker: ^1.2.2
+  file_picker: ^10.3.4
+
+# file_picker pins win32 ^5.9.0 while geolocator (via package_info_plus) needs
+# win32 ^6. win32 is Windows-only and this app targets iOS/Android, so we pin
+# the newer line to let dependency resolution succeed.
+dependency_overrides:
+  win32: ^6.0.1
 
 dev_dependencies:
   flutter_test:

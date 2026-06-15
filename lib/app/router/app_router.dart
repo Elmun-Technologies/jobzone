@@ -28,8 +28,19 @@ import '../../features/preferences/presentation/experience_level_page.dart';
 import '../../features/preferences/presentation/job_title_page.dart';
 import '../../features/preferences/presentation/job_type_page.dart';
 import '../../features/preferences/presentation/working_model_page.dart';
+import '../../features/profile/presentation/edit/about_edit_page.dart';
+import '../../features/profile/presentation/edit/awards_page.dart';
+import '../../features/profile/presentation/edit/certifications_page.dart';
+import '../../features/profile/presentation/edit/contact_info_page.dart';
+import '../../features/profile/presentation/edit/education_page.dart';
+import '../../features/profile/presentation/edit/experience_page.dart';
+import '../../features/profile/presentation/edit/projects_page.dart';
+import '../../features/profile/presentation/edit/resume_page.dart';
+import '../../features/profile/presentation/edit/skills_edit_page.dart';
+import '../../features/profile/presentation/edit/volunteer_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/profile/presentation/your_profile_page.dart';
+import '../../features/reviews/presentation/write_review_page.dart';
 import '../../features/search/presentation/explore_page.dart';
 import '../../features/search/presentation/filter_page.dart';
 import '../../features/search/presentation/search_page.dart';
@@ -180,12 +191,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/jobs/:id/apply/success',
         builder: (c, s) => const ApplicationSuccessPage(),
       ),
-      _stub('/jobs/:id/review/new', 'Write Company Review'),
-
       // Companies
       _stub('/companies/:id', 'Company Details'),
       _stub('/companies/:id/intro-video', 'Intro Video'),
       _stub('/companies/:id/gallery', 'Gallery'),
+      GoRoute(
+        path: '/companies/:id/review/new',
+        builder: (c, s) => WriteReviewPage(
+          companyId: s.pathParameters['id']!,
+          companyName: s.extra as String?,
+        ),
+      ),
 
       // Chat detail + calls
       _stub('/chat/:id', 'Chat'),
@@ -202,16 +218,46 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Profile (CV) subtree
-      _stub(Routes.profileContactInfo, 'Contact Info'),
-      _stub(Routes.profileAbout, 'About Me'),
-      _stub(Routes.profileExperience, 'Experience'),
-      _stub(Routes.profileEducation, 'Education'),
-      _stub(Routes.profileProjects, 'Projects'),
-      _stub(Routes.profileCertifications, 'Certifications & Licenses'),
-      _stub(Routes.profileVolunteer, 'Volunteer Experience'),
-      _stub(Routes.profileAwards, 'Awards & Achievements'),
-      _stub(Routes.profileSkills, 'Skills'),
-      _stub(Routes.profileResume, 'Resume / CV'),
+      GoRoute(
+        path: Routes.profileContactInfo,
+        builder: (c, s) => const ContactInfoPage(),
+      ),
+      GoRoute(
+        path: Routes.profileAbout,
+        builder: (c, s) => const AboutEditPage(),
+      ),
+      GoRoute(
+        path: Routes.profileExperience,
+        builder: (c, s) => const ExperienceListPage(),
+      ),
+      GoRoute(
+        path: Routes.profileEducation,
+        builder: (c, s) => const EducationListPage(),
+      ),
+      GoRoute(
+        path: Routes.profileProjects,
+        builder: (c, s) => const ProjectsListPage(),
+      ),
+      GoRoute(
+        path: Routes.profileCertifications,
+        builder: (c, s) => const CertificationsListPage(),
+      ),
+      GoRoute(
+        path: Routes.profileVolunteer,
+        builder: (c, s) => const VolunteerListPage(),
+      ),
+      GoRoute(
+        path: Routes.profileAwards,
+        builder: (c, s) => const AwardsListPage(),
+      ),
+      GoRoute(
+        path: Routes.profileSkills,
+        builder: (c, s) => const SkillsEditPage(),
+      ),
+      GoRoute(
+        path: Routes.profileResume,
+        builder: (c, s) => const ResumePage(),
+      ),
 
       // Account subtree
       _stub(Routes.accountPersonalInfo, 'Personal Information'),
