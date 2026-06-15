@@ -2,15 +2,19 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../calls/application/call_providers.dart';
+import '../../calls/domain/call_service.dart';
 import '../domain/chat_models.dart';
 
-/// UI-only call screen (video or voice). No real media transport yet — wiring
-/// to WebRTC/Agora is deferred to a later phase. A local timer simulates the
-/// in-call duration and the controls toggle local state only.
-class CallPage extends StatefulWidget {
+/// Call screen (video or voice). Drives its UI from a [CallService] session
+/// stream. The default service is simulated (no real transport); binding an
+/// Agora/WebRTC service via `callServiceFactoryProvider` makes this real with
+/// no changes here. See `docs/phase-8-realtime-and-push.md`.
+class CallPage extends ConsumerStatefulWidget {
   const CallPage({
     super.key,
     required this.conversationId,
@@ -23,39 +27,44 @@ class CallPage extends StatefulWidget {
   final Conversation? peer;
 
   @override
-  State<CallPage> createState() => _CallPageState();
+  ConsumerState<CallPage> createState() => _CallPageState();
 }
 
-class _CallPageState extends State<CallPage> {
-  Timer? _timer;
-  Duration _elapsed = Duration.zero;
-  bool _connecting = true;
-  bool _muted = false;
-  bool _speaker = true;
-  bool _videoOn = true;
+class _CallPageState extends ConsumerState<CallPage> {
+  late final CallService _service;
+  StreamSubscription<CallSession>? _sub;
+  CallSession _session = const CallSession();
 
   @override
   void initState() {
     super.initState();
-    // Simulate connecting → connected, then tick the call timer.
-    Timer(const Duration(seconds: 2), () {
+    _service = ref.read(callServiceFactoryProvider)();
+    _session = _service.current.copyWith(videoEnabled: widget.isVideo);
+    _sub = _service.sessions.listen((s) {
       if (!mounted) return;
-      setState(() => _connecting = false);
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (mounted) setState(() => _elapsed += const Duration(seconds: 1));
-      });
+      setState(() => _session = s);
+      if (s.phase == CallPhase.ended || s.phase == CallPhase.failed) {
+        Navigator.of(context).maybePop();
+      }
     });
+    _service.join(
+      channelId: widget.conversationId,
+      type: widget.isVideo ? CallType.video : CallType.voice,
+    );
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _sub?.cancel();
+    // Tears down the engine/stream (a real service leaves the channel here).
+    _service.dispose();
     super.dispose();
   }
 
   String get _durationText {
-    final m = _elapsed.inMinutes.toString().padLeft(2, '0');
-    final s = (_elapsed.inSeconds % 60).toString().padLeft(2, '0');
+    final d = _session.duration;
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
     return '$m:$s';
   }
 
@@ -64,18 +73,20 @@ class _CallPageState extends State<CallPage> {
     final l = context.l10n;
     final peer = widget.peer;
     final name = peer?.title ?? l.navChat;
-    final status = _connecting
+    final connecting = _session.phase == CallPhase.connecting;
+    final status = connecting
         ? l.callConnecting
         : (widget.isVideo
               ? _durationText
               : '${l.callInProgress} · $_durationText');
+    final showVideo = widget.isVideo && _session.videoEnabled;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0E1116),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          if (widget.isVideo && _videoOn)
+          if (showVideo)
             _VideoBackdrop(url: peer?.avatarUrl)
           else
             const ColoredBox(color: Color(0xFF0E1116)),
@@ -83,10 +94,7 @@ class _CallPageState extends State<CallPage> {
             child: Column(
               children: [
                 const SizedBox(height: AppSpacing.xxl),
-                _Avatar(
-                  url: peer?.avatarUrl,
-                  hidden: widget.isVideo && _videoOn,
-                ),
+                _Avatar(url: peer?.avatarUrl, hidden: showVideo),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   name,
@@ -104,13 +112,15 @@ class _CallPageState extends State<CallPage> {
                 const Spacer(),
                 _Controls(
                   isVideo: widget.isVideo,
-                  muted: _muted,
-                  speaker: _speaker,
-                  videoOn: _videoOn,
-                  onToggleMute: () => setState(() => _muted = !_muted),
-                  onToggleSpeaker: () => setState(() => _speaker = !_speaker),
-                  onToggleVideo: () => setState(() => _videoOn = !_videoOn),
-                  onEnd: () => Navigator.of(context).maybePop(),
+                  muted: _session.muted,
+                  speaker: _session.speakerOn,
+                  videoOn: _session.videoEnabled,
+                  onToggleMute: () => _service.setMuted(!_session.muted),
+                  onToggleSpeaker: () =>
+                      _service.setSpeaker(!_session.speakerOn),
+                  onToggleVideo: () =>
+                      _service.setVideoEnabled(!_session.videoEnabled),
+                  onEnd: () => _service.leave(),
                 ),
                 const SizedBox(height: AppSpacing.xl),
               ],
