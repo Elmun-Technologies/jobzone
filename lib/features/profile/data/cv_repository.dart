@@ -5,7 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
+import '../../../shared/enums/enums.dart';
 import '../domain/cv_models.dart';
+import 'offline_profile.dart';
 
 /// CRUD for every editable CV section. Backed by Supabase when configured;
 /// otherwise an in-memory store seeded with sample data so the edit flows are
@@ -168,9 +170,10 @@ class CvRepository {
     String? bio,
   }) async {
     if (!_online) {
-      _offline.fullName = fullName;
-      _offline.headline = headline;
-      _offline.bio = bio;
+      offlineProfile
+        ..fullName = fullName
+        ..headline = headline
+        ..bio = bio;
       return;
     }
     final uid = _uid;
@@ -182,9 +185,38 @@ class CvRepository {
         .eq('id', uid);
   }
 
+  /// Personal Information screen — name + contact basics on the profile row.
+  Future<void> savePersonalInfo({
+    String? fullName,
+    String? phone,
+    String? city,
+    String? country,
+  }) async {
+    if (!_online) {
+      offlineProfile
+        ..fullName = fullName
+        ..phone = phone
+        ..city = city
+        ..country = country;
+      return;
+    }
+    final uid = _uid;
+    if (uid == null) return;
+    await _ref
+        .read(supabaseClientProvider)
+        .from('profiles')
+        .update({
+          'full_name': fullName,
+          'phone': phone,
+          'city': city,
+          'country': country,
+        })
+        .eq('id', uid);
+  }
+
   Future<void> setOpenToWork(bool value) async {
     if (!_online) {
-      _offline.isOpenToWork = value;
+      offlineProfile.isOpenToWork = value;
       return;
     }
     final uid = _uid;
@@ -195,6 +227,36 @@ class CvRepository {
         .update({'is_open_to_work': value})
         .eq('id', uid);
   }
+
+  /// Job Seeking Status screen — status + open-to-work flag.
+  Future<void> setSeekingStatus(
+    SeekingStatus status, {
+    required bool openToWork,
+  }) async {
+    if (!_online) {
+      offlineProfile
+        ..seekingStatus = status
+        ..isOpenToWork = openToWork;
+      return;
+    }
+    final uid = _uid;
+    if (uid == null) return;
+    await _ref
+        .read(supabaseClientProvider)
+        .from('profiles')
+        .update({
+          'seeking_status_id': _seekingStatusId(status),
+          'is_open_to_work': openToWork,
+        })
+        .eq('id', uid);
+  }
+
+  // Maps to the smallint ids seeded in `seeking_statuses` (migration 0001).
+  int _seekingStatusId(SeekingStatus s) => switch (s) {
+    SeekingStatus.activelyLooking => 1,
+    SeekingStatus.openToOffers => 2,
+    SeekingStatus.notLooking => 3,
+  };
 
   // --- Contact info --------------------------------------------------------
   Future<ContactInfo> contactInfo() async {
@@ -407,11 +469,6 @@ final cvRepositoryProvider = Provider<CvRepository>((ref) => CvRepository(ref));
 /// edit screens render meaningfully without a backend.
 class _OfflineCvStore {
   int seq = 100;
-  String? fullName = 'Aziz Karimov';
-  String? headline = 'Senior Flutter Engineer';
-  String? bio =
-      'Mobile engineer focused on clean architecture and delightful UX.';
-  bool isOpenToWork = true;
 
   final experiences = <Experience>[
     Experience(

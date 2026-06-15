@@ -3,7 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/supabase/supabase_providers.dart';
+import '../../features/account/presentation/analytics_page.dart';
+import '../../features/account/presentation/help_center_page.dart';
+import '../../features/account/presentation/invite_friends_page.dart';
 import '../../features/account/presentation/language_page.dart';
+import '../../features/account/presentation/password_manager_page.dart';
+import '../../features/account/presentation/personal_info_page.dart';
+import '../../features/account/presentation/privacy_policy_page.dart';
+import '../../features/account/presentation/seeking_status_page.dart';
+import '../../features/account/presentation/settings_page.dart';
 import '../../features/applications/domain/application.dart';
 import '../../features/applications/presentation/application_status_page.dart';
 import '../../features/applications/presentation/application_success_page.dart';
@@ -304,8 +312,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Account subtree
-      _stub(Routes.accountPersonalInfo, 'Personal Information'),
-      _stub(Routes.accountAnalytics, 'Analytics'),
+      GoRoute(
+        path: Routes.accountPersonalInfo,
+        builder: (c, s) => const PersonalInfoPage(),
+      ),
+      GoRoute(
+        path: Routes.accountAnalytics,
+        builder: (c, s) => const AnalyticsPage(),
+      ),
       GoRoute(
         path: Routes.accountApplications,
         builder: (c, s) => const MyApplicationsPage(),
@@ -315,8 +329,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) =>
             ApplicationStatusPage(application: s.extra as Application?),
       ),
-      _stub(Routes.accountSeekingStatus, 'Job Seeking Status'),
-      _stub(Routes.accountSettings, 'Settings'),
+      GoRoute(
+        path: Routes.accountSeekingStatus,
+        builder: (c, s) => const SeekingStatusPage(),
+      ),
+      GoRoute(
+        path: Routes.accountSettings,
+        builder: (c, s) => const SettingsPage(),
+      ),
       GoRoute(
         path: Routes.accountNotificationSettings,
         builder: (c, s) => const NotificationSettingsPage(),
@@ -325,17 +345,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.accountLanguage,
         builder: (c, s) => const LanguagePage(),
       ),
-      _stub(Routes.accountPassword, 'Password Manager'),
-      _stub(Routes.accountHelp, 'Help Center'),
-      _stub(Routes.accountPrivacy, 'Privacy Policy'),
-      _stub(Routes.accountInvite, 'Invite Friends'),
+      GoRoute(
+        path: Routes.accountPassword,
+        builder: (c, s) => const PasswordManagerPage(),
+      ),
+      GoRoute(
+        path: Routes.accountHelp,
+        builder: (c, s) => const HelpCenterPage(),
+      ),
+      GoRoute(
+        path: Routes.accountPrivacy,
+        builder: (c, s) => const PrivacyPolicyPage(),
+      ),
+      GoRoute(
+        path: Routes.accountInvite,
+        builder: (c, s) => const InviteFriendsPage(),
+      ),
     ],
     errorBuilder: (context, state) =>
         PlaceholderPage(title: state.error?.message ?? 'Not found'),
   );
 });
-
-GoRoute _stub(String path, String title) => GoRoute(
-  path: path,
-  builder: (context, state) => PlaceholderPage(title: title),
-);

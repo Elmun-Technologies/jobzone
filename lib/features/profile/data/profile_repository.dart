@@ -2,7 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
+import '../../../shared/enums/enums.dart';
 import '../domain/user_profile.dart';
+import 'cv_repository.dart';
+import 'offline_profile.dart';
+
+SeekingStatus _seekingStatusFromId(int? id) => switch (id) {
+  2 => SeekingStatus.openToOffers,
+  3 => SeekingStatus.notLooking,
+  _ => SeekingStatus.activelyLooking,
+};
 
 String? _yearRange(Object? start, Object? end, bool current) {
   String? year(Object? d) {
@@ -24,8 +33,54 @@ class ProfileRepository {
 
   final Ref _ref;
 
+  /// Offline profile assembled from the shared scalar store plus the CV lists
+  /// owned by [CvRepository], so edits made on the edit screens are reflected.
+  Future<UserProfile> _offlineProfile() async {
+    final cv = _ref.read(cvRepositoryProvider);
+    final exps = await cv.experiences();
+    final edus = await cv.educations();
+    final skills = await cv.skills();
+    String? years(DateTime? s, DateTime? e, bool current) {
+      final start = s?.year.toString();
+      final end = current ? 'Present' : e?.year.toString();
+      if (start == null && end == null) return null;
+      return [start, end].where((x) => x != null).join(' – ');
+    }
+
+    return UserProfile(
+      fullName: offlineProfile.fullName,
+      headline: offlineProfile.headline,
+      bio: offlineProfile.bio,
+      avatarUrl: offlineProfile.avatarUrl,
+      city: offlineProfile.city,
+      country: offlineProfile.country,
+      email: offlineProfile.email,
+      phone: offlineProfile.phone,
+      isOpenToWork: offlineProfile.isOpenToWork,
+      seekingStatus: offlineProfile.seekingStatus,
+      experiences: [
+        for (final e in exps)
+          ExperienceEntry(
+            title: e.title,
+            companyName: e.companyName,
+            period: years(e.startDate, e.endDate, e.isCurrent),
+            description: e.description,
+          ),
+      ],
+      educations: [
+        for (final e in edus)
+          EducationEntry(
+            school: e.school,
+            degree: e.degree,
+            period: years(e.startDate, e.endDate, false),
+          ),
+      ],
+      skills: skills,
+    );
+  }
+
   Future<UserProfile?> load() async {
-    if (!Env.hasSupabase) return _mockProfile;
+    if (!Env.hasSupabase) return _offlineProfile();
 
     final client = _ref.read(supabaseClientProvider);
     final uid = client.auth.currentUser?.id;
@@ -63,6 +118,7 @@ class ProfileRepository {
       email: p['email'] as String?,
       phone: p['phone'] as String?,
       isOpenToWork: (p['is_open_to_work'] ?? true) as bool,
+      seekingStatus: _seekingStatusFromId(p['seeking_status_id'] as int?),
       experiences: (exp as List)
           .map(
             (e) => ExperienceEntry(
@@ -103,35 +159,4 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 
 final currentProfileProvider = FutureProvider<UserProfile?>(
   (ref) => ref.watch(profileRepositoryProvider).load(),
-);
-
-const _mockProfile = UserProfile(
-  fullName: 'Aziz Karimov',
-  headline: 'Senior Flutter Engineer',
-  bio: 'Mobile engineer focused on clean architecture and delightful UX.',
-  city: 'Tashkent',
-  country: 'UZ',
-  email: 'aziz@example.com',
-  phone: '+998 90 123 45 67',
-  experiences: [
-    ExperienceEntry(
-      title: 'Senior Flutter Engineer',
-      companyName: 'Acme',
-      period: '2022 – Present',
-      description: 'Lead the mobile team building cross-platform apps.',
-    ),
-    ExperienceEntry(
-      title: 'Mobile Developer',
-      companyName: 'Nimbus',
-      period: '2019 – 2022',
-    ),
-  ],
-  educations: [
-    EducationEntry(
-      school: 'TUIT',
-      degree: 'BSc Computer Science',
-      period: '2015 – 2019',
-    ),
-  ],
-  skills: ['Dart', 'Flutter', 'Riverpod', 'Supabase', 'REST', 'Git'],
 );

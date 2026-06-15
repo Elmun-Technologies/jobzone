@@ -1,3 +1,5 @@
+import '../../../shared/enums/enums.dart';
+
 /// Aggregated, read-only view of a user's profile and key CV sections.
 class UserProfile {
   const UserProfile({
@@ -10,6 +12,7 @@ class UserProfile {
     this.email,
     this.phone,
     this.isOpenToWork = true,
+    this.seekingStatus = SeekingStatus.activelyLooking,
     this.experiences = const [],
     this.educations = const [],
     this.skills = const [],
@@ -24,6 +27,7 @@ class UserProfile {
   final String? email;
   final String? phone;
   final bool isOpenToWork;
+  final SeekingStatus seekingStatus;
   final List<ExperienceEntry> experiences;
   final List<EducationEntry> educations;
   final List<String> skills;

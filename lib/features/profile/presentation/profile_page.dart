@@ -81,8 +81,13 @@ class ProfilePage extends ConsumerWidget {
           ),
           _Tile(
             icon: Icons.badge_outlined,
-            label: 'Personal Information',
+            label: l.personalInformation,
             onTap: () => context.push(Routes.accountPersonalInfo),
+          ),
+          _Tile(
+            icon: Icons.insights_outlined,
+            label: l.analytics,
+            onTap: () => context.push(Routes.accountAnalytics),
           ),
           _Tile(
             icon: Icons.description_outlined,
@@ -95,23 +100,23 @@ class ProfilePage extends ConsumerWidget {
             onTap: () => context.push(Routes.bookmarks),
           ),
           _Tile(
-            icon: Icons.notifications_none_rounded,
-            label: l.notificationSettings,
-            onTap: () => context.push(Routes.accountNotificationSettings),
-          ),
-          _Tile(
             icon: Icons.settings_outlined,
             label: l.settings,
             onTap: () => context.push(Routes.accountSettings),
           ),
           _Tile(
+            icon: Icons.card_giftcard_rounded,
+            label: l.inviteFriends,
+            onTap: () => context.push(Routes.accountInvite),
+          ),
+          _Tile(
             icon: Icons.help_outline_rounded,
-            label: 'Help Center',
+            label: l.helpCenter,
             onTap: () => context.push(Routes.accountHelp),
           ),
           _Tile(
             icon: Icons.privacy_tip_outlined,
-            label: 'Privacy Policy',
+            label: l.privacyPolicy,
             onTap: () => context.push(Routes.accountPrivacy),
           ),
         ],
