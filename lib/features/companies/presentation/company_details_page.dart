@@ -90,7 +90,7 @@ class _OpenJobsTab extends ConsumerWidget {
     final l = context.l10n;
     final async = ref.watch(companyJobsProvider(companyId));
     return async.when(
-      loading: () => const JzLoader(),
+      loading: () => const JobListSkeleton(),
       error: (_, _) => Center(child: Text(l.errUnknown)),
       data: (jobs) => jobs.isEmpty
           ? JzEmptyState(icon: Icons.work_outline_rounded, title: l.noJobsTitle)

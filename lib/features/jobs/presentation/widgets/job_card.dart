@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../application/bookmarks_controller.dart';
 import '../../domain/job.dart';
 import '../util/job_labels.dart';
@@ -20,6 +21,7 @@ class JobCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final colors = context.colors;
     final bookmarked =
         ref.watch(bookmarksControllerProvider).value?.contains(job.id) ?? false;
@@ -71,15 +73,19 @@ class JobCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                InkResponse(
-                  onTap: () => ref
-                      .read(bookmarksControllerProvider.notifier)
-                      .toggle(job.id),
-                  child: Icon(
-                    bookmarked
-                        ? Icons.bookmark_rounded
-                        : Icons.bookmark_border_rounded,
-                    color: bookmarked ? colors.primary : colors.textSecondary,
+                Semantics(
+                  button: true,
+                  label: bookmarked ? l.removeBookmark : l.addBookmark,
+                  child: InkResponse(
+                    onTap: () => ref
+                        .read(bookmarksControllerProvider.notifier)
+                        .toggle(job.id),
+                    child: Icon(
+                      bookmarked
+                          ? Icons.bookmark_rounded
+                          : Icons.bookmark_border_rounded,
+                      color: bookmarked ? colors.primary : colors.textSecondary,
+                    ),
                   ),
                 ),
               ],

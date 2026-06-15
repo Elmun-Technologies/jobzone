@@ -51,6 +51,7 @@ class HomePage extends ConsumerWidget {
                     count: unread,
                     isLabelVisible: unread > 0,
                     child: IconButton.filledTonal(
+                      tooltip: l.notifications,
                       onPressed: () => context.push(Routes.notifications),
                       icon: const Icon(Icons.notifications_none_rounded),
                     ),
@@ -72,7 +73,15 @@ class HomePage extends ConsumerWidget {
               SizedBox(
                 height: 190,
                 child: suggested.when(
-                  loading: () => const Center(child: JzLoader()),
+                  loading: () => Shimmer(
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 3,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(width: AppSpacing.md),
+                      itemBuilder: (_, _) => const JobCardSkeleton(width: 260),
+                    ),
+                  ),
                   error: (_, _) => _ErrorBox(message: l.errUnknown),
                   data: (jobs) => jobs.isEmpty
                       ? _EmptyBox(message: l.noJobsTitle)
@@ -94,10 +103,8 @@ class HomePage extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               recent.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                  child: JzLoader(),
-                ),
+                loading: () =>
+                    const JobListSkeleton(count: 3, padding: EdgeInsets.zero),
                 error: (_, _) => _ErrorBox(message: l.errUnknown),
                 data: (jobs) => jobs.isEmpty
                     ? _EmptyBox(message: l.noJobsTitle)

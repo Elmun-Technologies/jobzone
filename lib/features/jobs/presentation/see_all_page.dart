@@ -24,7 +24,7 @@ class SeeAllJobsPage extends ConsumerWidget {
     return JzScaffold(
       title: isSuggested ? l.suggestedJobs : l.recentJobs,
       body: jobsAsync.when(
-        loading: () => const JzLoader(),
+        loading: () => const JobListSkeleton(),
         error: (_, _) => Center(child: Text(l.errUnknown)),
         data: (jobs) => jobs.isEmpty
             ? JzEmptyState(

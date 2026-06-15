@@ -317,5 +317,7 @@
   "inviteBody": "Share your code with friends. When they join Jobzone, you both unlock perks.",
   "yourReferralCode": "Your referral code",
   "copyCode": "Copy code",
-  "codeCopied": "Code copied to clipboard"
+  "codeCopied": "Code copied to clipboard",
+  "addBookmark": "Save job",
+  "removeBookmark": "Remove from saved"
 }

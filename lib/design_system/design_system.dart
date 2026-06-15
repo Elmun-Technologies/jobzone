@@ -9,6 +9,7 @@ export 'theme/theme_controller.dart';
 export 'widgets/buttons/jz_primary_button.dart';
 export 'widgets/feedback/jz_empty_state.dart';
 export 'widgets/feedback/jz_loader.dart';
+export 'widgets/feedback/jz_skeleton.dart';
 export 'widgets/inputs/jz_text_field.dart';
 export 'widgets/layout/jz_scaffold.dart';
 export 'widgets/layout/section_header.dart';

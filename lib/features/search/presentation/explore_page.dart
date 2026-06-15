@@ -72,7 +72,7 @@ class ExplorePage extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           Expanded(
             child: results.when(
-              loading: () => const JzLoader(),
+              loading: () => const JobListSkeleton(),
               error: (_, _) => Center(child: Text(l.errUnknown)),
               data: (jobs) => jobs.isEmpty
                   ? JzEmptyState(
