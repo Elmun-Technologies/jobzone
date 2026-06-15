@@ -319,5 +319,7 @@
   "copyCode": "Kodni nusxalash",
   "codeCopied": "Kod nusxalandi",
   "addBookmark": "Vakansiyani saqlash",
-  "removeBookmark": "Saqlanganlardan olib tashlash"
+  "removeBookmark": "Saqlanganlardan olib tashlash",
+  "errorTitle": "Nimadir xato ketdi",
+  "retry": "Qayta urinish"
 }

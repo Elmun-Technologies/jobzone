@@ -25,7 +25,14 @@ class SeeAllJobsPage extends ConsumerWidget {
       title: isSuggested ? l.suggestedJobs : l.recentJobs,
       body: jobsAsync.when(
         loading: () => const JobListSkeleton(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(
+            isSuggested ? suggestedJobsProvider : recentJobsProvider,
+          ),
+        ),
         data: (jobs) => jobs.isEmpty
             ? JzEmptyState(
                 icon: Icons.work_outline_rounded,

@@ -140,6 +140,52 @@ class JobCardSkeleton extends StatelessWidget {
   }
 }
 
+/// Placeholder for a leading-avatar list row (chat list, notifications).
+class ListTileSkeleton extends StatelessWidget {
+  const ListTileSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: Row(
+        children: [
+          const SkeletonBox(width: 48, height: 48, radius: AppRadius.pill),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                SkeletonBox(width: 140, height: 12),
+                SizedBox(height: AppSpacing.sm),
+                SkeletonBox(height: 10),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A shimmering column of [ListTileSkeleton]s for avatar-list loading states.
+class TileListSkeleton extends StatelessWidget {
+  const TileListSkeleton({super.key, this.count = 6});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: Column(
+        children: [for (var i = 0; i < count; i++) const ListTileSkeleton()],
+      ),
+    );
+  }
+}
+
 /// A shimmering column of [JobCardSkeleton]s for list loading states.
 class JobListSkeleton extends StatelessWidget {
   const JobListSkeleton({super.key, this.count = 4, this.padding});

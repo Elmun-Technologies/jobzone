@@ -79,7 +79,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       body: results.when(
         loading: () => const JobListSkeleton(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(searchControllerProvider),
+        ),
         data: (jobs) => jobs.isEmpty
             ? JzEmptyState(
                 icon: Icons.search_off_rounded,
