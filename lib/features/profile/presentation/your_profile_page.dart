@@ -175,6 +175,32 @@ class _ProfileView extends StatelessWidget {
             ],
           ),
         ),
+        const Divider(height: AppSpacing.xl),
+        _NavTile(
+          icon: Icons.lightbulb_outline_rounded,
+          label: l.sectionProjects,
+          onTap: () => context.push(Routes.profileProjects),
+        ),
+        _NavTile(
+          icon: Icons.verified_outlined,
+          label: l.sectionCertifications,
+          onTap: () => context.push(Routes.profileCertifications),
+        ),
+        _NavTile(
+          icon: Icons.volunteer_activism_outlined,
+          label: l.sectionVolunteer,
+          onTap: () => context.push(Routes.profileVolunteer),
+        ),
+        _NavTile(
+          icon: Icons.emoji_events_outlined,
+          label: l.sectionAwards,
+          onTap: () => context.push(Routes.profileAwards),
+        ),
+        _NavTile(
+          icon: Icons.description_outlined,
+          label: l.sectionResume,
+          onTap: () => context.push(Routes.profileResume),
+        ),
       ],
     );
   }
@@ -251,6 +277,28 @@ class _ExperienceTile extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _NavTile extends StatelessWidget {
+  const _NavTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: context.colors.textPrimary),
+      title: Text(label, style: context.text.bodyLarge),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: onTap,
     );
   }
 }

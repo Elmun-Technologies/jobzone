@@ -47,6 +47,8 @@ abstract final class Routes {
   static String companyDetails(String id) => '/companies/$id';
   static String companyIntroVideo(String id) => '/companies/$id/intro-video';
   static String companyGallery(String id) => '/companies/$id/gallery';
+  static String writeCompanyReview(String companyId) =>
+      '/companies/$companyId/review/new';
 
   // Chat
   static String chatDetail(String id) => '/chat/$id';

@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../reviews/data/reviews_repository.dart';
+import '../../reviews/domain/review.dart';
+import '../../reviews/presentation/widgets/star_rating_input.dart';
 import '../application/bookmarks_controller.dart';
 import '../application/jobs_providers.dart';
 import '../domain/job.dart';
@@ -131,7 +134,7 @@ class _JobDetail extends ConsumerWidget {
               children: [
                 _AboutTab(job: job),
                 _CompanyTab(job: job),
-                _ReviewsTab(),
+                _ReviewsTab(job: job),
               ],
             ),
           ),
@@ -266,14 +269,131 @@ class _CompanyTab extends StatelessWidget {
   }
 }
 
-class _ReviewsTab extends StatelessWidget {
+class _ReviewsTab extends ConsumerWidget {
+  const _ReviewsTab({required this.job});
+  final Job job;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final async = ref.watch(companyReviewsProvider(job.companyId));
+
+    void openWrite() => context.push(
+      Routes.writeCompanyReview(job.companyId),
+      extra: job.companyName,
+    );
+
+    return async.when(
+      loading: () => const JzLoader(),
+      error: (_, _) => Center(child: Text(l.errUnknown)),
+      data: (reviews) {
+        if (reviews.isEmpty) {
+          return Column(
+            children: [
+              Expanded(
+                child: JzEmptyState(
+                  icon: Icons.reviews_outlined,
+                  title: l.reviewsEmptyTitle,
+                  message: l.reviewsEmptyBody,
+                ),
+              ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: OutlinedButton.icon(
+                    onPressed: openWrite,
+                    icon: const Icon(Icons.rate_review_outlined),
+                    label: Text(l.writeAReview),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+        final avg =
+            reviews.map((r) => r.rating).reduce((a, b) => a + b) /
+            reviews.length;
+        return ListView.separated(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          itemCount: reviews.length + 1,
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+          itemBuilder: (c, i) {
+            if (i == 0) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        avg.toStringAsFixed(1),
+                        style: context.text.headlineSmall,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      StarRatingDisplay(rating: avg),
+                    ],
+                  ),
+                  TextButton.icon(
+                    onPressed: openWrite,
+                    icon: const Icon(Icons.rate_review_outlined, size: 18),
+                    label: Text(l.writeAReview),
+                  ),
+                ],
+              );
+            }
+            return _ReviewCard(review: reviews[i - 1]);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ReviewCard extends StatelessWidget {
+  const _ReviewCard({required this.review});
+  final CompanyReview review;
+
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
-    return JzEmptyState(
-      icon: Icons.reviews_outlined,
-      title: l.reviewsEmptyTitle,
-      message: l.reviewsEmptyBody,
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              StarRatingDisplay(rating: review.rating.toDouble()),
+              const Spacer(),
+              if (review.authorName != null)
+                Text(
+                  review.authorName!,
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+          if (review.title != null && review.title!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(review.title!, style: context.text.titleSmall),
+          ],
+          if (review.body != null && review.body!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              review.body!,
+              style: context.text.bodyMedium?.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
