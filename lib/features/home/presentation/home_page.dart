@@ -7,6 +7,7 @@ import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
+import '../../notifications/application/notifications_providers.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -17,6 +18,7 @@ class HomePage extends ConsumerWidget {
     final colors = context.colors;
     final suggested = ref.watch(suggestedJobsProvider);
     final recent = ref.watch(recentJobsProvider);
+    final unread = ref.watch(unreadNotificationsCountProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -45,9 +47,13 @@ class HomePage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  IconButton.filledTonal(
-                    onPressed: () => context.push(Routes.notifications),
-                    icon: const Icon(Icons.notifications_none_rounded),
+                  Badge.count(
+                    count: unread,
+                    isLabelVisible: unread > 0,
+                    child: IconButton.filledTonal(
+                      onPressed: () => context.push(Routes.notifications),
+                      icon: const Icon(Icons.notifications_none_rounded),
+                    ),
                   ),
                 ],
               ),
