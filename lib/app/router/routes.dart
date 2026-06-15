@@ -57,6 +57,7 @@ abstract final class Routes {
   static const notifications = '/notifications';
 
   // Profile (CV) subtree
+  static const yourProfile = '/your-profile';
   static const profileContactInfo = '/profile/contact-info';
   static const profileAbout = '/profile/about';
   static const profileExperience = '/profile/experience';
@@ -72,6 +73,7 @@ abstract final class Routes {
   static const accountPersonalInfo = '/account/personal-info';
   static const accountAnalytics = '/account/analytics';
   static const accountApplications = '/account/my-applications';
+  static String applicationStatus(String id) => '/account/my-applications/$id';
   static const accountSeekingStatus = '/account/seeking-status';
   static const accountSettings = '/account/settings';
   static const accountNotificationSettings = '/account/notification-settings';

@@ -4,6 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/supabase/supabase_providers.dart';
 import '../../features/account/presentation/language_page.dart';
+import '../../features/applications/domain/application.dart';
+import '../../features/applications/presentation/application_status_page.dart';
+import '../../features/applications/presentation/application_success_page.dart';
+import '../../features/applications/presentation/apply_job_page.dart';
+import '../../features/applications/presentation/my_applications_page.dart';
 import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/new_password_page.dart';
@@ -11,6 +16,9 @@ import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/verify_code_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/jobs/presentation/bookmarks_page.dart';
+import '../../features/jobs/presentation/job_details_page.dart';
+import '../../features/jobs/presentation/see_all_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/onboarding/presentation/welcome_page.dart';
 import '../../features/permissions/presentation/location_access_page.dart';
@@ -21,7 +29,10 @@ import '../../features/preferences/presentation/job_title_page.dart';
 import '../../features/preferences/presentation/job_type_page.dart';
 import '../../features/preferences/presentation/working_model_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
+import '../../features/profile/presentation/your_profile_page.dart';
 import '../../features/search/presentation/explore_page.dart';
+import '../../features/search/presentation/filter_page.dart';
+import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
 import '../../shared/widgets/placeholder_page.dart';
@@ -144,16 +155,31 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Explore children
-      _stub(Routes.search, 'Search'),
-      _stub(Routes.filter, 'Filter'),
+      GoRoute(path: Routes.search, builder: (c, s) => const SearchPage()),
+      GoRoute(path: Routes.filter, builder: (c, s) => const FilterPage()),
 
       // Jobs (static before parameterized)
-      _stub(Routes.suggestedJobs, 'Suggested Jobs'),
-      _stub(Routes.recentJobs, 'Recent Jobs'),
-      _stub(Routes.bookmarks, 'Bookmarks'),
-      _stub('/jobs/:id', 'Job Details'),
-      _stub('/jobs/:id/apply', 'Apply for Job'),
-      _stub('/jobs/:id/apply/success', 'Application Sent'),
+      GoRoute(
+        path: Routes.suggestedJobs,
+        builder: (c, s) => const SeeAllJobsPage(kind: SeeAllKind.suggested),
+      ),
+      GoRoute(
+        path: Routes.recentJobs,
+        builder: (c, s) => const SeeAllJobsPage(kind: SeeAllKind.recent),
+      ),
+      GoRoute(path: Routes.bookmarks, builder: (c, s) => const BookmarksPage()),
+      GoRoute(
+        path: '/jobs/:id',
+        builder: (c, s) => JobDetailsPage(jobId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/jobs/:id/apply',
+        builder: (c, s) => ApplyJobPage(jobId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/jobs/:id/apply/success',
+        builder: (c, s) => const ApplicationSuccessPage(),
+      ),
       _stub('/jobs/:id/review/new', 'Write Company Review'),
 
       // Companies
@@ -168,6 +194,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // Notifications
       _stub(Routes.notifications, 'Notifications'),
+
+      // Your Profile (CV read view)
+      GoRoute(
+        path: Routes.yourProfile,
+        builder: (c, s) => const YourProfilePage(),
+      ),
 
       // Profile (CV) subtree
       _stub(Routes.profileContactInfo, 'Contact Info'),
@@ -184,7 +216,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // Account subtree
       _stub(Routes.accountPersonalInfo, 'Personal Information'),
       _stub(Routes.accountAnalytics, 'Analytics'),
-      _stub(Routes.accountApplications, 'My Applications'),
+      GoRoute(
+        path: Routes.accountApplications,
+        builder: (c, s) => const MyApplicationsPage(),
+      ),
+      GoRoute(
+        path: '/account/my-applications/:id',
+        builder: (c, s) =>
+            ApplicationStatusPage(application: s.extra as Application?),
+      ),
       _stub(Routes.accountSeekingStatus, 'Job Seeking Status'),
       _stub(Routes.accountSettings, 'Settings'),
       _stub(Routes.accountNotificationSettings, 'Notification Settings'),
