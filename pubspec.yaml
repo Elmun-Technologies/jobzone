@@ -1,5 +1,5 @@
 name: jobzone
-description: "A new Flutter project."
+description: "Jobzone — find your next job. A Flutter + Supabase job-finder app with real-time chat and uz/ru/en localization."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -67,6 +67,33 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
+
+# App launcher icon (run: dart run flutter_launcher_icons)
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#2563EB"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  web:
+    generated: true
+    background_color: "#2563EB"
+    theme_color: "#2563EB"
+
+# Native splash screen (run: dart run flutter_native_splash:create).
+# Brand-indigo background in both light/dark so the white logo has contrast.
+flutter_native_splash:
+  color: "#2563EB"
+  color_dark: "#2563EB"
+  image: "assets/icon/icon_foreground.png"
+  android_12:
+    color: "#2563EB"
+    color_dark: "#2563EB"
+    image: "assets/icon/icon_foreground.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
