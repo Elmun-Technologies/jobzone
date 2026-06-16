@@ -24,7 +24,7 @@ void main() {
       expect(job.companyVerified, isTrue);
       expect(job.locationText, 'Tashkent, UZ');
       expect(job.skills, ['Dart', 'Flutter']);
-      expect(job.salaryText, 'USD 1k–2k');
+      expect(job.salaryText, r'$1k - $2k');
       expect(job.postedAt, isNotNull);
     });
 
@@ -47,7 +47,7 @@ void main() {
         'salary_min': 1500,
         'currency': 'USD',
       });
-      expect(job.salaryText, 'USD 1.5k');
+      expect(job.salaryText, r'$1.5k');
     });
   });
 }

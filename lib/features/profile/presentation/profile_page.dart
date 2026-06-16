@@ -97,7 +97,7 @@ class ProfilePage extends ConsumerWidget {
           _Tile(
             icon: Icons.bookmark_border_rounded,
             label: l.bookmarks,
-            onTap: () => context.push(Routes.bookmarks),
+            onTap: () => context.go(Routes.bookmarks),
           ),
           _Tile(
             icon: Icons.settings_outlined,
