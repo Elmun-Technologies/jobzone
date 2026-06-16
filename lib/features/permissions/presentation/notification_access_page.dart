@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../localization/l10n_extension.dart';
@@ -22,16 +23,16 @@ class NotificationAccessPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     return PermissionScaffold(
-      icon: Icons.notifications_active_outlined,
+      icon: IconsaxPlusBold.notification,
       title: l.permNotifTitle,
       body: l.permNotifBody,
-      primaryLabel: l.allow,
+      primaryLabel: l.allowNotification,
       onPrimary: () async {
         await ref.read(permissionServiceProvider).requestNotifications();
         if (context.mounted) await _finish(context, ref);
       },
-      skipLabel: l.skip,
-      onSkip: () => _finish(context, ref),
+      secondaryLabel: l.maybeLater,
+      onSecondary: () => _finish(context, ref),
     );
   }
 }
