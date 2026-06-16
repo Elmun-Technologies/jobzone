@@ -10,10 +10,10 @@ import '../../calls/application/call_providers.dart';
 import '../../calls/domain/call_service.dart';
 import '../domain/chat_models.dart';
 
-/// Call screen (video or voice). Drives its UI from a [CallService] session
-/// stream. The default service is simulated (no real transport); binding an
-/// Agora/WebRTC service via `callServiceFactoryProvider` makes this real with
-/// no changes here. See `docs/phase-8-realtime-and-push.md`.
+/// Call screen (video or voice), matching the Figma design. Drives its UI from
+/// a [CallService] session stream (default = simulated; an Agora/WebRTC service
+/// drops in via `callServiceFactoryProvider`). See
+/// `docs/phase-8-realtime-and-push.md`.
 class CallPage extends ConsumerStatefulWidget {
   const CallPage({
     super.key,
@@ -56,7 +56,6 @@ class _CallPageState extends ConsumerState<CallPage> {
   @override
   void dispose() {
     _sub?.cancel();
-    // Tears down the engine/stream (a real service leaves the channel here).
     _service.dispose();
     super.dispose();
   }
@@ -71,59 +70,134 @@ class _CallPageState extends ConsumerState<CallPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final colors = context.colors;
     final peer = widget.peer;
     final name = peer?.title ?? l.navChat;
     final connecting = _session.phase == CallPhase.connecting;
-    final status = connecting
-        ? l.callConnecting
-        : (widget.isVideo
-              ? _durationText
-              : '${l.callInProgress} · $_durationText');
-    final showVideo = widget.isVideo && _session.videoEnabled;
+    final status = connecting ? l.callConnecting : _durationText;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0E1116),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (showVideo)
-            _VideoBackdrop(url: peer?.avatarUrl)
-          else
-            const ColoredBox(color: Color(0xFF0E1116)),
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: AppSpacing.xxl),
-                _Avatar(url: peer?.avatarUrl, hidden: showVideo),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  name,
-                  style: context.text.headlineSmall?.copyWith(
-                    color: Colors.white,
-                  ),
+      backgroundColor: colors.primary,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            if (widget.isVideo) ...[
+              const Positioned(
+                top: AppSpacing.sm,
+                left: AppSpacing.lg,
+                child: _LiveBadge(),
+              ),
+              Positioned(
+                top: AppSpacing.sm,
+                right: AppSpacing.lg,
+                child: _SelfPreview(url: peer?.avatarUrl),
+              ),
+              Positioned(
+                left: AppSpacing.xl,
+                right: AppSpacing.xl,
+                bottom: 150,
+                child: _NameTime(name: name, status: status, center: false),
+              ),
+            ] else
+              Align(
+                alignment: const Alignment(0, -0.15),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _BigAvatar(url: peer?.avatarUrl),
+                    const SizedBox(height: AppSpacing.xl),
+                    _NameTime(name: name, status: status, center: true),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  status,
-                  style: context.text.bodyMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
-                ),
-                const Spacer(),
-                _Controls(
-                  isVideo: widget.isVideo,
+              ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                child: _Controls(
                   muted: _session.muted,
                   speaker: _session.speakerOn,
                   videoOn: _session.videoEnabled,
-                  onToggleMute: () => _service.setMuted(!_session.muted),
                   onToggleSpeaker: () =>
                       _service.setSpeaker(!_session.speakerOn),
+                  onToggleMute: () => _service.setMuted(!_session.muted),
                   onToggleVideo: () =>
                       _service.setVideoEnabled(!_session.videoEnabled),
+                  onChat: () => Navigator.of(context).maybePop(),
                   onEnd: () => _service.leave(),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NameTime extends StatelessWidget {
+  const _NameTime({
+    required this.name,
+    required this.status,
+    required this.center,
+  });
+  final String name;
+  final String status;
+  final bool center;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: center
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          name,
+          style: context.text.headlineSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          status,
+          style: context.text.bodyLarge?.copyWith(color: Colors.white70),
+        ),
+      ],
+    );
+  }
+}
+
+class _LiveBadge extends StatelessWidget {
+  const _LiveBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: Color(0xFFEF4444),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            context.l10n.callLive,
+            style: context.text.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -132,69 +206,65 @@ class _CallPageState extends ConsumerState<CallPage> {
   }
 }
 
-class _VideoBackdrop extends StatelessWidget {
-  const _VideoBackdrop({this.url});
+class _SelfPreview extends StatelessWidget {
+  const _SelfPreview({this.url});
   final String? url;
 
   @override
   Widget build(BuildContext context) {
-    if (url == null || url!.isEmpty) {
-      return const ColoredBox(color: Color(0xFF1F242D));
-    }
-    return ColorFiltered(
-      colorFilter: ColorFilter.mode(
-        Colors.black.withValues(alpha: 0.35),
-        BlendMode.darken,
-      ),
-      child: CachedNetworkImage(
-        imageUrl: url!,
-        fit: BoxFit.cover,
-        errorWidget: (_, _, _) => const ColoredBox(color: Color(0xFF1F242D)),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        width: 96,
+        height: 132,
+        color: const Color(0xFFCDCDD6),
+        child: (url == null || url!.isEmpty)
+            ? null
+            : CachedNetworkImage(imageUrl: url!, fit: BoxFit.cover),
       ),
     );
   }
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({this.url, this.hidden = false});
+class _BigAvatar extends StatelessWidget {
+  const _BigAvatar({this.url});
   final String? url;
-  final bool hidden;
 
   @override
   Widget build(BuildContext context) {
-    if (hidden) return const SizedBox(height: 120);
-    return CircleAvatar(
-      radius: 60,
-      backgroundColor: Colors.white24,
-      backgroundImage: (url != null && url!.isNotEmpty)
-          ? CachedNetworkImageProvider(url!)
-          : null,
-      child: (url == null || url!.isEmpty)
-          ? const Icon(Icons.person_rounded, size: 60, color: Colors.white)
-          : null,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      child: Container(
+        width: 150,
+        height: 180,
+        color: const Color(0xFFCDCDD6),
+        child: (url == null || url!.isEmpty)
+            ? const Icon(Icons.person_rounded, size: 80, color: Colors.white)
+            : CachedNetworkImage(imageUrl: url!, fit: BoxFit.cover),
+      ),
     );
   }
 }
 
 class _Controls extends StatelessWidget {
   const _Controls({
-    required this.isVideo,
     required this.muted,
     required this.speaker,
     required this.videoOn,
-    required this.onToggleMute,
     required this.onToggleSpeaker,
+    required this.onToggleMute,
     required this.onToggleVideo,
+    required this.onChat,
     required this.onEnd,
   });
 
-  final bool isVideo;
   final bool muted;
   final bool speaker;
   final bool videoOn;
-  final VoidCallback onToggleMute;
   final VoidCallback onToggleSpeaker;
+  final VoidCallback onToggleMute;
   final VoidCallback onToggleVideo;
+  final VoidCallback onChat;
   final VoidCallback onEnd;
 
   @override
@@ -202,63 +272,69 @@ class _Controls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _CircleButton(
+        _Ctrl(
+          icon: speaker ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+          onTap: onToggleSpeaker,
+        ),
+        const SizedBox(width: AppSpacing.lg),
+        _Ctrl(
           icon: muted ? Icons.mic_off_rounded : Icons.mic_rounded,
-          active: muted,
           onTap: onToggleMute,
         ),
         const SizedBox(width: AppSpacing.lg),
-        if (isVideo)
-          _CircleButton(
-            icon: videoOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
-            active: !videoOn,
-            onTap: onToggleVideo,
-          )
-        else
-          _CircleButton(
-            icon: speaker ? Icons.volume_up_rounded : Icons.volume_off_rounded,
-            active: !speaker,
-            onTap: onToggleSpeaker,
-          ),
+        _EndButton(onTap: onEnd),
         const SizedBox(width: AppSpacing.lg),
-        _CircleButton(
-          icon: Icons.call_end_rounded,
-          background: const Color(0xFFDC2626),
-          iconColor: Colors.white,
-          onTap: onEnd,
+        _Ctrl(
+          icon: videoOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
+          onTap: onToggleVideo,
         ),
+        const SizedBox(width: AppSpacing.lg),
+        _Ctrl(icon: Icons.chat_bubble_rounded, onTap: onChat),
       ],
     );
   }
 }
 
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({
-    required this.icon,
-    required this.onTap,
-    this.active = false,
-    this.background,
-    this.iconColor,
-  });
-
+class _Ctrl extends StatelessWidget {
+  const _Ctrl({required this.icon, required this.onTap});
   final IconData icon;
   final VoidCallback onTap;
-  final bool active;
-  final Color? background;
-  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    final bg = background ?? (active ? Colors.white : Colors.white24);
-    final fg = iconColor ?? (active ? Colors.black : Colors.white);
-    return InkResponse(
-      onTap: onTap,
-      radius: 36,
-      child: Container(
-        height: 60,
-        width: 60,
-        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-        child: Icon(icon, color: fg),
+    return Material(
+      color: Colors.white.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        onTap: onTap,
+        child: SizedBox(
+          width: 52,
+          height: 52,
+          child: Icon(icon, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class _EndButton extends StatelessWidget {
+  const _EndButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFEF4444),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: const SizedBox(
+          width: 64,
+          height: 64,
+          child: Icon(Icons.call_end_rounded, color: Colors.white, size: 28),
+        ),
       ),
     );
   }
