@@ -57,21 +57,38 @@ class Job {
       location ??
       [city, country].where((e) => e != null && e.isNotEmpty).join(', ');
 
-  /// e.g. "USD 1.5k–3k". Null when no salary is set.
+  String get _currencySymbol => switch (currency) {
+    'USD' => r'$',
+    'EUR' => '€',
+    'GBP' => '£',
+    _ => (currency == null || currency!.isEmpty) ? '' : '${currency!} ',
+  };
+
+  /// e.g. r"$1.5k - $3k". Null when no salary is set.
   String? get salaryText {
     final min = salaryMin;
     final max = salaryMax;
-    final cur = currency ?? '';
+    final s = _currencySymbol;
     String fmt(num v) => v >= 1000
         ? '${(v / 1000).toStringAsFixed(v % 1000 == 0 ? 0 : 1)}k'
         : v.toStringAsFixed(0);
     if (min != null && max != null) {
-      return '$cur ${fmt(min)}–${fmt(max)}'.trim();
+      return '$s${fmt(min)} - $s${fmt(max)}';
     }
     final single = min ?? max;
     if (single == null) return null;
-    return '$cur ${fmt(single)}'.trim();
+    return '$s${fmt(single)}';
   }
+
+  /// e.g. "/month", "/hr". Null when no period is set.
+  String? get salaryPeriodSuffix => switch (salaryPeriod) {
+    'hour' => '/hr',
+    'day' => '/day',
+    'week' => '/wk',
+    'month' => '/month',
+    'year' => '/yr',
+    _ => null,
+  };
 
   factory Job.fromMap(Map<String, dynamic> m) {
     num? parseNum(Object? v) =>

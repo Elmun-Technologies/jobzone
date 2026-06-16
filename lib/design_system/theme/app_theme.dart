@@ -128,9 +128,27 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.surface,
-        indicatorColor: c.chipBackground,
+        indicatorColor: Colors.transparent,
         elevation: 0,
-        labelTextStyle: WidgetStatePropertyAll(textTheme.labelMedium),
+        height: 64,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? c.primary
+                : c.textSecondary,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => textTheme.labelSmall!.copyWith(
+            color: states.contains(WidgetState.selected)
+                ? c.primary
+                : c.textSecondary,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w400,
+          ),
+        ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: c.primary),
       snackBarTheme: SnackBarThemeData(

@@ -165,6 +165,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: Routes.bookmarks,
+                builder: (c, s) => const BookmarksPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: Routes.chat,
                 builder: (c, s) => const ChatListPage(),
               ),
@@ -194,7 +202,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.recentJobs,
         builder: (c, s) => const SeeAllJobsPage(kind: SeeAllKind.recent),
       ),
-      GoRoute(path: Routes.bookmarks, builder: (c, s) => const BookmarksPage()),
       GoRoute(
         path: '/jobs/:id',
         builder: (c, s) => JobDetailsPage(jobId: s.pathParameters['id']!),

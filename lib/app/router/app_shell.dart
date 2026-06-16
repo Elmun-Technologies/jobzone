@@ -38,6 +38,11 @@ class AppShell extends StatelessWidget {
             label: l.navExplore,
           ),
           NavigationDestination(
+            icon: const Icon(Icons.bookmark_border_rounded),
+            selectedIcon: const Icon(Icons.bookmark_rounded),
+            label: l.bookmarks,
+          ),
+          NavigationDestination(
             icon: const Icon(Icons.chat_bubble_outline_rounded),
             selectedIcon: const Icon(Icons.chat_bubble_rounded),
             label: l.navChat,
