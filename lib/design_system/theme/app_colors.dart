@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Semantic color tokens, exposed as a [ThemeExtension] so widgets read
 /// `Theme.of(context).extension<JzColors>()!` (see the `context.colors`
-/// extension in `app_theme.dart`). Approximates the Behance reference:
-/// clean white surfaces, soft borders, an indigo/blue accent.
+/// extension in `app_theme.dart`). Matches the Figma reference: clean white
+/// surfaces, soft borders, a royal-indigo accent (#3A36DB).
 @immutable
 class JzColors extends ThemeExtension<JzColors> {
   const JzColors({
@@ -36,8 +36,9 @@ class JzColors extends ThemeExtension<JzColors> {
   final Color danger;
   final Color chipBackground;
 
-  static const Color _indigo = Color(0xFF2563EB);
-  static const Color _indigoDark = Color(0xFF3B82F6);
+  // Figma reference primary (royal indigo) + a lighter tint for dark mode.
+  static const Color _indigo = Color(0xFF3A36DB);
+  static const Color _indigoDark = Color(0xFF6C63FF);
 
   static const JzColors light = JzColors(
     primary: _indigo,

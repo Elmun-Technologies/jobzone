@@ -36,7 +36,7 @@
 - **Supabase** — Auth, PostgreSQL (+RLS), Storage, Realtime
 - **Meilisearch** for job search (synced from Postgres via an Edge Function; the client only ever talks to a scoped proxy)
 - **flutter_localizations** + ARB (uz/ru/en), runtime locale switch
-- Design tokens as a `ThemeExtension` (`JzColors`), indigo accent `#2563EB`
+- Design tokens as a `ThemeExtension` (`JzColors`), royal-indigo accent `#3A36DB` (Figma reference)
 
 ## Getting started
 
