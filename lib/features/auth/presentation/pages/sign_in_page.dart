@@ -10,6 +10,8 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../application/auth_controller.dart';
 import '../../domain/auth_repository.dart';
 import '../util/auth_failure_message.dart';
+import '../widgets/auth_header.dart';
+import '../widgets/auth_social_row.dart';
 import 'verify_code_page.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
@@ -131,61 +133,86 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final colors = context.colors;
     final loading = ref.watch(authControllerProvider).isLoading;
-    return JzScaffold(
-      title: l.signIn,
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          children: [
-            Text(
-              l.signInSubtitle,
-              style: context.text.bodyMedium?.copyWith(
-                color: context.colors.textSecondary,
+    return Scaffold(
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xxl,
+            ),
+            children: [
+              AuthHeader(title: l.signIn, subtitle: l.signInSubtitle),
+              const SizedBox(height: AppSpacing.xxl),
+              JzTextField(
+                label: l.email,
+                hint: 'example@gmail.com',
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                validator: (v) =>
+                    Validators.isEmail(v ?? '') ? null : l.valEmail,
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            JzTextField(
-              label: l.email,
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icons.mail_outline_rounded,
-              validator: (v) => Validators.isEmail(v ?? '') ? null : l.valEmail,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            JzTextField(
-              label: l.password,
-              controller: _password,
-              obscureText: true,
-              prefixIcon: Icons.lock_outline_rounded,
-              validator: (v) => Validators.isNotBlank(v) ? null : l.valRequired,
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _forgotPassword,
-                child: Text(l.forgotPassword),
+              const SizedBox(height: AppSpacing.lg),
+              JzPasswordField(
+                label: l.password,
+                controller: _password,
+                validator: (v) =>
+                    Validators.isNotBlank(v) ? null : l.valRequired,
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            JzPrimaryButton(
-              label: l.signIn,
-              loading: loading,
-              onPressed: _submit,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(l.dontHaveAccount),
-                TextButton(
-                  onPressed: () => context.push(Routes.createAccount),
-                  child: Text(l.createAccount),
+              const SizedBox(height: AppSpacing.md),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: _forgotPassword,
+                  child: Text(
+                    l.forgotPassword,
+                    style: context.text.bodyMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              JzPrimaryButton(
+                label: l.signIn,
+                loading: loading,
+                onPressed: _submit,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AuthSocialRow(label: l.orSignInWith),
+              const SizedBox(height: AppSpacing.xl),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    l.dontHaveAccount,
+                    style: context.text.bodyMedium?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  GestureDetector(
+                    onTap: () => context.push(Routes.createAccount),
+                    child: Text(
+                      l.signUp,
+                      style: context.text.bodyMedium?.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
