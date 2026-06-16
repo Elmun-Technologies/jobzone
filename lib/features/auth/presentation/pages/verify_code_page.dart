@@ -10,6 +10,7 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../application/auth_controller.dart';
 import '../../domain/auth_repository.dart';
 import '../util/auth_failure_message.dart';
+import '../widgets/auth_header.dart';
 
 class VerifyCodeArgs {
   const VerifyCodeArgs({required this.email, required this.purpose});
@@ -60,66 +61,87 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     final loading = ref.watch(authControllerProvider).isLoading;
 
     final base = PinTheme(
-      width: 52,
+      width: 46,
       height: 56,
-      textStyle: context.text.titleLarge,
+      textStyle: context.text.headlineSmall,
       decoration: BoxDecoration(
         color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
     );
 
-    return JzScaffold(
-      title: l.verifyCodeTitle,
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        children: [
-          Text(
-            l.verifyCodeSubtitle(widget.args.email),
-            style: context.text.bodyMedium?.copyWith(
-              color: colors.textSecondary,
-            ),
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.xl,
+            AppSpacing.xl,
+            AppSpacing.xxl,
           ),
-          const SizedBox(height: AppSpacing.xl),
-          Pinput(
-            length: 6,
-            controller: _pin,
-            defaultPinTheme: base,
-            focusedPinTheme: base.copyWith(
-              decoration: base.decoration!.copyWith(
-                border: Border.all(color: colors.primary, width: 1.5),
+          children: [
+            AuthHeader(
+              title: l.verifyCodeTitle,
+              subtitle: '${l.verifyCodeSubtitle}\n*${widget.args.email}*',
+              showBack: true,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            Pinput(
+              length: 6,
+              controller: _pin,
+              defaultPinTheme: base,
+              focusedPinTheme: base.copyWith(
+                decoration: base.decoration!.copyWith(
+                  border: Border.all(color: colors.primary, width: 1.5),
+                ),
               ),
+              onCompleted: _verify,
             ),
-            onCompleted: _verify,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          JzPrimaryButton(
-            label: l.continueLabel,
-            loading: loading,
-            onPressed: () {
-              if (_pin.text.length == 6) _verify(_pin.text);
-            },
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          if (widget.args.purpose == OtpPurpose.signup)
-            Center(
-              child: TextButton(
-                onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  final message = l.codeResent;
-                  final ok = await ref
-                      .read(authControllerProvider.notifier)
-                      .resendSignupOtp(widget.args.email);
-                  if (ok) {
-                    messenger
-                      ..hideCurrentSnackBar()
-                      ..showSnackBar(SnackBar(content: Text(message)));
-                  }
-                },
-                child: Text(l.resendCode),
+            const SizedBox(height: AppSpacing.xl),
+            if (widget.args.purpose == OtpPurpose.signup) ...[
+              Text(
+                l.didntReceiveOtp,
+                textAlign: TextAlign.center,
+                style: context.text.bodyMedium?.copyWith(
+                  color: colors.textSecondary,
+                ),
               ),
+              const SizedBox(height: AppSpacing.xs),
+              Center(
+                child: GestureDetector(
+                  onTap: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final message = l.codeResent;
+                    final ok = await ref
+                        .read(authControllerProvider.notifier)
+                        .resendSignupOtp(widget.args.email);
+                    if (ok) {
+                      messenger
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(SnackBar(content: Text(message)));
+                    }
+                  },
+                  child: Text(
+                    l.resendCode,
+                    style: context.text.bodyMedium?.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+            JzPrimaryButton(
+              label: l.verify,
+              loading: loading,
+              onPressed: () {
+                if (_pin.text.length == 6) _verify(_pin.text);
+              },
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

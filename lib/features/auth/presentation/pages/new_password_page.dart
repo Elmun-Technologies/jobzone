@@ -9,6 +9,7 @@ import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../application/auth_controller.dart';
 import '../util/auth_failure_message.dart';
+import '../widgets/auth_header.dart';
 
 class NewPasswordPage extends ConsumerStatefulWidget {
   const NewPasswordPage({super.key});
@@ -50,45 +51,46 @@ class _NewPasswordPageState extends ConsumerState<NewPasswordPage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final loading = ref.watch(authControllerProvider).isLoading;
-    return JzScaffold(
-      title: l.newPasswordTitle,
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          children: [
-            Text(
-              l.newPasswordSubtitle,
-              style: context.text.bodyMedium?.copyWith(
-                color: context.colors.textSecondary,
+    return Scaffold(
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xxl,
+            ),
+            children: [
+              AuthHeader(
+                title: l.newPasswordTitle,
+                subtitle: l.newPasswordSubtitle,
+                showBack: true,
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            JzTextField(
-              label: l.password,
-              controller: _password,
-              obscureText: true,
-              prefixIcon: Icons.lock_outline_rounded,
-              validator: (v) => Validators.isStrongEnough(v ?? '')
-                  ? null
-                  : l.valPasswordShort,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            JzTextField(
-              label: l.confirmPassword,
-              controller: _confirm,
-              obscureText: true,
-              prefixIcon: Icons.lock_outline_rounded,
-              validator: (v) =>
-                  v == _password.text ? null : l.valPasswordMismatch,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            JzPrimaryButton(
-              label: l.save,
-              loading: loading,
-              onPressed: _submit,
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xxl),
+              JzPasswordField(
+                label: l.password,
+                controller: _password,
+                validator: (v) => Validators.isStrongEnough(v ?? '')
+                    ? null
+                    : l.valPasswordShort,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              JzPasswordField(
+                label: l.confirmPassword,
+                controller: _confirm,
+                validator: (v) =>
+                    v == _password.text ? null : l.valPasswordMismatch,
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              JzPrimaryButton(
+                label: l.createNewPassword,
+                loading: loading,
+                onPressed: _submit,
+              ),
+            ],
+          ),
         ),
       ),
     );

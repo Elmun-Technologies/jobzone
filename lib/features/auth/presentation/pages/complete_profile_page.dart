@@ -13,6 +13,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
+import '../widgets/auth_header.dart';
 
 class CompleteProfilePage extends ConsumerStatefulWidget {
   const CompleteProfilePage({super.key});
@@ -26,6 +27,8 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _headline = TextEditingController();
+  final _phone = TextEditingController();
+  String? _gender;
   Uint8List? _avatar;
   bool _saving = false;
 
@@ -33,6 +36,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   void dispose() {
     _name.dispose();
     _headline.dispose();
+    _phone.dispose();
     super.dispose();
   }
 
@@ -94,59 +98,142 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
-    return JzScaffold(
-      title: l.completeProfileTitle,
-      showBack: false,
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          children: [
-            Text(
-              l.completeProfileSubtitle,
-              style: context.text.bodyMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
+    return Scaffold(
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xl,
+              AppSpacing.xxl,
             ),
-            const SizedBox(height: AppSpacing.xl),
-            Center(
-              child: GestureDetector(
-                onTap: _pickAvatar,
-                child: CircleAvatar(
-                  radius: 44,
-                  backgroundColor: colors.chipBackground,
-                  backgroundImage: _avatar == null
-                      ? null
-                      : MemoryImage(_avatar!),
-                  child: _avatar != null
-                      ? null
-                      : Icon(Icons.add_a_photo_outlined, color: colors.primary),
+            children: [
+              AuthHeader(
+                title: l.completeProfileTitle,
+                subtitle: l.completeProfileSubtitle,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Center(
+                child: GestureDetector(
+                  onTap: _pickAvatar,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      CircleAvatar(
+                        radius: 52,
+                        backgroundColor: colors.chipBackground,
+                        backgroundImage: _avatar == null
+                            ? null
+                            : MemoryImage(_avatar!),
+                        child: _avatar != null
+                            ? null
+                            : Icon(
+                                Icons.person_rounded,
+                                size: 52,
+                                color: colors.primary,
+                              ),
+                      ),
+                      Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: colors.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.surface, width: 2),
+                          ),
+                          child: Icon(
+                            Icons.edit_outlined,
+                            size: 16,
+                            color: colors.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            JzTextField(
-              label: l.fullName,
-              controller: _name,
-              prefixIcon: Icons.person_outline_rounded,
-              validator: (v) => Validators.isNotBlank(v) ? null : l.valRequired,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            JzTextField(
-              label: l.headline,
-              hint: 'Flutter Developer',
-              controller: _headline,
-              prefixIcon: Icons.badge_outlined,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            JzPrimaryButton(
-              label: l.continueLabel,
-              loading: _saving,
-              onPressed: _save,
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xl),
+              JzTextField(
+                label: l.fullName,
+                hint: 'Ex. John Doe',
+                controller: _name,
+                validator: (v) =>
+                    Validators.isNotBlank(v) ? null : l.valRequired,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _PhoneField(label: l.phoneNumber, controller: _phone),
+              const SizedBox(height: AppSpacing.lg),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.gender, style: context.text.labelLarge),
+                  const SizedBox(height: AppSpacing.sm),
+                  DropdownButtonFormField<String>(
+                    initialValue: _gender,
+                    isExpanded: true,
+                    hint: Text(l.selectOption),
+                    items: const [
+                      DropdownMenuItem(value: 'male', child: Text('Male')),
+                      DropdownMenuItem(value: 'female', child: Text('Female')),
+                      DropdownMenuItem(value: 'other', child: Text('Other')),
+                    ],
+                    onChanged: (v) => setState(() => _gender = v),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              JzPrimaryButton(
+                label: l.completeProfileCta,
+                loading: _saving,
+                onPressed: _save,
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Phone field with a country-code prefix, styled like the design.
+class _PhoneField extends StatelessWidget {
+  const _PhoneField({required this.label, required this.controller});
+  final String label;
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: context.text.labelLarge),
+        const SizedBox(height: AppSpacing.sm),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            hintText: 'Enter Phone Number',
+            prefixIcon: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('+998', style: context.text.bodyLarge),
+                  Icon(Icons.arrow_drop_down, color: colors.textSecondary),
+                  const SizedBox(width: AppSpacing.sm),
+                  Container(width: 1, height: 24, color: colors.border),
+                ],
+              ),
+            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0),
+          ),
+        ),
+      ],
     );
   }
 }
