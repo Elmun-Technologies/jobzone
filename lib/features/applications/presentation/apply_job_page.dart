@@ -1,6 +1,8 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
@@ -19,13 +21,28 @@ class ApplyJobPage extends ConsumerStatefulWidget {
 }
 
 class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
-  final _cover = TextEditingController();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _text = TextEditingController();
+  String? _cvName;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _cover.dispose();
+    _name.dispose();
+    _email.dispose();
+    _text.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickCv() async {
+    final res = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['pdf', 'doc', 'docx'],
+    );
+    if (res != null && res.files.isNotEmpty) {
+      setState(() => _cvName = res.files.first.name);
+    }
   }
 
   Future<void> _submit(Job job) async {
@@ -35,7 +52,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
           .read(applicationsControllerProvider.notifier)
           .apply(
             job: job,
-            coverLetter: _cover.text.trim().isEmpty ? null : _cover.text.trim(),
+            coverLetter: _text.text.trim().isEmpty ? null : _text.text.trim(),
           );
       if (mounted) context.go(Routes.applySuccess(widget.jobId));
     } catch (e) {
@@ -48,70 +65,116 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
     final jobAsync = ref.watch(jobByIdProvider(widget.jobId));
 
-    return JzScaffold(
-      title: l.applyTitle,
-      body: jobAsync.when(
-        loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
-        data: (job) => job == null
-            ? JzEmptyState(icon: Icons.search_off_rounded, title: l.noJobsTitle)
-            : ListView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                children: [
-                  Text(job.title, style: context.text.titleMedium),
-                  Text(
-                    [
-                      job.companyName,
-                      if (job.locationText.isNotEmpty) job.locationText,
-                    ].join(' • '),
-                    style: context.text.bodyMedium?.copyWith(
-                      color: colors.textSecondary,
+    return Scaffold(
+      body: SafeArea(
+        child: jobAsync.when(
+          loading: () => const JzLoader(),
+          error: (_, _) => Center(child: Text(l.errUnknown)),
+          data: (job) => job == null
+              ? JzEmptyState(
+                  icon: Icons.search_off_rounded,
+                  title: l.noJobsTitle,
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: JzTopBar(title: l.applyTitle),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.description_outlined, color: colors.primary),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text(
-                            l.defaultCv,
-                            style: context.text.bodyMedium,
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
+                        children: [
+                          JzTextField(
+                            label: l.fullName,
+                            hint: 'John Doe',
+                            controller: _name,
                           ),
-                        ),
-                        Icon(
-                          Icons.check_circle_rounded,
-                          color: colors.success,
-                          size: 20,
-                        ),
-                      ],
+                          const SizedBox(height: AppSpacing.lg),
+                          JzTextField(
+                            label: l.email,
+                            hint: 'example@gmail.com',
+                            controller: _email,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Text(
+                            l.uploadCvResume,
+                            style: context.text.labelLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _UploadBox(fileName: _cvName, onTap: _pickCv),
+                          const SizedBox(height: AppSpacing.lg),
+                          Text(l.addText, style: context.text.labelLarge),
+                          const SizedBox(height: AppSpacing.sm),
+                          JzTextField(
+                            controller: _text,
+                            hint: l.coverLetterHint,
+                            maxLines: 6,
+                            minLines: 5,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(l.coverLetter, style: context.text.labelLarge),
-                  const SizedBox(height: AppSpacing.sm),
-                  TextField(
-                    controller: _cover,
-                    maxLines: 6,
-                    decoration: InputDecoration(hintText: l.coverLetterHint),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  JzPrimaryButton(
-                    label: l.submitApplication,
-                    loading: _submitting,
-                    onPressed: () => _submit(job),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: JzPrimaryButton(
+                        label: l.submit,
+                        loading: _submitting,
+                        onPressed: () => _submit(job),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UploadBox extends StatelessWidget {
+  const _UploadBox({required this.fileName, required this.onTap});
+  final String? fileName;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: colors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              IconsaxPlusBold.document_upload,
+              color: colors.primary,
+              size: 40,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              fileName ?? context.l10n.browseFile,
+              style: context.text.bodyMedium?.copyWith(
+                color: fileName == null ? colors.textSecondary : colors.primary,
+                fontWeight: fileName == null ? null : FontWeight.w600,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
