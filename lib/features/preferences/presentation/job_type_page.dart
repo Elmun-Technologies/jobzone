@@ -20,15 +20,16 @@ class JobTypePage extends ConsumerWidget {
       JobType.fullTime.wire: l.jobTypeFullTime,
       JobType.partTime.wire: l.jobTypePartTime,
       JobType.contract.wire: l.jobTypeContract,
-      JobType.internship.wire: l.jobTypeInternship,
       JobType.temporary.wire: l.jobTypeTemporary,
+      JobType.internship.wire: l.jobTypeInternship,
     };
     return PreferenceStepScaffold(
       title: l.prefJobTypeTitle,
-      subtitle: l.prefSelectMultiple,
+      step: 1,
+      totalSteps: 4,
       nextLabel: l.next,
       onNext: () => context.push(Routes.setupExperience),
-      child: MultiSelectChips(
+      child: OptionCheckList(
         options: options,
         selected: draft.jobTypes,
         onToggle: notifier.toggleJobType,

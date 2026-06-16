@@ -3,81 +3,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../application/preferences_controller.dart';
 import 'widgets/preference_step.dart';
 
-class JobTitlePage extends ConsumerStatefulWidget {
+/// Predefined job titles shown as a multi-select checklist (matches the
+/// Figma "What Job Title Are You Seeking?" screen).
+const _jobTitles = <String>[
+  'Accountant',
+  'Business Development Manager',
+  'Content Writer',
+  'Data Analyst',
+  'Finance Manager',
+  'Graphic Designer',
+  'HR Specialist',
+  'Human Resources Manager',
+  'Marketing Manager',
+  'Product Manager',
+  'Project Manager',
+  'Sales Manager',
+  'Software Engineer',
+  'UX/UI Designer',
+];
+
+class JobTitlePage extends ConsumerWidget {
   const JobTitlePage({super.key});
 
   @override
-  ConsumerState<JobTitlePage> createState() => _JobTitlePageState();
-}
-
-class _JobTitlePageState extends ConsumerState<JobTitlePage> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _add() {
-    ref.read(preferencesControllerProvider.notifier).addTitle(_controller.text);
-    _controller.clear();
-  }
-
-  Future<void> _finish() async {
-    await ref.read(preferencesControllerProvider.notifier).persist();
-    if (mounted) context.push(Routes.permLocation);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final titles = ref.watch(preferencesControllerProvider).titles;
+    final selected = ref.watch(preferencesControllerProvider).titles.toSet();
+    final notifier = ref.read(preferencesControllerProvider.notifier);
+
     return PreferenceStepScaffold(
       title: l.prefJobTitleTitle,
+      step: 4,
+      totalSteps: 4,
       nextLabel: l.next,
-      onNext: _finish,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: JzTextField(
-                  hint: l.prefJobTitleHint,
-                  controller: _controller,
-                  textInputAction: TextInputAction.done,
-                  onChanged: (_) {},
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              IconButton.filledTonal(
-                onPressed: _add,
-                icon: const Icon(Icons.add_rounded),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              for (final title in titles)
-                Chip(
-                  label: Text(title),
-                  onDeleted: () => ref
-                      .read(preferencesControllerProvider.notifier)
-                      .removeTitle(title),
-                ),
-            ],
-          ),
-        ],
+      onNext: () async {
+        final router = GoRouter.of(context);
+        await notifier.persist();
+        router.push(Routes.permLocation);
+      },
+      child: OptionCheckList(
+        options: {for (final t in _jobTitles) t: t},
+        selected: selected,
+        onToggle: notifier.toggleTitle,
       ),
     );
   }

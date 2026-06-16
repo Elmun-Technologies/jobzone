@@ -24,10 +24,11 @@ class ExperienceLevelPage extends ConsumerWidget {
     };
     return PreferenceStepScaffold(
       title: l.prefExperienceTitle,
-      subtitle: l.prefSelectMultiple,
+      step: 2,
+      totalSteps: 4,
       nextLabel: l.next,
       onNext: () => context.push(Routes.setupWorkingModel),
-      child: MultiSelectChips(
+      child: OptionCheckList(
         options: options,
         selected: draft.experienceLevels,
         onToggle: notifier.toggleExperience,

@@ -18,15 +18,16 @@ class WorkingModelPage extends ConsumerWidget {
     final notifier = ref.read(preferencesControllerProvider.notifier);
     final options = {
       WorkingModel.onsite.wire: l.wmOnsite,
-      WorkingModel.remote.wire: l.wmRemote,
       WorkingModel.hybrid.wire: l.wmHybrid,
+      WorkingModel.remote.wire: l.wmRemote,
     };
     return PreferenceStepScaffold(
       title: l.prefWorkingModelTitle,
-      subtitle: l.prefSelectMultiple,
+      step: 3,
+      totalSteps: 4,
       nextLabel: l.next,
       onNext: () => context.push(Routes.setupJobTitle),
-      child: MultiSelectChips(
+      child: OptionCheckList(
         options: options,
         selected: draft.workingModels,
         onToggle: notifier.toggleWorkingModel,
