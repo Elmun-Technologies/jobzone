@@ -28,7 +28,6 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
   @override
   void initState() {
     super.initState();
-    // Clear the unread badge once opened.
     Future.microtask(
       () => ref.read(chatRepositoryProvider).markRead(widget.conversationId),
     );
@@ -71,72 +70,13 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
     final convo = _convo;
     final async = ref.watch(messagesProvider(widget.conversationId));
 
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: colors.chipBackground,
-              backgroundImage:
-                  (convo?.avatarUrl != null && convo!.avatarUrl!.isNotEmpty)
-                  ? CachedNetworkImageProvider(convo.avatarUrl!)
-                  : null,
-              child: (convo?.avatarUrl == null || convo!.avatarUrl!.isEmpty)
-                  ? Icon(Icons.person_rounded, size: 20, color: colors.primary)
-                  : null,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    convo?.title ?? l.navChat,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.text.titleSmall,
-                  ),
-                  if (convo?.subtitle != null)
-                    Text(
-                      convo!.subtitle!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.text.labelSmall?.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: l.voiceCall,
-            icon: const Icon(Icons.call_outlined),
-            onPressed: () => context.push(
-              Routes.voiceCall(widget.conversationId),
-              extra: convo,
-            ),
-          ),
-          IconButton(
-            tooltip: l.videoCall,
-            icon: const Icon(Icons.videocam_outlined),
-            onPressed: () => context.push(
-              Routes.videoCall(widget.conversationId),
-              extra: convo,
-            ),
-          ),
-        ],
-      ),
       body: Column(
         children: [
+          _Header(conversationId: widget.conversationId, convo: convo),
           Expanded(
             child: async.when(
               loading: () => const JzLoader(),
@@ -153,8 +93,15 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
                 return ListView.builder(
                   controller: _scroll,
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: messages.length,
-                  itemBuilder: (_, i) => _Bubble(message: messages[i]),
+                  itemCount: messages.length + 1,
+                  itemBuilder: (_, i) {
+                    if (i == 0) return const _DateChip();
+                    return _MessageItem(
+                      message: messages[i - 1],
+                      peerName: convo?.title ?? '',
+                      peerAvatar: convo?.avatarUrl,
+                    );
+                  },
                 );
               },
             ),
@@ -166,59 +113,311 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
   }
 }
 
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message});
-  final Message message;
+class _Header extends StatelessWidget {
+  const _Header({required this.conversationId, required this.convo});
+  final String conversationId;
+  final Conversation? convo;
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final colors = context.colors;
-    final mine = message.isMine;
-    return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.74,
-        ),
-        decoration: BoxDecoration(
-          color: mine ? colors.primary : colors.surfaceVariant,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(AppRadius.lg),
-            topRight: const Radius.circular(AppRadius.lg),
-            bottomLeft: Radius.circular(mine ? AppRadius.lg : AppRadius.xs),
-            bottomRight: Radius.circular(mine ? AppRadius.xs : AppRadius.lg),
+    final topPad = MediaQuery.of(context).padding.top;
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        topPad + AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
+      decoration: BoxDecoration(
+        color: colors.primary,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+      ),
+      child: Row(
+        children: [
+          JzCircleButton(
+            icon: Icons.arrow_back_rounded,
+            onTap: () => Navigator.of(context).maybePop(),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (message.content != null)
-              Text(
-                message.content!,
-                style: context.text.bodyMedium?.copyWith(
-                  color: mine ? colors.onPrimary : colors.textPrimary,
+          const SizedBox(width: AppSpacing.md),
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.white24,
+            backgroundImage:
+                (convo?.avatarUrl != null && convo!.avatarUrl!.isNotEmpty)
+                ? CachedNetworkImageProvider(convo!.avatarUrl!)
+                : null,
+            child: (convo?.avatarUrl == null || convo!.avatarUrl!.isEmpty)
+                ? const Icon(Icons.person_rounded, color: Colors.white)
+                : null,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  convo?.title ?? l.navChat,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            const SizedBox(height: 2),
-            Text(
-              messageTime(context, message.createdAt),
-              style: context.text.labelSmall?.copyWith(
-                color: mine
-                    ? colors.onPrimary.withValues(alpha: 0.7)
-                    : colors.textSecondary,
-              ),
+                Text(
+                  l.online,
+                  style: context.text.bodySmall?.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+          PopupMenuButton<String>(
+            iconColor: Colors.white,
+            onSelected: (v) {
+              final route = v == 'video'
+                  ? Routes.videoCall(conversationId)
+                  : Routes.voiceCall(conversationId);
+              context.push(route, extra: convo);
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'voice', child: Text(l.voiceCall)),
+              PopupMenuItem(value: 'video', child: Text(l.videoCall)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateChip extends StatelessWidget {
+  const _DateChip();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Center(
+        child: Text(
+          context.l10n.today.toUpperCase(),
+          style: context.text.labelSmall?.copyWith(
+            color: context.colors.textSecondary,
+            letterSpacing: 2,
+          ),
         ),
       ),
     );
   }
 }
+
+class _MessageItem extends StatelessWidget {
+  const _MessageItem({
+    required this.message,
+    required this.peerName,
+    this.peerAvatar,
+  });
+  final Message message;
+  final String peerName;
+  final String? peerAvatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final mine = message.isMine;
+    final maxW = MediaQuery.sizeOf(context).width * 0.72;
+
+    final Widget bubble = switch (message.type) {
+      'image' => _ImageBubble(url: message.attachmentUrl, maxWidth: maxW),
+      'voice' || 'audio' => _VoiceBubble(mine: mine),
+      _ => _TextBubble(text: message.content ?? '', mine: mine, maxWidth: maxW),
+    };
+
+    final meta = Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.lg),
+      child: Row(
+        mainAxisAlignment: mine
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        children: mine
+            ? [
+                Text(
+                  messageTime(context, message.createdAt),
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  l.you,
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ]
+            : [
+                Text(
+                  peerName,
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  messageTime(context, message.createdAt),
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: mine
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+          child: bubble,
+        ),
+        meta,
+      ],
+    );
+  }
+}
+
+class _TextBubble extends StatelessWidget {
+  const _TextBubble({
+    required this.text,
+    required this.mine,
+    required this.maxWidth,
+  });
+  final String text;
+  final bool mine;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: mine ? colors.primary : colors.surface,
+        borderRadius: _bubbleRadius(mine),
+        border: mine ? null : Border.all(color: colors.border),
+      ),
+      child: Text(
+        text,
+        style: context.text.bodyMedium?.copyWith(
+          color: mine ? colors.onPrimary : colors.textPrimary,
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageBubble extends StatelessWidget {
+  const _ImageBubble({required this.url, required this.maxWidth});
+  final String? url;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Container(
+        width: maxWidth,
+        height: maxWidth * 0.7,
+        color: colors.surfaceVariant,
+        child: (url == null || url!.isEmpty)
+            ? null
+            : CachedNetworkImage(imageUrl: url!, fit: BoxFit.cover),
+      ),
+    );
+  }
+}
+
+class _VoiceBubble extends StatelessWidget {
+  const _VoiceBubble({required this.mine});
+  final bool mine;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final fg = mine ? colors.onPrimary : colors.textPrimary;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: mine ? colors.primary : colors.surface,
+        borderRadius: _bubbleRadius(mine),
+        border: mine ? null : Border.all(color: colors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.play_circle_fill_rounded, color: fg, size: 30),
+          const SizedBox(width: AppSpacing.sm),
+          ..._waveform(fg),
+          const SizedBox(width: AppSpacing.sm),
+          Text('0:13', style: context.text.labelSmall?.copyWith(color: fg)),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _waveform(Color color) {
+    const heights = <double>[
+      8,
+      16,
+      22,
+      12,
+      26,
+      18,
+      10,
+      20,
+      14,
+      24,
+      9,
+      17,
+      22,
+      12,
+    ];
+    return [
+      for (final h in heights)
+        Container(
+          width: 2.5,
+          height: h,
+          margin: const EdgeInsets.symmetric(horizontal: 1),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+    ];
+  }
+}
+
+BorderRadius _bubbleRadius(bool mine) => BorderRadius.only(
+  topLeft: const Radius.circular(AppRadius.lg),
+  topRight: const Radius.circular(AppRadius.lg),
+  bottomLeft: Radius.circular(mine ? AppRadius.lg : AppRadius.xs),
+  bottomRight: Radius.circular(mine ? AppRadius.xs : AppRadius.lg),
+);
 
 class _Composer extends StatelessWidget {
   const _Composer({required this.controller, required this.onSend});
@@ -228,18 +427,19 @@ class _Composer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
     return SafeArea(
       top: false,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          border: Border(top: BorderSide(color: colors.border)),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            _RoundIcon(
+              icon: Icons.add_rounded,
+              onTap: () => ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+            ),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: TextField(
                 controller: controller,
@@ -251,11 +451,45 @@ class _Composer extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            IconButton.filled(
-              onPressed: onSend,
-              icon: const Icon(Icons.send_rounded),
+            ListenableBuilder(
+              listenable: controller,
+              builder: (_, _) {
+                final hasText = controller.text.trim().isNotEmpty;
+                return _RoundIcon(
+                  icon: hasText ? Icons.send_rounded : Icons.mic_rounded,
+                  onTap: hasText
+                      ? onSend
+                      : () => ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+                );
+              },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoundIcon extends StatelessWidget {
+  const _RoundIcon({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: colors.primary,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        onTap: onTap,
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Icon(icon, color: colors.onPrimary),
         ),
       ),
     );
