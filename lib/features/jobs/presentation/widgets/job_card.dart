@@ -9,6 +9,7 @@ import '../../../../localization/l10n_extension.dart';
 import '../../application/bookmarks_controller.dart';
 import '../../domain/job.dart';
 import '../util/job_labels.dart';
+import 'bookmark_confirm_sheet.dart';
 
 /// Job summary card used across Home, See-all, Bookmarks and Search. Tapping
 /// opens details; the bookmark toggle is wired to [bookmarksControllerProvider].
@@ -77,9 +78,20 @@ class JobCard extends ConsumerWidget {
                   button: true,
                   label: bookmarked ? l.removeBookmark : l.addBookmark,
                   child: InkResponse(
-                    onTap: () => ref
-                        .read(bookmarksControllerProvider.notifier)
-                        .toggle(job.id),
+                    onTap: () async {
+                      final notifier = ref.read(
+                        bookmarksControllerProvider.notifier,
+                      );
+                      if (!bookmarked) {
+                        notifier.toggle(job.id);
+                        return;
+                      }
+                      final remove = await showRemoveBookmarkSheet(
+                        context,
+                        job,
+                      );
+                      if (remove == true) notifier.toggle(job.id);
+                    },
                     child: Icon(
                       bookmarked
                           ? Icons.bookmark_rounded

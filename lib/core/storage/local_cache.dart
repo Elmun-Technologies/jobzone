@@ -17,4 +17,5 @@ abstract final class CacheKeys {
   static const String onboardingComplete = 'pref_onboarding_complete';
   static const String profileSetupComplete = 'pref_profile_setup_complete';
   static const String bookmarks = 'pref_bookmarks';
+  static const String recentSearches = 'pref_recent_searches';
 }

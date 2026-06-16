@@ -14,29 +14,47 @@ class BookmarksPage extends ConsumerWidget {
     final l = context.l10n;
     final jobsAsync = ref.watch(bookmarkedJobsProvider);
 
-    return JzScaffold(
-      title: l.bookmarks,
-      body: jobsAsync.when(
-        loading: () => const JobListSkeleton(),
-        error: (_, _) => JzErrorState(
-          title: l.errorTitle,
-          message: l.errUnknown,
-          retryLabel: l.retry,
-          onRetry: () => ref.invalidate(bookmarkedJobsProvider),
-        ),
-        data: (jobs) => jobs.isEmpty
-            ? JzEmptyState(
-                icon: Icons.bookmark_border_rounded,
-                title: l.noBookmarksTitle,
-                message: l.noBookmarksBody,
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                itemCount: jobs.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (_, i) => JobCard(job: jobs[i]),
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Center(
+                child: Text(l.bookmarks, style: context.text.titleLarge),
               ),
+            ),
+            Expanded(
+              child: jobsAsync.when(
+                loading: () => const JobListSkeleton(),
+                error: (_, _) => JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () => ref.invalidate(bookmarkedJobsProvider),
+                ),
+                data: (jobs) => jobs.isEmpty
+                    ? JzEmptyState(
+                        icon: Icons.bookmark_border_rounded,
+                        title: l.noBookmarksTitle,
+                        message: l.noBookmarksBody,
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
+                        itemCount: jobs.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSpacing.md),
+                        itemBuilder: (_, i) => JobCard(job: jobs[i]),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
