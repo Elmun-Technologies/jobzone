@@ -55,6 +55,14 @@ class PreferencesController extends Notifier<PreferenceDraft> {
     state = state.copyWith(titles: [...state.titles, t]);
   }
 
+  /// Toggles a predefined title in/out of the selection.
+  void toggleTitle(String title) {
+    final next = state.titles.contains(title)
+        ? state.titles.where((t) => t != title).toList()
+        : [...state.titles, title];
+    state = state.copyWith(titles: next);
+  }
+
   void removeTitle(String title) => state = state.copyWith(
     titles: state.titles.where((t) => t != title).toList(),
   );
