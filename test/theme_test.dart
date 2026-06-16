@@ -10,7 +10,7 @@ void main() {
 
     expect(light.extension<JzColors>(), isNotNull);
     expect(dark.extension<JzColors>(), isNotNull);
-    expect(light.extension<JzColors>()!.primary, const Color(0xFF2563EB));
+    expect(light.extension<JzColors>()!.primary, const Color(0xFF3A36DB));
     expect(light.brightness, Brightness.light);
     expect(dark.brightness, Brightness.dark);
   });
