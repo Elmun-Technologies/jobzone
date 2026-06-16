@@ -15,6 +15,7 @@ export 'widgets/buttons/jz_circle_button.dart';
 export 'widgets/inputs/jz_password_field.dart';
 export 'widgets/inputs/jz_text_field.dart';
 export 'widgets/layout/jz_scaffold.dart';
+export 'widgets/layout/jz_top_bar.dart';
 export 'widgets/media/jz_svg.dart';
 export 'widgets/text/highlight_text.dart';
 export 'widgets/layout/section_header.dart';

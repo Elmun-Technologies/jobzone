@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../data/reviews_repository.dart';
 import '../domain/review.dart';
-import 'widgets/star_rating_input.dart';
 
-/// Write / update a review for a company. Reached from a job's or company's
-/// Reviews tab; [companyName] is passed via `extra` for the header.
+/// Write a review for a company. Reached from a job's or company's Reviews tab;
+/// [companyName] is passed via `extra` for the header.
 class WriteReviewPage extends ConsumerStatefulWidget {
   const WriteReviewPage({super.key, required this.companyId, this.companyName});
 
@@ -22,24 +22,20 @@ class WriteReviewPage extends ConsumerStatefulWidget {
 }
 
 class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _title = TextEditingController();
   final _body = TextEditingController();
-  final _pros = TextEditingController();
-  final _cons = TextEditingController();
-  final _jobTitle = TextEditingController();
-  int _rating = 0;
-  bool _currentEmployee = false;
+  int _rating = 5;
+  int _photos = 0;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _title.dispose();
     _body.dispose();
-    _pros.dispose();
-    _cons.dispose();
-    _jobTitle.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickPhotos() async {
+    final imgs = await ImagePicker().pickMultiImage();
+    if (imgs.isNotEmpty) setState(() => _photos += imgs.length);
   }
 
   Future<void> _submit() async {
@@ -48,7 +44,6 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
       showErrorSnack(context, l.ratingRequired);
       return;
     }
-    if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
       await ref
@@ -57,12 +52,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
             CompanyReview(
               companyId: widget.companyId,
               rating: _rating,
-              title: _nullable(_title.text),
-              body: _nullable(_body.text),
-              pros: _nullable(_pros.text),
-              cons: _nullable(_cons.text),
-              isCurrentEmployee: _currentEmployee,
-              jobTitle: _nullable(_jobTitle.text),
+              body: _body.text.trim().isEmpty ? null : _body.text.trim(),
             ),
           );
       ref.invalidate(companyReviewsProvider(widget.companyId));
@@ -81,23 +71,55 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
-    return JzScaffold(
-      title: l.writeReviewTitle,
-      body: Column(
-        children: [
-          Expanded(
-            child: Form(
-              key: _formKey,
+    final name = widget.companyName ?? '';
+    final letter = name.isEmpty ? '?' : name.substring(0, 1).toUpperCase();
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: JzTopBar(title: l.writeReviewTitle),
+            ),
+            Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 children: [
-                  if (widget.companyName != null)
-                    Text(
-                      widget.companyName!,
-                      style: context.text.titleMedium,
-                      textAlign: TextAlign.center,
+                  Center(
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 36,
+                          backgroundColor: colors.primary,
+                          child: Text(
+                            letter,
+                            style: context.text.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        if (name.isNotEmpty) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            name,
+                            style: context.text.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  const SizedBox(height: AppSpacing.md),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Divider(color: colors.border),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     l.rateThisCompany,
                     style: context.text.bodyMedium?.copyWith(
@@ -105,75 +127,67 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  StarRatingInput(
-                    rating: _rating,
-                    onChanged: (v) => setState(() => _rating = v),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  JzTextField(
-                    label: l.reviewTitleLabel,
-                    controller: _title,
-                    hint: l.reviewTitleHint,
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 1; i <= 5; i++)
+                        IconButton(
+                          onPressed: () => setState(() => _rating = i),
+                          icon: Icon(
+                            Icons.star_rounded,
+                            size: 40,
+                            color: i <= _rating
+                                ? const Color(0xFFFFC629)
+                                : colors.border,
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
+                  Divider(color: colors.border),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(l.addDetailedReview, style: context.text.labelLarge),
+                  const SizedBox(height: AppSpacing.sm),
                   JzTextField(
-                    label: l.reviewBodyLabel,
                     controller: _body,
                     hint: l.reviewBodyHint,
                     maxLines: 5,
-                    minLines: 3,
+                    minLines: 4,
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  JzTextField(
-                    label: l.prosLabel,
-                    controller: _pros,
-                    maxLines: 3,
-                    minLines: 2,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  JzTextField(
-                    label: l.consLabel,
-                    controller: _cons,
-                    maxLines: 3,
-                    minLines: 2,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  JzTextField(
-                    label: l.yourJobTitleLabel,
-                    controller: _jobTitle,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l.currentEmployee),
-                    value: _currentEmployee,
-                    onChanged: (v) => setState(() => _currentEmployee = v),
+                  const SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: _pickPhotos,
+                      icon: Icon(
+                        Icons.camera_alt_outlined,
+                        color: colors.primary,
+                        size: 20,
+                      ),
+                      label: Text(
+                        _photos == 0 ? l.addPhoto : '$_photos',
+                        style: context.text.bodyMedium?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.lg,
-              ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: JzPrimaryButton(
-                label: l.submitReview,
+                label: l.submit,
                 loading: _submitting,
                 onPressed: _submit,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
-
-String? _nullable(String s) => s.trim().isEmpty ? null : s.trim();

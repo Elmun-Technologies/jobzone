@@ -12,48 +12,68 @@ class ApplicationSuccessPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
-    return JzScaffold(
-      showBack: false,
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          children: [
-            const Spacer(),
-            Container(
-              height: 120,
-              width: 120,
-              decoration: BoxDecoration(
-                color: colors.success.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: JzCircleButton(
+                  icon: Icons.arrow_back_rounded,
+                  onTap: () => context.go(Routes.home),
+                ),
               ),
-              child: Icon(Icons.check_rounded, size: 64, color: colors.success),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              l.applicationSentTitle,
-              style: context.text.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l.applicationSentBody,
-              style: context.text.bodyMedium?.copyWith(
-                color: colors.textSecondary,
+              const Spacer(flex: 2),
+              Container(
+                height: 120,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_rounded,
+                  size: 64,
+                  color: colors.onPrimary,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const Spacer(),
-            JzPrimaryButton(
-              label: l.viewMyApplications,
-              onPressed: () => context.go(Routes.accountApplications),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextButton(
-              onPressed: () => context.go(Routes.home),
-              child: Text(l.backToHome),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                l.applicationSentTitle,
+                style: context.text.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                l.applicationSentBody,
+                style: context.text.bodyMedium?.copyWith(
+                  color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Spacer(flex: 3),
+              JzPrimaryButton(
+                label: l.viewMyApplications,
+                onPressed: () => context.go(Routes.accountApplications),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              TextButton(
+                onPressed: () => context.go(Routes.home),
+                child: Text(
+                  l.cancel,
+                  style: context.text.titleMedium?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
         ),
       ),
     );
