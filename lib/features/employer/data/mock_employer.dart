@@ -24,10 +24,42 @@ class MockEmployer {
       if (j.companyId == companyId) j,
   ];
 
-  /// Re-seeds the in-memory jobs (and clears the company) so tests start fresh.
+  /// Mutable team/recruiter list, lazily seeded.
+  List<CompanyPerson>? _people;
+  List<CompanyPerson> get people => _people ??= [
+    const CompanyPerson(
+      id: 'p1',
+      name: 'Dilnoza Yusupova',
+      title: 'Head of Talent',
+      isRecruiter: true,
+    ),
+    const CompanyPerson(
+      id: 'p2',
+      name: 'Sardor Aliyev',
+      title: 'Engineering Manager',
+    ),
+  ];
+
+  /// Mutable gallery list, lazily seeded.
+  List<GalleryItem>? _gallery;
+  List<GalleryItem> get gallery => _gallery ??= [
+    const GalleryItem(
+      id: 'g1',
+      mediaUrl: 'https://picsum.photos/seed/acme1/600/600',
+      caption: 'Our office',
+    ),
+    const GalleryItem(
+      id: 'g2',
+      mediaUrl: 'https://picsum.photos/seed/acme2/600/600',
+    ),
+  ];
+
+  /// Re-seeds the in-memory stores (and clears the company) so tests start fresh.
   @visibleForTesting
   void resetJobsForTest() {
     _jobs = null;
+    _people = null;
+    _gallery = null;
     company = null;
   }
 }

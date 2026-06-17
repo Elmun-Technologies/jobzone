@@ -475,5 +475,14 @@
   "noCompanyBody": "Создайте компанию, чтобы публиковать вакансии.",
   "editCompanyCta": "Изменить компанию",
   "saveChanges": "Сохранить изменения",
-  "companySavedToast": "Компания сохранена"
+  "companySavedToast": "Компания сохранена",
+  "managePeopleTitle": "Команда и рекрутеры",
+  "manageGalleryTitle": "Галерея",
+  "addPersonCta": "Добавить человека",
+  "recruiterToggle": "Этот человек — рекрутер",
+  "personNameLabel": "Имя",
+  "personTitleLabel": "Должность",
+  "addPhotoCta": "Добавить фото",
+  "imageUrlLabel": "URL изображения",
+  "captionLabel": "Подпись"
 }

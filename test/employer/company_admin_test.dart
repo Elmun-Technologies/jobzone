@@ -55,5 +55,39 @@ void main() {
       expect(loaded?.name, 'Globex Corp');
       expect(loaded?.about, 'Updated');
     });
+
+    test('addPerson / removePerson mutate the team list', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final repo = container.read(companyAdminRepositoryProvider);
+
+      final before = (await repo.people()).length;
+      await repo.addPerson(name: 'Olim', title: 'CTO', isRecruiter: true);
+      final after = await repo.people();
+      expect(after.length, before + 1);
+
+      final added = after.firstWhere((p) => p.name == 'Olim');
+      expect(added.isRecruiter, isTrue);
+      await repo.removePerson(added.id);
+      expect((await repo.people()).any((p) => p.id == added.id), isFalse);
+    });
+
+    test('addGalleryItem / removeGalleryItem mutate the gallery', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final repo = container.read(companyAdminRepositoryProvider);
+
+      final before = (await repo.gallery()).length;
+      await repo.addGalleryItem(
+        mediaUrl: 'https://example.com/p.jpg',
+        caption: 'New',
+      );
+      final after = await repo.gallery();
+      expect(after.length, before + 1);
+
+      final added = after.firstWhere((g) => g.caption == 'New');
+      await repo.removeGalleryItem(added.id);
+      expect((await repo.gallery()).any((g) => g.id == added.id), isFalse);
+    });
   });
 }

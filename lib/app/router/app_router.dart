@@ -37,6 +37,8 @@ import '../../features/employer/presentation/applicants/applicants_page.dart';
 import '../../features/employer/presentation/applicants/job_applicants_page.dart';
 import '../../features/employer/presentation/company/company_manage_page.dart';
 import '../../features/employer/presentation/company/edit_company_page.dart';
+import '../../features/employer/presentation/company/manage_gallery_page.dart';
+import '../../features/employer/presentation/company/manage_people_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
@@ -292,6 +294,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ? PlaceholderPage(title: s.uri.toString())
               : EditCompanyPage(company: company);
         },
+      ),
+      GoRoute(
+        path: Routes.employerCompanyPeople,
+        builder: (c, s) => const ManagePeoplePage(),
+      ),
+      GoRoute(
+        path: Routes.employerCompanyGallery,
+        builder: (c, s) => const ManageGalleryPage(),
       ),
 
       // Explore children

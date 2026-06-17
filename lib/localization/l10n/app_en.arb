@@ -475,5 +475,14 @@
   "noCompanyBody": "Create your company to start posting jobs.",
   "editCompanyCta": "Edit company",
   "saveChanges": "Save changes",
-  "companySavedToast": "Company saved"
+  "companySavedToast": "Company saved",
+  "managePeopleTitle": "Team & Recruiters",
+  "manageGalleryTitle": "Gallery",
+  "addPersonCta": "Add person",
+  "recruiterToggle": "This person is a recruiter",
+  "personNameLabel": "Name",
+  "personTitleLabel": "Title",
+  "addPhotoCta": "Add photo",
+  "imageUrlLabel": "Image URL",
+  "captionLabel": "Caption"
 }
