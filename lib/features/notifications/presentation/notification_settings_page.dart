@@ -8,7 +8,8 @@ import '../application/notifications_providers.dart';
 import '../data/notifications_repository.dart';
 import '../domain/notification.dart';
 
-/// Toggle per-channel push / email notification preferences.
+/// Toggle notification preferences. The design's five switches map onto the
+/// existing [NotificationSettings] channels.
 class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({super.key});
 
@@ -36,78 +37,59 @@ class _NotificationSettingsPageState
     final l = context.l10n;
     final async = ref.watch(notificationSettingsProvider);
 
-    return JzScaffold(
-      title: l.notificationSettings,
-      body: async.when(
-        loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
-        data: (loaded) {
-          final s = _settings ??= loaded;
-          return ListView(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            children: [
-              _SectionLabel(l.pushNotifications),
-              _Toggle(
-                title: l.notifMessages,
-                value: s.pushMessages,
-                onChanged: (v) => _update(s.copyWith(pushMessages: v)),
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: JzTopBar(title: l.notificationSettings),
+            ),
+            Expanded(
+              child: async.when(
+                loading: () => const JzLoader(),
+                error: (_, _) => Center(child: Text(l.errUnknown)),
+                data: (loaded) {
+                  final s = _settings ??= loaded;
+                  return ListView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
+                    children: [
+                      _Toggle(
+                        title: l.notifGeneral,
+                        value: s.pushMessages,
+                        onChanged: (v) => _update(s.copyWith(pushMessages: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifJobAvailable,
+                        value: s.pushJobMatch,
+                        onChanged: (v) => _update(s.copyWith(pushJobMatch: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifJobInvitation,
+                        value: s.pushApplication,
+                        onChanged: (v) =>
+                            _update(s.copyWith(pushApplication: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifAppUpdates,
+                        value: s.pushReviews,
+                        onChanged: (v) => _update(s.copyWith(pushReviews: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifJobStatus,
+                        value: s.emailApplication,
+                        onChanged: (v) =>
+                            _update(s.copyWith(emailApplication: v)),
+                      ),
+                    ],
+                  );
+                },
               ),
-              _Toggle(
-                title: l.notifApplications,
-                value: s.pushApplication,
-                onChanged: (v) => _update(s.copyWith(pushApplication: v)),
-              ),
-              _Toggle(
-                title: l.notifJobMatches,
-                value: s.pushJobMatch,
-                onChanged: (v) => _update(s.copyWith(pushJobMatch: v)),
-              ),
-              _Toggle(
-                title: l.notifReviews,
-                value: s.pushReviews,
-                onChanged: (v) => _update(s.copyWith(pushReviews: v)),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _SectionLabel(l.emailNotifications),
-              _Toggle(
-                title: l.notifMessages,
-                value: s.emailMessages,
-                onChanged: (v) => _update(s.copyWith(emailMessages: v)),
-              ),
-              _Toggle(
-                title: l.notifApplications,
-                value: s.emailApplication,
-                onChanged: (v) => _update(s.copyWith(emailApplication: v)),
-              ),
-              _Toggle(
-                title: l.notifJobMatches,
-                value: s.emailJobMatch,
-                onChanged: (v) => _update(s.copyWith(emailJobMatch: v)),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.xs,
-      ),
-      child: Text(
-        text,
-        style: context.text.labelLarge?.copyWith(color: context.colors.primary),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -125,11 +107,14 @@ class _Toggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      title: Text(title, style: context.text.bodyLarge),
-      value: value,
-      onChanged: onChanged,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: context.text.bodyLarge)),
+          Switch(value: value, onChanged: onChanged),
+        ],
+      ),
     );
   }
 }
