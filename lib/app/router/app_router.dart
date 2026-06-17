@@ -17,6 +17,7 @@ import '../../features/applications/presentation/application_status_page.dart';
 import '../../features/applications/presentation/application_success_page.dart';
 import '../../features/applications/presentation/apply_job_page.dart';
 import '../../features/applications/presentation/my_applications_page.dart';
+import '../../features/auth/presentation/pages/choose_role_page.dart';
 import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/new_password_page.dart';
@@ -29,6 +30,12 @@ import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/companies/presentation/company_details_page.dart';
 import '../../features/companies/presentation/gallery_page.dart';
 import '../../features/companies/presentation/intro_video_page.dart';
+import '../../features/employer/presentation/applicants/applicants_page.dart';
+import '../../features/employer/presentation/company/company_manage_page.dart';
+import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
+import '../../features/employer/presentation/employer_shell.dart';
+import '../../features/employer/presentation/jobs/my_jobs_page.dart';
+import '../../features/employer/presentation/onboarding/create_company_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/jobs/presentation/bookmarks_page.dart';
 import '../../features/jobs/presentation/job_details_page.dart';
@@ -108,6 +115,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => const NewPasswordPage(),
       ),
       GoRoute(
+        path: Routes.chooseRole,
+        builder: (c, s) => const ChooseRolePage(),
+      ),
+      GoRoute(
         path: Routes.completeProfile,
         builder: (c, s) => const CompleteProfilePage(),
       ),
@@ -183,6 +194,58 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: Routes.profile,
                 builder: (c, s) => const ProfilePage(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // Employer (Jobzone Business) — onboarding + its own bottom-nav shell
+      GoRoute(
+        path: Routes.employerOnboard,
+        builder: (c, s) => const CreateCompanyPage(),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            EmployerShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.employerDashboard,
+                builder: (c, s) => const EmployerDashboardPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.employerJobs,
+                builder: (c, s) => const MyJobsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.employerApplicants,
+                builder: (c, s) => const ApplicantsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.employerChat,
+                builder: (c, s) => const ChatListPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.employerCompany,
+                builder: (c, s) => const CompanyManagePage(),
               ),
             ],
           ),

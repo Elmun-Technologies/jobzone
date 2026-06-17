@@ -421,5 +421,17 @@
   "cancelationPolicy": "Bekor qilish siyosati",
   "termsCondition": "Shartlar va qoidalar",
   "privacyCancelBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.",
-  "privacyTermsBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+  "privacyTermsBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "roleChooseTitle": "Jobzone'dan qanday foydalanasiz?",
+  "roleChooseSubtitle": "Buni keyin Sozlamalarda o'zgartirishingiz mumkin.",
+  "roleSeekerTitle": "Men ish qidiryapman",
+  "roleSeekerDesc": "Vakansiyalarni toping, ariza bering va arizalarni kuzating.",
+  "roleEmployerTitle": "Men ishga olaman",
+  "roleEmployerDesc": "Kompaniyangiz uchun vakansiya joylang va nomzodlarni boshqaring.",
+  "navDashboard": "Boshqaruv",
+  "navMyJobs": "Vakansiyalarim",
+  "navApplicants": "Nomzodlar",
+  "navCompany": "Kompaniya",
+  "createCompanyTitle": "Kompaniyangizni sozlang",
+  "createCompanyBody": "Nomzodlarga kompaniyangiz haqida ma'lumot bering. To'liq profilni keyin to'ldirishingiz mumkin."
 }

@@ -44,7 +44,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     if (!mounted) return;
     if (ok) {
       isSignup
-          ? context.go(Routes.completeProfile)
+          ? context.go(Routes.chooseRole)
           : context.push(Routes.newPassword);
     } else {
       showErrorSnack(

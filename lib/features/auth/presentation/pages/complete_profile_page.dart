@@ -12,6 +12,8 @@ import '../../../../core/supabase/supabase_providers.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/enums/enums.dart';
+import '../../../../shared/providers/app_flags.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../widgets/auth_header.dart';
 
@@ -86,7 +88,12 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
         }
       }
       if (!mounted) return;
-      context.push(Routes.setupJobType);
+      final role = ref.read(appFlagsProvider).role;
+      context.push(
+        role == UserRole.employer
+            ? Routes.employerOnboard
+            : Routes.setupJobType,
+      );
     } catch (e) {
       if (mounted) showErrorSnack(context, e.toString());
     } finally {
