@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
@@ -23,7 +24,6 @@ class CompanyDetailsPage extends ConsumerWidget {
     final l = context.l10n;
     final async = ref.watch(companyByIdProvider(companyId));
     return Scaffold(
-      appBar: AppBar(),
       body: async.when(
         loading: () => const JzLoader(),
         error: (_, _) => Center(child: Text(l.errUnknown)),
@@ -94,24 +94,49 @@ class _OpenJobsTab extends ConsumerWidget {
       error: (_, _) => Center(child: Text(l.errUnknown)),
       data: (jobs) => jobs.isEmpty
           ? JzEmptyState(icon: Icons.work_outline_rounded, title: l.noJobsTitle)
-          : ListView.separated(
+          : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: jobs.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (_, i) => JobCard(job: jobs[i]),
+              children: [
+                Text(
+                  l.recentlyAddedJobs,
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                for (final j in jobs)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: JobCard(job: j),
+                  ),
+              ],
             ),
     );
   }
 }
 
-class _AboutTab extends StatelessWidget {
+class _AboutTab extends ConsumerWidget {
   const _AboutTab({required this.company});
   final Company company;
 
+  TextStyle? _h(BuildContext c) =>
+      c.text.titleMedium?.copyWith(fontWeight: FontWeight.w700);
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final colors = context.colors;
+    final people =
+        ref.watch(companyPeopleProvider(company.id)).value ?? const [];
+    CompanyPerson? contact;
+    for (final p in people) {
+      if (p.isRecruiter) {
+        contact = p;
+        break;
+      }
+    }
+    contact ??= people.isEmpty ? null : people.first;
+
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
@@ -120,41 +145,71 @@ class _AboutTab extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
         ],
         if (company.about != null && company.about!.isNotEmpty) ...[
-          Text(l.aboutCompany, style: context.text.titleSmall),
-          const SizedBox(height: AppSpacing.xs),
+          Text(l.aboutCompany, style: _h(context)),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             company.about!,
             style: context.text.bodyMedium?.copyWith(
               color: colors.textSecondary,
+              height: 1.5,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
         ],
-        _InfoRow(
-          icon: Icons.factory_outlined,
-          label: l.industryLabel,
-          value: company.industry,
-        ),
-        _InfoRow(
-          icon: Icons.groups_outlined,
-          label: l.companySizeLabel,
-          value: company.size,
-        ),
-        _InfoRow(
-          icon: Icons.event_outlined,
+        if (contact != null) ...[
+          Text(l.companyContact, style: _h(context)),
+          const SizedBox(height: AppSpacing.md),
+          _ContactRow(person: contact),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+        Text(l.workingHours, style: _h(context)),
+        const SizedBox(height: AppSpacing.sm),
+        const _WorkingHours(),
+        const SizedBox(height: AppSpacing.lg),
+        if (company.headquarters != null &&
+            company.headquarters!.isNotEmpty) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(l.companyAddress, style: _h(context)),
+              Text(
+                l.viewOnMap,
+                style: context.text.labelLarge?.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Icon(Icons.location_on_rounded, size: 18, color: colors.primary),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  company.headquarters!,
+                  style: context.text.bodyMedium?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const _MapPlaceholder(),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+        Text(l.companySummary, style: _h(context)),
+        const SizedBox(height: AppSpacing.sm),
+        _SummaryRow(label: l.websiteLabel, value: company.website),
+        _SummaryRow(label: l.headquartersLabel, value: company.headquarters),
+        _SummaryRow(
           label: l.foundedLabel,
           value: company.foundedYear?.toString(),
         ),
-        _InfoRow(
-          icon: Icons.location_on_outlined,
-          label: l.headquartersLabel,
-          value: company.headquarters,
-        ),
-        _InfoRow(
-          icon: Icons.language_rounded,
-          label: l.websiteLabel,
-          value: company.website,
-        ),
+        _SummaryRow(label: l.companySizeLabel, value: company.size),
+        _SummaryRow(label: l.industryLabel, value: company.industry),
       ],
     );
   }
@@ -202,9 +257,142 @@ class _IntroVideoCard extends StatelessWidget {
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.label, this.value});
+class _ContactRow extends StatelessWidget {
+  const _ContactRow({required this.person});
+  final CompanyPerson person;
+
+  void _soon(BuildContext context) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(context.l10n.comingSoon)));
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: colors.surfaceVariant,
+          backgroundImage:
+              (person.avatarUrl != null && person.avatarUrl!.isNotEmpty)
+              ? CachedNetworkImageProvider(person.avatarUrl!)
+              : null,
+          child: (person.avatarUrl == null || person.avatarUrl!.isEmpty)
+              ? Icon(Icons.person_rounded, color: colors.textSecondary)
+              : null,
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                person.name,
+                style: context.text.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (person.title != null)
+                Text(
+                  person.title!,
+                  style: context.text.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        _RoundAction(
+          icon: Icons.chat_bubble_rounded,
+          onTap: () => _soon(context),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _RoundAction(icon: Icons.call_rounded, onTap: () => _soon(context)),
+      ],
+    );
+  }
+}
+
+class _RoundAction extends StatelessWidget {
+  const _RoundAction({required this.icon, required this.onTap});
   final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: colors.primary,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(icon, color: colors.onPrimary, size: 20),
+        ),
+      ),
+    );
+  }
+}
+
+class _WorkingHours extends StatelessWidget {
+  const _WorkingHours();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final locale = Localizations.localeOf(context).toString();
+    // Jan 1 2024 is a Monday — render Mon→Sun localized.
+    final days = [
+      for (var i = 0; i < 7; i++)
+        DateFormat.EEEE(
+          locale,
+        ).format(DateTime(2024, 1, 1).add(Duration(days: i))),
+    ];
+    return Column(
+      children: [
+        for (final d in days)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  d,
+                  style: context.text.bodyMedium?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+                Text('09:00 - 18:00', style: context.text.bodyMedium),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _MapPlaceholder extends StatelessWidget {
+  const _MapPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      height: 150,
+      decoration: BoxDecoration(
+        color: colors.surfaceVariant,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Icon(Icons.location_on_rounded, color: colors.primary, size: 40),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({required this.label, this.value});
   final String label;
   final String? value;
 
@@ -213,24 +401,24 @@ class _InfoRow extends StatelessWidget {
     if (value == null || value!.isEmpty) return const SizedBox.shrink();
     final colors = context.colors;
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, size: 20, color: colors.textSecondary),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: context.text.labelSmall?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-                Text(value!, style: context.text.bodyMedium),
-              ],
+          Text(
+            label,
+            style: context.text.bodyMedium?.copyWith(
+              color: colors.textSecondary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Flexible(
+            child: Text(
+              value!,
+              textAlign: TextAlign.right,
+              style: context.text.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -255,11 +443,22 @@ class _PeopleTab extends ConsumerWidget {
               icon: Icons.people_outline_rounded,
               title: l.noPeopleTitle,
             )
-          : ListView.separated(
+          : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: people.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (_, i) => _PersonTile(person: people[i]),
+              children: [
+                Text(
+                  '${l.tabPeople} (${people.length})',
+                  style: context.text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                for (final p in people)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: _PersonTile(person: p),
+                  ),
+              ],
             ),
     );
   }
@@ -338,9 +537,41 @@ class _GalleryTab extends ConsumerWidget {
               icon: Icons.photo_library_outlined,
               title: l.noGalleryTitle,
             )
-          : GalleryGrid(
-              items: items,
-              padding: const EdgeInsets.all(AppSpacing.lg),
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${l.tabGallery} (${items.length})',
+                        style: context.text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        l.seeAll,
+                        style: context.text.labelLarge?.copyWith(
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: GalleryGrid(
+                    items: items,
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                  ),
+                ),
+              ],
             ),
     );
   }
