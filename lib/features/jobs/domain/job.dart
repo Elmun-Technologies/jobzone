@@ -26,6 +26,7 @@ class Job {
     this.applicantsCount = 0,
     this.postedAt,
     this.categoryName,
+    this.status = 'open',
   });
 
   final String id;
@@ -52,6 +53,10 @@ class Job {
   final int applicantsCount;
   final DateTime? postedAt;
   final String? categoryName;
+
+  /// Lifecycle: `draft` / `open` / `closed`. The seeker `job_feed` only ever
+  /// returns `open`; employer reads of the base `jobs` table carry the real one.
+  final String status;
 
   String get locationText =>
       location ??
@@ -122,6 +127,61 @@ class Job {
           ? DateTime.tryParse('${m['posted_at']}')
           : null,
       categoryName: m['category_name'] as String?,
+      status: (m['status'] ?? 'open') as String,
     );
   }
+
+  Job copyWith({
+    String? id,
+    String? title,
+    String? companyId,
+    String? companyName,
+    String? companyLogoUrl,
+    bool? companyVerified,
+    String? location,
+    String? city,
+    String? country,
+    String? jobType,
+    String? experienceLevel,
+    String? workingModel,
+    num? salaryMin,
+    num? salaryMax,
+    String? currency,
+    String? salaryPeriod,
+    List<String>? skills,
+    String? description,
+    String? responsibilities,
+    String? requirements,
+    String? benefits,
+    int? applicantsCount,
+    DateTime? postedAt,
+    String? categoryName,
+    String? status,
+  }) => Job(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    companyId: companyId ?? this.companyId,
+    companyName: companyName ?? this.companyName,
+    companyLogoUrl: companyLogoUrl ?? this.companyLogoUrl,
+    companyVerified: companyVerified ?? this.companyVerified,
+    location: location ?? this.location,
+    city: city ?? this.city,
+    country: country ?? this.country,
+    jobType: jobType ?? this.jobType,
+    experienceLevel: experienceLevel ?? this.experienceLevel,
+    workingModel: workingModel ?? this.workingModel,
+    salaryMin: salaryMin ?? this.salaryMin,
+    salaryMax: salaryMax ?? this.salaryMax,
+    currency: currency ?? this.currency,
+    salaryPeriod: salaryPeriod ?? this.salaryPeriod,
+    skills: skills ?? this.skills,
+    description: description ?? this.description,
+    responsibilities: responsibilities ?? this.responsibilities,
+    requirements: requirements ?? this.requirements,
+    benefits: benefits ?? this.benefits,
+    applicantsCount: applicantsCount ?? this.applicantsCount,
+    postedAt: postedAt ?? this.postedAt,
+    categoryName: categoryName ?? this.categoryName,
+    status: status ?? this.status,
+  );
 }

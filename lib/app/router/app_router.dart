@@ -35,7 +35,9 @@ import '../../features/employer/presentation/company/company_manage_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
+import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
+import '../../features/jobs/domain/job.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/jobs/presentation/bookmarks_page.dart';
 import '../../features/jobs/presentation/job_details_page.dart';
@@ -250,6 +252,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+
+      // Employer detail routes (pushed above the employer shell)
+      GoRoute(
+        path: Routes.employerPostJob,
+        builder: (c, s) => const PostJobPage(),
+      ),
+      GoRoute(
+        path: '/employer/jobs/:id/edit',
+        builder: (c, s) => PostJobPage(job: s.extra as Job?),
       ),
 
       // Explore children
