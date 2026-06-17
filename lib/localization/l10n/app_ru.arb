@@ -433,5 +433,10 @@
   "navApplicants": "Кандидаты",
   "navCompany": "Компания",
   "createCompanyTitle": "Настройте компанию",
-  "createCompanyBody": "Расскажите кандидатам о компании. Полный профиль можно заполнить позже."
+  "createCompanyBody": "Расскажите кандидатам о компании. Полный профиль можно заполнить позже.",
+  "companyNameLabel": "Название компании",
+  "companyIndustryLabel": "Отрасль",
+  "companySizeLabel": "Размер компании",
+  "companyAboutLabel": "О компании",
+  "companyHqLabel": "Головной офис"
 }

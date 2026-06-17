@@ -433,5 +433,10 @@
   "navApplicants": "Nomzodlar",
   "navCompany": "Kompaniya",
   "createCompanyTitle": "Kompaniyangizni sozlang",
-  "createCompanyBody": "Nomzodlarga kompaniyangiz haqida ma'lumot bering. To'liq profilni keyin to'ldirishingiz mumkin."
+  "createCompanyBody": "Nomzodlarga kompaniyangiz haqida ma'lumot bering. To'liq profilni keyin to'ldirishingiz mumkin.",
+  "companyNameLabel": "Kompaniya nomi",
+  "companyIndustryLabel": "Soha",
+  "companySizeLabel": "Kompaniya hajmi",
+  "companyAboutLabel": "Kompaniya haqida",
+  "companyHqLabel": "Bosh ofis"
 }

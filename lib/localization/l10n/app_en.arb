@@ -433,5 +433,10 @@
   "navApplicants": "Applicants",
   "navCompany": "Company",
   "createCompanyTitle": "Set up your company",
-  "createCompanyBody": "Tell candidates about your company. You can complete the full profile later."
+  "createCompanyBody": "Tell candidates about your company. You can complete the full profile later.",
+  "companyNameLabel": "Company name",
+  "companyIndustryLabel": "Industry",
+  "companySizeLabel": "Company size",
+  "companyAboutLabel": "About",
+  "companyHqLabel": "Headquarters"
 }
