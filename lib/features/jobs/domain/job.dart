@@ -11,6 +11,8 @@ class Job {
     this.location,
     this.city,
     this.country,
+    this.lat,
+    this.lng,
     this.jobType,
     this.experienceLevel,
     this.workingModel,
@@ -38,6 +40,8 @@ class Job {
   final String? location;
   final String? city;
   final String? country;
+  final double? lat;
+  final double? lng;
   final String? jobType;
   final String? experienceLevel;
   final String? workingModel;
@@ -108,6 +112,8 @@ class Job {
       location: m['location'] as String?,
       city: m['city'] as String?,
       country: m['country'] as String?,
+      lat: (m['lat'] as num?)?.toDouble(),
+      lng: (m['lng'] as num?)?.toDouble(),
       jobType: m['job_type'] as String?,
       experienceLevel: m['experience_level'] as String?,
       workingModel: m['working_model'] as String?,
@@ -141,6 +147,8 @@ class Job {
     String? location,
     String? city,
     String? country,
+    double? lat,
+    double? lng,
     String? jobType,
     String? experienceLevel,
     String? workingModel,
@@ -167,6 +175,8 @@ class Job {
     location: location ?? this.location,
     city: city ?? this.city,
     country: country ?? this.country,
+    lat: lat ?? this.lat,
+    lng: lng ?? this.lng,
     jobType: jobType ?? this.jobType,
     experienceLevel: experienceLevel ?? this.experienceLevel,
     workingModel: workingModel ?? this.workingModel,
