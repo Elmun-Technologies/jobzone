@@ -462,5 +462,13 @@
   "fieldRequirements": "Talablar",
   "saveDraft": "Qoralama saqlash",
   "publishJob": "E'lon qilish",
-  "jobSavedToast": "Vakansiya saqlandi"
+  "jobSavedToast": "Vakansiya saqlandi",
+  "noApplicantsTitle": "Hozircha nomzodlar yo'q",
+  "noApplicantsBody": "Odamlar ariza berganda, nomzodlar shu yerda paydo bo'ladi.",
+  "updateStatusCta": "Holatni o'zgartirish",
+  "statusUpdatedToast": "Holat yangilandi",
+  "applicantSkillsLabel": "Ko'nikmalar",
+  "applicantCoverLabel": "Murojaat xati",
+  "appliedForLabel": "Ariza berilgan",
+  "statusTimelineTitle": "Holat tarixi"
 }

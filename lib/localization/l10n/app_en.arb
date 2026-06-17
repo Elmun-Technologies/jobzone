@@ -462,5 +462,13 @@
   "fieldRequirements": "Requirements",
   "saveDraft": "Save as draft",
   "publishJob": "Publish",
-  "jobSavedToast": "Job saved"
+  "jobSavedToast": "Job saved",
+  "noApplicantsTitle": "No applicants yet",
+  "noApplicantsBody": "Applicants will appear here as people apply.",
+  "updateStatusCta": "Update status",
+  "statusUpdatedToast": "Status updated",
+  "applicantSkillsLabel": "Skills",
+  "applicantCoverLabel": "Cover letter",
+  "appliedForLabel": "Applied for",
+  "statusTimelineTitle": "Status timeline"
 }
