@@ -30,7 +30,10 @@ import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/companies/presentation/company_details_page.dart';
 import '../../features/companies/presentation/gallery_page.dart';
 import '../../features/companies/presentation/intro_video_page.dart';
+import '../../features/employer/domain/applicant.dart';
+import '../../features/employer/presentation/applicants/applicant_detail_page.dart';
 import '../../features/employer/presentation/applicants/applicants_page.dart';
+import '../../features/employer/presentation/applicants/job_applicants_page.dart';
 import '../../features/employer/presentation/company/company_manage_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
@@ -262,6 +265,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/employer/jobs/:id/edit',
         builder: (c, s) => PostJobPage(job: s.extra as Job?),
+      ),
+      GoRoute(
+        path: '/employer/jobs/:id/applicants',
+        builder: (c, s) => JobApplicantsPage(
+          jobId: s.pathParameters['id']!,
+          jobTitle: (s.extra as Job?)?.title,
+        ),
+      ),
+      GoRoute(
+        path: '/employer/applicants/:id',
+        builder: (c, s) {
+          final applicant = s.extra as Applicant?;
+          return applicant == null
+              ? PlaceholderPage(title: s.uri.toString())
+              : ApplicantDetailPage(applicant: applicant);
+        },
       ),
 
       // Explore children

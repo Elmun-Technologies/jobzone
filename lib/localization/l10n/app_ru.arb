@@ -462,5 +462,13 @@
   "fieldRequirements": "Требования",
   "saveDraft": "Сохранить черновик",
   "publishJob": "Опубликовать",
-  "jobSavedToast": "Вакансия сохранена"
+  "jobSavedToast": "Вакансия сохранена",
+  "noApplicantsTitle": "Пока нет откликов",
+  "noApplicantsBody": "Здесь появятся кандидаты, когда откликнутся.",
+  "updateStatusCta": "Изменить статус",
+  "statusUpdatedToast": "Статус обновлён",
+  "applicantSkillsLabel": "Навыки",
+  "applicantCoverLabel": "Сопроводительное письмо",
+  "appliedForLabel": "Отклик на",
+  "statusTimelineTitle": "История статуса"
 }

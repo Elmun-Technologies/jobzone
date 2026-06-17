@@ -99,6 +99,10 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
                         const SizedBox(height: AppSpacing.md),
                     itemBuilder: (context, i) => _MyJobCard(
                       job: jobs[i],
+                      onTap: () => context.push(
+                        Routes.employerJobApplicants(jobs[i].id),
+                        extra: jobs[i],
+                      ),
                       onEdit: () => context.push(
                         Routes.employerEditJob(jobs[i].id),
                         extra: jobs[i],
@@ -154,12 +158,14 @@ class _FilterChip extends StatelessWidget {
 class _MyJobCard extends StatelessWidget {
   const _MyJobCard({
     required this.job,
+    required this.onTap,
     required this.onEdit,
     required this.onClose,
     required this.onReopen,
   });
 
   final Job job;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onClose;
   final VoidCallback onReopen;
@@ -173,89 +179,96 @@ class _MyJobCard extends StatelessWidget {
       ?workingModelLabel(context, job.workingModel),
       ?experienceLabel(context, job.experienceLevel),
     ];
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  job.title,
-                  style: context.text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _StatusChip(status: job.status),
-              PopupMenuButton<String>(
-                onSelected: (v) => switch (v) {
-                  'edit' => onEdit(),
-                  'close' => onClose(),
-                  'reopen' => onReopen(),
-                  _ => null,
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(value: 'edit', child: Text(l.jobEditAction)),
-                  if (job.status == 'closed')
-                    PopupMenuItem(
-                      value: 'reopen',
-                      child: Text(l.jobReopenAction),
-                    )
-                  else
-                    PopupMenuItem(
-                      value: 'close',
-                      child: Text(l.jobCloseAction),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: colors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    job.title,
+                    style: context.text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                ],
-                icon: Icon(
-                  Icons.more_vert_rounded,
-                  color: colors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          if (tags.isNotEmpty)
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [for (final t in tags) _Tag(t)],
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Divider(color: colors.border, height: 1),
-          ),
-          Row(
-            children: [
-              Icon(Icons.people_alt_outlined, size: 16, color: colors.primary),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${job.applicantsCount} ${l.applicants}',
-                style: context.text.bodySmall?.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              const Spacer(),
-              if (job.salaryText != null)
-                Text(
-                  job.salaryText!,
-                  style: context.text.titleSmall?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w800,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-            ],
-          ),
-        ],
+                _StatusChip(status: job.status),
+                PopupMenuButton<String>(
+                  onSelected: (v) => switch (v) {
+                    'edit' => onEdit(),
+                    'close' => onClose(),
+                    'reopen' => onReopen(),
+                    _ => null,
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'edit', child: Text(l.jobEditAction)),
+                    if (job.status == 'closed')
+                      PopupMenuItem(
+                        value: 'reopen',
+                        child: Text(l.jobReopenAction),
+                      )
+                    else
+                      PopupMenuItem(
+                        value: 'close',
+                        child: Text(l.jobCloseAction),
+                      ),
+                  ],
+                  icon: Icon(
+                    Icons.more_vert_rounded,
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            if (tags.isNotEmpty)
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [for (final t in tags) _Tag(t)],
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(color: colors.border, height: 1),
+            ),
+            Row(
+              children: [
+                Icon(
+                  Icons.people_alt_outlined,
+                  size: 16,
+                  color: colors.primary,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '${job.applicantsCount} ${l.applicants}',
+                  style: context.text.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                if (job.salaryText != null)
+                  Text(
+                    job.salaryText!,
+                    style: context.text.titleSmall?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

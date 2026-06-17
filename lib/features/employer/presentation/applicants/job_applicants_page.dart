@@ -8,14 +8,17 @@ import '../../../../localization/l10n_extension.dart';
 import '../../data/applicants_repository.dart';
 import 'widgets/applicant_card.dart';
 
-/// Cross-job applicant inbox — every applicant across the employer's jobs.
-class ApplicantsPage extends ConsumerWidget {
-  const ApplicantsPage({super.key});
+/// Applicants for a single job posting.
+class JobApplicantsPage extends ConsumerWidget {
+  const JobApplicantsPage({super.key, required this.jobId, this.jobTitle});
+
+  final String jobId;
+  final String? jobTitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final async = ref.watch(allApplicantsProvider);
+    final async = ref.watch(jobApplicantsProvider(jobId));
 
     return Scaffold(
       body: SafeArea(
@@ -23,9 +26,7 @@ class ApplicantsPage extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Center(
-                child: Text(l.navApplicants, style: context.text.titleLarge),
-              ),
+              child: JzTopBar(title: jobTitle ?? l.navApplicants),
             ),
             Expanded(
               child: async.when(
@@ -51,7 +52,6 @@ class ApplicantsPage extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.md),
                     itemBuilder: (context, i) => ApplicantCard(
                       applicant: applicants[i],
-                      showJob: true,
                       onTap: () => context.push(
                         Routes.employerApplicant(applicants[i].id),
                         extra: applicants[i],
