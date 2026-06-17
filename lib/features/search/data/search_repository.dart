@@ -52,6 +52,16 @@ class SearchRepository {
           (j.salaryMax ?? j.salaryMin ?? 0) < f.salaryMin!) {
         return false;
       }
+      if (f.salaryMax != null &&
+          (j.salaryMin ?? j.salaryMax ?? 0) > f.salaryMax!) {
+        return false;
+      }
+      if (f.titles.isNotEmpty &&
+          !f.titles.any(
+            (t) => j.title.toLowerCase().contains(t.toLowerCase()),
+          )) {
+        return false;
+      }
       if (f.city != null &&
           f.city!.isNotEmpty &&
           (j.city?.toLowerCase() != f.city!.toLowerCase())) {

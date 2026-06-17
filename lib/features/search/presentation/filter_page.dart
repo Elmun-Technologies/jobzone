@@ -6,8 +6,21 @@ import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/enums/enums.dart';
 import '../../jobs/presentation/util/job_labels.dart';
+import '../../preferences/presentation/widgets/preference_step.dart';
 import '../application/search_controller.dart';
 import '../domain/search_filters.dart';
+
+const _cities = ['Tashkent', 'Samarkand', 'Remote'];
+const _jobTitles = <String>[
+  'Accountant',
+  'Business Development Manager',
+  'Content Writer',
+  'Data Analyst',
+  'Finance Manager',
+  'Graphic Designer',
+  'Software Engineer',
+  'UX/UI Designer',
+];
 
 class FilterPage extends ConsumerStatefulWidget {
   const FilterPage({super.key});
@@ -34,100 +47,123 @@ class _FilterPageState extends ConsumerState<FilterPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final salary = (_draft.salaryMin ?? 0).toDouble();
+    final colors = context.colors;
+    final salary = RangeValues(
+      (_draft.salaryMin ?? 20000).toDouble(),
+      (_draft.salaryMax ?? 80000).toDouble(),
+    );
 
-    return JzScaffold(
-      title: l.filterTitle,
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [
-                _group(
-                  l.prefJobTypeTitle,
-                  {
-                    for (final e in JobType.values)
-                      e.wire: jobTypeLabel(context, e.wire) ?? e.wire,
-                  },
-                  _draft.jobTypes,
-                  (w) => setState(
-                    () => _draft = _draft.copyWith(
-                      jobTypes: _toggled(_draft.jobTypes, w),
-                    ),
-                  ),
-                ),
-                _group(
-                  l.prefExperienceTitle,
-                  {
-                    for (final e in ExperienceLevel.values)
-                      e.wire: experienceLabel(context, e.wire) ?? e.wire,
-                  },
-                  _draft.experienceLevels,
-                  (w) => setState(
-                    () => _draft = _draft.copyWith(
-                      experienceLevels: _toggled(_draft.experienceLevels, w),
-                    ),
-                  ),
-                ),
-                _group(
-                  l.prefWorkingModelTitle,
-                  {
-                    for (final e in WorkingModel.values)
-                      e.wire: workingModelLabel(context, e.wire) ?? e.wire,
-                  },
-                  _draft.workingModels,
-                  (w) => setState(
-                    () => _draft = _draft.copyWith(
-                      workingModels: _toggled(_draft.workingModels, w),
-                    ),
-                  ),
-                ),
-                Text(
-                  salary == 0
-                      ? l.salaryFrom
-                      : '${l.salaryFrom}: \$${salary.toInt()}',
-                  style: context.text.titleSmall,
-                ),
-                Slider(
-                  value: salary,
-                  max: 5000,
-                  divisions: 10,
-                  label: '\$${salary.toInt()}',
-                  onChanged: (v) => setState(
-                    () => _draft = v == 0
-                        ? _draft.copyWith(clearSalary: true)
-                        : _draft.copyWith(salaryMin: v),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(l.sortBy, style: context.text.titleSmall),
-                const SizedBox(height: AppSpacing.sm),
-                SegmentedButton<SearchSort>(
-                  segments: [
-                    ButtonSegment(
-                      value: SearchSort.newest,
-                      label: Text(l.sortNewest),
-                    ),
-                    ButtonSegment(
-                      value: SearchSort.salaryHigh,
-                      label: Text(l.sortSalaryHigh),
-                    ),
-                    ButtonSegment(
-                      value: SearchSort.salaryLow,
-                      label: Text(l.sortSalaryLow),
-                    ),
-                  ],
-                  selected: {_draft.sort},
-                  onSelectionChanged: (s) =>
-                      setState(() => _draft = _draft.copyWith(sort: s.first)),
-                ),
-              ],
+              child: JzTopBar(title: l.filterTitle),
             ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                children: [
+                  Text(l.locationLabel, style: _sectionStyle(context)),
+                  const SizedBox(height: AppSpacing.sm),
+                  DropdownButtonFormField<String>(
+                    initialValue: _draft.city,
+                    isExpanded: true,
+                    hint: Text(l.searchLocationHint),
+                    items: [
+                      for (final c in _cities)
+                        DropdownMenuItem(value: c, child: Text(c)),
+                    ],
+                    onChanged: (v) =>
+                        setState(() => _draft = _draft.copyWith(city: v)),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(l.salaryLabel, style: _sectionStyle(context)),
+                  RangeSlider(
+                    values: salary,
+                    min: 20000,
+                    max: 80000,
+                    divisions: 6,
+                    labels: RangeLabels(
+                      '\$${(salary.start / 1000).round()}k',
+                      '\$${(salary.end / 1000).round()}k',
+                    ),
+                    onChanged: (v) => setState(
+                      () => _draft = _draft.copyWith(
+                        salaryMin: v.start,
+                        salaryMax: v.end,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      for (final k in const [20, 40, 60, 80])
+                        Text(
+                          k == 80 ? '\$80k+' : '\$${k}k',
+                          style: context.text.labelSmall?.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.fieldWorkingModel,
+                    options: {
+                      for (final e in WorkingModel.values)
+                        e.wire: workingModelLabel(context, e.wire) ?? e.wire,
+                    },
+                    selected: _draft.workingModels,
+                    onChanged: (s) => setState(
+                      () => _draft = _draft.copyWith(workingModels: s),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.fieldJobType,
+                    options: {
+                      for (final e in JobType.values)
+                        e.wire: jobTypeLabel(context, e.wire) ?? e.wire,
+                    },
+                    selected: _draft.jobTypes,
+                    onChanged: (s) =>
+                        setState(() => _draft = _draft.copyWith(jobTypes: s)),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.fieldLevel,
+                    options: {
+                      for (final e in ExperienceLevel.values)
+                        e.wire: experienceLabel(context, e.wire) ?? e.wire,
+                    },
+                    selected: _draft.experienceLevels,
+                    onChanged: (s) => setState(
+                      () => _draft = _draft.copyWith(experienceLevels: s),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(l.fieldJobTitle, style: _sectionStyle(context)),
+                  const SizedBox(height: AppSpacing.sm),
+                  OptionCheckList(
+                    options: {for (final t in _jobTitles) t: t},
+                    selected: _draft.titles,
+                    onToggle: (t) => setState(
+                      () => _draft = _draft.copyWith(
+                        titles: _toggled(_draft.titles, t),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
@@ -154,38 +190,102 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _group(
-    String title,
-    Map<String, String> options,
-    Set<String> selected,
-    ValueChanged<String> onToggle,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: context.text.titleSmall),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+  TextStyle? _sectionStyle(BuildContext context) =>
+      context.text.titleMedium?.copyWith(fontWeight: FontWeight.w700);
+}
+
+/// A labelled horizontal chip row with a leading "All" chip (clears the set).
+class _ChipSection extends StatelessWidget {
+  const _ChipSection({
+    required this.title,
+    required this.options,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final String title;
+  final Map<String, String> options;
+  final Set<String> selected;
+  final ValueChanged<Set<String>> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: context.text.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             children: [
+              _Chip(
+                label: context.l10n.categoryAll,
+                selected: selected.isEmpty,
+                onTap: () => onChanged(const {}),
+              ),
               for (final e in options.entries)
-                FilterChip(
-                  label: Text(e.value),
+                _Chip(
+                  label: e.value,
                   selected: selected.contains(e.key),
-                  onSelected: (_) => onToggle(e.key),
+                  onTap: () {
+                    final next = {...selected};
+                    next.contains(e.key) ? next.remove(e.key) : next.add(e.key);
+                    onChanged(next);
+                  },
                 ),
             ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(right: AppSpacing.sm),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: selected ? colors.primary : colors.surfaceVariant,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+          child: Text(
+            label,
+            style: context.text.labelLarge?.copyWith(
+              color: selected ? colors.onPrimary : colors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

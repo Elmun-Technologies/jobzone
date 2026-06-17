@@ -10,7 +10,9 @@ class SearchFilters {
     this.jobTypes = const {},
     this.experienceLevels = const {},
     this.workingModels = const {},
+    this.titles = const {},
     this.salaryMin,
+    this.salaryMax,
     this.city,
     this.sort = SearchSort.newest,
   });
@@ -19,7 +21,9 @@ class SearchFilters {
   final Set<String> jobTypes;
   final Set<String> experienceLevels;
   final Set<String> workingModels;
+  final Set<String> titles;
   final num? salaryMin;
+  final num? salaryMax;
   final String? city;
   final SearchSort sort;
 
@@ -28,7 +32,8 @@ class SearchFilters {
       jobTypes.length +
       experienceLevels.length +
       workingModels.length +
-      (salaryMin != null ? 1 : 0) +
+      titles.length +
+      ((salaryMin != null || salaryMax != null) ? 1 : 0) +
       (city != null && city!.isNotEmpty ? 1 : 0);
 
   SearchFilters copyWith({
@@ -36,7 +41,9 @@ class SearchFilters {
     Set<String>? jobTypes,
     Set<String>? experienceLevels,
     Set<String>? workingModels,
+    Set<String>? titles,
     num? salaryMin,
+    num? salaryMax,
     bool clearSalary = false,
     String? city,
     bool clearCity = false,
@@ -46,7 +53,9 @@ class SearchFilters {
     jobTypes: jobTypes ?? this.jobTypes,
     experienceLevels: experienceLevels ?? this.experienceLevels,
     workingModels: workingModels ?? this.workingModels,
+    titles: titles ?? this.titles,
     salaryMin: clearSalary ? null : (salaryMin ?? this.salaryMin),
+    salaryMax: clearSalary ? null : (salaryMax ?? this.salaryMax),
     city: clearCity ? null : (city ?? this.city),
     sort: sort ?? this.sort,
   );
@@ -86,6 +95,7 @@ class SearchQuery {
         inList('experience_level', f.experienceLevels),
       if (f.workingModels.isNotEmpty) inList('working_model', f.workingModels),
       if (f.salaryMin != null) 'salary_max >= ${f.salaryMin}',
+      if (f.salaryMax != null) 'salary_min <= ${f.salaryMax}',
       if (f.city != null && f.city!.isNotEmpty) 'city = "${f.city}"',
     ];
 

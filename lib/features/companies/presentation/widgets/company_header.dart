@@ -2,51 +2,65 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
+import '../../../../localization/l10n_extension.dart';
 import '../../domain/company.dart';
 
-/// Cover + logo + name header shown atop the Company Details screen.
+/// Company Details header (Figma): a soft grey bar with back + "Company
+/// Details", an overlapping centered logo, the name, industry and website.
 class CompanyHeader extends StatelessWidget {
   const CompanyHeader({super.key, required this.company});
   final Company company;
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final colors = context.colors;
+    final topPad = MediaQuery.of(context).padding.top;
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 110,
+        Container(
           width: double.infinity,
-          child: (company.coverUrl == null || company.coverUrl!.isEmpty)
-              ? Container(color: colors.surfaceVariant)
-              : CachedNetworkImage(
-                  imageUrl: company.coverUrl!,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, _, _) =>
-                      Container(color: colors.surfaceVariant),
-                ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
+          color: colors.surfaceVariant,
+          padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
-            0,
+            topPad + AppSpacing.md,
             AppSpacing.lg,
-            AppSpacing.sm,
+            48,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Transform.translate(
-                offset: const Offset(0, -24),
-                child: _Logo(url: company.logoUrl),
+              JzCircleButton(
+                icon: Icons.arrow_back_rounded,
+                onTap: () => Navigator.of(context).maybePop(),
               ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    l.companyDetailsTitle,
+                    style: context.text.titleLarge,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 48),
+            ],
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -36),
+          child: Column(
+            children: [
+              _LogoCircle(name: company.name, url: company.logoUrl),
+              const SizedBox(height: AppSpacing.sm),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(
                     child: Text(
                       company.name,
-                      style: context.text.titleLarge,
+                      style: context.text.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -61,19 +75,30 @@ class CompanyHeader extends StatelessWidget {
                   ],
                 ],
               ),
-              if (company.industry != null || company.headquarters != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xs),
-                  child: Text(
-                    [
-                      company.industry,
-                      company.headquarters,
-                    ].where((e) => e != null && e.isNotEmpty).join(' • '),
-                    style: context.text.bodySmall?.copyWith(
-                      color: colors.textSecondary,
-                    ),
+              if (company.industry != null && company.industry!.isNotEmpty)
+                Text(
+                  company.industry!,
+                  style: context.text.bodyMedium?.copyWith(
+                    color: colors.textSecondary,
                   ),
                 ),
+              if (company.website != null && company.website!.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.link_rounded, size: 18, color: colors.primary),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      company.website!,
+                      style: context.text.bodyMedium?.copyWith(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -82,32 +107,41 @@ class CompanyHeader extends StatelessWidget {
   }
 }
 
-class _Logo extends StatelessWidget {
-  const _Logo({this.url});
+class _LogoCircle extends StatelessWidget {
+  const _LogoCircle({required this.name, this.url});
+  final String name;
   final String? url;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final fallback = Icon(Icons.business_rounded, color: colors.primary);
+    final letter = name.isEmpty ? '?' : name.substring(0, 1).toUpperCase();
     return Container(
-      height: 64,
-      width: 64,
+      height: 84,
+      width: 84,
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: colors.border, width: 2),
+        color: colors.primary,
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.surface, width: 4),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.md - 2),
-        child: (url == null || url!.isEmpty)
-            ? fallback
-            : CachedNetworkImage(
-                imageUrl: url!,
-                fit: BoxFit.cover,
-                errorWidget: (_, _, _) => fallback,
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: (url == null || url!.isEmpty)
+          ? Text(
+              letter,
+              style: context.text.headlineMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
               ),
-      ),
+            )
+          : CachedNetworkImage(
+              imageUrl: url!,
+              fit: BoxFit.cover,
+              width: 84,
+              height: 84,
+              errorWidget: (_, _, _) =>
+                  const Icon(Icons.business_rounded, color: Colors.white),
+            ),
     );
   }
 }
