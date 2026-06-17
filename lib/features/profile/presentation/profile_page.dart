@@ -3,47 +3,203 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/config/env.dart';
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../data/profile_repository.dart';
+import '../domain/user_profile.dart';
 
-/// Profile tab — also the account/settings hub. Demonstrates live theming and
-/// the entry point to the Language screen.
+/// Profile tab — the account hub.
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
+
+  double _completion(UserProfile? p) {
+    if (p == null) return 0;
+    final flags = [
+      p.fullName?.isNotEmpty ?? false,
+      p.bio?.isNotEmpty ?? false,
+      p.phone?.isNotEmpty ?? false,
+      p.email?.isNotEmpty ?? false,
+      p.locationText.isNotEmpty,
+      p.experiences.isNotEmpty,
+      p.educations.isNotEmpty,
+      p.skills.isNotEmpty,
+    ];
+    return flags.where((b) => b).length / flags.length;
+  }
+
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.logOut),
+        content: Text(l.logoutConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: Text(l.logOut),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    if (Env.hasSupabase) {
+      await ref.read(supabaseClientProvider).auth.signOut();
+    }
+    if (context.mounted) context.go(Routes.welcome);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final colors = context.colors;
-    final themeMode = ref.watch(themeModeControllerProvider);
+    final profile = ref.watch(currentProfileProvider).value;
 
-    return JzScaffold(
-      title: l.navProfile,
-      showBack: false,
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          Row(
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          children: [
+            Center(child: Text(l.navProfile, style: context.text.titleLarge)),
+            const SizedBox(height: AppSpacing.lg),
+            _ProfileCard(
+              name: profile?.fullName ?? '—',
+              completion: _completion(profile),
+              onTap: () => context.push(Routes.yourProfile),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _MenuTile(
+              icon: Icons.person_outline_rounded,
+              label: l.personalInformation,
+              onTap: () => context.push(Routes.accountPersonalInfo),
+            ),
+            _MenuTile(
+              icon: Icons.insights_rounded,
+              label: l.analytics,
+              onTap: () => context.push(Routes.accountAnalytics),
+            ),
+            _MenuTile(
+              icon: Icons.assignment_outlined,
+              label: l.myApplications,
+              onTap: () => context.push(Routes.accountApplications),
+            ),
+            _MenuTile(
+              icon: Icons.remove_red_eye_outlined,
+              label: l.jobSeekingStatus,
+              onTap: () => context.push(Routes.accountSeekingStatus),
+            ),
+            _MenuTile(
+              icon: Icons.settings_outlined,
+              label: l.settings,
+              onTap: () => context.push(Routes.accountSettings),
+            ),
+            _MenuTile(
+              icon: Icons.language_rounded,
+              label: l.language,
+              onTap: () => context.push(Routes.accountLanguage),
+            ),
+            _MenuTile(
+              icon: Icons.help_outline_rounded,
+              label: l.helpCenter,
+              onTap: () => context.push(Routes.accountHelp),
+            ),
+            _MenuTile(
+              icon: Icons.lock_outline_rounded,
+              label: l.privacyPolicy,
+              onTap: () => context.push(Routes.accountPrivacy),
+            ),
+            _MenuTile(
+              icon: Icons.person_add_alt_1_outlined,
+              label: l.inviteFriends,
+              onTap: () => context.push(Routes.accountInvite),
+            ),
+            _MenuTile(
+              icon: Icons.logout_rounded,
+              label: l.logOut,
+              onTap: () => _logout(context, ref),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileCard extends StatelessWidget {
+  const _ProfileCard({
+    required this.name,
+    required this.completion,
+    required this.onTap,
+  });
+  final String name;
+  final double completion;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: colors.primary,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Row(
             children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: colors.chipBackground,
-                child: Icon(
-                  Icons.person_rounded,
-                  size: 32,
-                  color: colors.primary,
-                ),
+              const CircleAvatar(
+                radius: 26,
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.person_rounded, color: Colors.white),
               ),
-              const SizedBox(width: AppSpacing.lg),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your name', style: context.text.titleMedium),
                     Text(
-                      'Open to work',
+                      name,
+                      style: context.text.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      context.l10n.viewProfile,
                       style: context.text.bodySmall?.copyWith(
-                        color: colors.textSecondary,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 46,
+                height: 46,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: completion,
+                      strokeWidth: 4,
+                      backgroundColor: Colors.white24,
+                      valueColor: const AlwaysStoppedAnimation(
+                        Color(0xFFFFC629),
+                      ),
+                    ),
+                    Text(
+                      '${(completion * 100).round()}%',
+                      style: context.text.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -51,94 +207,39 @@ class ProfilePage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-          Text(l.appearance, style: context.text.titleSmall),
-          const SizedBox(height: AppSpacing.sm),
-          SegmentedButton<ThemeMode>(
-            segments: [
-              ButtonSegment(
-                value: ThemeMode.system,
-                label: Text(l.themeSystem),
-              ),
-              ButtonSegment(value: ThemeMode.light, label: Text(l.themeLight)),
-              ButtonSegment(value: ThemeMode.dark, label: Text(l.themeDark)),
-            ],
-            selected: {themeMode},
-            onSelectionChanged: (s) => ref
-                .read(themeModeControllerProvider.notifier)
-                .setThemeMode(s.first),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _Tile(
-            icon: Icons.account_circle_outlined,
-            label: l.yourProfile,
-            onTap: () => context.push(Routes.yourProfile),
-          ),
-          _Tile(
-            icon: Icons.language_rounded,
-            label: l.language,
-            onTap: () => context.push(Routes.accountLanguage),
-          ),
-          _Tile(
-            icon: Icons.badge_outlined,
-            label: l.personalInformation,
-            onTap: () => context.push(Routes.accountPersonalInfo),
-          ),
-          _Tile(
-            icon: Icons.insights_outlined,
-            label: l.analytics,
-            onTap: () => context.push(Routes.accountAnalytics),
-          ),
-          _Tile(
-            icon: Icons.description_outlined,
-            label: l.myApplications,
-            onTap: () => context.push(Routes.accountApplications),
-          ),
-          _Tile(
-            icon: Icons.bookmark_border_rounded,
-            label: l.bookmarks,
-            onTap: () => context.go(Routes.bookmarks),
-          ),
-          _Tile(
-            icon: Icons.settings_outlined,
-            label: l.settings,
-            onTap: () => context.push(Routes.accountSettings),
-          ),
-          _Tile(
-            icon: Icons.card_giftcard_rounded,
-            label: l.inviteFriends,
-            onTap: () => context.push(Routes.accountInvite),
-          ),
-          _Tile(
-            icon: Icons.help_outline_rounded,
-            label: l.helpCenter,
-            onTap: () => context.push(Routes.accountHelp),
-          ),
-          _Tile(
-            icon: Icons.privacy_tip_outlined,
-            label: l.privacyPolicy,
-            onTap: () => context.push(Routes.accountPrivacy),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _Tile extends StatelessWidget {
-  const _Tile({required this.icon, required this.label, required this.onTap});
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: context.colors.textPrimary),
-      title: Text(label, style: context.text.bodyLarge),
-      trailing: const Icon(Icons.chevron_right_rounded),
+    final colors = context.colors;
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.md),
       onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        child: Row(
+          children: [
+            Icon(icon, color: colors.primary),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(child: Text(label, style: context.text.bodyLarge)),
+            Icon(Icons.chevron_right_rounded, color: colors.primary),
+          ],
+        ),
+      ),
     );
   }
 }
