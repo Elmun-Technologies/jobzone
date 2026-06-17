@@ -490,5 +490,7 @@
   "statOpenJobs": "Open jobs",
   "statNew": "New",
   "statInterviews": "Interviews",
-  "messageCandidate": "Message"
+  "messageCandidate": "Message",
+  "switchToEmployer": "Switch to Employer",
+  "switchToSeeker": "Switch to Job Seeker"
 }

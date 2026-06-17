@@ -490,5 +490,7 @@
   "statOpenJobs": "Ochiq vakansiyalar",
   "statNew": "Yangi",
   "statInterviews": "Suhbatlar",
-  "messageCandidate": "Xabar yozish"
+  "messageCandidate": "Xabar yozish",
+  "switchToEmployer": "Ish beruvchi rejimi",
+  "switchToSeeker": "Ish izlovchi rejimi"
 }

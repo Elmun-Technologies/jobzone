@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
-import '../../../../core/config/env.dart';
-import '../../../../core/supabase/supabase_providers.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/enums/enums.dart';
-import '../../../../shared/providers/app_flags.dart';
+import '../../application/role_controller.dart';
 import '../widgets/auth_header.dart';
 
 /// Sits between Verify and Complete Profile during signup: the user picks
@@ -31,17 +29,7 @@ class _ChooseRolePageState extends ConsumerState<ChooseRolePage> {
     if (role == null) return;
     setState(() => _saving = true);
     try {
-      await ref.read(appFlagsProvider.notifier).setRole(role);
-      if (Env.hasSupabase) {
-        final client = ref.read(supabaseClientProvider);
-        final uid = client.auth.currentUser?.id;
-        if (uid != null) {
-          await client
-              .from('profiles')
-              .update({'role': role.wire})
-              .eq('id', uid);
-        }
-      }
+      await applyRole(ref, role);
       if (mounted) context.push(Routes.completeProfile);
     } finally {
       if (mounted) setState(() => _saving = false);
