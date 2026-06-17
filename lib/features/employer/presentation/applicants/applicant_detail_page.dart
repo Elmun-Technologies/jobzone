@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/enums/enums.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../applications/domain/application.dart';
 import '../../../applications/presentation/util/status_label.dart';
+import '../../../chat/domain/chat_models.dart';
 import '../../data/applicants_repository.dart';
 import '../../domain/applicant.dart';
 
@@ -75,6 +78,22 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
       );
     });
     showInfoSnack(context, context.l10n.statusUpdatedToast);
+  }
+
+  /// Opens a chat with the candidate, reusing the existing chat stack. The
+  /// conversation is keyed off the application id; real provisioning between
+  /// employer and candidate is a later Supabase-activation item.
+  void _message() {
+    final a = _applicant;
+    context.push(
+      Routes.chatDetail('applicant-${a.id}'),
+      extra: Conversation(
+        id: 'applicant-${a.id}',
+        title: a.name,
+        avatarUrl: a.avatarUrl,
+        subtitle: a.jobTitle,
+      ),
+    );
   }
 
   @override
@@ -199,9 +218,33 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                   AppSpacing.lg,
                   AppSpacing.lg,
                 ),
-                child: JzPrimaryButton(
-                  label: l.updateStatusCta,
-                  onPressed: _pickStatus,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _message,
+                        style: OutlinedButton.styleFrom(
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.md,
+                          ),
+                          side: BorderSide(color: context.colors.border),
+                        ),
+                        icon: const Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          size: 18,
+                        ),
+                        label: Text(l.messageCandidate),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: JzPrimaryButton(
+                        label: l.updateStatusCta,
+                        onPressed: _pickStatus,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
