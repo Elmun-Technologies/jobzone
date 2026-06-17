@@ -39,5 +39,21 @@ void main() {
         expect(loaded?.about, 'We build things.');
       },
     );
+
+    test('updateCompany overwrites the stored company', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final repo = container.read(companyAdminRepositoryProvider);
+
+      await repo.createCompany(name: 'Globex');
+      final created = await repo.myCompany();
+      await repo.updateCompany(
+        created!.copyWith(name: 'Globex Corp', about: 'Updated'),
+      );
+
+      final loaded = await repo.myCompany();
+      expect(loaded?.name, 'Globex Corp');
+      expect(loaded?.about, 'Updated');
+    });
   });
 }

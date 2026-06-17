@@ -470,5 +470,10 @@
   "applicantSkillsLabel": "Skills",
   "applicantCoverLabel": "Cover letter",
   "appliedForLabel": "Applied for",
-  "statusTimelineTitle": "Status timeline"
+  "statusTimelineTitle": "Status timeline",
+  "noCompanyTitle": "No company yet",
+  "noCompanyBody": "Create your company to start posting jobs.",
+  "editCompanyCta": "Edit company",
+  "saveChanges": "Save changes",
+  "companySavedToast": "Company saved"
 }

@@ -30,6 +30,33 @@ class Company {
 
   bool get hasIntroVideo => introVideoUrl != null && introVideoUrl!.isNotEmpty;
 
+  Company copyWith({
+    String? name,
+    String? logoUrl,
+    String? coverUrl,
+    String? about,
+    String? industry,
+    String? size,
+    int? foundedYear,
+    String? website,
+    String? headquarters,
+    String? introVideoUrl,
+    bool? isVerified,
+  }) => Company(
+    id: id,
+    name: name ?? this.name,
+    logoUrl: logoUrl ?? this.logoUrl,
+    coverUrl: coverUrl ?? this.coverUrl,
+    about: about ?? this.about,
+    industry: industry ?? this.industry,
+    size: size ?? this.size,
+    foundedYear: foundedYear ?? this.foundedYear,
+    website: website ?? this.website,
+    headquarters: headquarters ?? this.headquarters,
+    introVideoUrl: introVideoUrl ?? this.introVideoUrl,
+    isVerified: isVerified ?? this.isVerified,
+  );
+
   factory Company.fromMap(Map<String, dynamic> m) => Company(
     id: (m['id'] ?? '') as String,
     name: (m['name'] ?? '') as String,
