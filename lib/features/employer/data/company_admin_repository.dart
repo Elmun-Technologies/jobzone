@@ -95,6 +95,112 @@ class CompanyAdminRepository {
     return Company.fromMap(row);
   }
 
+  // ── People (team / recruiters) ─────────────────────────────────────────────
+
+  Future<List<CompanyPerson>> people() async {
+    if (!_live) return [...mockEmployer.people];
+    final client = _ref.read(supabaseClientProvider);
+    final company = await myCompany();
+    if (company == null) return const [];
+    final rows = await client
+        .from('company_people')
+        .select()
+        .eq('company_id', company.id)
+        .order('is_recruiter', ascending: false);
+    return (rows as List)
+        .map((e) => CompanyPerson.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> addPerson({
+    required String name,
+    String? title,
+    bool isRecruiter = false,
+  }) async {
+    if (!_live) {
+      mockEmployer.people.add(
+        CompanyPerson(
+          id: 'mp-${DateTime.now().millisecondsSinceEpoch}',
+          name: name,
+          title: title,
+          isRecruiter: isRecruiter,
+        ),
+      );
+      return;
+    }
+    final company = await myCompany();
+    await _ref.read(supabaseClientProvider).from('company_people').insert({
+      'company_id': company?.id,
+      'name': name,
+      'is_recruiter': isRecruiter,
+      if (title != null && title.isNotEmpty) 'title': title,
+    });
+  }
+
+  Future<void> removePerson(String id) async {
+    if (!_live) {
+      mockEmployer.people.removeWhere((p) => p.id == id);
+      return;
+    }
+    await _ref
+        .read(supabaseClientProvider)
+        .from('company_people')
+        .delete()
+        .eq('id', id);
+  }
+
+  // ── Gallery ────────────────────────────────────────────────────────────────
+
+  Future<List<GalleryItem>> gallery() async {
+    if (!_live) return [...mockEmployer.gallery];
+    final client = _ref.read(supabaseClientProvider);
+    final company = await myCompany();
+    if (company == null) return const [];
+    final rows = await client
+        .from('company_gallery')
+        .select()
+        .eq('company_id', company.id)
+        .order('sort_order');
+    return (rows as List)
+        .map((e) => GalleryItem.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> addGalleryItem({
+    required String mediaUrl,
+    String? caption,
+  }) async {
+    if (!_live) {
+      mockEmployer.gallery.add(
+        GalleryItem(
+          id: 'mg-${DateTime.now().millisecondsSinceEpoch}',
+          mediaUrl: mediaUrl,
+          caption: caption,
+        ),
+      );
+      return;
+    }
+    final company = await myCompany();
+    await _ref.read(supabaseClientProvider).from('company_gallery').insert({
+      'company_id': company?.id,
+      'media_url': mediaUrl,
+      'media_type': 'image',
+      if (caption != null && caption.isNotEmpty) 'caption': caption,
+    });
+  }
+
+  Future<void> removeGalleryItem(String id) async {
+    if (!_live) {
+      mockEmployer.gallery.removeWhere((g) => g.id == id);
+      return;
+    }
+    await _ref
+        .read(supabaseClientProvider)
+        .from('company_gallery')
+        .delete()
+        .eq('id', id);
+  }
+
   /// Lowercased, hyphenated name plus a short timestamp suffix so the unique
   /// `companies.slug` constraint never collides.
   String _slugify(String name) {
@@ -114,4 +220,14 @@ final companyAdminRepositoryProvider = Provider<CompanyAdminRepository>(
 /// The current employer's company (null until create-company onboarding runs).
 final myCompanyProvider = FutureProvider<Company?>(
   (ref) => ref.read(companyAdminRepositoryProvider).myCompany(),
+);
+
+/// The employer's team / recruiters.
+final companyPeopleAdminProvider = FutureProvider<List<CompanyPerson>>(
+  (ref) => ref.read(companyAdminRepositoryProvider).people(),
+);
+
+/// The employer's company gallery.
+final companyGalleryAdminProvider = FutureProvider<List<GalleryItem>>(
+  (ref) => ref.read(companyAdminRepositoryProvider).gallery(),
 );

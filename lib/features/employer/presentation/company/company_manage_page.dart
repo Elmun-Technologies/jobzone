@@ -127,6 +127,17 @@ class _CompanyView extends StatelessWidget {
           icon: const Icon(Icons.edit_outlined, size: 18),
           label: Text(l.editCompanyCta),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        _ManageRow(
+          icon: Icons.people_outline_rounded,
+          label: l.managePeopleTitle,
+          onTap: () => context.push(Routes.employerCompanyPeople),
+        ),
+        _ManageRow(
+          icon: Icons.photo_library_outlined,
+          label: l.manageGalleryTitle,
+          onTap: () => context.push(Routes.employerCompanyGallery),
+        ),
         if (company.about != null && company.about!.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),
           Text(l.companyAboutLabel, style: context.text.titleSmall),
@@ -147,6 +158,37 @@ class _CompanyView extends StatelessWidget {
             value: company.headquarters!,
           ),
       ],
+    );
+  }
+}
+
+class _ManageRow extends StatelessWidget {
+  const _ManageRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        child: Row(
+          children: [
+            Icon(icon, color: colors.primary),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(label, style: context.text.bodyLarge)),
+            Icon(Icons.chevron_right_rounded, color: colors.textSecondary),
+          ],
+        ),
+      ),
     );
   }
 }

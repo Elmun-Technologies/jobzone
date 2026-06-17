@@ -475,5 +475,14 @@
   "noCompanyBody": "Vakansiya joylash uchun kompaniyangizni yarating.",
   "editCompanyCta": "Kompaniyani tahrirlash",
   "saveChanges": "O'zgarishlarni saqlash",
-  "companySavedToast": "Kompaniya saqlandi"
+  "companySavedToast": "Kompaniya saqlandi",
+  "managePeopleTitle": "Jamoa va rekruterlar",
+  "manageGalleryTitle": "Galereya",
+  "addPersonCta": "Odam qo'shish",
+  "recruiterToggle": "Bu odam rekruter",
+  "personNameLabel": "Ism",
+  "personTitleLabel": "Lavozim",
+  "addPhotoCta": "Rasm qo'shish",
+  "imageUrlLabel": "Rasm URL manzili",
+  "captionLabel": "Izoh"
 }
