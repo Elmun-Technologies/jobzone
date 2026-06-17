@@ -34,8 +34,13 @@ jobs:
           flutter-version: 3.44.2
           cache: true
       - run: flutter pub get
-      # base-href must match the project-pages path (/<repo>/).
-      - run: flutter build web --release --base-href /jobzone/
+      # base-href must match the project-pages path (/<repo>/). The Supabase
+      # publishable key is client-safe (RLS-protected, shipped in the bundle),
+      # so it's passed inline; move it to a repo Variable later if preferred.
+      - run: >
+          flutter build web --release --base-href /jobzone/
+          --dart-define=SUPABASE_URL=https://wajotaeoulizhveparhz.supabase.co
+          --dart-define=SUPABASE_ANON_KEY=sb_publishable_YctSfyzY4fyj-Wbc8AMufA_4ZQE1tOP
       # enablement: true asks the action to turn on GitHub Pages (Actions
       # source) automatically, so the first deploy doesn't require toggling it
       # by hand in Settings → Pages.
