@@ -489,5 +489,6 @@
   "recentApplicants": "So'nggi nomzodlar",
   "statOpenJobs": "Ochiq vakansiyalar",
   "statNew": "Yangi",
-  "statInterviews": "Suhbatlar"
+  "statInterviews": "Suhbatlar",
+  "messageCandidate": "Xabar yozish"
 }

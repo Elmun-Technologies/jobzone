@@ -489,5 +489,6 @@
   "recentApplicants": "Недавние кандидаты",
   "statOpenJobs": "Открытые вакансии",
   "statNew": "Новые",
-  "statInterviews": "Собеседования"
+  "statInterviews": "Собеседования",
+  "messageCandidate": "Написать"
 }

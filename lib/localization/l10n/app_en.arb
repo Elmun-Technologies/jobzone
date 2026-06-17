@@ -489,5 +489,6 @@
   "recentApplicants": "Recent applicants",
   "statOpenJobs": "Open jobs",
   "statNew": "New",
-  "statInterviews": "Interviews"
+  "statInterviews": "Interviews",
+  "messageCandidate": "Message"
 }
