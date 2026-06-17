@@ -6,6 +6,7 @@ import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/enums/enums.dart';
+import '../../jobs/presentation/util/job_labels.dart';
 import '../application/applications_controller.dart';
 import '../domain/application.dart';
 import 'util/status_label.dart';
@@ -17,29 +18,54 @@ class MyApplicationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final async = ref.watch(applicationsControllerProvider);
-    return JzScaffold(
-      title: l.myApplications,
-      body: async.when(
-        loading: () => const JobListSkeleton(),
-        error: (_, _) => JzErrorState(
-          title: l.errorTitle,
-          message: l.errUnknown,
-          retryLabel: l.retry,
-          onRetry: () => ref.invalidate(applicationsControllerProvider),
-        ),
-        data: (apps) => apps.isEmpty
-            ? JzEmptyState(
-                icon: Icons.description_outlined,
-                title: l.noApplicationsTitle,
-                message: l.noApplicationsBody,
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                itemCount: apps.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (_, i) => _ApplicationCard(application: apps[i]),
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: JzTopBar(
+                title: l.myApplications,
+                actions: [
+                  JzCircleButton(
+                    icon: Icons.search_rounded,
+                    onTap: () => context.push(Routes.search),
+                  ),
+                ],
               ),
+            ),
+            Expanded(
+              child: async.when(
+                loading: () => const JobListSkeleton(),
+                error: (_, _) => JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () => ref.invalidate(applicationsControllerProvider),
+                ),
+                data: (apps) => apps.isEmpty
+                    ? JzEmptyState(
+                        icon: Icons.description_outlined,
+                        title: l.noApplicationsTitle,
+                        message: l.noApplicationsBody,
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
+                        itemCount: apps.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSpacing.md),
+                        itemBuilder: (_, i) =>
+                            _ApplicationCard(application: apps[i]),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -54,23 +80,23 @@ class StatusPill extends StatelessWidget {
     final color = applicationStatusColor(context, status);
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
+        horizontal: AppSpacing.md,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Text(
         applicationStatusLabel(context, status),
-        style: context.text.labelSmall?.copyWith(color: color),
+        style: context.text.labelSmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
 }
-
-String formatDate(DateTime d) =>
-    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 class _ApplicationCard extends StatelessWidget {
   const _ApplicationCard({required this.application});
@@ -79,6 +105,16 @@ class _ApplicationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final job = application.job;
+    final tags = [
+      ?jobTypeLabel(context, job.jobType),
+      ?workingModelLabel(context, job.workingModel),
+      ?experienceLabel(context, job.experienceLevel),
+    ];
+    final letter = job.companyName.isEmpty
+        ? '?'
+        : job.companyName.substring(0, 1).toUpperCase();
+
     return GestureDetector(
       onTap: () => context.push(
         Routes.applicationStatus(application.id),
@@ -94,26 +130,91 @@ class _ApplicationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(application.job.title, style: context.text.titleSmall),
-            Text(
-              application.job.companyName,
-              style: context.text.bodySmall?.copyWith(
-                color: colors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                StatusPill(status: application.status),
-                const Spacer(),
-                Text(
-                  formatDate(application.appliedAt),
-                  style: context.text.labelSmall?.copyWith(
-                    color: colors.textSecondary,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    color: colors.primary,
+                    alignment: Alignment.center,
+                    child: Text(
+                      letter,
+                      style: context.text.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        job.title,
+                        style: context.text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        job.companyName,
+                        style: context.text.bodySmall?.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                StatusPill(status: application.status),
               ],
             ),
+            if (job.locationText.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on_rounded,
+                    size: 16,
+                    color: colors.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    job.locationText,
+                    style: context.text.bodySmall?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (tags.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (final t in tags)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      child: Text(t, style: context.text.labelSmall),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
