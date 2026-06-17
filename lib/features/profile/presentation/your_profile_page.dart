@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,313 +15,201 @@ class YourProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final profileAsync = ref.watch(currentProfileProvider);
-    return JzScaffold(
-      title: l.yourProfile,
-      body: profileAsync.when(
-        loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
-        data: (profile) => profile == null
-            ? JzEmptyState(
-                icon: Icons.person_outline_rounded,
-                title: l.completeProfileTitle,
-              )
-            : _ProfileView(profile: profile),
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: JzTopBar(title: l.yourProfile),
+            ),
+            Expanded(
+              child: profileAsync.when(
+                loading: () => const JzLoader(),
+                error: (_, _) => Center(child: Text(l.errUnknown)),
+                data: (profile) => _Hub(profile: profile),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _ProfileView extends StatelessWidget {
-  const _ProfileView({required this.profile});
-  final UserProfile profile;
+class _Section {
+  const _Section(this.icon, this.label, this.route, this.done);
+  final IconData icon;
+  final String label;
+  final String route;
+  final bool done;
+}
+
+class _Hub extends StatelessWidget {
+  const _Hub({required this.profile});
+  final UserProfile? profile;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
+    final p = profile;
+    final sections = <_Section>[
+      _Section(
+        Icons.person_outline_rounded,
+        l.sectionContact,
+        Routes.profileContactInfo,
+        (p?.email?.isNotEmpty ?? false) || (p?.phone?.isNotEmpty ?? false),
+      ),
+      _Section(
+        Icons.description_outlined,
+        l.sectionAbout,
+        Routes.profileAbout,
+        p?.bio?.isNotEmpty ?? false,
+      ),
+      _Section(
+        Icons.work_outline_rounded,
+        l.sectionExperience,
+        Routes.profileExperience,
+        p?.experiences.isNotEmpty ?? false,
+      ),
+      _Section(
+        Icons.school_outlined,
+        l.sectionEducation,
+        Routes.profileEducation,
+        p?.educations.isNotEmpty ?? false,
+      ),
+      _Section(
+        Icons.insights_rounded,
+        l.sectionProjects,
+        Routes.profileProjects,
+        false,
+      ),
+      _Section(
+        Icons.verified_outlined,
+        l.sectionCertifications,
+        Routes.profileCertifications,
+        false,
+      ),
+      _Section(
+        Icons.volunteer_activism_outlined,
+        l.sectionVolunteer,
+        Routes.profileVolunteer,
+        false,
+      ),
+      _Section(
+        Icons.emoji_events_outlined,
+        l.sectionAwards,
+        Routes.profileAwards,
+        false,
+      ),
+      _Section(
+        Icons.donut_small_rounded,
+        l.sectionSkills,
+        Routes.profileSkills,
+        p?.skills.isNotEmpty ?? false,
+      ),
+      _Section(
+        Icons.description_rounded,
+        l.sectionResume,
+        Routes.profileResume,
+        false,
+      ),
+    ];
+    final completed = sections.where((s) => s.done).length;
+
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       children: [
         Row(
           children: [
-            ClipOval(
-              child: Container(
-                height: 72,
-                width: 72,
-                color: colors.chipBackground,
-                child: (profile.avatarUrl == null || profile.avatarUrl!.isEmpty)
-                    ? Icon(
-                        Icons.person_rounded,
-                        size: 36,
-                        color: colors.primary,
-                      )
-                    : CachedNetworkImage(
-                        imageUrl: profile.avatarUrl!,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, _, _) => Icon(
-                          Icons.person_rounded,
-                          size: 36,
-                          color: colors.primary,
-                        ),
-                      ),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: LinearProgressIndicator(
+                  value: completed / sections.length,
+                  minHeight: 6,
+                  backgroundColor: colors.surfaceVariant,
+                  color: colors.primary,
+                ),
               ),
             ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(profile.fullName ?? '—', style: context.text.titleLarge),
-                  if (profile.headline != null && profile.headline!.isNotEmpty)
-                    Text(
-                      profile.headline!,
-                      style: context.text.bodyMedium?.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  if (profile.locationText.isNotEmpty)
-                    Text(
-                      profile.locationText,
-                      style: context.text.bodySmall?.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                ],
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              '$completed/${sections.length}',
+              style: context.text.labelLarge?.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-        if (profile.isOpenToWork) ...[
-          const SizedBox(height: AppSpacing.md),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Chip(
-              avatar: Icon(
-                Icons.check_circle_rounded,
-                size: 18,
-                color: colors.success,
-              ),
-              label: Text(l.openToWork),
-            ),
+        const SizedBox(height: AppSpacing.lg),
+        for (final s in sections)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: _SectionCard(section: s),
           ),
-        ],
-        const SizedBox(height: AppSpacing.xl),
-        if (profile.bio != null && profile.bio!.isNotEmpty)
-          _Section(
-            title: l.sectionAbout,
-            onEdit: () => context.push(Routes.profileAbout),
-            child: Text(
-              profile.bio!,
-              style: context.text.bodyMedium?.copyWith(
-                color: colors.textSecondary,
-              ),
-            ),
-          ),
-        _Section(
-          title: l.sectionExperience,
-          onEdit: () => context.push(Routes.profileExperience),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final e in profile.experiences) _ExperienceTile(entry: e),
-              if (profile.experiences.isEmpty)
-                _emptyHint(context, l.noEntriesYet),
-            ],
-          ),
-        ),
-        _Section(
-          title: l.sectionEducation,
-          onEdit: () => context.push(Routes.profileEducation),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final e in profile.educations)
-                _LineTile(
-                  title: e.school,
-                  subtitle: [
-                    e.degree,
-                    e.period,
-                  ].whereType<String>().join(' • '),
-                ),
-              if (profile.educations.isEmpty)
-                _emptyHint(context, l.noEntriesYet),
-            ],
-          ),
-        ),
-        _Section(
-          title: l.sectionSkills,
-          onEdit: () => context.push(Routes.profileSkills),
-          child: profile.skills.isEmpty
-              ? _emptyHint(context, l.noEntriesYet)
-              : Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    for (final s in profile.skills) Chip(label: Text(s)),
-                  ],
-                ),
-        ),
-        _Section(
-          title: l.sectionContact,
-          onEdit: () => context.push(Routes.profileContactInfo),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (profile.email != null)
-                _LineTile(title: l.email, subtitle: profile.email!),
-              if (profile.phone != null)
-                _LineTile(title: l.phone, subtitle: profile.phone!),
-            ],
-          ),
-        ),
-        const Divider(height: AppSpacing.xl),
-        _NavTile(
-          icon: Icons.lightbulb_outline_rounded,
-          label: l.sectionProjects,
-          onTap: () => context.push(Routes.profileProjects),
-        ),
-        _NavTile(
-          icon: Icons.verified_outlined,
-          label: l.sectionCertifications,
-          onTap: () => context.push(Routes.profileCertifications),
-        ),
-        _NavTile(
-          icon: Icons.volunteer_activism_outlined,
-          label: l.sectionVolunteer,
-          onTap: () => context.push(Routes.profileVolunteer),
-        ),
-        _NavTile(
-          icon: Icons.emoji_events_outlined,
-          label: l.sectionAwards,
-          onTap: () => context.push(Routes.profileAwards),
-        ),
-        _NavTile(
-          icon: Icons.description_outlined,
-          label: l.sectionResume,
-          onTap: () => context.push(Routes.profileResume),
-        ),
       ],
     );
   }
-
-  Widget _emptyHint(BuildContext context, String text) => Text(
-    text,
-    style: context.text.bodySmall?.copyWith(
-      color: context.colors.textSecondary,
-    ),
-  );
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child, this.onEdit});
-  final String title;
-  final Widget child;
-  final VoidCallback? onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title, style: context.text.titleMedium),
-              if (onEdit != null)
-                IconButton(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined),
-                  iconSize: 20,
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _ExperienceTile extends StatelessWidget {
-  const _ExperienceTile({required this.entry});
-  final ExperienceEntry entry;
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.section});
+  final _Section section;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(entry.title, style: context.text.titleSmall),
-          Text(
-            [entry.companyName, entry.period].whereType<String>().join(' • '),
-            style: context.text.bodySmall?.copyWith(
-              color: colors.textSecondary,
-            ),
+    return Material(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        onTap: () => context.push(section.route),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: colors.border),
           ),
-          if (entry.description != null && entry.description!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: Text(
-                entry.description!,
-                style: context.text.bodyMedium?.copyWith(
-                  color: colors.textSecondary,
+          child: Row(
+            children: [
+              Icon(section.icon, color: colors.primary, size: 22),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  section.label,
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavTile extends StatelessWidget {
-  const _NavTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: context.colors.textPrimary),
-      title: Text(label, style: context.text.bodyLarge),
-      trailing: const Icon(Icons.chevron_right_rounded),
-      onTap: onTap,
-    );
-  }
-}
-
-class _LineTile extends StatelessWidget {
-  const _LineTile({required this.title, required this.subtitle});
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: context.text.titleSmall),
-          Text(
-            subtitle,
-            style: context.text.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-            ),
+              if (section.done)
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: colors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: colors.onPrimary,
+                  ),
+                )
+              else
+                Icon(Icons.chevron_right_rounded, color: colors.primary),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

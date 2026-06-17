@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../../design_system/design_system.dart';
 import '../../../../../localization/l10n_extension.dart';
 
-/// Standard layout for a CV edit form: scrollable body with a pinned Save
-/// button, an optional Delete action in the app bar, and a busy state.
+/// Standard layout for a CV edit form (Figma): a circular back + centered
+/// title with an optional red Delete action, a scrollable body and a pinned
+/// Save button.
 class EditFormScaffold extends StatelessWidget {
   const EditFormScaffold({
     super.key,
@@ -25,45 +26,69 @@ class EditFormScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
-    return JzScaffold(
-      title: title,
-      actions: [
-        if (onDelete != null)
-          IconButton(
-            tooltip: l.delete,
-            onPressed: saving ? null : () => _confirmDelete(context),
-            icon: const Icon(Icons.delete_outline_rounded),
-          ),
-      ],
-      body: Column(
-        children: [
-          Expanded(
-            child: Form(
-              key: formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                children: children,
+    final colors = context.colors;
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: JzTopBar(
+                title: title,
+                actions: [
+                  if (onDelete != null)
+                    GestureDetector(
+                      onTap: saving ? null : () => _confirmDelete(context),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.border),
+                        ),
+                        child: Icon(
+                          Icons.delete_outline_rounded,
+                          color: colors.danger,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.lg,
-              ),
-              child: JzPrimaryButton(
-                label: l.save,
-                loading: saving,
-                onPressed: () => onSave(),
+            Expanded(
+              child: Form(
+                key: formKey,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    0,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                  ),
+                  children: children,
+                ),
               ),
             ),
-          ),
-        ],
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                child: JzPrimaryButton(
+                  label: context.l10n.save,
+                  loading: saving,
+                  onPressed: () => onSave(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
