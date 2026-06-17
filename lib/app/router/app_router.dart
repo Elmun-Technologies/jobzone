@@ -27,6 +27,7 @@ import '../../features/chat/domain/chat_models.dart';
 import '../../features/chat/presentation/call_page.dart';
 import '../../features/chat/presentation/chat_detail_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
+import '../../features/companies/domain/company.dart';
 import '../../features/companies/presentation/company_details_page.dart';
 import '../../features/companies/presentation/gallery_page.dart';
 import '../../features/companies/presentation/intro_video_page.dart';
@@ -35,6 +36,7 @@ import '../../features/employer/presentation/applicants/applicant_detail_page.da
 import '../../features/employer/presentation/applicants/applicants_page.dart';
 import '../../features/employer/presentation/applicants/job_applicants_page.dart';
 import '../../features/employer/presentation/company/company_manage_page.dart';
+import '../../features/employer/presentation/company/edit_company_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
@@ -280,6 +282,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return applicant == null
               ? PlaceholderPage(title: s.uri.toString())
               : ApplicantDetailPage(applicant: applicant);
+        },
+      ),
+      GoRoute(
+        path: Routes.employerCompanyEdit,
+        builder: (c, s) {
+          final company = s.extra as Company?;
+          return company == null
+              ? PlaceholderPage(title: s.uri.toString())
+              : EditCompanyPage(company: company);
         },
       ),
 

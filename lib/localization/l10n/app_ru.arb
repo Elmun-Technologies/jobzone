@@ -470,5 +470,10 @@
   "applicantSkillsLabel": "Навыки",
   "applicantCoverLabel": "Сопроводительное письмо",
   "appliedForLabel": "Отклик на",
-  "statusTimelineTitle": "История статуса"
+  "statusTimelineTitle": "История статуса",
+  "noCompanyTitle": "Компании пока нет",
+  "noCompanyBody": "Создайте компанию, чтобы публиковать вакансии.",
+  "editCompanyCta": "Изменить компанию",
+  "saveChanges": "Сохранить изменения",
+  "companySavedToast": "Компания сохранена"
 }

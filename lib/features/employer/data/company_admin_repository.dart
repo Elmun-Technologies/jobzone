@@ -72,6 +72,29 @@ class CompanyAdminRepository {
     return Company.fromMap(row);
   }
 
+  /// Updates the employer's company profile and returns the new value.
+  Future<Company> updateCompany(Company company) async {
+    if (!_live) {
+      mockEmployer.company = company;
+      return company;
+    }
+    final client = _ref.read(supabaseClientProvider);
+    final row = await client
+        .from('companies')
+        .update({
+          'name': company.name,
+          'industry': company.industry,
+          'size': company.size,
+          'about': company.about,
+          'website': company.website,
+          'headquarters': company.headquarters,
+        })
+        .eq('id', company.id)
+        .select()
+        .single();
+    return Company.fromMap(row);
+  }
+
   /// Lowercased, hyphenated name plus a short timestamp suffix so the unique
   /// `companies.slug` constraint never collides.
   String _slugify(String name) {

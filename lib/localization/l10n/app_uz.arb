@@ -470,5 +470,10 @@
   "applicantSkillsLabel": "Ko'nikmalar",
   "applicantCoverLabel": "Murojaat xati",
   "appliedForLabel": "Ariza berilgan",
-  "statusTimelineTitle": "Holat tarixi"
+  "statusTimelineTitle": "Holat tarixi",
+  "noCompanyTitle": "Hozircha kompaniya yo'q",
+  "noCompanyBody": "Vakansiya joylash uchun kompaniyangizni yarating.",
+  "editCompanyCta": "Kompaniyani tahrirlash",
+  "saveChanges": "O'zgarishlarni saqlash",
+  "companySavedToast": "Kompaniya saqlandi"
 }
