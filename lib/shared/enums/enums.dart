@@ -70,6 +70,17 @@ enum NotificationType {
   static NotificationType? fromWire(String? w) => _byWire(values, w);
 }
 
+/// Which in-app experience a signed-in user gets. `job_seeker` is the default
+/// (today's app); `employer` unlocks the Jobzone Business / HR side.
+enum UserRole {
+  jobSeeker('job_seeker'),
+  employer('employer');
+
+  const UserRole(this.wire);
+  final String wire;
+  static UserRole? fromWire(String? w) => _byWire(values, w);
+}
+
 T? _byWire<T extends Enum>(List<T> values, String? wire) {
   if (wire == null) return null;
   for (final v in values) {

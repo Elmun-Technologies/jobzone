@@ -58,6 +58,7 @@ class ProfileRepository {
       phone: offlineProfile.phone,
       isOpenToWork: offlineProfile.isOpenToWork,
       seekingStatus: offlineProfile.seekingStatus,
+      role: offlineProfile.role,
       experiences: [
         for (final e in exps)
           ExperienceEntry(
@@ -119,6 +120,7 @@ class ProfileRepository {
       phone: p['phone'] as String?,
       isOpenToWork: (p['is_open_to_work'] ?? true) as bool,
       seekingStatus: _seekingStatusFromId(p['seeking_status_id'] as int?),
+      role: UserRole.fromWire(p['role'] as String?) ?? UserRole.jobSeeker,
       experiences: (exp as List)
           .map(
             (e) => ExperienceEntry(
