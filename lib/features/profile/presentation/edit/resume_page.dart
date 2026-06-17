@@ -1,6 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
@@ -9,7 +11,8 @@ import '../../application/cv_providers.dart';
 import '../../data/cv_repository.dart';
 import '../../domain/cv_models.dart';
 
-/// Manage uploaded resumes: upload a PDF, set the default, delete.
+/// Upload Resume/CV editor (Figma): an upload box + the uploaded files, with a
+/// sticky Save.
 class ResumePage extends ConsumerStatefulWidget {
   const ResumePage({super.key});
 
@@ -50,113 +53,131 @@ class _ResumePageState extends ConsumerState<ResumePage> {
     }
   }
 
-  Future<void> _setDefault(Resume r) async {
-    if (r.id == null || r.isDefault) return;
-    await ref.read(cvRepositoryProvider).setDefaultResume(r.id!);
-    ref.invalidate(resumesControllerProvider);
-  }
-
   Future<void> _delete(Resume r) async {
     if (r.id == null) return;
-    final l = context.l10n;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l.deleteEntryTitle),
-        content: Text(l.deleteEntryBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c, false),
-            child: Text(l.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(c, true),
-            child: Text(l.delete),
-          ),
-        ],
-      ),
-    );
-    if (ok == true) {
-      await ref.read(cvRepositoryProvider).deleteResume(r.id!);
-      ref.invalidate(resumesControllerProvider);
-    }
+    await ref.read(cvRepositoryProvider).deleteResume(r.id!);
+    ref.invalidate(resumesControllerProvider);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final async = ref.watch(resumesControllerProvider);
+    final resumes = async.value ?? const [];
 
-    return JzScaffold(
-      title: l.sectionResume,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _uploading ? null : _upload,
-        icon: _uploading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.4),
-              )
-            : const Icon(Icons.upload_file_rounded),
-        label: Text(l.uploadResume),
-      ),
-      body: async.when(
-        loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
-        data: (resumes) => resumes.isEmpty
-            ? JzEmptyState(
-                icon: Icons.description_outlined,
-                title: l.noResumeTitle,
-                message: l.noResumeBody,
-              )
-            : ListView.separated(
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: JzTopBar(title: l.sectionResume),
+            ),
+            Expanded(
+              child: ListView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg,
+                  0,
                   AppSpacing.lg,
                   AppSpacing.lg,
-                  AppSpacing.xxl * 2,
                 ),
-                itemCount: resumes.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (c, i) => _ResumeTile(
-                  resume: resumes[i],
-                  onSetDefault: () => _setDefault(resumes[i]),
-                  onDelete: () => _delete(resumes[i]),
+                children: [
+                  Text(l.uploadResume, style: context.text.labelLarge),
+                  const SizedBox(height: AppSpacing.sm),
+                  _UploadBox(uploading: _uploading, onTap: _upload),
+                  const SizedBox(height: AppSpacing.lg),
+                  for (final r in resumes)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: _ResumeRow(resume: r, onDelete: () => _delete(r)),
+                    ),
+                ],
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                child: JzPrimaryButton(
+                  label: l.save,
+                  onPressed: () => context.pop(),
                 ),
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _ResumeTile extends StatelessWidget {
-  const _ResumeTile({
-    required this.resume,
-    required this.onSetDefault,
-    required this.onDelete,
-  });
+class _UploadBox extends StatelessWidget {
+  const _UploadBox({required this.uploading, required this.onTap});
+  final bool uploading;
+  final VoidCallback onTap;
 
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return GestureDetector(
+      onTap: uploading ? null : onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: colors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Column(
+          children: [
+            if (uploading)
+              const SizedBox(
+                height: 40,
+                width: 40,
+                child: CircularProgressIndicator(strokeWidth: 2.4),
+              )
+            else
+              Icon(
+                IconsaxPlusBold.document_upload,
+                color: colors.primary,
+                size: 40,
+              ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              context.l10n.browseFile,
+              style: context.text.bodyMedium?.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResumeRow extends StatelessWidget {
+  const _ResumeRow({required this.resume, required this.onDelete});
   final Resume resume;
-  final VoidCallback onSetDefault;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
     final colors = context.colors;
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: resume.isDefault ? colors.primary : colors.border,
-        ),
+        color: colors.danger.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
         children: [
-          Icon(Icons.picture_as_pdf_outlined, color: colors.danger),
+          Icon(Icons.picture_as_pdf_rounded, color: colors.danger, size: 28),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -166,7 +187,9 @@ class _ResumeTile extends StatelessWidget {
                   resume.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.text.titleSmall,
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 if (resume.sizeText != null)
                   Text(
@@ -175,26 +198,15 @@ class _ResumeTile extends StatelessWidget {
                       color: colors.textSecondary,
                     ),
                   ),
-                if (resume.isDefault)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Text(
-                      l.defaultResume,
-                      style: context.text.labelSmall?.copyWith(
-                        color: colors.primary,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            onSelected: (v) => v == 'default' ? onSetDefault() : onDelete(),
-            itemBuilder: (c) => [
-              if (!resume.isDefault)
-                PopupMenuItem(value: 'default', child: Text(l.setDefault)),
-              PopupMenuItem(value: 'delete', child: Text(l.delete)),
-            ],
+          IconButton(
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              color: colors.textSecondary,
+            ),
+            onPressed: onDelete,
           ),
         ],
       ),
