@@ -484,5 +484,10 @@
   "personTitleLabel": "Lavozim",
   "addPhotoCta": "Rasm qo'shish",
   "imageUrlLabel": "Rasm URL manzili",
-  "captionLabel": "Izoh"
+  "captionLabel": "Izoh",
+  "dashboardGreeting": "Xush kelibsiz",
+  "recentApplicants": "So'nggi nomzodlar",
+  "statOpenJobs": "Ochiq vakansiyalar",
+  "statNew": "Yangi",
+  "statInterviews": "Suhbatlar"
 }

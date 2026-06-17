@@ -484,5 +484,10 @@
   "personTitleLabel": "Title",
   "addPhotoCta": "Add photo",
   "imageUrlLabel": "Image URL",
-  "captionLabel": "Caption"
+  "captionLabel": "Caption",
+  "dashboardGreeting": "Welcome back",
+  "recentApplicants": "Recent applicants",
+  "statOpenJobs": "Open jobs",
+  "statNew": "New",
+  "statInterviews": "Interviews"
 }

@@ -484,5 +484,10 @@
   "personTitleLabel": "Должность",
   "addPhotoCta": "Добавить фото",
   "imageUrlLabel": "URL изображения",
-  "captionLabel": "Подпись"
+  "captionLabel": "Подпись",
+  "dashboardGreeting": "С возвращением",
+  "recentApplicants": "Недавние кандидаты",
+  "statOpenJobs": "Открытые вакансии",
+  "statNew": "Новые",
+  "statInterviews": "Собеседования"
 }
