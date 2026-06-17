@@ -13,6 +13,7 @@ export 'widgets/feedback/jz_loader.dart';
 export 'widgets/feedback/jz_skeleton.dart';
 export 'widgets/buttons/jz_circle_button.dart';
 export 'widgets/inputs/jz_password_field.dart';
+export 'widgets/inputs/jz_radio.dart';
 export 'widgets/inputs/jz_text_field.dart';
 export 'widgets/layout/jz_scaffold.dart';
 export 'widgets/layout/jz_top_bar.dart';
