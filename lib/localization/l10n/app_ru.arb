@@ -490,5 +490,7 @@
   "statOpenJobs": "Открытые вакансии",
   "statNew": "Новые",
   "statInterviews": "Собеседования",
-  "messageCandidate": "Написать"
+  "messageCandidate": "Написать",
+  "switchToEmployer": "Режим работодателя",
+  "switchToSeeker": "Режим соискателя"
 }

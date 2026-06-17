@@ -7,6 +7,8 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/enums/enums.dart';
+import '../../auth/application/role_controller.dart';
 import '../data/profile_repository.dart';
 import '../domain/user_profile.dart';
 
@@ -173,6 +175,14 @@ class ProfilePage extends ConsumerWidget {
               icon: Icons.person_add_alt_1_outlined,
               label: l.inviteFriends,
               onTap: () => context.push(Routes.accountInvite),
+            ),
+            _MenuTile(
+              icon: Icons.business_center_outlined,
+              label: l.switchToEmployer,
+              onTap: () async {
+                await applyRole(ref, UserRole.employer);
+                if (context.mounted) context.go(Routes.employerDashboard);
+              },
             ),
             _MenuTile(
               icon: Icons.logout_rounded,
