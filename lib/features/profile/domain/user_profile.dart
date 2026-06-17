@@ -13,6 +13,7 @@ class UserProfile {
     this.phone,
     this.isOpenToWork = true,
     this.seekingStatus = SeekingStatus.activelyLooking,
+    this.role = UserRole.jobSeeker,
     this.experiences = const [],
     this.educations = const [],
     this.skills = const [],
@@ -28,6 +29,7 @@ class UserProfile {
   final String? phone;
   final bool isOpenToWork;
   final SeekingStatus seekingStatus;
+  final UserRole role;
   final List<ExperienceEntry> experiences;
   final List<EducationEntry> educations;
   final List<String> skills;

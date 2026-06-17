@@ -16,6 +16,7 @@ class OfflineProfile {
   String? country = 'UZ';
   bool isOpenToWork = true;
   SeekingStatus seekingStatus = SeekingStatus.activelyLooking;
+  UserRole role = UserRole.jobSeeker;
 }
 
 /// Process-wide offline profile instance.

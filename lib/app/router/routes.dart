@@ -11,6 +11,7 @@ abstract final class Routes {
   static const createAccount = '/auth/create-account';
   static const verifyCode = '/auth/verify-code';
   static const newPassword = '/auth/new-password';
+  static const chooseRole = '/auth/choose-role';
   static const completeProfile = '/auth/complete-profile';
 
   // Preference setup
@@ -84,4 +85,25 @@ abstract final class Routes {
   static const accountHelp = '/account/help';
   static const accountPrivacy = '/account/privacy';
   static const accountInvite = '/account/invite';
+
+  // ── Employer (Jobzone Business / HR side) ────────────────────────────────
+  // Create-company onboarding (the employer's "complete setup" step).
+  static const employerOnboard = '/employer/onboarding';
+
+  // Employer shell tabs.
+  static const employerDashboard = '/employer/dashboard';
+  static const employerJobs = '/employer/jobs';
+  static const employerApplicants = '/employer/applicants';
+  static const employerChat = '/employer/chat';
+  static const employerCompany = '/employer/company';
+
+  // Employer detail routes (pushed above the shell).
+  static const employerPostJob = '/employer/jobs/new';
+  static String employerEditJob(String id) => '/employer/jobs/$id/edit';
+  static String employerJobApplicants(String id) =>
+      '/employer/jobs/$id/applicants';
+  static String employerApplicant(String id) => '/employer/applicants/$id';
+  static const employerCompanyEdit = '/employer/company/edit';
+  static const employerCompanyPeople = '/employer/company/people';
+  static const employerCompanyGallery = '/employer/company/gallery';
 }

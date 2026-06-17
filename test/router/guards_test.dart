@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jobzone/app/router/guards.dart';
 import 'package:jobzone/app/router/routes.dart';
+import 'package:jobzone/shared/enums/enums.dart';
 
 void main() {
   group('resolveRedirect', () {
@@ -119,6 +120,133 @@ void main() {
         ),
         isNull,
       );
+    });
+  });
+
+  group('resolveRedirect — role', () {
+    test('signed-in user without a complete profile may pick a role', () {
+      // The choose-role screen sits between verify and complete-profile.
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: false,
+          location: Routes.chooseRole,
+        ),
+        isNull,
+      );
+    });
+
+    test('onboarded employer is sent to the employer dashboard from home', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          role: UserRole.employer,
+          location: Routes.home,
+        ),
+        Routes.employerDashboard,
+      );
+    });
+
+    test('onboarded employer can browse the employer area', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          role: UserRole.employer,
+          location: Routes.employerDashboard,
+        ),
+        isNull,
+      );
+    });
+
+    test('onboarded employer is sent to dashboard from auth screens', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          role: UserRole.employer,
+          location: Routes.signIn,
+        ),
+        Routes.employerDashboard,
+      );
+    });
+
+    test('employer setup zone is create-company, not seeker preferences', () {
+      // An employer mid-setup landing on a seeker preference page is bounced
+      // back to complete-profile.
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: false,
+          role: UserRole.employer,
+          location: Routes.setupJobType,
+        ),
+        Routes.completeProfile,
+      );
+    });
+
+    test('employer mid-setup may stay on create-company onboarding', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: false,
+          role: UserRole.employer,
+          location: Routes.employerOnboard,
+        ),
+        isNull,
+      );
+    });
+
+    test('job seeker is kept out of the employer area', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          location: Routes.employerDashboard,
+        ),
+        Routes.home,
+      );
+    });
+
+    test('offline mode never redirects regardless of role', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: false,
+          signedIn: false,
+          onboardingSeen: false,
+          profileComplete: false,
+          role: UserRole.employer,
+          location: Routes.home,
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('UserRole.fromWire', () {
+    test('round-trips known wire values', () {
+      expect(UserRole.fromWire('job_seeker'), UserRole.jobSeeker);
+      expect(UserRole.fromWire('employer'), UserRole.employer);
+    });
+
+    test('returns null for unknown or missing values', () {
+      expect(UserRole.fromWire('admin'), isNull);
+      expect(UserRole.fromWire(null), isNull);
     });
   });
 }
