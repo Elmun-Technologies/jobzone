@@ -1,31 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 import '../application/search_controller.dart';
 
-/// Map-style Explore screen. A real map (google_maps_flutter) drops in where
-/// `_MapBackdrop` is; until then it renders a neutral map placeholder with job
-/// pins, matching the Figma layout (floating search + filter, current-location
-/// button, and a bottom job carousel).
-class ExplorePage extends ConsumerWidget {
+/// Map-style Explore screen backed by OpenStreetMap (via flutter_map — no API
+/// key needed). Job pins are plotted from each job's lat/lng; a floating search
+/// + filter sits on top and a job carousel along the bottom.
+class ExplorePage extends ConsumerStatefulWidget {
   const ExplorePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExplorePage> createState() => _ExplorePageState();
+}
+
+class _ExplorePageState extends ConsumerState<ExplorePage> {
+  final _map = MapController();
+
+  // Default view: Tashkent. Real device location lands with geolocator later.
+  static const _initialCenter = LatLng(41.3111, 69.2797);
+
+  @override
+  void dispose() {
+    _map.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
     final results = ref.watch(searchControllerProvider);
     final topPad = MediaQuery.of(context).padding.top;
+    final jobs = results.value ?? const <Job>[];
+    final located = [
+      for (final j in jobs)
+        if (j.lat != null && j.lng != null) j,
+    ];
 
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(child: _MapBackdrop()),
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: _map,
+              options: const MapOptions(
+                initialCenter: _initialCenter,
+                initialZoom: 11,
+                minZoom: 3,
+                maxZoom: 18,
+                interactionOptions: InteractionOptions(
+                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                ),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'io.jobzone.jobzone',
+                ),
+                MarkerLayer(
+                  markers: [
+                    for (final job in located)
+                      Marker(
+                        point: LatLng(job.lat!, job.lng!),
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.topCenter,
+                        child: _JobPin(
+                          onTap: () => context.push(Routes.jobDetails(job.id)),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Positioned(
             top: topPad + AppSpacing.sm,
             left: AppSpacing.lg,
@@ -93,9 +149,7 @@ class ExplorePage extends ConsumerWidget {
             bottom: 250,
             child: _CircleFab(
               icon: Icons.my_location_rounded,
-              onTap: () => ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+              onTap: () => _map.move(_initialCenter, 12),
             ),
           ),
           Positioned(
@@ -130,67 +184,21 @@ class ExplorePage extends ConsumerWidget {
   }
 }
 
-class _MapBackdrop extends StatelessWidget {
-  const _MapBackdrop();
+class _JobPin extends StatelessWidget {
+  const _JobPin({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Container(
-      color: const Color(0xFFE9EBF0),
-      child: Stack(
-        children: [
-          // Faux "region" highlight.
-          Align(
-            alignment: const Alignment(0, -0.1),
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(140),
-                border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.4),
-                ),
-              ),
-            ),
-          ),
-          for (final a in const [
-            Alignment(-0.5, -0.4),
-            Alignment(0.45, -0.55),
-            Alignment(0.3, 0.05),
-            Alignment(-0.35, 0.2),
-          ])
-            Align(
-              alignment: a,
-              child: Icon(
-                Icons.location_on_rounded,
-                color: colors.primary,
-                size: 28,
-              ),
-            ),
-          // Selected pin (center).
-          Align(
-            alignment: const Alignment(0, -0.1),
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: colors.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-              ),
-            ),
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Icon(
+        Icons.location_on_rounded,
+        color: colors.primary,
+        size: 40,
+        shadows: const [
+          Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
     );

@@ -5,6 +5,8 @@ import '../domain/job.dart';
 final List<Job> mockJobs = [
   Job(
     id: 'mock-1',
+    lat: 41.3111,
+    lng: 69.2797,
     title: 'Senior Flutter Engineer',
     companyId: 'c-acme',
     companyName: 'Acme',
@@ -31,6 +33,8 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-2',
+    lat: 41.2995,
+    lng: 69.2401,
     title: 'Product Designer',
     companyId: 'c-nimbus',
     companyName: 'Nimbus',
@@ -49,6 +53,8 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-3',
+    lat: 39.6270,
+    lng: 66.9750,
     title: 'Backend Developer (Node.js)',
     companyId: 'c-acme',
     companyName: 'Acme',
@@ -69,6 +75,8 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-4',
+    lat: 41.3300,
+    lng: 69.2900,
     title: 'Marketing Manager',
     companyId: 'c-nimbus',
     companyName: 'Nimbus',
@@ -88,6 +96,8 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-5',
+    lat: 41.2856,
+    lng: 69.2034,
     title: 'Flutter Intern',
     companyId: 'c-acme',
     companyName: 'Acme',
