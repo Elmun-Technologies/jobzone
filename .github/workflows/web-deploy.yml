@@ -36,7 +36,12 @@ jobs:
       - run: flutter pub get
       # base-href must match the project-pages path (/<repo>/).
       - run: flutter build web --release --base-href /jobzone/
+      # enablement: true asks the action to turn on GitHub Pages (Actions
+      # source) automatically, so the first deploy doesn't require toggling it
+      # by hand in Settings → Pages.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
