@@ -1,17 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/widgets/snackbars.dart';
+import '../../application/auth_controller.dart';
+import '../util/auth_failure_message.dart';
 
 /// "Or sign in with" divider + Apple / Google / Facebook circular buttons.
-/// Social auth isn't wired yet, so taps show a coming-soon message.
-class AuthSocialRow extends StatelessWidget {
+/// Google is wired to Supabase OAuth; Apple/Facebook are coming soon.
+class AuthSocialRow extends ConsumerWidget {
   const AuthSocialRow({super.key, required this.label});
 
   final String label;
 
+  Future<void> _google(BuildContext context, WidgetRef ref) async {
+    final ok = await ref
+        .read(authControllerProvider.notifier)
+        .signInWithGoogle();
+    // On web the page redirects on success; only surface failures.
+    if (!ok && context.mounted) {
+      final err = ref.read(authControllerProvider).error;
+      showErrorSnack(
+        context,
+        err == null
+            ? context.l10n.errUnknown
+            : authFailureMessage(context, err),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     return Column(
       children: [
@@ -44,7 +64,7 @@ class AuthSocialRow extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.lg),
             _SocialButton(
-              onTap: () => _comingSoon(context),
+              onTap: () => _google(context, ref),
               child: Text(
                 'G',
                 style: context.text.titleLarge?.copyWith(

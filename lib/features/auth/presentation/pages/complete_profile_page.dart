@@ -80,6 +80,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
               .from('profiles')
               .update({
                 'full_name': _name.text.trim(),
+                'phone': '+998${_phone.text.replaceAll(RegExp(r'\D'), '')}',
                 if (_headline.text.trim().isNotEmpty)
                   'headline': _headline.text.trim(),
                 'avatar_url': ?avatarUrl,
@@ -172,7 +173,14 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                     Validators.isNotBlank(v) ? null : l.valRequired,
               ),
               const SizedBox(height: AppSpacing.lg),
-              _PhoneField(label: l.phoneNumber, controller: _phone),
+              _PhoneField(
+                label: l.phoneNumber,
+                controller: _phone,
+                validator: (v) {
+                  final digits = (v ?? '').replaceAll(RegExp(r'\D'), '');
+                  return digits.length >= 7 ? null : l.valPhoneRequired;
+                },
+              ),
               const SizedBox(height: AppSpacing.lg),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,9 +216,14 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
 
 /// Phone field with a country-code prefix, styled like the design.
 class _PhoneField extends StatelessWidget {
-  const _PhoneField({required this.label, required this.controller});
+  const _PhoneField({
+    required this.label,
+    required this.controller,
+    this.validator,
+  });
   final String label;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -223,6 +236,7 @@ class _PhoneField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.phone,
+          validator: validator,
           decoration: InputDecoration(
             hintText: 'Enter Phone Number',
             prefixIcon: Padding(
