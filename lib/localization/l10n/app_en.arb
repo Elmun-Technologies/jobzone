@@ -492,5 +492,6 @@
   "statInterviews": "Interviews",
   "messageCandidate": "Message",
   "switchToEmployer": "Switch to Employer",
-  "switchToSeeker": "Switch to Job Seeker"
+  "switchToSeeker": "Switch to Job Seeker",
+  "valPhoneRequired": "Enter a valid phone number"
 }

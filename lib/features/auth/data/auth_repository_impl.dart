@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,6 +17,18 @@ class SupabaseAuthRepository implements AuthRepository {
     required String password,
   }) async {
     await _auth.signInWithPassword(email: email, password: password);
+  }
+
+  @override
+  Future<void> signInWithGoogle() async {
+    await _auth.signInWithOAuth(
+      OAuthProvider.google,
+      // Web redirects within the current origin; mobile uses the app deep link.
+      redirectTo: kIsWeb ? null : 'io.jobzone.jobzone://login-callback',
+      authScreenLaunchMode: kIsWeb
+          ? LaunchMode.platformDefault
+          : LaunchMode.externalApplication,
+    );
   }
 
   @override

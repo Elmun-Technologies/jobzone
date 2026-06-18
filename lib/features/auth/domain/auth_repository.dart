@@ -9,6 +9,10 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  /// Starts the Google OAuth flow (redirect on web, external browser on
+  /// mobile). Requires the Google provider to be enabled in Supabase Auth.
+  Future<void> signInWithGoogle();
+
   Future<void> signUp({
     required String email,
     required String password,

@@ -492,5 +492,6 @@
   "statInterviews": "Suhbatlar",
   "messageCandidate": "Xabar yozish",
   "switchToEmployer": "Ish beruvchi rejimi",
-  "switchToSeeker": "Ish izlovchi rejimi"
+  "switchToSeeker": "Ish izlovchi rejimi",
+  "valPhoneRequired": "To'g'ri telefon raqamini kiriting"
 }
