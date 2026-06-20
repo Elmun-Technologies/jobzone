@@ -67,13 +67,27 @@ class JobCard extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
-                        job.companyName,
-                        style: context.text.bodySmall?.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              job.companyName,
+                              style: context.text.bodySmall?.copyWith(
+                                color: colors.textSecondary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (job.companyVerified) ...[
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.verified_rounded,
+                              size: 14,
+                              color: colors.primary,
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),

@@ -501,5 +501,11 @@
   "choosePackage": "Choose a package",
   "buyCta": "Buy",
   "promotedToast": "Job promoted to the top",
-  "freeLabel": "Free"
+  "freeLabel": "Free",
+  "promotionsTitle": "Promotions",
+  "noPromotionsTitle": "No promotions yet",
+  "orderStatusPaid": "Paid",
+  "orderStatusPending": "Pending",
+  "orderStatusCancelled": "Cancelled",
+  "orderStatusRefunded": "Refunded"
 }
