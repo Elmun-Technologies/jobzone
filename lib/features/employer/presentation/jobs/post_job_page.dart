@@ -43,6 +43,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late String? _type = widget.job?.jobType;
   late String? _level = widget.job?.experienceLevel;
   late String? _model = widget.job?.workingModel;
+  late String? _payType = widget.job?.salaryPeriod;
+  late String? _payoutFreq = widget.job?.payoutFrequency;
   bool _saving = false;
 
   bool get _isEdit => widget.job != null;
@@ -78,6 +80,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             workingModel: _model,
             salaryMin: num.tryParse(_min.text),
             salaryMax: num.tryParse(_max.text),
+            salaryPeriod: _payType,
+            payoutFrequency: _payoutFreq,
             city: _city.text.trim(),
             skills: skills,
             description: _description.text.trim(),
@@ -93,6 +97,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           workingModel: _model,
           salaryMin: num.tryParse(_min.text),
           salaryMax: num.tryParse(_max.text),
+          salaryPeriod: _payType,
+          payoutFrequency: _payoutFreq,
           city: _city.text.trim(),
           skills: skills,
           description: _description.text.trim(),
@@ -196,6 +202,32 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      label: l.payTypeLabel,
+                      value: _payType,
+                      items: {
+                        'month': l.payMonth,
+                        'hour': l.payHour,
+                        'day': l.payDay,
+                        'week': l.payWeek,
+                        'shift': l.payShift,
+                        'task': l.payTask,
+                      },
+                      onChanged: (v) => setState(() => _payType = v),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      label: l.payoutFreqLabel,
+                      value: _payoutFreq,
+                      items: {
+                        'monthly': l.payoutMonthly,
+                        'biweekly': l.payoutBiweekly,
+                        'weekly': l.payoutWeekly,
+                        'daily': l.payoutDaily,
+                      },
+                      onChanged: (v) => setState(() => _payoutFreq = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(label: l.fieldCity, controller: _city),

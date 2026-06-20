@@ -239,6 +239,24 @@ class _InfoGrid extends StatelessWidget {
               ),
             ],
           ),
+          if (job.payoutFrequency != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _InfoCard(
+                    icon: Icons.event_repeat_outlined,
+                    label: l.payoutFreqLabel,
+                    value:
+                        payoutFrequencyLabel(context, job.payoutFrequency) ??
+                        '—',
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+          ],
         ],
       ),
     );

@@ -507,5 +507,18 @@
   "orderStatusPaid": "Оплачено",
   "orderStatusPending": "Ожидает оплаты",
   "orderStatusCancelled": "Отменено",
-  "orderStatusRefunded": "Возвращено"
+  "orderStatusRefunded": "Возвращено",
+  "payTypeLabel": "Оплата",
+  "payoutFreqLabel": "Частота выплат",
+  "payHour": "За час",
+  "payDay": "За день",
+  "payWeek": "За неделю",
+  "payMonth": "За месяц",
+  "payYear": "За год",
+  "payShift": "За смену",
+  "payTask": "За услугу",
+  "payoutMonthly": "Раз в месяц",
+  "payoutBiweekly": "Два раза в месяц",
+  "payoutWeekly": "Еженедельно",
+  "payoutDaily": "Ежедневно"
 }
