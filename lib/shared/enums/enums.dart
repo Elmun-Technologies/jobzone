@@ -6,11 +6,37 @@ enum JobType {
   partTime('part_time'),
   contract('contract'),
   internship('internship'),
-  temporary('temporary');
+  temporary('temporary'),
+  rotational('rotational'); // Вахта — rotational shift work
 
   const JobType(this.wire);
   final String wire;
   static JobType? fromWire(String? w) => _byWire(values, w);
+}
+
+/// Work schedule pattern ("График работы"): days-on/days-off or custom.
+enum SchedulePattern {
+  sixOne('6_1'),
+  fiveTwo('5_2'),
+  fourFour('4_4'),
+  twoTwo('2_2'),
+  custom('custom');
+
+  const SchedulePattern(this.wire);
+  final String wire;
+  static SchedulePattern? fromWire(String? w) => _byWire(values, w);
+}
+
+/// How a hire is formalized ("Оформление сотрудника").
+enum Formalization {
+  employmentContract('employment_contract'),
+  gph('gph'),
+  selfEmployed('self_employed'),
+  none('none');
+
+  const Formalization(this.wire);
+  final String wire;
+  static Formalization? fromWire(String? w) => _byWire(values, w);
 }
 
 enum ExperienceLevel {

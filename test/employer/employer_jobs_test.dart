@@ -58,6 +58,22 @@ void main() {
       expect(created.categoryName, 'Drivers');
     });
 
+    test('createJob persists blue-collar fit fields', () async {
+      final created = await repo().createJob(
+        title: 'Welder',
+        jobType: 'rotational',
+        schedulePattern: '6_1',
+        hoursPerDay: 12,
+        nightShift: true,
+        formalization: 'employment_contract',
+      );
+      expect(created.jobType, 'rotational');
+      expect(created.schedulePattern, '6_1');
+      expect(created.hoursPerDay, 12);
+      expect(created.nightShift, isTrue);
+      expect(created.formalization, 'employment_contract');
+    });
+
     test('setStatus flips a job and the status filter respects it', () async {
       final r = repo();
       final job = (await r.myJobs()).first;

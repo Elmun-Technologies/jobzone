@@ -524,5 +524,18 @@
   "currencyLabel": "Валюта",
   "currencyUzs": "Сум (UZS)",
   "currencyUsd": "Доллар (USD)",
-  "valSalaryRequired": "Укажите зарплату"
+  "valSalaryRequired": "Укажите зарплату",
+  "jobTypeRotational": "Вахта",
+  "fieldFormalization": "Оформление сотрудника",
+  "formEmploymentContract": "Трудовой договор",
+  "formGph": "Договор ГПХ",
+  "formSelfEmployed": "Самозанятый",
+  "formNone": "Без оформления",
+  "fieldSchedulePattern": "График работы",
+  "schedCustom": "Свой график",
+  "fieldHoursPerDay": "Часов в день",
+  "fieldNightShift": "Ночные смены",
+  "fieldResponsibilities": "Обязанности",
+  "fieldBenefits": "Льготы",
+  "yes": "Да"
 }

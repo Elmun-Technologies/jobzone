@@ -524,5 +524,18 @@
   "currencyLabel": "Currency",
   "currencyUzs": "So'm (UZS)",
   "currencyUsd": "Dollar (USD)",
-  "valSalaryRequired": "Enter a salary"
+  "valSalaryRequired": "Enter a salary",
+  "jobTypeRotational": "Rotational (shift)",
+  "fieldFormalization": "Employment formalization",
+  "formEmploymentContract": "Employment contract",
+  "formGph": "Service contract (GPH)",
+  "formSelfEmployed": "Self-employed",
+  "formNone": "Not formalized",
+  "fieldSchedulePattern": "Work schedule",
+  "schedCustom": "Custom",
+  "fieldHoursPerDay": "Hours per day",
+  "fieldNightShift": "Night shifts",
+  "fieldResponsibilities": "Responsibilities",
+  "fieldBenefits": "Benefits",
+  "yes": "Yes"
 }

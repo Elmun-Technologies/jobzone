@@ -9,6 +9,7 @@ String? jobTypeLabel(BuildContext c, String? wire) => switch (wire) {
   'contract' => c.l10n.jobTypeContract,
   'internship' => c.l10n.jobTypeInternship,
   'temporary' => c.l10n.jobTypeTemporary,
+  'rotational' => c.l10n.jobTypeRotational,
   _ => null,
 };
 
@@ -45,5 +46,24 @@ String? payoutFrequencyLabel(BuildContext c, String? wire) => switch (wire) {
   'biweekly' => c.l10n.payoutBiweekly,
   'weekly' => c.l10n.payoutWeekly,
   'daily' => c.l10n.payoutDaily,
+  _ => null,
+};
+
+/// Work schedule pattern ("График работы").
+String? schedulePatternLabel(BuildContext c, String? wire) => switch (wire) {
+  '6_1' => '6/1',
+  '5_2' => '5/2',
+  '4_4' => '4/4',
+  '2_2' => '2/2',
+  'custom' => c.l10n.schedCustom,
+  _ => null,
+};
+
+/// Employment formalization ("Оформление сотрудника").
+String? formalizationLabel(BuildContext c, String? wire) => switch (wire) {
+  'employment_contract' => c.l10n.formEmploymentContract,
+  'gph' => c.l10n.formGph,
+  'self_employed' => c.l10n.formSelfEmployed,
+  'none' => c.l10n.formNone,
   _ => null,
 };

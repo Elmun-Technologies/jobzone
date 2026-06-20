@@ -49,5 +49,42 @@ void main() {
       });
       expect(job.salaryText, r'$1.5k');
     });
+
+    test('parses blue-collar fit fields and groups UZS salary', () {
+      final job = Job.fromMap({
+        'id': 'j1',
+        'title': 'Welder',
+        'company_id': 'c1',
+        'company_name': 'Acme',
+        'job_type': 'rotational',
+        'schedule_pattern': '6_1',
+        'hours_per_day': 12,
+        'night_shift': true,
+        'formalization': 'employment_contract',
+        'currency': 'UZS',
+        'salary_min': 2500000,
+        'salary_max': 3000000,
+        'category_id': 'driver',
+      });
+      expect(job.jobType, 'rotational');
+      expect(job.schedulePattern, '6_1');
+      expect(job.hoursPerDay, 12);
+      expect(job.nightShift, isTrue);
+      expect(job.formalization, 'employment_contract');
+      expect(job.categoryId, 'driver');
+      expect(job.salaryText, "2 500 000 - 3 000 000 so'm");
+    });
+
+    test('fit fields default safely when absent', () {
+      final job = Job.fromMap({
+        'id': 'j2',
+        'title': 'x',
+        'company_id': 'c1',
+        'company_name': 'Acme',
+      });
+      expect(job.nightShift, isFalse);
+      expect(job.schedulePattern, isNull);
+      expect(job.formalization, isNull);
+    });
   });
 }

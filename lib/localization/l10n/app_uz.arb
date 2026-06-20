@@ -524,5 +524,18 @@
   "currencyLabel": "Valyuta",
   "currencyUzs": "So'm (UZS)",
   "currencyUsd": "Dollar (USD)",
-  "valSalaryRequired": "Maoshni kiriting"
+  "valSalaryRequired": "Maoshni kiriting",
+  "jobTypeRotational": "Vahta usuli",
+  "fieldFormalization": "Rasmiylashtirish",
+  "formEmploymentContract": "Mehnat shartnomasi",
+  "formGph": "Fuqarolik-huquqiy shartnoma (GPH)",
+  "formSelfEmployed": "O'zini o'zi band qilgan",
+  "formNone": "Rasmiylashtirilmaydi",
+  "fieldSchedulePattern": "Ish jadvali",
+  "schedCustom": "Boshqa jadval",
+  "fieldHoursPerDay": "Kuniga necha soat",
+  "fieldNightShift": "Tungi smenalar",
+  "fieldResponsibilities": "Majburiyatlar",
+  "fieldBenefits": "Imtiyozlar",
+  "yes": "Ha"
 }

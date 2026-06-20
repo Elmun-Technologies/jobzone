@@ -12,6 +12,10 @@ export interface JobRow {
   job_type?: string | null;
   experience_level?: string | null;
   working_model?: string | null;
+  schedule_pattern?: string | null;
+  hours_per_day?: number | null;
+  night_shift?: boolean | null;
+  formalization?: string | null;
   country?: string | null;
   city?: string | null;
   location?: string | null;
@@ -54,6 +58,10 @@ export function toJobDocument(
     job_type: job.job_type ?? null,
     experience_level: job.experience_level ?? null,
     working_model: job.working_model ?? null,
+    schedule_pattern: job.schedule_pattern ?? null,
+    hours_per_day: job.hours_per_day ?? null,
+    night_shift: job.night_shift ?? false,
+    formalization: job.formalization ?? null,
     country: job.country ?? null,
     city: job.city ?? null,
     location: job.location ?? null,
@@ -84,6 +92,9 @@ export const JOBS_SETTINGS = {
     "job_type",
     "experience_level",
     "working_model",
+    "schedule_pattern",
+    "night_shift",
+    "formalization",
     "category_id",
     "company_id",
     "country",

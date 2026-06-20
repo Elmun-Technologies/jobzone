@@ -48,6 +48,16 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late String? _payoutFreq = widget.job?.payoutFrequency;
   late String _currency = widget.job?.currency ?? 'UZS';
   late String? _categoryId = widget.job?.categoryId;
+  late String? _schedule = widget.job?.schedulePattern;
+  late String? _formalization = widget.job?.formalization;
+  late bool _nightShift = widget.job?.nightShift ?? false;
+  late final _hours = TextEditingController(
+    text: widget.job?.hoursPerDay?.toString(),
+  );
+  late final _responsibilities = TextEditingController(
+    text: widget.job?.responsibilities,
+  );
+  late final _benefits = TextEditingController(text: widget.job?.benefits);
   bool _saving = false;
 
   bool get _isEdit => widget.job != null;
@@ -61,6 +71,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     _skills.dispose();
     _description.dispose();
     _requirements.dispose();
+    _hours.dispose();
+    _responsibilities.dispose();
+    _benefits.dispose();
     super.dispose();
   }
 
@@ -85,12 +98,18 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             salaryMax: num.tryParse(_max.text),
             salaryPeriod: _payType,
             payoutFrequency: _payoutFreq,
+            schedulePattern: _schedule,
+            hoursPerDay: num.tryParse(_hours.text),
+            nightShift: _nightShift,
+            formalization: _formalization,
             currency: _currency,
             categoryId: _categoryId,
             city: _city.text.trim(),
             skills: skills,
             description: _description.text.trim(),
+            responsibilities: _responsibilities.text.trim(),
             requirements: _requirements.text.trim(),
+            benefits: _benefits.text.trim(),
             status: status,
           ),
         );
@@ -104,12 +123,18 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           salaryMax: num.tryParse(_max.text),
           salaryPeriod: _payType,
           payoutFrequency: _payoutFreq,
+          schedulePattern: _schedule,
+          hoursPerDay: num.tryParse(_hours.text),
+          nightShift: _nightShift,
+          formalization: _formalization,
           currency: _currency,
           categoryId: _categoryId,
           city: _city.text.trim(),
           skills: skills,
           description: _description.text.trim(),
+          responsibilities: _responsibilities.text.trim(),
           requirements: _requirements.text.trim(),
+          benefits: _benefits.text.trim(),
           status: status,
         );
       }
@@ -175,6 +200,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                         JobType.contract.wire: l.jobTypeContract,
                         JobType.internship.wire: l.jobTypeInternship,
                         JobType.temporary.wire: l.jobTypeTemporary,
+                        JobType.rotational.wire: l.jobTypeRotational,
                       },
                       onChanged: (v) => setState(() => _type = v),
                     ),
@@ -200,6 +226,44 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                         WorkingModel.hybrid.wire: l.wmHybrid,
                       },
                       onChanged: (v) => setState(() => _model = v),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      label: l.fieldFormalization,
+                      value: _formalization,
+                      items: {
+                        Formalization.employmentContract.wire:
+                            l.formEmploymentContract,
+                        Formalization.gph.wire: l.formGph,
+                        Formalization.selfEmployed.wire: l.formSelfEmployed,
+                        Formalization.none.wire: l.formNone,
+                      },
+                      onChanged: (v) => setState(() => _formalization = v),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      label: l.fieldSchedulePattern,
+                      value: _schedule,
+                      items: {
+                        SchedulePattern.fiveTwo.wire: '5/2',
+                        SchedulePattern.sixOne.wire: '6/1',
+                        SchedulePattern.fourFour.wire: '4/4',
+                        SchedulePattern.twoTwo.wire: '2/2',
+                        SchedulePattern.custom.wire: l.schedCustom,
+                      },
+                      onChanged: (v) => setState(() => _schedule = v),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    JzTextField(
+                      label: l.fieldHoursPerDay,
+                      controller: _hours,
+                      keyboardType: TextInputType.number,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.fieldNightShift),
+                      value: _nightShift,
+                      onChanged: (v) => setState(() => _nightShift = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Row(
@@ -282,8 +346,22 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(
+                      label: l.fieldResponsibilities,
+                      controller: _responsibilities,
+                      maxLines: 4,
+                      minLines: 3,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    JzTextField(
                       label: l.fieldRequirements,
                       controller: _requirements,
+                      maxLines: 4,
+                      minLines: 3,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    JzTextField(
+                      label: l.fieldBenefits,
+                      controller: _benefits,
                       maxLines: 4,
                       minLines: 3,
                     ),
