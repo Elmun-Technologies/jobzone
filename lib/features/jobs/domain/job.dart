@@ -20,6 +20,7 @@ class Job {
     this.salaryMax,
     this.currency,
     this.salaryPeriod,
+    this.payoutFrequency,
     this.skills = const [],
     this.description,
     this.responsibilities,
@@ -52,6 +53,9 @@ class Job {
   final num? salaryMax;
   final String? currency;
   final String? salaryPeriod;
+
+  /// How often wages are paid: `monthly` / `biweekly` / `weekly` / `daily`.
+  final String? payoutFrequency;
   final List<String> skills;
   final String? description;
   final String? responsibilities;
@@ -108,6 +112,8 @@ class Job {
     'week' => '/wk',
     'month' => '/month',
     'year' => '/yr',
+    'shift' => '/shift',
+    'task' => '/task',
     _ => null,
   };
 
@@ -133,6 +139,7 @@ class Job {
       salaryMax: parseNum(m['salary_max']),
       currency: m['currency'] as String?,
       salaryPeriod: m['salary_period'] as String?,
+      payoutFrequency: m['payout_frequency'] as String?,
       skills:
           (m['skills_required'] as List?)?.map((e) => '$e').toList() ??
           const [],
@@ -175,6 +182,7 @@ class Job {
     num? salaryMax,
     String? currency,
     String? salaryPeriod,
+    String? payoutFrequency,
     List<String>? skills,
     String? description,
     String? responsibilities,
@@ -206,6 +214,7 @@ class Job {
     salaryMax: salaryMax ?? this.salaryMax,
     currency: currency ?? this.currency,
     salaryPeriod: salaryPeriod ?? this.salaryPeriod,
+    payoutFrequency: payoutFrequency ?? this.payoutFrequency,
     skills: skills ?? this.skills,
     description: description ?? this.description,
     responsibilities: responsibilities ?? this.responsibilities,

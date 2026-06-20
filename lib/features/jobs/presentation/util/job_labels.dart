@@ -26,3 +26,24 @@ String? experienceLabel(BuildContext c, String? wire) => switch (wire) {
   'lead' => c.l10n.expLead,
   _ => null,
 };
+
+/// Pay basis ("Оплата"): what the salary is per.
+String? payTypeLabel(BuildContext c, String? wire) => switch (wire) {
+  'hour' => c.l10n.payHour,
+  'day' => c.l10n.payDay,
+  'week' => c.l10n.payWeek,
+  'month' => c.l10n.payMonth,
+  'year' => c.l10n.payYear,
+  'shift' => c.l10n.payShift,
+  'task' => c.l10n.payTask,
+  _ => null,
+};
+
+/// Payout frequency ("Частота выплат").
+String? payoutFrequencyLabel(BuildContext c, String? wire) => switch (wire) {
+  'monthly' => c.l10n.payoutMonthly,
+  'biweekly' => c.l10n.payoutBiweekly,
+  'weekly' => c.l10n.payoutWeekly,
+  'daily' => c.l10n.payoutDaily,
+  _ => null,
+};

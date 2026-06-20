@@ -507,5 +507,18 @@
   "orderStatusPaid": "To'langan",
   "orderStatusPending": "Kutilmoqda",
   "orderStatusCancelled": "Bekor qilingan",
-  "orderStatusRefunded": "Qaytarilgan"
+  "orderStatusRefunded": "Qaytarilgan",
+  "payTypeLabel": "To'lov",
+  "payoutFreqLabel": "To'lov chastotasi",
+  "payHour": "Soatiga",
+  "payDay": "Kuniga",
+  "payWeek": "Haftasiga",
+  "payMonth": "Oyiga",
+  "payYear": "Yiliga",
+  "payShift": "Smenasiga",
+  "payTask": "Xizmat uchun",
+  "payoutMonthly": "Oyiga bir marta",
+  "payoutBiweekly": "Oyiga ikki marta",
+  "payoutWeekly": "Haftalik",
+  "payoutDaily": "Kunlik"
 }

@@ -507,5 +507,18 @@
   "orderStatusPaid": "Paid",
   "orderStatusPending": "Pending",
   "orderStatusCancelled": "Cancelled",
-  "orderStatusRefunded": "Refunded"
+  "orderStatusRefunded": "Refunded",
+  "payTypeLabel": "Payment",
+  "payoutFreqLabel": "Payout frequency",
+  "payHour": "Per hour",
+  "payDay": "Per day",
+  "payWeek": "Per week",
+  "payMonth": "Per month",
+  "payYear": "Per year",
+  "payShift": "Per shift",
+  "payTask": "Per task",
+  "payoutMonthly": "Monthly",
+  "payoutBiweekly": "Twice a month",
+  "payoutWeekly": "Weekly",
+  "payoutDaily": "Daily"
 }
