@@ -493,5 +493,8 @@
   "messageCandidate": "Написать",
   "switchToEmployer": "Режим работодателя",
   "switchToSeeker": "Режим соискателя",
-  "valPhoneRequired": "Введите корректный номер телефона"
+  "valPhoneRequired": "Введите корректный номер телефона",
+  "genderMale": "Мужской",
+  "genderFemale": "Женский",
+  "genderOther": "Другой"
 }

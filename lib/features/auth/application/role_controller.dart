@@ -14,7 +14,11 @@ Future<void> applyRole(WidgetRef ref, UserRole role) async {
     final client = ref.read(supabaseClientProvider);
     final uid = client.auth.currentUser?.id;
     if (uid != null) {
-      await client.from('profiles').update({'role': role.wire}).eq('id', uid);
+      // Best-effort: the local flag is the source of truth for routing, so a
+      // transient backend write failure must not throw out of the UI callback.
+      try {
+        await client.from('profiles').update({'role': role.wire}).eq('id', uid);
+      } catch (_) {}
     }
   }
 }
