@@ -29,6 +29,7 @@ class Job {
     this.applicantsCount = 0,
     this.postedAt,
     this.categoryName,
+    this.categoryId,
     this.status = 'open',
     this.boostedUntil,
     this.boostKind,
@@ -64,6 +65,7 @@ class Job {
   final int applicantsCount;
   final DateTime? postedAt;
   final String? categoryName;
+  final String? categoryId;
 
   /// Lifecycle: `draft` / `open` / `closed`. The seeker `job_feed` only ever
   /// returns `open`; employer reads of the base `jobs` table carry the real one.
@@ -89,10 +91,17 @@ class Job {
     _ => (currency == null || currency!.isEmpty) ? '' : '${currency!} ',
   };
 
-  /// e.g. r"$1.5k - $3k". Null when no salary is set.
+  /// e.g. r"$1.5k - $3k" (USD) or "2 500 000 - 3 000 000 so'm" (UZS). Null when
+  /// no salary is set.
   String? get salaryText {
     final min = salaryMin;
     final max = salaryMax;
+    if (currency == 'UZS') {
+      String g(num v) => _groupDigits(v.round());
+      if (min != null && max != null) return "${g(min)} - ${g(max)} so'm";
+      final one = min ?? max;
+      return one == null ? null : "${g(one)} so'm";
+    }
     final s = _currencySymbol;
     String fmt(num v) => v >= 1000
         ? '${(v / 1000).toStringAsFixed(v % 1000 == 0 ? 0 : 1)}k'
@@ -103,6 +112,17 @@ class Job {
     final single = min ?? max;
     if (single == null) return null;
     return '$s${fmt(single)}';
+  }
+
+  /// Space-grouped thousands, e.g. 2500000 -> "2 500 000".
+  static String _groupDigits(int v) {
+    final s = v.abs().toString();
+    final buf = StringBuffer(v < 0 ? '-' : '');
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write(' ');
+      buf.write(s[i]);
+    }
+    return buf.toString();
   }
 
   /// e.g. "/month", "/hr". Null when no period is set.
@@ -152,6 +172,7 @@ class Job {
           ? DateTime.tryParse('${m['posted_at']}')
           : null,
       categoryName: m['category_name'] as String?,
+      categoryId: m['category_id'] as String?,
       status: (m['status'] ?? 'open') as String,
       boostedUntil: m['boosted_until'] != null
           ? DateTime.tryParse('${m['boosted_until']}')
@@ -191,6 +212,7 @@ class Job {
     int? applicantsCount,
     DateTime? postedAt,
     String? categoryName,
+    String? categoryId,
     String? status,
     DateTime? boostedUntil,
     String? boostKind,
@@ -223,6 +245,7 @@ class Job {
     applicantsCount: applicantsCount ?? this.applicantsCount,
     postedAt: postedAt ?? this.postedAt,
     categoryName: categoryName ?? this.categoryName,
+    categoryId: categoryId ?? this.categoryId,
     status: status ?? this.status,
     boostedUntil: boostedUntil ?? this.boostedUntil,
     boostKind: boostKind ?? this.boostKind,

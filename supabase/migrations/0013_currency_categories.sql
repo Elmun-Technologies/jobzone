@@ -1,19 +1,16 @@
--- seed.sql — reference data applied on `supabase db reset`.
--- Demo companies/jobs are intentionally omitted here (they require auth users);
--- create those from the app or a separate dev-seed script.
+-- 0013_currency_categories.sql
+-- Localize money to the Uzbek market and broaden the category taxonomy for the
+-- blue-collar / mass-hiring marketplace.
 
+-- Currency: default to UZS (so'm); allow UZS or USD.
+alter table public.jobs alter column currency set default 'UZS';
+alter table public.jobs drop constraint if exists jobs_currency_check;
+alter table public.jobs
+  add constraint jobs_currency_check
+  check (currency is null or currency in ('UZS','USD'));
+
+-- Blue-collar + foreign-jobs categories (idempotent; mirrors seed.sql).
 insert into public.job_categories (name, slug, icon) values
-  ('Engineering',      'engineering', 'code'),
-  ('Design',           'design',      'palette'),
-  ('Product',          'product',     'widgets'),
-  ('Marketing',        'marketing',   'campaign'),
-  ('Sales',            'sales',       'trending_up'),
-  ('Finance',          'finance',     'payments'),
-  ('Human Resources',  'hr',          'groups'),
-  ('Customer Support', 'support',     'headset_mic'),
-  ('Data & AI',        'data-ai',     'analytics'),
-  ('Operations',       'operations',  'settings'),
-  -- Blue-collar / mass-hiring + foreign-jobs taxonomy.
   ('Restaurants & Hospitality', 'horeca',             'restaurant'),
   ('Retail & Sales',            'retail',             'storefront'),
   ('Logistics & Delivery',      'logistics-delivery', 'local_shipping'),

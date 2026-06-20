@@ -7,6 +7,7 @@ import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/enums/enums.dart';
 import '../../../../shared/widgets/snackbars.dart';
+import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
 import '../../data/employer_jobs_repository.dart';
 
@@ -45,6 +46,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late String? _model = widget.job?.workingModel;
   late String? _payType = widget.job?.salaryPeriod;
   late String? _payoutFreq = widget.job?.payoutFrequency;
+  late String _currency = widget.job?.currency ?? 'UZS';
+  late String? _categoryId = widget.job?.categoryId;
   bool _saving = false;
 
   bool get _isEdit => widget.job != null;
@@ -82,6 +85,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             salaryMax: num.tryParse(_max.text),
             salaryPeriod: _payType,
             payoutFrequency: _payoutFreq,
+            currency: _currency,
+            categoryId: _categoryId,
             city: _city.text.trim(),
             skills: skills,
             description: _description.text.trim(),
@@ -99,6 +104,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           salaryMax: num.tryParse(_max.text),
           salaryPeriod: _payType,
           payoutFrequency: _payoutFreq,
+          currency: _currency,
+          categoryId: _categoryId,
           city: _city.text.trim(),
           skills: skills,
           description: _description.text.trim(),
@@ -121,6 +128,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final cats =
+        ref.watch(jobCategoriesProvider).value ?? const <JobCategory>[];
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -145,6 +154,16 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       controller: _title,
                       validator: (v) =>
                           Validators.isNotBlank(v) ? null : l.valRequired,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      key: ValueKey('cat-${_categoryId ?? ''}-${cats.length}'),
+                      label: l.jobCategory,
+                      value: cats.any((c) => c.id == _categoryId)
+                          ? _categoryId
+                          : null,
+                      items: {for (final c in cats) c.id: c.name},
+                      onChanged: (v) => setState(() => _categoryId = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     _Dropdown(
@@ -191,6 +210,14 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                             label: l.fieldSalaryMin,
                             controller: _min,
                             keyboardType: TextInputType.number,
+                            validator: (v) {
+                              if (!Validators.isNotBlank(v)) {
+                                return l.valSalaryRequired;
+                              }
+                              return num.tryParse(v!.trim()) == null
+                                  ? l.valSalaryRequired
+                                  : null;
+                            },
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -199,9 +226,22 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                             label: l.fieldSalaryMax,
                             controller: _max,
                             keyboardType: TextInputType.number,
+                            validator: (v) {
+                              if (!Validators.isNotBlank(v)) return null;
+                              return num.tryParse(v!.trim()) == null
+                                  ? l.valSalaryRequired
+                                  : null;
+                            },
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      label: l.currencyLabel,
+                      value: _currency,
+                      items: {'UZS': l.currencyUzs, 'USD': l.currencyUsd},
+                      onChanged: (v) => setState(() => _currency = v ?? 'UZS'),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     _Dropdown(
@@ -295,6 +335,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
 class _Dropdown extends StatelessWidget {
   const _Dropdown({
+    super.key,
     required this.label,
     required this.value,
     required this.items,
