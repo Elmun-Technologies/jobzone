@@ -21,6 +21,10 @@ class Job {
     this.currency,
     this.salaryPeriod,
     this.payoutFrequency,
+    this.schedulePattern,
+    this.hoursPerDay,
+    this.nightShift = false,
+    this.formalization,
     this.skills = const [],
     this.description,
     this.responsibilities,
@@ -57,6 +61,13 @@ class Job {
 
   /// How often wages are paid: `monthly` / `biweekly` / `weekly` / `daily`.
   final String? payoutFrequency;
+
+  /// Blue-collar fit: schedule pattern (`6_1`/`5_2`…), hours/day, night shifts,
+  /// and how the hire is formalized (`employment_contract`/`gph`/…).
+  final String? schedulePattern;
+  final num? hoursPerDay;
+  final bool nightShift;
+  final String? formalization;
   final List<String> skills;
   final String? description;
   final String? responsibilities;
@@ -160,6 +171,10 @@ class Job {
       currency: m['currency'] as String?,
       salaryPeriod: m['salary_period'] as String?,
       payoutFrequency: m['payout_frequency'] as String?,
+      schedulePattern: m['schedule_pattern'] as String?,
+      hoursPerDay: parseNum(m['hours_per_day']),
+      nightShift: (m['night_shift'] ?? false) as bool,
+      formalization: m['formalization'] as String?,
       skills:
           (m['skills_required'] as List?)?.map((e) => '$e').toList() ??
           const [],
@@ -204,6 +219,10 @@ class Job {
     String? currency,
     String? salaryPeriod,
     String? payoutFrequency,
+    String? schedulePattern,
+    num? hoursPerDay,
+    bool? nightShift,
+    String? formalization,
     List<String>? skills,
     String? description,
     String? responsibilities,
@@ -237,6 +256,10 @@ class Job {
     currency: currency ?? this.currency,
     salaryPeriod: salaryPeriod ?? this.salaryPeriod,
     payoutFrequency: payoutFrequency ?? this.payoutFrequency,
+    schedulePattern: schedulePattern ?? this.schedulePattern,
+    hoursPerDay: hoursPerDay ?? this.hoursPerDay,
+    nightShift: nightShift ?? this.nightShift,
+    formalization: formalization ?? this.formalization,
     skills: skills ?? this.skills,
     description: description ?? this.description,
     responsibilities: responsibilities ?? this.responsibilities,

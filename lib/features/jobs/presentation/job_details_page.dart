@@ -369,6 +369,23 @@ class _AboutTab extends StatelessWidget {
             children: [
               if (job.categoryName != null)
                 _SummaryRow(label: l.jobCategory, value: job.categoryName!),
+              if (schedulePatternLabel(context, job.schedulePattern) != null)
+                _SummaryRow(
+                  label: l.fieldSchedulePattern,
+                  value: schedulePatternLabel(context, job.schedulePattern)!,
+                ),
+              if (formalizationLabel(context, job.formalization) != null)
+                _SummaryRow(
+                  label: l.fieldFormalization,
+                  value: formalizationLabel(context, job.formalization)!,
+                ),
+              if (job.hoursPerDay != null)
+                _SummaryRow(
+                  label: l.fieldHoursPerDay,
+                  value: '${job.hoursPerDay}',
+                ),
+              if (job.nightShift)
+                _SummaryRow(label: l.fieldNightShift, value: l.yes),
               if (job.postedAt != null)
                 _SummaryRow(
                   label: l.jobPostedOn,
