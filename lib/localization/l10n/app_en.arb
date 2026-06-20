@@ -496,5 +496,10 @@
   "valPhoneRequired": "Enter a valid phone number",
   "genderMale": "Male",
   "genderFemale": "Female",
-  "genderOther": "Other"
+  "genderOther": "Other",
+  "promoteCta": "Promote",
+  "choosePackage": "Choose a package",
+  "buyCta": "Buy",
+  "promotedToast": "Job promoted to the top",
+  "freeLabel": "Free"
 }

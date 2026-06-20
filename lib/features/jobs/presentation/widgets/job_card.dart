@@ -55,6 +55,10 @@ class JobCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (job.isBoosted) ...[
+                        const JzTopBadge(),
+                        const SizedBox(height: AppSpacing.xs),
+                      ],
                       Text(
                         job.title,
                         style: context.text.titleMedium?.copyWith(

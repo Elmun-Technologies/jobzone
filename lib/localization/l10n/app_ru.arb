@@ -496,5 +496,10 @@
   "valPhoneRequired": "Введите корректный номер телефона",
   "genderMale": "Мужской",
   "genderFemale": "Женский",
-  "genderOther": "Другой"
+  "genderOther": "Другой",
+  "promoteCta": "Продвигать",
+  "choosePackage": "Выберите пакет",
+  "buyCta": "Купить",
+  "promotedToast": "Вакансия поднята в топ",
+  "freeLabel": "Бесплатно"
 }

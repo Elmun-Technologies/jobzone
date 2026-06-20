@@ -496,5 +496,10 @@
   "valPhoneRequired": "To'g'ri telefon raqamini kiriting",
   "genderMale": "Erkak",
   "genderFemale": "Ayol",
-  "genderOther": "Boshqa"
+  "genderOther": "Boshqa",
+  "promoteCta": "Reklama",
+  "choosePackage": "Paketni tanlang",
+  "buyCta": "Sotib olish",
+  "promotedToast": "Vakansiya tepaga chiqarildi",
+  "freeLabel": "Bepul"
 }

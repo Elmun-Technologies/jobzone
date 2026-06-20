@@ -6,6 +6,7 @@ export 'theme/app_spacing.dart';
 export 'theme/app_theme.dart';
 export 'theme/app_typography.dart';
 export 'theme/theme_controller.dart';
+export 'widgets/badges/jz_top_badge.dart';
 export 'widgets/buttons/jz_primary_button.dart';
 export 'widgets/feedback/jz_empty_state.dart';
 export 'widgets/feedback/jz_error_state.dart';
