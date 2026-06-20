@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
+import '../../jobs/data/categories_repository.dart';
 import '../../jobs/domain/job.dart';
 import 'mock_employer.dart';
 
@@ -48,6 +49,8 @@ class EmployerJobsRepository {
     num? salaryMax,
     String? salaryPeriod,
     String? payoutFrequency,
+    String currency = 'UZS',
+    String? categoryId,
     String? city,
     String? country,
     List<String> skills = const [],
@@ -69,9 +72,11 @@ class EmployerJobsRepository {
         workingModel: workingModel,
         salaryMin: salaryMin,
         salaryMax: salaryMax,
-        currency: 'USD',
+        currency: currency,
         salaryPeriod: salaryPeriod ?? 'month',
         payoutFrequency: payoutFrequency,
+        categoryId: categoryId,
+        categoryName: CategoriesRepository.byId(categoryId)?.name,
         city: city,
         country: country,
         skills: skills,
@@ -101,8 +106,10 @@ class EmployerJobsRepository {
           'working_model': ?workingModel,
           'salary_min': ?salaryMin,
           'salary_max': ?salaryMax,
+          'currency': currency,
           'salary_period': ?salaryPeriod,
           'payout_frequency': ?payoutFrequency,
+          'category_id': ?categoryId,
           if (city != null && city.isNotEmpty) 'city': city,
           if (country != null && country.isNotEmpty) 'country': country,
           if (description != null && description.isNotEmpty)
@@ -137,8 +144,10 @@ class EmployerJobsRepository {
           'working_model': job.workingModel,
           'salary_min': job.salaryMin,
           'salary_max': job.salaryMax,
+          'currency': job.currency,
           'salary_period': job.salaryPeriod,
           'payout_frequency': job.payoutFrequency,
+          'category_id': job.categoryId,
           'city': job.city,
           'country': job.country,
           'skills_required': job.skills,

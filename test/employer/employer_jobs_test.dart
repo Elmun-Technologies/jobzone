@@ -36,6 +36,28 @@ void main() {
       expect(after.first.title, 'Growth Lead');
     });
 
+    test('createJob defaults currency to UZS', () async {
+      final created = await repo().createJob(title: 'Barista');
+      expect(created.currency, 'UZS');
+    });
+
+    test('createJob keeps an explicit USD currency', () async {
+      final created = await repo().createJob(
+        title: 'Engineer',
+        currency: 'USD',
+      );
+      expect(created.currency, 'USD');
+    });
+
+    test('createJob resolves a category id to its display name', () async {
+      final created = await repo().createJob(
+        title: 'Driver',
+        categoryId: 'driver',
+      );
+      expect(created.categoryId, 'driver');
+      expect(created.categoryName, 'Drivers');
+    });
+
     test('setStatus flips a job and the status filter respects it', () async {
       final r = repo();
       final job = (await r.myJobs()).first;

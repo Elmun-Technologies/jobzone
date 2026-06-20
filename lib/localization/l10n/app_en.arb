@@ -520,5 +520,9 @@
   "payoutMonthly": "Monthly",
   "payoutBiweekly": "Twice a month",
   "payoutWeekly": "Weekly",
-  "payoutDaily": "Daily"
+  "payoutDaily": "Daily",
+  "currencyLabel": "Currency",
+  "currencyUzs": "So'm (UZS)",
+  "currencyUsd": "Dollar (USD)",
+  "valSalaryRequired": "Enter a salary"
 }
