@@ -29,6 +29,9 @@ class Job {
     this.postedAt,
     this.categoryName,
     this.status = 'open',
+    this.boostedUntil,
+    this.boostKind,
+    this.expiresAt,
   });
 
   final String id;
@@ -61,6 +64,15 @@ class Job {
   /// Lifecycle: `draft` / `open` / `closed`. The seeker `job_feed` only ever
   /// returns `open`; employer reads of the base `jobs` table carry the real one.
   final String status;
+
+  /// Paid promotion: when set in the future the job is "boosted" (TOP/featured).
+  final DateTime? boostedUntil;
+  final String? boostKind; // 'top' / 'featured'
+  final DateTime? expiresAt;
+
+  /// True while a paid promotion is active.
+  bool get isBoosted =>
+      boostedUntil != null && boostedUntil!.isAfter(DateTime.now());
 
   String get locationText =>
       location ??
@@ -134,6 +146,13 @@ class Job {
           : null,
       categoryName: m['category_name'] as String?,
       status: (m['status'] ?? 'open') as String,
+      boostedUntil: m['boosted_until'] != null
+          ? DateTime.tryParse('${m['boosted_until']}')
+          : null,
+      boostKind: m['boost_kind'] as String?,
+      expiresAt: m['expires_at'] != null
+          ? DateTime.tryParse('${m['expires_at']}')
+          : null,
     );
   }
 
@@ -165,6 +184,9 @@ class Job {
     DateTime? postedAt,
     String? categoryName,
     String? status,
+    DateTime? boostedUntil,
+    String? boostKind,
+    DateTime? expiresAt,
   }) => Job(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -193,5 +215,8 @@ class Job {
     postedAt: postedAt ?? this.postedAt,
     categoryName: categoryName ?? this.categoryName,
     status: status ?? this.status,
+    boostedUntil: boostedUntil ?? this.boostedUntil,
+    boostKind: boostKind ?? this.boostKind,
+    expiresAt: expiresAt ?? this.expiresAt,
   );
 }

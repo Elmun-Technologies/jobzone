@@ -7,6 +7,8 @@ final List<Job> mockJobs = [
     id: 'mock-1',
     lat: 41.3111,
     lng: 69.2797,
+    boostedUntil: DateTime(2027, 1, 1),
+    boostKind: 'top',
     title: 'Senior Flutter Engineer',
     companyId: 'c-acme',
     companyName: 'Acme',
