@@ -7,6 +7,7 @@ import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/presentation/util/job_labels.dart';
+import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/employer_jobs_repository.dart';
 
 /// The employer's posted jobs, filterable by lifecycle status, with create /
@@ -109,6 +110,8 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
                       ),
                       onClose: () => _setStatus(jobs[i], 'closed'),
                       onReopen: () => _setStatus(jobs[i], 'open'),
+                      onPromote: () =>
+                          showPromoteSheet(context, jobId: jobs[i].id),
                     ),
                   );
                 },
@@ -162,6 +165,7 @@ class _MyJobCard extends StatelessWidget {
     required this.onEdit,
     required this.onClose,
     required this.onReopen,
+    required this.onPromote,
   });
 
   final Job job;
@@ -169,6 +173,7 @@ class _MyJobCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onClose;
   final VoidCallback onReopen;
+  final VoidCallback onPromote;
 
   @override
   Widget build(BuildContext context) {
@@ -204,15 +209,21 @@ class _MyJobCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (job.isBoosted) ...[
+                  const JzTopBadge(),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
                 _StatusChip(status: job.status),
                 PopupMenuButton<String>(
                   onSelected: (v) => switch (v) {
+                    'promote' => onPromote(),
                     'edit' => onEdit(),
                     'close' => onClose(),
                     'reopen' => onReopen(),
                     _ => null,
                   },
                   itemBuilder: (_) => [
+                    PopupMenuItem(value: 'promote', child: Text(l.promoteCta)),
                     PopupMenuItem(value: 'edit', child: Text(l.jobEditAction)),
                     if (job.status == 'closed')
                       PopupMenuItem(
