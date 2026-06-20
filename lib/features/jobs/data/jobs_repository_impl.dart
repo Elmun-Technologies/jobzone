@@ -25,20 +25,36 @@ class JobsRepositoryImpl implements JobsRepository {
         .from('job_feed')
         .select()
         .eq('status', 'open')
+        // Active paid promotions float to the top, then by recency.
+        .order('boost_active', ascending: false)
         .order('posted_at', ascending: !recentFirst)
         .limit(limit);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
 
+  /// Stable sort that floats boosted jobs to the front (offline ordering).
+  List<Job> _boostedFirst(Iterable<Job> jobs) {
+    final list = jobs.toList();
+    final boosted = [
+      for (final j in list)
+        if (j.isBoosted) j,
+    ];
+    final rest = [
+      for (final j in list)
+        if (!j.isBoosted) j,
+    ];
+    return [...boosted, ...rest];
+  }
+
   @override
   Future<List<Job>> recent({int limit = 10}) async {
-    if (!_live) return mockJobs.take(limit).toList();
+    if (!_live) return _boostedFirst(mockJobs).take(limit).toList();
     return _query(limit: limit);
   }
 
   @override
   Future<List<Job>> suggested({int limit = 10}) async {
-    if (!_live) return mockJobs.reversed.take(limit).toList();
+    if (!_live) return _boostedFirst(mockJobs.reversed).take(limit).toList();
     // A real ranking against user_preferences lands in a later phase.
     return _query(limit: limit, recentFirst: false);
   }
@@ -73,13 +89,14 @@ class JobsRepositoryImpl implements JobsRepository {
   @override
   Future<List<Job>> byCompany(String companyId, {int limit = 20}) async {
     if (!_live) {
-      return mockJobs.where((j) => j.companyId == companyId).toList();
+      return _boostedFirst(mockJobs.where((j) => j.companyId == companyId));
     }
     final rows = await _client
         .from('job_feed')
         .select()
         .eq('company_id', companyId)
         .eq('status', 'open')
+        .order('boost_active', ascending: false)
         .order('posted_at', ascending: false)
         .limit(limit);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
