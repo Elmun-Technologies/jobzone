@@ -493,5 +493,8 @@
   "messageCandidate": "Message",
   "switchToEmployer": "Switch to Employer",
   "switchToSeeker": "Switch to Job Seeker",
-  "valPhoneRequired": "Enter a valid phone number"
+  "valPhoneRequired": "Enter a valid phone number",
+  "genderMale": "Male",
+  "genderFemale": "Female",
+  "genderOther": "Other"
 }

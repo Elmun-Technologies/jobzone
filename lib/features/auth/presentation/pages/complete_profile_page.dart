@@ -191,10 +191,19 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                     initialValue: _gender,
                     isExpanded: true,
                     hint: Text(l.selectOption),
-                    items: const [
-                      DropdownMenuItem(value: 'male', child: Text('Male')),
-                      DropdownMenuItem(value: 'female', child: Text('Female')),
-                      DropdownMenuItem(value: 'other', child: Text('Other')),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'male',
+                        child: Text(l.genderMale),
+                      ),
+                      DropdownMenuItem(
+                        value: 'female',
+                        child: Text(l.genderFemale),
+                      ),
+                      DropdownMenuItem(
+                        value: 'other',
+                        child: Text(l.genderOther),
+                      ),
                     ],
                     onChanged: (v) => setState(() => _gender = v),
                   ),

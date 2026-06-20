@@ -77,7 +77,8 @@ class ApplicationsRepository {
       );
       return;
     }
-    final uid = _client.auth.currentUser!.id;
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return;
     await _client.from('applications').insert({
       'job_id': job.id,
       'applicant_id': uid,
