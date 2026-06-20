@@ -41,6 +41,7 @@ import '../../features/employer/presentation/company/manage_gallery_page.dart';
 import '../../features/employer/presentation/company/manage_people_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
+import '../../features/monetization/presentation/promotions_history_page.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
 import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
@@ -302,6 +303,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.employerCompanyGallery,
         builder: (c, s) => const ManageGalleryPage(),
+      ),
+      GoRoute(
+        path: Routes.employerPromotions,
+        builder: (c, s) => const PromotionsHistoryPage(),
       ),
 
       // Explore children

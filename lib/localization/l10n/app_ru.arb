@@ -501,5 +501,11 @@
   "choosePackage": "Выберите пакет",
   "buyCta": "Купить",
   "promotedToast": "Вакансия поднята в топ",
-  "freeLabel": "Бесплатно"
+  "freeLabel": "Бесплатно",
+  "promotionsTitle": "Продвижения",
+  "noPromotionsTitle": "Пока нет продвижений",
+  "orderStatusPaid": "Оплачено",
+  "orderStatusPending": "Ожидает оплаты",
+  "orderStatusCancelled": "Отменено",
+  "orderStatusRefunded": "Возвращено"
 }

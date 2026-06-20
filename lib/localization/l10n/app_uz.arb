@@ -501,5 +501,11 @@
   "choosePackage": "Paketni tanlang",
   "buyCta": "Sotib olish",
   "promotedToast": "Vakansiya tepaga chiqarildi",
-  "freeLabel": "Bepul"
+  "freeLabel": "Bepul",
+  "promotionsTitle": "Reklamalar",
+  "noPromotionsTitle": "Hozircha reklama yo'q",
+  "orderStatusPaid": "To'langan",
+  "orderStatusPending": "Kutilmoqda",
+  "orderStatusCancelled": "Bekor qilingan",
+  "orderStatusRefunded": "Qaytarilgan"
 }

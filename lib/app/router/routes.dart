@@ -106,4 +106,5 @@ abstract final class Routes {
   static const employerCompanyEdit = '/employer/company/edit';
   static const employerCompanyPeople = '/employer/company/people';
   static const employerCompanyGallery = '/employer/company/gallery';
+  static const employerPromotions = '/employer/promotions';
 }

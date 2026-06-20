@@ -138,6 +138,11 @@ class _CompanyView extends StatelessWidget {
           label: l.manageGalleryTitle,
           onTap: () => context.push(Routes.employerCompanyGallery),
         ),
+        _ManageRow(
+          icon: Icons.bolt_outlined,
+          label: l.promotionsTitle,
+          onTap: () => context.push(Routes.employerPromotions),
+        ),
         if (company.about != null && company.about!.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),
           Text(l.companyAboutLabel, style: context.text.titleSmall),
