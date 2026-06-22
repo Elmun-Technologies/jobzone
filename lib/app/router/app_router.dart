@@ -275,6 +275,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => PostJobPage(job: s.extra as Job?),
       ),
       GoRoute(
+        path: '/employer/jobs/:id/duplicate',
+        builder: (c, s) => PostJobPage(job: s.extra as Job?, duplicate: true),
+      ),
+      GoRoute(
         path: '/employer/jobs/:id/applicants',
         builder: (c, s) => JobApplicantsPage(
           jobId: s.pathParameters['id']!,

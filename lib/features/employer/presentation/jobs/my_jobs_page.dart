@@ -112,6 +112,10 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
                       onReopen: () => _setStatus(jobs[i], 'open'),
                       onPromote: () =>
                           showPromoteSheet(context, jobId: jobs[i].id),
+                      onDuplicate: () => context.push(
+                        Routes.employerDuplicateJob(jobs[i].id),
+                        extra: jobs[i],
+                      ),
                     ),
                   );
                 },
@@ -166,6 +170,7 @@ class _MyJobCard extends StatelessWidget {
     required this.onClose,
     required this.onReopen,
     required this.onPromote,
+    required this.onDuplicate,
   });
 
   final Job job;
@@ -174,6 +179,7 @@ class _MyJobCard extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onReopen;
   final VoidCallback onPromote;
+  final VoidCallback onDuplicate;
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +224,7 @@ class _MyJobCard extends StatelessWidget {
                   onSelected: (v) => switch (v) {
                     'promote' => onPromote(),
                     'edit' => onEdit(),
+                    'duplicate' => onDuplicate(),
                     'close' => onClose(),
                     'reopen' => onReopen(),
                     _ => null,
@@ -225,6 +232,10 @@ class _MyJobCard extends StatelessWidget {
                   itemBuilder: (_) => [
                     PopupMenuItem(value: 'promote', child: Text(l.promoteCta)),
                     PopupMenuItem(value: 'edit', child: Text(l.jobEditAction)),
+                    PopupMenuItem(
+                      value: 'duplicate',
+                      child: Text(l.jobDuplicateAction),
+                    ),
                     if (job.status == 'closed')
                       PopupMenuItem(
                         value: 'reopen',

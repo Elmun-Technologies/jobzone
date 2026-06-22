@@ -34,9 +34,13 @@ const _kLicenseCategories = [
 /// Create or edit a job posting. Pass [job] (via the edit route's `extra`) to
 /// prefill the form for editing; omit it to create a new posting.
 class PostJobPage extends ConsumerStatefulWidget {
-  const PostJobPage({super.key, this.job});
+  const PostJobPage({super.key, this.job, this.duplicate = false});
 
   final Job? job;
+
+  /// When true, [job] only prefills the form and a NEW posting is created
+  /// (used by "duplicate / use as template").
+  final bool duplicate;
 
   @override
   ConsumerState<PostJobPage> createState() => _PostJobPageState();
@@ -100,7 +104,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   bool _saving = false;
   bool _generating = false;
 
-  bool get _isEdit => widget.job != null;
+  bool get _isEdit => widget.job != null && !widget.duplicate;
 
   @override
   void dispose() {
