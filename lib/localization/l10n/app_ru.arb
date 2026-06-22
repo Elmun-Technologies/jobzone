@@ -447,6 +447,7 @@
   "jobCloseAction": "Закрыть",
   "jobReopenAction": "Открыть снова",
   "jobEditAction": "Изменить",
+  "jobDuplicateAction": "Использовать как шаблон",
   "noJobsTitle": "Пока нет вакансий",
   "noJobsBody": "Разместите первую вакансию, чтобы получать отклики.",
   "editJobTitle": "Изменить вакансию",

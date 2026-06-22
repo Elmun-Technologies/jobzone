@@ -103,6 +103,8 @@ abstract final class Routes {
   // Employer detail routes (pushed above the shell).
   static const employerPostJob = '/employer/jobs/new';
   static String employerEditJob(String id) => '/employer/jobs/$id/edit';
+  static String employerDuplicateJob(String id) =>
+      '/employer/jobs/$id/duplicate';
   static String employerJobApplicants(String id) =>
       '/employer/jobs/$id/applicants';
   static String employerJobApplicantsMap(String id) =>

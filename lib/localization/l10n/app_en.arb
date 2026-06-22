@@ -447,6 +447,7 @@
   "jobCloseAction": "Close",
   "jobReopenAction": "Reopen",
   "jobEditAction": "Edit",
+  "jobDuplicateAction": "Use as template",
   "noJobsTitle": "No jobs yet",
   "noJobsBody": "Post your first job to start receiving applicants.",
   "editJobTitle": "Edit Job",

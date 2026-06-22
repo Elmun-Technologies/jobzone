@@ -447,6 +447,7 @@
   "jobCloseAction": "Yopish",
   "jobReopenAction": "Qayta ochish",
   "jobEditAction": "Tahrirlash",
+  "jobDuplicateAction": "Shablon sifatida ishlatish",
   "noJobsTitle": "Hozircha vakansiya yo'q",
   "noJobsBody": "Birinchi vakansiyangizni joylang va arizalar qabul qilishni boshlang.",
   "editJobTitle": "Vakansiyani tahrirlash",
