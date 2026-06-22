@@ -10,6 +10,7 @@ class AppFlags {
     required this.onboardingSeen,
     required this.profileComplete,
     this.role = UserRole.jobSeeker,
+    this.roleChosen = false,
   });
 
   final bool onboardingSeen;
@@ -20,14 +21,20 @@ class AppFlags {
   /// offline/dev mode has no session to read a role from.
   final UserRole role;
 
+  /// Whether the user has explicitly picked a role (vs the [role] default). New
+  /// accounts must choose at registration before proceeding (incl. Google).
+  final bool roleChosen;
+
   AppFlags copyWith({
     bool? onboardingSeen,
     bool? profileComplete,
     UserRole? role,
+    bool? roleChosen,
   }) => AppFlags(
     onboardingSeen: onboardingSeen ?? this.onboardingSeen,
     profileComplete: profileComplete ?? this.profileComplete,
     role: role ?? this.role,
+    roleChosen: roleChosen ?? this.roleChosen,
   );
 }
 
@@ -41,6 +48,7 @@ class AppFlagsController extends Notifier<AppFlags> {
       role:
           UserRole.fromWire(prefs.getString(CacheKeys.userRole)) ??
           UserRole.jobSeeker,
+      roleChosen: prefs.getBool(CacheKeys.userRoleChosen) ?? false,
     );
   }
 
@@ -59,10 +67,24 @@ class AppFlagsController extends Notifier<AppFlags> {
   }
 
   Future<void> setRole(UserRole role) async {
-    await ref
-        .read(sharedPreferencesProvider)
-        .setString(CacheKeys.userRole, role.wire);
-    state = state.copyWith(role: role);
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString(CacheKeys.userRole, role.wire);
+    await prefs.setBool(CacheKeys.userRoleChosen, true);
+    state = state.copyWith(role: role, roleChosen: true);
+  }
+
+  /// Clears per-account onboarding state on sign-out so the next account starts
+  /// clean (re-chooses role + completes its own setup). Onboarding-seen stays.
+  Future<void> reset() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(CacheKeys.profileSetupComplete);
+    await prefs.remove(CacheKeys.userRole);
+    await prefs.remove(CacheKeys.userRoleChosen);
+    state = state.copyWith(
+      profileComplete: false,
+      role: UserRole.jobSeeker,
+      roleChosen: false,
+    );
   }
 }
 

@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
-import '../../../../shared/enums/enums.dart';
-import '../../../auth/application/role_controller.dart';
 import '../../data/applicants_repository.dart';
 import '../../data/company_admin_repository.dart';
 import '../../data/employer_stats_provider.dart';
@@ -34,35 +32,20 @@ class EmployerDashboardPage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              Row(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.dashboardGreeting,
-                          style: context.text.bodyMedium?.copyWith(
-                            color: context.colors.textSecondary,
-                          ),
-                        ),
-                        Text(
-                          company?.name ?? l.navDashboard,
-                          style: context.text.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    l.dashboardGreeting,
+                    style: context.text.bodyMedium?.copyWith(
+                      color: context.colors.textSecondary,
                     ),
                   ),
-                  TextButton.icon(
-                    onPressed: () async {
-                      await applyRole(ref, UserRole.jobSeeker);
-                      if (context.mounted) context.go(Routes.home);
-                    },
-                    icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-                    label: Text(l.switchToSeeker),
+                  Text(
+                    company?.name ?? l.navDashboard,
+                    style: context.text.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ],
               ),
