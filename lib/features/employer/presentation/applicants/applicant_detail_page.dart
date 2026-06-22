@@ -10,6 +10,9 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../../applications/domain/application.dart';
 import '../../../applications/presentation/util/status_label.dart';
 import '../../../chat/domain/chat_models.dart';
+import '../../../reviews/data/worker_reviews_repository.dart';
+import '../../../reviews/domain/worker_review.dart';
+import '../../../reviews/presentation/widgets/star_rating_input.dart';
 import '../../data/applicants_repository.dart';
 import '../../domain/applicant.dart';
 
@@ -96,6 +99,82 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
     );
   }
 
+  Future<void> _rateWorker() async {
+    final l = context.l10n;
+    var rating = 5;
+    var reliability = 5;
+    final note = TextEditingController();
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (c) => Padding(
+        padding: EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          top: AppSpacing.lg,
+          bottom: MediaQuery.of(c).viewInsets.bottom + AppSpacing.lg,
+        ),
+        child: StatefulBuilder(
+          builder: (c, setSheet) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.rateWorker,
+                style: context.text.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(l.ratingQuality, style: context.text.labelLarge),
+              StarRatingInput(
+                rating: rating,
+                onChanged: (v) => setSheet(() => rating = v),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(l.reliability, style: context.text.labelLarge),
+              StarRatingInput(
+                rating: reliability,
+                onChanged: (v) => setSheet(() => reliability = v),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              JzTextField(
+                controller: note,
+                hint: l.reviewNoteHint,
+                maxLines: 3,
+                minLines: 2,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              JzPrimaryButton(
+                label: l.submit,
+                onPressed: () => Navigator.pop(c, true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (saved == true) {
+      await ref
+          .read(workerReviewsRepositoryProvider)
+          .submit(
+            WorkerReview(
+              workerId: _applicant.workerId,
+              jobId: _applicant.jobId,
+              rating: rating,
+              reliability: reliability,
+              body: note.text.trim().isEmpty ? null : note.text.trim(),
+            ),
+          );
+      ref.invalidate(workerReputationProvider(_applicant.workerId));
+      if (mounted) showInfoSnack(context, l.reviewThanks);
+    }
+    note.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -168,11 +247,56 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                             ),
                           ),
                         ),
+                        Consumer(
+                          builder: (c, ref, _) {
+                            final rep = ref
+                                .watch(workerReputationProvider(a.workerId))
+                                .value;
+                            if (rep == null || !rep.hasReviews) {
+                              return const SizedBox.shrink();
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.sm,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.shield_outlined,
+                                    size: 16,
+                                    color: colors.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${rep.reliabilityScore}/100 · '
+                                    '${rep.reviewCount}',
+                                    style: context.text.bodySmall?.copyWith(
+                                      color: colors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _AppliedFor(jobTitle: a.jobTitle),
+                  const SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: _rateWorker,
+                      icon: const Icon(Icons.star_outline_rounded, size: 18),
+                      label: Text(l.rateWorker),
+                      style: OutlinedButton.styleFrom(
+                        shape: const StadiumBorder(),
+                      ),
+                    ),
+                  ),
                   if (a.skills.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xl),
                     Text(

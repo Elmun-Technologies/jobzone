@@ -558,5 +558,10 @@
   "no": "No",
   "answerAllRequired": "Please answer all required questions",
   "aiGenerate": "AI Generate",
-  "aiNeedTitle": "Enter a job title first"
+  "aiNeedTitle": "Enter a job title first",
+  "rateWorker": "Rate candidate",
+  "ratingQuality": "Quality",
+  "reliability": "Reliability",
+  "reviewNoteHint": "Add a note (optional)",
+  "reviewThanks": "Review submitted"
 }

@@ -9,6 +9,7 @@ List<Applicant> seedApplicants() => [
   Applicant(
     id: 'app-1',
     jobId: 'mock-1',
+    workerId: 'u-madina',
     jobTitle: 'Senior Flutter Engineer',
     name: 'Madina Karimova',
     headline: 'Senior Mobile Engineer · 6y',
@@ -32,6 +33,7 @@ List<Applicant> seedApplicants() => [
   Applicant(
     id: 'app-2',
     jobId: 'mock-1',
+    workerId: 'u-bekzod',
     jobTitle: 'Senior Flutter Engineer',
     name: 'Bekzod Aliyev',
     headline: 'Flutter Developer · 4y',
@@ -56,6 +58,7 @@ List<Applicant> seedApplicants() => [
   Applicant(
     id: 'app-3',
     jobId: 'mock-3',
+    workerId: 'u-nodira',
     jobTitle: 'Backend Developer (Node.js)',
     name: 'Nodira Yusupova',
     headline: 'Backend Engineer · 5y',
@@ -76,6 +79,7 @@ List<Applicant> seedApplicants() => [
   Applicant(
     id: 'app-4',
     jobId: 'mock-5',
+    workerId: 'u-jasur',
     jobTitle: 'Flutter Intern',
     name: 'Jasur Toshmatov',
     headline: 'CS Student · Flutter enthusiast',

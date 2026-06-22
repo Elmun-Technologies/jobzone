@@ -558,5 +558,10 @@
   "no": "Нет",
   "answerAllRequired": "Ответьте на все обязательные вопросы",
   "aiGenerate": "AI генерация",
-  "aiNeedTitle": "Сначала введите название вакансии"
+  "aiNeedTitle": "Сначала введите название вакансии",
+  "rateWorker": "Оценить кандидата",
+  "ratingQuality": "Качество",
+  "reliability": "Надёжность",
+  "reviewNoteHint": "Заметка (необязательно)",
+  "reviewThanks": "Отзыв отправлен"
 }
