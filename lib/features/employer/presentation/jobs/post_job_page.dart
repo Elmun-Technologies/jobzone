@@ -182,13 +182,20 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
+      // Resolve the category id to its human label so the prompt reads cleanly.
+      final cats =
+          ref.read(jobCategoriesProvider).value ?? const <JobCategory>[];
+      final named = cats.where((c) => c.id == _categoryId).map((c) => c.name);
+      final categoryName = named.isEmpty ? null : named.first;
+      final locale = Localizations.localeOf(context).languageCode;
       final d = await ref
           .read(aiContentRepositoryProvider)
           .draftJob(
             title: _title.text.trim(),
-            category: _categoryId,
+            category: categoryName,
             jobType: _type,
             skills: skills,
+            locale: locale,
           );
       if (!mounted) return;
       setState(() {

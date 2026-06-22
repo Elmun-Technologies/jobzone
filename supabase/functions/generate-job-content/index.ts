@@ -1,16 +1,33 @@
 // generate-job-content — AI assist for employers (job-post drafting + applicant
 // ranking).
 //
-// STUB: returns template-based drafts and rule-based (skill-overlap) ranking —
-// NO external API key required. Swap the `draft`/`rank` bodies for a Claude call
-// later; the request/response contract stays the same so callers don't change.
+// `draft` writes the job-post sections (description / responsibilities /
+// requirements / benefits). When ANTHROPIC_API_KEY is set it calls the Claude
+// Messages API for real, localized, on-topic copy; otherwise it falls back to
+// the built-in templates so the "AI Генерация" button always works (offline, in
+// dev, or before a key is provisioned). `rank` is rule-based (skill overlap).
+// The request/response contract is identical in every mode, so callers never
+// change.
 //
-// Optional function secret: EDGE_SHARED_SECRET
+// Optional function secrets:
+//   ANTHROPIC_API_KEY  — enables real Claude drafting (else templates)
+//   EDGE_SHARED_SECRET — gates the endpoint (x-edge-secret header)
 
 import { corsHeaders, json } from "../_shared/cors.ts";
 
-function draft(input: Record<string, unknown>) {
-  const title = (String(input.title ?? "").trim()) || "this role";
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+const CLAUDE_MODEL = "claude-opus-4-8";
+
+interface Draft {
+  description: string;
+  responsibilities: string;
+  requirements: string;
+  benefits: string;
+}
+
+// ── Template fallback (no key required) ──────────────────────────────────────
+function templateDraft(input: Record<string, unknown>): Draft {
+  const title = String(input.title ?? "").trim() || "this role";
   const skills = Array.isArray(input.skills) ? input.skills.map(String) : [];
   const skillList = skills.length ? skills.join(", ") : "the required skills";
   return {
@@ -27,6 +44,104 @@ function draft(input: Record<string, unknown>) {
   };
 }
 
+// ── Real Claude drafting ─────────────────────────────────────────────────────
+const LANG: Record<string, string> = {
+  uz: "Uzbek (Latin script)",
+  ru: "Russian",
+  en: "English",
+};
+
+async function claudeDraft(input: Record<string, unknown>): Promise<Draft> {
+  const title = String(input.title ?? "").trim();
+  const category = String(input.category ?? "").trim();
+  const jobType = String(input.jobType ?? "").trim();
+  const skills = Array.isArray(input.skills) ? input.skills.map(String) : [];
+  const lang = LANG[String(input.locale ?? "uz")] ?? LANG.uz;
+
+  const facts = [
+    `Job title: ${title || "(not specified)"}`,
+    category && `Category: ${category}`,
+    jobType && `Employment type: ${jobType}`,
+    skills.length && `Key skills: ${skills.join(", ")}`,
+  ].filter(Boolean).join("\n");
+
+  const system =
+    "You are a recruiting copywriter for Jobzone, a blue-collar and " +
+    "mass-hiring job marketplace in Uzbekistan. Write a clear, concrete, " +
+    `realistic job posting in ${lang} for hourly / shift work. Keep each ` +
+    "section short and practical. Do NOT invent a salary, company name, or " +
+    "contact details. Do NOT state gender, age, race, religion, or " +
+    "nationality requirements (it is illegal and against our policy).";
+
+  // Force a single tool call so the model returns clean, structured sections.
+  const tool = {
+    name: "emit_job_post",
+    description: "Return the drafted job-post sections.",
+    input_schema: {
+      type: "object",
+      properties: {
+        description: {
+          type: "string",
+          description: "2-4 sentence overview of the role.",
+        },
+        responsibilities: {
+          type: "string",
+          description: "What the worker does; short newline-separated lines.",
+        },
+        requirements: {
+          type: "string",
+          description: "What the worker needs; short newline-separated lines.",
+        },
+        benefits: {
+          type: "string",
+          description: "What the employer offers; short newline-separated lines.",
+        },
+      },
+      required: ["description", "responsibilities", "requirements", "benefits"],
+    },
+  };
+
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 1024,
+      system,
+      tools: [tool],
+      tool_choice: { type: "tool", name: "emit_job_post" },
+      messages: [
+        {
+          role: "user",
+          content: `Draft a job posting from these facts:\n${facts}`,
+        },
+      ],
+    }),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`anthropic ${resp.status}: ${await resp.text()}`);
+  }
+  const data = await resp.json();
+  const block = Array.isArray(data?.content)
+    ? data.content.find(
+      (b: Record<string, unknown>) => b?.type === "tool_use",
+    )
+    : null;
+  const out = (block?.input ?? {}) as Partial<Draft>;
+  return {
+    description: String(out.description ?? ""),
+    responsibilities: String(out.responsibilities ?? ""),
+    requirements: String(out.requirements ?? ""),
+    benefits: String(out.benefits ?? ""),
+  };
+}
+
+// ── Rule-based applicant ranking (skill overlap) ─────────────────────────────
 function rank(input: Record<string, unknown>) {
   const jobSkills = (Array.isArray(input.jobSkills) ? input.jobSkills : [])
     .map((s) => String(s).toLowerCase());
@@ -54,5 +169,15 @@ Deno.serve(async (req) => {
   }
   const body = await req.json().catch(() => ({}));
   if (body?.action === "rank") return json({ ok: true, ...rank(body) });
-  return json({ ok: true, ...draft(body) });
+
+  // draft — real Claude when a key is present, templates otherwise. Any API
+  // error falls back to the template so the button never dead-ends.
+  if (ANTHROPIC_API_KEY) {
+    try {
+      return json({ ok: true, source: "claude", ...(await claudeDraft(body)) });
+    } catch (e) {
+      console.error("claudeDraft failed, using template:", e);
+    }
+  }
+  return json({ ok: true, source: "template", ...templateDraft(body) });
 });

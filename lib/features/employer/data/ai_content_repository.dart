@@ -34,6 +34,7 @@ class AiContentRepository {
     String? category,
     String? jobType,
     List<String> skills = const [],
+    String locale = 'uz',
   }) async {
     if (_live) {
       final res = await _ref
@@ -47,6 +48,7 @@ class AiContentRepository {
               'category': category,
               'jobType': jobType,
               'skills': skills,
+              'locale': locale,
             },
           );
       final m = (res.data as Map?)?.cast<String, dynamic>() ?? const {};
