@@ -7,8 +7,7 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
-import '../../../shared/enums/enums.dart';
-import '../../auth/application/role_controller.dart';
+import '../../../shared/providers/app_flags.dart';
 import '../data/profile_repository.dart';
 import '../domain/user_profile.dart';
 
@@ -110,6 +109,9 @@ class ProfilePage extends ConsumerWidget {
     if (Env.hasSupabase) {
       await ref.read(supabaseClientProvider).auth.signOut();
     }
+    // Clear per-account onboarding (role + profile-complete) so the next
+    // account that signs in starts its own journey from role choice.
+    await ref.read(appFlagsProvider.notifier).reset();
     if (context.mounted) context.go(Routes.welcome);
   }
 
@@ -175,14 +177,6 @@ class ProfilePage extends ConsumerWidget {
               icon: Icons.person_add_alt_1_outlined,
               label: l.inviteFriends,
               onTap: () => context.push(Routes.accountInvite),
-            ),
-            _MenuTile(
-              icon: Icons.business_center_outlined,
-              label: l.switchToEmployer,
-              onTap: () async {
-                await applyRole(ref, UserRole.employer);
-                if (context.mounted) context.go(Routes.employerDashboard);
-              },
             ),
             _MenuTile(
               icon: Icons.logout_rounded,

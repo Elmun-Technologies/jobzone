@@ -23,6 +23,7 @@ String? resolveRedirect({
   required bool profileComplete,
   required String location,
   UserRole role = UserRole.jobSeeker,
+  bool roleChosen = false,
 }) {
   if (!hasSupabase) return null;
   if (location == Routes.splash) return null; // splash performs the first hop
@@ -45,7 +46,15 @@ String? resolveRedirect({
 
   if (!onboardingSeen) return inOnboarding ? null : Routes.onboarding;
   if (!signedIn) return inAuth ? null : Routes.signIn;
-  if (!profileComplete) return inSetup ? null : Routes.completeProfile;
+  if (!profileComplete) {
+    // New accounts must pick a role first. The guard enforces this (not just
+    // per-screen navigation) so Google OAuth — which has no explicit
+    // post-signup hop — also lands on the role-choice screen.
+    if (!roleChosen) {
+      return location == Routes.chooseRole ? null : Routes.chooseRole;
+    }
+    return inSetup ? null : Routes.completeProfile;
+  }
 
   // Past setup: keep each role inside its own area.
   if (isEmployer) {
@@ -65,6 +74,7 @@ String? redirectFromRef(Ref ref, String location) {
     onboardingSeen: ref.read(appFlagsProvider).onboardingSeen,
     profileComplete: ref.read(appFlagsProvider).profileComplete,
     role: ref.read(appFlagsProvider).role,
+    roleChosen: ref.read(appFlagsProvider).roleChosen,
     location: location,
   );
 }

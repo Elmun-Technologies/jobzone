@@ -77,6 +77,7 @@ void main() {
           signedIn: true,
           onboardingSeen: true,
           profileComplete: false,
+          roleChosen: true,
           location: Routes.home,
         ),
         Routes.completeProfile,
@@ -90,6 +91,7 @@ void main() {
           signedIn: true,
           onboardingSeen: true,
           profileComplete: false,
+          roleChosen: true,
           location: Routes.setupJobType,
         ),
         isNull,
@@ -135,6 +137,33 @@ void main() {
           location: Routes.chooseRole,
         ),
         isNull,
+      );
+    });
+
+    test('new signed-in user without a chosen role must choose-role', () {
+      // Covers Google OAuth: signed in, profile incomplete, role not yet picked.
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: false,
+          location: Routes.home,
+        ),
+        Routes.chooseRole,
+      );
+    });
+
+    test('new user must choose-role before complete-profile', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: false,
+          location: Routes.completeProfile,
+        ),
+        Routes.chooseRole,
       );
     });
 
@@ -190,6 +219,7 @@ void main() {
           onboardingSeen: true,
           profileComplete: false,
           role: UserRole.employer,
+          roleChosen: true,
           location: Routes.setupJobType,
         ),
         Routes.completeProfile,
@@ -204,6 +234,7 @@ void main() {
           onboardingSeen: true,
           profileComplete: false,
           role: UserRole.employer,
+          roleChosen: true,
           location: Routes.employerOnboard,
         ),
         isNull,
