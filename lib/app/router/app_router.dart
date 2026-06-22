@@ -74,6 +74,8 @@ import '../../features/profile/presentation/edit/volunteer_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/profile/presentation/your_profile_page.dart';
 import '../../features/reviews/presentation/write_review_page.dart';
+import '../../features/search/domain/job_collection.dart';
+import '../../features/search/presentation/collection_results_page.dart';
 import '../../features/search/presentation/explore_page.dart';
 import '../../features/search/presentation/filter_page.dart';
 import '../../features/search/presentation/search_page.dart';
@@ -321,6 +323,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.recentJobs,
         builder: (c, s) => const SeeAllJobsPage(kind: SeeAllKind.recent),
+      ),
+      GoRoute(
+        path: '/collection/:key',
+        builder: (c, s) => CollectionResultsPage(
+          collection:
+              JobCollection.fromKey(s.pathParameters['key']) ??
+              JobCollection.freshers,
+        ),
       ),
       GoRoute(
         path: '/jobs/:id',

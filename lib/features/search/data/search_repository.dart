@@ -67,6 +67,8 @@ class SearchRepository {
           (j.city?.toLowerCase() != f.city!.toLowerCase())) {
         return false;
       }
+      if (f.womenFriendly && !j.womenFriendly) return false;
+      if (f.nightShift && !j.nightShift) return false;
       return true;
     }).toList();
 
