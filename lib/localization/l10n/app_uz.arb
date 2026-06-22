@@ -540,5 +540,12 @@
   "yes": "Ha",
   "fieldWorkAddress": "Ish manzili",
   "pickOnMap": "Xaritada tanlash",
-  "useThisLocation": "Shu joyni tanlash"
+  "useThisLocation": "Shu joyni tanlash",
+  "workerCardHint": "Ish beruvchilar sizni shunday ko'radi",
+  "desiredPay": "Kutilayotgan maosh",
+  "availabilityLabel": "Tayyorlik",
+  "availImmediate": "Hozir tayyor",
+  "availTwoWeeks": "Ikki haftada",
+  "availFlexible": "Moslashuvchan",
+  "verifyPhone": "Telefonni tasdiqlash"
 }

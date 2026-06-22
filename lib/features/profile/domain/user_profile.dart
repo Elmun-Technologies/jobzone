@@ -14,6 +14,12 @@ class UserProfile {
     this.isOpenToWork = true,
     this.seekingStatus = SeekingStatus.activelyLooking,
     this.role = UserRole.jobSeeker,
+    this.phoneVerified = false,
+    this.workerVerified = false,
+    this.desiredPayMin,
+    this.desiredPayMax,
+    this.desiredPayCurrency = 'UZS',
+    this.availability,
     this.experiences = const [],
     this.educations = const [],
     this.skills = const [],
@@ -30,6 +36,16 @@ class UserProfile {
   final bool isOpenToWork;
   final SeekingStatus seekingStatus;
   final UserRole role;
+
+  /// Trust signals (admin-granted / phone-OTP; see migration 0016).
+  final bool phoneVerified;
+  final bool workerVerified;
+
+  /// Blue-collar worker card: desired pay range + availability.
+  final num? desiredPayMin;
+  final num? desiredPayMax;
+  final String desiredPayCurrency;
+  final String? availability; // immediate / two_weeks / flexible
   final List<ExperienceEntry> experiences;
   final List<EducationEntry> educations;
   final List<String> skills;
