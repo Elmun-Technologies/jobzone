@@ -16,6 +16,7 @@ class Applicant {
     required this.appliedAt,
     this.coverLetter,
     this.history = const [],
+    this.screeningQA = const [],
   });
 
   /// The application id (used as the key for status updates).
@@ -31,6 +32,9 @@ class Applicant {
   final String? coverLetter;
   final List<StatusEvent> history;
 
+  /// Screening Q&A as shown to the employer (question + display-ready answer).
+  final List<({String question, String answer})> screeningQA;
+
   Applicant copyWith({ApplicationStatus? status, List<StatusEvent>? history}) =>
       Applicant(
         id: id,
@@ -44,5 +48,6 @@ class Applicant {
         appliedAt: appliedAt,
         coverLetter: coverLetter,
         history: history ?? this.history,
+        screeningQA: screeningQA,
       );
 }

@@ -36,8 +36,10 @@ class ApplicantsRepository {
     final rows = await client
         .from('applications')
         .select(
-          'id, current_status, applied_at, cover_letter, '
-          'job_id, jobs!inner(title, company_id, companies!inner(owner_id)), '
+          'id, current_status, applied_at, cover_letter, answers, '
+          'job_id, '
+          'jobs!inner(title, screening_questions, company_id, '
+          'companies!inner(owner_id)), '
           'profiles_public(full_name, headline, avatar_url)',
         )
         .eq('jobs.companies.owner_id', uid)
@@ -59,8 +61,9 @@ class ApplicantsRepository {
     final rows = await client
         .from('applications')
         .select(
-          'id, current_status, applied_at, cover_letter, '
-          'job_id, jobs(title), profiles_public(full_name, headline, avatar_url)',
+          'id, current_status, applied_at, cover_letter, answers, '
+          'job_id, jobs(title, screening_questions), '
+          'profiles_public(full_name, headline, avatar_url)',
         )
         .eq('job_id', jobId)
         .order('applied_at', ascending: false);
@@ -139,7 +142,29 @@ class ApplicantsRepository {
           ApplicationStatus.submitted,
       appliedAt: DateTime.tryParse('${r['applied_at']}') ?? DateTime.now(),
       coverLetter: r['cover_letter'] as String?,
+      screeningQA: _screeningQA(job?['screening_questions'], r['answers']),
     );
+  }
+
+  /// Zips a job's screening questions with an application's answers into
+  /// display-ready (question, answer) pairs (booleans → 'yes'/'no').
+  List<({String question, String answer})> _screeningQA(
+    Object? questions,
+    Object? answers,
+  ) {
+    final qs = questions is List ? questions : const [];
+    final ans = answers is Map ? answers.cast<String, dynamic>() : const {};
+    final out = <({String question, String answer})>[];
+    for (final q in qs) {
+      if (q is! Map) continue;
+      final id = q['id'] as String?;
+      if (id == null || !ans.containsKey(id)) continue;
+      final v = ans[id];
+      final a = v is bool ? (v ? 'yes' : 'no') : '$v';
+      if (a.trim().isEmpty) continue;
+      out.add((question: (q['label'] ?? '') as String, answer: a));
+    }
+    return out;
   }
 
   void _seedOffline() {

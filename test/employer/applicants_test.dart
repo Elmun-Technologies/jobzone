@@ -18,6 +18,15 @@ void main() {
       expect(forJob1.every((a) => a.jobId == 'mock-1'), isTrue);
     });
 
+    test('applicant carries screening Q&A from the offline seed', () async {
+      final app1 = (await repo().applicantsForJob(
+        'mock-1',
+      )).firstWhere((a) => a.id == 'app-1');
+      expect(app1.screeningQA, isNotEmpty);
+      expect(app1.screeningQA.first.question, contains('Flutter'));
+      expect(app1.screeningQA.any((qa) => qa.answer == 'yes'), isTrue);
+    });
+
     test('allApplicants spans multiple jobs', () async {
       final all = await repo().allApplicants();
       expect(all.map((a) => a.jobId).toSet().length, greaterThan(1));
