@@ -10,10 +10,14 @@ class ApplicationsController extends AsyncNotifier<List<Application>> {
   Future<List<Application>> build() =>
       ref.read(applicationsRepositoryProvider).myApplications();
 
-  Future<void> apply({required Job job, String? coverLetter}) async {
+  Future<void> apply({
+    required Job job,
+    String? coverLetter,
+    Map<String, dynamic>? answers,
+  }) async {
     await ref
         .read(applicationsRepositoryProvider)
-        .apply(job: job, coverLetter: coverLetter);
+        .apply(job: job, coverLetter: coverLetter, answers: answers);
     ref.invalidateSelf();
     await future;
   }

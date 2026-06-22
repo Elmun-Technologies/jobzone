@@ -4,6 +4,7 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../jobs/data/categories_repository.dart';
 import '../../jobs/domain/job.dart';
+import '../../jobs/domain/screening_question.dart';
 import 'mock_employer.dart';
 
 /// Write-side jobs repository for employers: list, create, edit and open/close
@@ -65,6 +66,7 @@ class EmployerJobsRepository {
     String? responsibilities,
     String? requirements,
     String? benefits,
+    List<ScreeningQuestion> screeningQuestions = const [],
     String status = 'open',
   }) async {
     if (!_live) {
@@ -98,6 +100,7 @@ class EmployerJobsRepository {
         responsibilities: responsibilities,
         requirements: requirements,
         benefits: benefits,
+        screeningQuestions: screeningQuestions,
         postedAt: DateTime.now(),
         status: status,
       );
@@ -140,6 +143,9 @@ class EmployerJobsRepository {
           if (requirements != null && requirements.isNotEmpty)
             'requirements': requirements,
           if (benefits != null && benefits.isNotEmpty) 'benefits': benefits,
+          'screening_questions': screeningQuestions
+              .map((q) => q.toMap())
+              .toList(),
         })
         .select()
         .single();
@@ -183,6 +189,9 @@ class EmployerJobsRepository {
           'responsibilities': job.responsibilities,
           'requirements': job.requirements,
           'benefits': job.benefits,
+          'screening_questions': job.screeningQuestions
+              .map((q) => q.toMap())
+              .toList(),
         })
         .eq('id', job.id)
         .select()

@@ -10,6 +10,7 @@ import '../../../../shared/enums/enums.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
+import '../../../jobs/domain/screening_question.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'widgets/job_location_picker.dart';
 
@@ -63,6 +64,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late final _address = TextEditingController(text: widget.job?.addressText);
   late double? _lat = widget.job?.lat;
   late double? _lng = widget.job?.lng;
+  late List<ScreeningQuestion> _questions = [
+    ...?widget.job?.screeningQuestions,
+  ];
   bool _saving = false;
 
   bool get _isEdit => widget.job != null;
@@ -135,6 +139,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             responsibilities: _responsibilities.text.trim(),
             requirements: _requirements.text.trim(),
             benefits: _benefits.text.trim(),
+            screeningQuestions: _questions
+                .where((q) => q.label.trim().isNotEmpty)
+                .toList(),
             status: status,
           ),
         );
@@ -163,6 +170,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           responsibilities: _responsibilities.text.trim(),
           requirements: _requirements.text.trim(),
           benefits: _benefits.text.trim(),
+          screeningQuestions: _questions
+              .where((q) => q.label.trim().isNotEmpty)
+              .toList(),
           status: status,
         );
       }
@@ -412,6 +422,11 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       maxLines: 4,
                       minLines: 3,
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _ScreeningEditor(
+                      questions: _questions,
+                      onChanged: (q) => setState(() => _questions = q),
+                    ),
                   ],
                 ),
               ),
@@ -489,6 +504,107 @@ class _Dropdown extends StatelessWidget {
               DropdownMenuItem(value: e.key, child: Text(e.value)),
           ],
           onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+/// Repeatable editor for a job's screening questions (label + type + required).
+/// Emits a new list on every change; empty-label rows are dropped on submit.
+class _ScreeningEditor extends StatelessWidget {
+  const _ScreeningEditor({required this.questions, required this.onChanged});
+
+  final List<ScreeningQuestion> questions;
+  final ValueChanged<List<ScreeningQuestion>> onChanged;
+
+  void _set(int i, ScreeningQuestion q) => onChanged([...questions]..[i] = q);
+  void _removeAt(int i) => onChanged([...questions]..removeAt(i));
+  void _add() => onChanged([
+    ...questions,
+    ScreeningQuestion(
+      id: 'q${DateTime.now().microsecondsSinceEpoch}',
+      label: '',
+    ),
+  ]);
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l.screeningSection, style: context.text.labelLarge),
+        const SizedBox(height: AppSpacing.sm),
+        for (var i = 0; i < questions.length; i++)
+          Padding(
+            key: ValueKey(questions[i].id),
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: questions[i].label,
+                        decoration: InputDecoration(
+                          hintText: l.questionTextHint,
+                          isDense: true,
+                        ),
+                        onChanged: (v) =>
+                            _set(i, questions[i].copyWith(label: v)),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => _removeAt(i),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: questions[i].type,
+                        isDense: true,
+                        items: [
+                          DropdownMenuItem(
+                            value: 'text',
+                            child: Text(l.qTypeText),
+                          ),
+                          DropdownMenuItem(
+                            value: 'yesno',
+                            child: Text(l.qTypeYesNo),
+                          ),
+                          DropdownMenuItem(
+                            value: 'number',
+                            child: Text(l.qTypeNumber),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            _set(i, questions[i].copyWith(type: v ?? 'text')),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    FilterChip(
+                      label: Text(l.questionRequired),
+                      selected: questions[i].required,
+                      onSelected: (v) =>
+                          _set(i, questions[i].copyWith(required: v)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: _add,
+            icon: const Icon(Icons.add_rounded, size: 18),
+            label: Text(l.addQuestion),
+            style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
+          ),
         ),
       ],
     );

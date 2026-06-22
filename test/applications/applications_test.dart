@@ -21,4 +21,19 @@ void main() {
     expect(after.first.status, ApplicationStatus.submitted);
     expect(after.first.coverLetter, 'Hello');
   });
+
+  test('apply persists screening answers (offline)', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    await container
+        .read(applicationsControllerProvider.notifier)
+        .apply(
+          job: mockJobs.first,
+          answers: const {'q-exp': '5', 'q-remote': true},
+        );
+    final apps = container.read(applicationsControllerProvider).value ?? [];
+    expect(apps.first.answers['q-exp'], '5');
+    expect(apps.first.answers['q-remote'], true);
+  });
 }

@@ -547,5 +547,14 @@
   "availImmediate": "Hozir tayyor",
   "availTwoWeeks": "Ikki haftada",
   "availFlexible": "Moslashuvchan",
-  "verifyPhone": "Telefonni tasdiqlash"
+  "verifyPhone": "Telefonni tasdiqlash",
+  "screeningSection": "Nomzodga savollar",
+  "addQuestion": "Savol qo'shish",
+  "questionTextHint": "Nomzodlarga savol",
+  "qTypeText": "Matn",
+  "qTypeYesNo": "Ha / Yo'q",
+  "qTypeNumber": "Raqam",
+  "questionRequired": "Majburiy",
+  "no": "Yo'q",
+  "answerAllRequired": "Barcha majburiy savollarga javob bering"
 }

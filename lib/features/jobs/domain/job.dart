@@ -1,3 +1,5 @@
+import 'screening_question.dart';
+
 /// A job posting, flattened with the company display fields (mirrors the
 /// `job_feed` view in Postgres and the Meilisearch document).
 class Job {
@@ -39,6 +41,7 @@ class Job {
     this.boostedUntil,
     this.boostKind,
     this.expiresAt,
+    this.screeningQuestions = const [],
   });
 
   final String id;
@@ -88,6 +91,10 @@ class Job {
   final DateTime? boostedUntil;
   final String? boostKind; // 'top' / 'featured'
   final DateTime? expiresAt;
+
+  /// Screening questions authored on the posting; answers land in
+  /// `applications.answers` keyed by each question's id.
+  final List<ScreeningQuestion> screeningQuestions;
 
   /// True while a paid promotion is active.
   bool get isBoosted =>
@@ -199,6 +206,15 @@ class Job {
       expiresAt: m['expires_at'] != null
           ? DateTime.tryParse('${m['expires_at']}')
           : null,
+      screeningQuestions:
+          (m['screening_questions'] as List?)
+              ?.map(
+                (e) => ScreeningQuestion.fromMap(
+                  (e as Map).cast<String, dynamic>(),
+                ),
+              )
+              .toList() ??
+          const [],
     );
   }
 
@@ -240,6 +256,7 @@ class Job {
     DateTime? boostedUntil,
     String? boostKind,
     DateTime? expiresAt,
+    List<ScreeningQuestion>? screeningQuestions,
   }) => Job(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -278,5 +295,6 @@ class Job {
     boostedUntil: boostedUntil ?? this.boostedUntil,
     boostKind: boostKind ?? this.boostKind,
     expiresAt: expiresAt ?? this.expiresAt,
+    screeningQuestions: screeningQuestions ?? this.screeningQuestions,
   );
 }
