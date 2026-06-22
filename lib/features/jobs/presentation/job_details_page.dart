@@ -328,6 +328,31 @@ class _AboutTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        if (job.womenFriendly || job.disabilityFriendly)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                if (job.womenFriendly)
+                  _MarkerChip(
+                    icon: Icons.diversity_1_rounded,
+                    label: l.fieldWomenFriendly,
+                  ),
+                if (job.disabilityFriendly)
+                  _MarkerChip(
+                    icon: Icons.accessible_rounded,
+                    label: l.fieldDisabilityFriendly,
+                  ),
+              ],
+            ),
+          ),
+        if (job.showPhoneOnListing && (job.contactPhone?.isNotEmpty ?? false))
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: _ContactTile(phone: job.contactPhone!),
+          ),
         if (job.description != null && job.description!.isNotEmpty)
           _Section(
             title: l.aboutThisJob,
@@ -363,12 +388,38 @@ class _AboutTab extends StatelessWidget {
               children: [for (final s in job.skills) _SkillChip(s)],
             ),
           ),
+        if (job.driverLicenses.isNotEmpty)
+          _Section(
+            title: l.driverLicenseLabel,
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [for (final c in job.driverLicenses) _SkillChip(c)],
+            ),
+          ),
+        if (job.languages.isNotEmpty)
+          _Section(
+            title: l.languagesLabel,
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final lang in job.languages)
+                  _SkillChip(jobLanguageLabel(context, lang)),
+              ],
+            ),
+          ),
         _Section(
           title: l.jobSummary,
           child: Column(
             children: [
               if (job.categoryName != null)
                 _SummaryRow(label: l.jobCategory, value: job.categoryName!),
+              if (job.salaryText != null)
+                _SummaryRow(
+                  label: l.payBasisLabel,
+                  value: job.salaryGross ? l.salaryGross : l.salaryNet,
+                ),
               if (job.addressText != null && job.addressText!.isNotEmpty)
                 _SummaryRow(label: l.fieldWorkAddress, value: job.addressText!),
               if (schedulePatternLabel(context, job.schedulePattern) != null)
@@ -532,6 +583,87 @@ class _SkillChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Text(label, style: context.text.labelMedium),
+    );
+  }
+}
+
+/// Inclusive marker pill (women-friendly / disability-friendly).
+class _MarkerChip extends StatelessWidget {
+  const _MarkerChip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: colors.primary),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: context.text.labelMedium?.copyWith(
+              color: colors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Employer contact phone shown on the listing (when the employer opted in).
+class _ContactTile extends StatelessWidget {
+  const _ContactTile({required this.phone});
+  final String phone;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: colors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.phone_rounded, color: colors.primary),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.fieldContactPhone,
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+                SelectableText(
+                  phone,
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
