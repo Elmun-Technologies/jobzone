@@ -1,3 +1,4 @@
+import '../../../core/utils/geo.dart';
 import '../../../shared/enums/enums.dart';
 import '../../applications/domain/application.dart';
 
@@ -18,6 +19,10 @@ class Applicant {
     this.coverLetter,
     this.history = const [],
     this.screeningQA = const [],
+    this.lat,
+    this.lng,
+    this.jobLat,
+    this.jobLng,
   });
 
   /// The application id (used as the key for status updates).
@@ -39,6 +44,18 @@ class Applicant {
   /// Screening Q&A as shown to the employer (question + display-ready answer).
   final List<({String question, String answer})> screeningQA;
 
+  /// Candidate's home coordinates and the job's coordinates (distance origin),
+  /// both nullable. Carried on the row so the cross-job inbox can show a
+  /// per-applicant distance without re-fetching each job.
+  final double? lat;
+  final double? lng;
+  final double? jobLat;
+  final double? jobLng;
+
+  /// Commute distance candidate → job in km, or null if either side has no
+  /// location (graceful: such applicants sort last and show no badge).
+  double? get distanceKm => geoDistanceKm(lat, lng, jobLat, jobLng);
+
   Applicant copyWith({ApplicationStatus? status, List<StatusEvent>? history}) =>
       Applicant(
         id: id,
@@ -54,5 +71,9 @@ class Applicant {
         coverLetter: coverLetter,
         history: history ?? this.history,
         screeningQA: screeningQA,
+        lat: lat,
+        lng: lng,
+        jobLat: jobLat,
+        jobLng: jobLng,
       );
 }

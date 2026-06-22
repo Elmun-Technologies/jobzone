@@ -465,6 +465,19 @@
   "jobSavedToast": "Job saved",
   "noApplicantsTitle": "No applicants yet",
   "noApplicantsBody": "Applicants will appear here as people apply.",
+  "sortNewest": "Newest",
+  "sortNearest": "Nearest",
+  "mapView": "Map",
+  "applicantsMapTitle": "Applicants map",
+  "mapNoLocations": "No applicant locations to show yet.",
+  "kmAway": "{distance} away",
+  "@kmAway": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
   "updateStatusCta": "Update status",
   "statusUpdatedToast": "Status updated",
   "applicantSkillsLabel": "Skills",

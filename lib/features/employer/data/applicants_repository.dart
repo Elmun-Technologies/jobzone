@@ -38,9 +38,9 @@ class ApplicantsRepository {
         .select(
           'id, applicant_id, current_status, applied_at, cover_letter, '
           'answers, job_id, '
-          'jobs!inner(title, screening_questions, company_id, '
+          'jobs!inner(title, screening_questions, lat, lng, company_id, '
           'companies!inner(owner_id)), '
-          'profiles_public(full_name, headline, avatar_url)',
+          'profiles_public(full_name, headline, avatar_url, lat, lng)',
         )
         .eq('jobs.companies.owner_id', uid)
         .order('applied_at', ascending: false);
@@ -62,8 +62,8 @@ class ApplicantsRepository {
         .from('applications')
         .select(
           'id, applicant_id, current_status, applied_at, cover_letter, '
-          'answers, job_id, jobs(title, screening_questions), '
-          'profiles_public(full_name, headline, avatar_url)',
+          'answers, job_id, jobs(title, screening_questions, lat, lng), '
+          'profiles_public(full_name, headline, avatar_url, lat, lng)',
         )
         .eq('job_id', jobId)
         .order('applied_at', ascending: false);
@@ -130,6 +130,7 @@ class ApplicantsRepository {
   Applicant _fromRow(Map<String, dynamic> r) {
     final job = r['jobs'] as Map<String, dynamic>?;
     final profile = r['profiles_public'] as Map<String, dynamic>?;
+    double? d(Object? v) => (v as num?)?.toDouble();
     return Applicant(
       id: r['id'] as String,
       jobId: (r['job_id'] ?? '') as String,
@@ -144,6 +145,10 @@ class ApplicantsRepository {
       appliedAt: DateTime.tryParse('${r['applied_at']}') ?? DateTime.now(),
       coverLetter: r['cover_letter'] as String?,
       screeningQA: _screeningQA(job?['screening_questions'], r['answers']),
+      lat: d(profile?['lat']),
+      lng: d(profile?['lng']),
+      jobLat: d(job?['lat']),
+      jobLng: d(job?['lng']),
     );
   }
 

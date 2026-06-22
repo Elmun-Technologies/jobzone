@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/geo.dart';
 import '../../../../../design_system/design_system.dart';
+import '../../../../../localization/l10n_extension.dart';
 import '../../../../applications/presentation/util/status_label.dart';
 import '../../../domain/applicant.dart';
 
@@ -58,7 +60,15 @@ class ApplicantCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   const SizedBox(height: AppSpacing.xs),
-                  _StatusPill(applicant: applicant),
+                  Row(
+                    children: [
+                      _StatusPill(applicant: applicant),
+                      if (applicant.distanceKm != null) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        _DistanceBadge(km: applicant.distanceKm!),
+                      ],
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -93,6 +103,28 @@ class _StatusPill extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+/// Commute distance candidate → job, shown next to the status pill.
+class _DistanceBadge extends StatelessWidget {
+  const _DistanceBadge({required this.km});
+  final double km;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.location_on_outlined, size: 14, color: colors.textSecondary),
+        const SizedBox(width: 2),
+        Text(
+          context.l10n.kmAway(formatKm(km)),
+          style: context.text.labelSmall?.copyWith(color: colors.textSecondary),
+        ),
+      ],
     );
   }
 }
