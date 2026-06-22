@@ -17,6 +17,7 @@ extension JobCollectionLabel on JobCollection {
       JobCollection.rotational => l.collectionRotational,
       JobCollection.women => l.collectionWomen,
       JobCollection.nightShift => l.collectionNightShift,
+      JobCollection.disability => l.collectionDisability,
     };
   }
 }

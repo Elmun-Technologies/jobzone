@@ -74,6 +74,13 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late bool _salaryGross = widget.job?.salaryGross ?? true;
   late final Set<String> _licenses = {...?widget.job?.driverLicenses};
   late List<JobLanguage> _languages = [...?widget.job?.languages];
+  late bool _requireCoverLetter = widget.job?.requireCoverLetter ?? false;
+  late bool _disabilityFriendly = widget.job?.disabilityFriendly ?? false;
+  late bool _allowIncompleteResume = widget.job?.allowIncompleteResume ?? false;
+  late bool _showPhone = widget.job?.showPhoneOnListing ?? false;
+  late final _contactPhone = TextEditingController(
+    text: widget.job?.contactPhone,
+  );
   late final _hours = TextEditingController(
     text: widget.job?.hoursPerDay?.toString(),
   );
@@ -105,6 +112,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     _responsibilities.dispose();
     _benefits.dispose();
     _address.dispose();
+    _contactPhone.dispose();
     super.dispose();
   }
 
@@ -187,6 +195,11 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             driverLicenses: _licenses.toList(),
             languages: _languages,
             salaryGross: _salaryGross,
+            requireCoverLetter: _requireCoverLetter,
+            disabilityFriendly: _disabilityFriendly,
+            allowIncompleteResume: _allowIncompleteResume,
+            showPhoneOnListing: _showPhone,
+            contactPhone: _contactPhone.text.trim(),
             currency: _currency,
             categoryId: _categoryId,
             lat: _lat,
@@ -222,6 +235,11 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           driverLicenses: _licenses.toList(),
           languages: _languages,
           salaryGross: _salaryGross,
+          requireCoverLetter: _requireCoverLetter,
+          disabilityFriendly: _disabilityFriendly,
+          allowIncompleteResume: _allowIncompleteResume,
+          showPhoneOnListing: _showPhone,
+          contactPhone: _contactPhone.text.trim(),
           currency: _currency,
           categoryId: _categoryId,
           lat: _lat,
@@ -372,6 +390,13 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       subtitle: Text(l.fieldWomenFriendlyHint),
                       value: _womenFriendly,
                       onChanged: (v) => setState(() => _womenFriendly = v),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.fieldDisabilityFriendly),
+                      subtitle: Text(l.fieldDisabilityFriendlyHint),
+                      value: _disabilityFriendly,
+                      onChanged: (v) => setState(() => _disabilityFriendly = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Row(
@@ -599,6 +624,41 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       questions: _questions,
                       onChanged: (q) => setState(() => _questions = q),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l.responseSettingsSection,
+                      style: context.text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.fieldRequireCoverLetter),
+                      value: _requireCoverLetter,
+                      onChanged: (v) => setState(() => _requireCoverLetter = v),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.fieldAllowIncompleteResume),
+                      subtitle: Text(l.fieldAllowIncompleteResumeHint),
+                      value: _allowIncompleteResume,
+                      onChanged: (v) =>
+                          setState(() => _allowIncompleteResume = v),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.fieldShowPhone),
+                      value: _showPhone,
+                      onChanged: (v) => setState(() => _showPhone = v),
+                    ),
+                    if (_showPhone) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      JzTextField(
+                        label: l.fieldContactPhone,
+                        controller: _contactPhone,
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ],
                   ],
                 ),
               ),

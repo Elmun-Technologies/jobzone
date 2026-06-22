@@ -13,6 +13,7 @@ bool _matches(JobCollection c, dynamic j) => switch (c) {
   JobCollection.rotational => j.jobType == 'rotational',
   JobCollection.women => j.womenFriendly == true,
   JobCollection.nightShift => j.nightShift == true,
+  JobCollection.disability => j.disabilityFriendly == true,
 };
 
 void main() {

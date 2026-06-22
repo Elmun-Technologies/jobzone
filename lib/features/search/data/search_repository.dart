@@ -69,6 +69,7 @@ class SearchRepository {
       }
       if (f.womenFriendly && !j.womenFriendly) return false;
       if (f.nightShift && !j.nightShift) return false;
+      if (f.disabilityFriendly && !j.disabilityFriendly) return false;
       return true;
     }).toList();
 

@@ -33,6 +33,11 @@ class Job {
     this.driverLicenses = const [],
     this.languages = const [],
     this.salaryGross = true,
+    this.requireCoverLetter = false,
+    this.disabilityFriendly = false,
+    this.allowIncompleteResume = false,
+    this.showPhoneOnListing = false,
+    this.contactPhone,
     this.skills = const [],
     this.description,
     this.responsibilities,
@@ -89,6 +94,15 @@ class Job {
   final List<String> driverLicenses;
   final List<JobLanguage> languages;
   final bool salaryGross;
+
+  /// Response settings (hh-style): require a cover letter on apply, an inclusive
+  /// disability-friendly marker, accept candidates with an incomplete resume,
+  /// and an optional [contactPhone] shown on the listing when [showPhoneOnListing].
+  final bool requireCoverLetter;
+  final bool disabilityFriendly;
+  final bool allowIncompleteResume;
+  final bool showPhoneOnListing;
+  final String? contactPhone;
   final List<String> skills;
   final String? description;
   final String? responsibilities;
@@ -213,6 +227,11 @@ class Job {
               .toList() ??
           const [],
       salaryGross: (m['salary_gross'] ?? true) as bool,
+      requireCoverLetter: (m['require_cover_letter'] ?? false) as bool,
+      disabilityFriendly: (m['disability_friendly'] ?? false) as bool,
+      allowIncompleteResume: (m['allow_incomplete_resume'] ?? false) as bool,
+      showPhoneOnListing: (m['show_phone_on_listing'] ?? false) as bool,
+      contactPhone: m['contact_phone'] as String?,
       skills:
           (m['skills_required'] as List?)?.map((e) => '$e').toList() ??
           const [],
@@ -275,6 +294,11 @@ class Job {
     List<String>? driverLicenses,
     List<JobLanguage>? languages,
     bool? salaryGross,
+    bool? requireCoverLetter,
+    bool? disabilityFriendly,
+    bool? allowIncompleteResume,
+    bool? showPhoneOnListing,
+    String? contactPhone,
     List<String>? skills,
     String? description,
     String? responsibilities,
@@ -318,6 +342,11 @@ class Job {
     driverLicenses: driverLicenses ?? this.driverLicenses,
     languages: languages ?? this.languages,
     salaryGross: salaryGross ?? this.salaryGross,
+    requireCoverLetter: requireCoverLetter ?? this.requireCoverLetter,
+    disabilityFriendly: disabilityFriendly ?? this.disabilityFriendly,
+    allowIncompleteResume: allowIncompleteResume ?? this.allowIncompleteResume,
+    showPhoneOnListing: showPhoneOnListing ?? this.showPhoneOnListing,
+    contactPhone: contactPhone ?? this.contactPhone,
     skills: skills ?? this.skills,
     description: description ?? this.description,
     responsibilities: responsibilities ?? this.responsibilities,

@@ -48,6 +48,12 @@ enum JobCollection {
     Icons.nightlight_round,
     Color(0xFF334E68),
     SearchFilters(nightShift: true),
+  ),
+  disability(
+    'disability',
+    Icons.accessible_rounded,
+    Color(0xFF00897B),
+    SearchFilters(disabilityFriendly: true),
   );
 
   const JobCollection(this.key, this.icon, this.accent, this.preset);

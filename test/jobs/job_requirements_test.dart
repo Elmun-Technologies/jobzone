@@ -35,4 +35,31 @@ void main() {
       expect(back.level, 'c1');
     });
   });
+
+  group('Job response settings parsing', () {
+    test('fromMap reads the response-setting flags + contact phone', () {
+      final j = Job.fromMap({
+        'id': 'j3',
+        'require_cover_letter': true,
+        'disability_friendly': true,
+        'allow_incomplete_resume': true,
+        'show_phone_on_listing': true,
+        'contact_phone': '+998901234567',
+      });
+      expect(j.requireCoverLetter, isTrue);
+      expect(j.disabilityFriendly, isTrue);
+      expect(j.allowIncompleteResume, isTrue);
+      expect(j.showPhoneOnListing, isTrue);
+      expect(j.contactPhone, '+998901234567');
+    });
+
+    test('defaults when the columns are absent', () {
+      final j = Job.fromMap({'id': 'j4'});
+      expect(j.requireCoverLetter, isFalse);
+      expect(j.disabilityFriendly, isFalse);
+      expect(j.allowIncompleteResume, isFalse);
+      expect(j.showPhoneOnListing, isFalse);
+      expect(j.contactPhone, isNull);
+    });
+  });
 }
