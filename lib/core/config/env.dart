@@ -20,6 +20,11 @@ class Env {
   /// simulated service. The App Certificate stays server-side (agora-token fn).
   static const String agoraAppId = String.fromEnvironment('AGORA_APP_ID');
 
+  /// Telegram bot username (without `@`) used to build the `t.me` link for the
+  /// notify-bridge handshake. Empty → the connect flow shows the `/start`
+  /// command instead of a deep link.
+  static const String telegramBot = String.fromEnvironment('TELEGRAM_BOT');
+
   static const String flavor = String.fromEnvironment(
     'FLAVOR',
     defaultValue: 'dev',

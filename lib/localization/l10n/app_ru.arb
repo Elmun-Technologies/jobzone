@@ -621,5 +621,6 @@
   "telegramHint": "Получайте уведомления в Telegram",
   "telegramConnectCta": "Подключить",
   "telegramDisconnect": "Отключить",
-  "telegramSendToken": "Откройте бота и отправьте"
+  "telegramSendToken": "Откройте бота и отправьте",
+  "copied": "Скопировано"
 }

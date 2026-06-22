@@ -635,5 +635,6 @@
   "telegramHint": "Get job & applicant alerts on Telegram",
   "telegramConnectCta": "Connect",
   "telegramDisconnect": "Disconnect",
-  "telegramSendToken": "Open our bot and send"
+  "telegramSendToken": "Open our bot and send",
+  "copied": "Copied"
 }

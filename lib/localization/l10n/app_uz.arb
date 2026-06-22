@@ -621,5 +621,6 @@
   "telegramHint": "Telegram orqali ish va nomzod xabarlarini oling",
   "telegramConnectCta": "Ulash",
   "telegramDisconnect": "Uzish",
-  "telegramSendToken": "Botni ochib yuboring"
+  "telegramSendToken": "Botni ochib yuboring",
+  "copied": "Nusxalandi"
 }

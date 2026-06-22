@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/env.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
@@ -172,9 +174,19 @@ class _TelegramTile extends ConsumerWidget {
                     .read(telegramRepositoryProvider)
                     .startLink();
                 ref.invalidate(telegramStatusProvider);
+                // With a bot username configured this is a one-tap t.me deep
+                // link; otherwise the raw /start command. Copied so the user
+                // can paste it straight into the bot chat.
+                final bot = Env.telegramBot;
+                final link = bot.isEmpty
+                    ? '/start $token'
+                    : 'https://t.me/$bot?start=$token';
+                await Clipboard.setData(ClipboardData(text: link));
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text('${l.telegramSendToken}: /start $token'),
+                    content: Text(
+                      '${l.telegramSendToken}: $link  (${l.copied})',
+                    ),
                   ),
                 );
               },
