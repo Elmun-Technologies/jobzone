@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -356,12 +357,15 @@ class _AboutTab extends StatelessWidget {
         if (job.description != null && job.description!.isNotEmpty)
           _Section(
             title: l.aboutThisJob,
-            child: Text(
-              job.description!,
-              style: context.text.bodyMedium?.copyWith(
-                color: colors.textSecondary,
-                height: 1.5,
-              ),
+            child: MarkdownBody(
+              data: job.description!,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                  .copyWith(
+                    p: context.text.bodyMedium?.copyWith(
+                      color: colors.textSecondary,
+                      height: 1.5,
+                    ),
+                  ),
             ),
           ),
         if (job.responsibilities != null && job.responsibilities!.isNotEmpty)

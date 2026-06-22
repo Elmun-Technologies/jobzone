@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/utils/markdown_edit.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
@@ -645,6 +646,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
+                    _MarkdownToolbar(controller: _description),
                     JzTextField(
                       label: l.fieldDescription,
                       controller: _description,
@@ -1011,6 +1013,53 @@ class _LanguagesEditor extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Minimal markdown formatting toolbar for the description field. Inserts
+/// markdown into [controller] at the selection; the seeker job-details renders
+/// it formatted (see job_details_page `MarkdownBody`).
+class _MarkdownToolbar extends StatelessWidget {
+  const _MarkdownToolbar({required this.controller});
+
+  final TextEditingController controller;
+
+  void _apply(MarkdownEdit Function(String, TextSelection) op) {
+    final v = controller.value;
+    final r = op(v.text, v.selection);
+    controller.value = TextEditingValue(text: r.text, selection: r.selection);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.colors.textSecondary;
+    Widget btn(
+      IconData icon,
+      MarkdownEdit Function(String, TextSelection) op,
+    ) => IconButton(
+      icon: Icon(icon, size: 20),
+      color: color,
+      visualDensity: VisualDensity.compact,
+      onPressed: () => _apply(op),
+    );
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          btn(Icons.format_bold_rounded, (t, s) => mdWrap(t, s, '**')),
+          btn(Icons.format_italic_rounded, (t, s) => mdWrap(t, s, '*')),
+          btn(
+            Icons.format_list_bulleted_rounded,
+            (t, s) => mdLinePrefix(t, s, '- '),
+          ),
+          btn(
+            Icons.format_list_numbered_rounded,
+            (t, s) => mdLinePrefix(t, s, '1. '),
+          ),
+        ],
+      ),
     );
   }
 }
