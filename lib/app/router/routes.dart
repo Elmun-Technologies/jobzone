@@ -39,6 +39,9 @@ abstract final class Routes {
   static const suggestedJobs = '/jobs/suggested';
   static const recentJobs = '/jobs/recent';
   static const bookmarks = '/bookmarks';
+
+  /// Quick-find collection results (e.g. `/collection/part_time`).
+  static String collection(String key) => '/collection/$key';
   static String jobDetails(String id) => '/jobs/$id';
   static String applyJob(String id) => '/jobs/$id/apply';
   static String applySuccess(String id) => '/jobs/$id/apply/success';

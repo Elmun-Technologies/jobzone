@@ -55,6 +55,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late String? _schedule = widget.job?.schedulePattern;
   late String? _formalization = widget.job?.formalization;
   late bool _nightShift = widget.job?.nightShift ?? false;
+  late bool _womenFriendly = widget.job?.womenFriendly ?? false;
   late final _hours = TextEditingController(
     text: widget.job?.hoursPerDay?.toString(),
   );
@@ -164,6 +165,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             hoursPerDay: num.tryParse(_hours.text),
             nightShift: _nightShift,
             formalization: _formalization,
+            womenFriendly: _womenFriendly,
             currency: _currency,
             categoryId: _categoryId,
             lat: _lat,
@@ -195,6 +197,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           hoursPerDay: num.tryParse(_hours.text),
           nightShift: _nightShift,
           formalization: _formalization,
+          womenFriendly: _womenFriendly,
           currency: _currency,
           categoryId: _categoryId,
           lat: _lat,
@@ -338,6 +341,13 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       title: Text(l.fieldNightShift),
                       value: _nightShift,
                       onChanged: (v) => setState(() => _nightShift = v),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.fieldWomenFriendly),
+                      subtitle: Text(l.fieldWomenFriendlyHint),
+                      value: _womenFriendly,
+                      onChanged: (v) => setState(() => _womenFriendly = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Row(

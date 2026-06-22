@@ -16,6 +16,7 @@ export interface JobRow {
   hours_per_day?: number | null;
   night_shift?: boolean | null;
   formalization?: string | null;
+  women_friendly?: boolean | null;
   country?: string | null;
   city?: string | null;
   location?: string | null;
@@ -63,6 +64,7 @@ export function toJobDocument(
     hours_per_day: job.hours_per_day ?? null,
     night_shift: job.night_shift ?? false,
     formalization: job.formalization ?? null,
+    women_friendly: job.women_friendly ?? false,
     country: job.country ?? null,
     city: job.city ?? null,
     location: job.location ?? null,
@@ -97,6 +99,7 @@ export const JOBS_SETTINGS = {
     "schedule_pattern",
     "night_shift",
     "formalization",
+    "women_friendly",
     "category_id",
     "company_id",
     "country",

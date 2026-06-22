@@ -14,6 +14,8 @@ class SearchFilters {
     this.salaryMin,
     this.salaryMax,
     this.city,
+    this.womenFriendly = false,
+    this.nightShift = false,
     this.sort = SearchSort.newest,
   });
 
@@ -25,6 +27,11 @@ class SearchFilters {
   final num? salaryMin;
   final num? salaryMax;
   final String? city;
+
+  /// Quick-find facets (set by the Home "collection" presets): women-friendly
+  /// roles and night-shift work.
+  final bool womenFriendly;
+  final bool nightShift;
   final SearchSort sort;
 
   /// Number of active facet filters (excludes the free-text query & sort).
@@ -34,7 +41,9 @@ class SearchFilters {
       workingModels.length +
       titles.length +
       ((salaryMin != null || salaryMax != null) ? 1 : 0) +
-      (city != null && city!.isNotEmpty ? 1 : 0);
+      (city != null && city!.isNotEmpty ? 1 : 0) +
+      (womenFriendly ? 1 : 0) +
+      (nightShift ? 1 : 0);
 
   SearchFilters copyWith({
     String? query,
@@ -47,6 +56,8 @@ class SearchFilters {
     bool clearSalary = false,
     String? city,
     bool clearCity = false,
+    bool? womenFriendly,
+    bool? nightShift,
     SearchSort? sort,
   }) => SearchFilters(
     query: query ?? this.query,
@@ -57,6 +68,8 @@ class SearchFilters {
     salaryMin: clearSalary ? null : (salaryMin ?? this.salaryMin),
     salaryMax: clearSalary ? null : (salaryMax ?? this.salaryMax),
     city: clearCity ? null : (city ?? this.city),
+    womenFriendly: womenFriendly ?? this.womenFriendly,
+    nightShift: nightShift ?? this.nightShift,
     sort: sort ?? this.sort,
   );
 }
@@ -97,6 +110,8 @@ class SearchQuery {
       if (f.salaryMin != null) 'salary_max >= ${f.salaryMin}',
       if (f.salaryMax != null) 'salary_min <= ${f.salaryMax}',
       if (f.city != null && f.city!.isNotEmpty) 'city = "${f.city}"',
+      if (f.womenFriendly) 'women_friendly = true',
+      if (f.nightShift) 'night_shift = true',
     ];
 
     final sort = switch (f.sort) {

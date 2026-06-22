@@ -9,6 +9,7 @@ import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 import '../../notifications/application/notifications_providers.dart';
+import 'widgets/collection_card.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -40,6 +41,10 @@ class HomePage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SectionHeader(title: l.quickFindTitle),
+                  const SizedBox(height: AppSpacing.md),
+                  const JobCollectionsRow(),
+                  const SizedBox(height: AppSpacing.xl),
                   SectionHeader(
                     title: l.suggestedJobs,
                     actionLabel: l.seeAll,

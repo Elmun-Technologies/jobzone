@@ -28,6 +28,7 @@ class Job {
     this.hoursPerDay,
     this.nightShift = false,
     this.formalization,
+    this.womenFriendly = false,
     this.skills = const [],
     this.description,
     this.responsibilities,
@@ -73,6 +74,11 @@ class Job {
   final num? hoursPerDay;
   final bool nightShift;
   final String? formalization;
+
+  /// Employer opt-in marker: the role offers women-friendly conditions
+  /// (safe environment, flexible hours). Surfaced via the "Women-friendly"
+  /// quick-find collection — not an exclusionary "women only" flag.
+  final bool womenFriendly;
   final List<String> skills;
   final String? description;
   final String? responsibilities;
@@ -185,6 +191,7 @@ class Job {
       hoursPerDay: parseNum(m['hours_per_day']),
       nightShift: (m['night_shift'] ?? false) as bool,
       formalization: m['formalization'] as String?,
+      womenFriendly: (m['women_friendly'] ?? false) as bool,
       skills:
           (m['skills_required'] as List?)?.map((e) => '$e').toList() ??
           const [],
@@ -243,6 +250,7 @@ class Job {
     num? hoursPerDay,
     bool? nightShift,
     String? formalization,
+    bool? womenFriendly,
     List<String>? skills,
     String? description,
     String? responsibilities,
@@ -282,6 +290,7 @@ class Job {
     hoursPerDay: hoursPerDay ?? this.hoursPerDay,
     nightShift: nightShift ?? this.nightShift,
     formalization: formalization ?? this.formalization,
+    womenFriendly: womenFriendly ?? this.womenFriendly,
     skills: skills ?? this.skills,
     description: description ?? this.description,
     responsibilities: responsibilities ?? this.responsibilities,
