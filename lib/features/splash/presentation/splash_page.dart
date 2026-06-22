@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
@@ -35,19 +34,7 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: colors.onPrimary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                IconsaxPlusBold.briefcase,
-                size: 48,
-                color: colors.primary,
-              ),
-            ),
+            Image.asset('assets/icon/splash_logo.png', width: 120, height: 120),
             const SizedBox(height: AppSpacing.lg),
             Text(
               context.l10n.appTitle,

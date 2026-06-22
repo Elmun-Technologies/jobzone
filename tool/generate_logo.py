@@ -23,7 +23,11 @@ def _disc(draw, x, y, r, fill):
     draw.ellipse([x - r, y - r, x + r, y + r], fill=fill)
 
 
-def build_sprite():
+def build_sprite(mark_only=False):
+    """The full brand logo, or — when [mark_only] — just the magnifying glass +
+    person (no downward pin tail / ground ellipse). The mark is compact and
+    near-square, so it fills a small launcher icon far better than the full
+    illustration, which wastes the icon on the light pin tail."""
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
@@ -31,13 +35,14 @@ def build_sprite():
     # transparent canvas (matters for the adaptive foreground).
     _disc(d, cx, cy, 700, WHITE)
 
-    # Lavender location-pin: round head + downward teardrop tail.
+    # Lavender location-pin: round head + (full logo only) downward teardrop.
     rp = 655
     _disc(d, cx, cy, rp, LAV)
-    ang = math.radians(33)
-    lx, ly = cx - rp * math.sin(ang), cy + rp * math.cos(ang)
-    rx, ry = cx + rp * math.sin(ang), cy + rp * math.cos(ang)
-    d.polygon([(lx, ly), (rx, ry), (cx, 2570)], fill=LAV)
+    if not mark_only:
+        ang = math.radians(33)
+        lx, ly = cx - rp * math.sin(ang), cy + rp * math.cos(ang)
+        rx, ry = cx + rp * math.sin(ang), cy + rp * math.cos(ang)
+        d.polygon([(lx, ly), (rx, ry), (cx, 2570)], fill=LAV)
 
     # White interior leaves a lavender halo ring (590..655).
     _disc(d, cx, cy, 590, WHITE)
@@ -68,9 +73,12 @@ def build_sprite():
     for p in (p1, p2):
         d.ellipse([p[0] - hw / 2, p[1] - hw / 2, p[0] + hw / 2, p[1] + hw / 2], fill=NAVY)
 
-    # Ground ellipse (thin outline).
-    gcy = 2585
-    d.ellipse([cx - 620, gcy - 95, cx + 620, gcy + 95], outline=GROUND, width=12)
+    # Ground ellipse (full logo only).
+    if not mark_only:
+        gcy = 2585
+        d.ellipse(
+            [cx - 620, gcy - 95, cx + 620, gcy + 95], outline=GROUND, width=12
+        )
 
     return img.crop(img.getbbox())
 
@@ -88,33 +96,36 @@ def place(sprite, size, frac, bg):
 
 def main():
     sprite = build_sprite()
+    # The compact glass+person mark reads far better at launcher size than the
+    # full illustration (whose light pin tail/ground would shrink the glass).
+    mark = build_sprite(mark_only=True)
 
-    # Legacy / iOS / web icon — logo on white, fills the canvas.
-    place(sprite, 1024, 0.90, WHITE).convert("RGB").save("assets/icon/icon.png")
+    # Legacy / iOS / web icon — bold mark on white, filling the canvas.
+    place(mark, 1024, 0.84, WHITE).convert("RGB").save("assets/icon/icon.png")
 
-    # Android adaptive foreground — logo within the ~66% safe zone, transparent.
-    place(sprite, 1024, 0.62, (0, 0, 0, 0)).save("assets/icon/icon_foreground.png")
+    # Android adaptive foreground — mark large within the safe zone, transparent.
+    place(mark, 1024, 0.70, (0, 0, 0, 0)).save("assets/icon/icon_foreground.png")
 
-    # Splash — white badge holding the logo, reads on the indigo splash bg.
+    # Splash — the FULL logo in a white badge, reads on the indigo splash bg.
     splash = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
     ImageDraw.Draw(splash).ellipse([512 - 472, 512 - 472, 512 + 472, 512 + 472], fill=WHITE)
-    logo = place(sprite, 1024, 0.60, (0, 0, 0, 0))
+    logo = place(sprite, 1024, 0.62, (0, 0, 0, 0))
     splash.alpha_composite(logo)
     splash.save("assets/icon/splash_logo.png")
 
-    # Web / PWA icons + favicon (white bg; maskable variants keep the logo in
-    # the ~62% safe zone so launcher masking never clips it).
-    place(sprite, 64, 0.92, WHITE).convert("RGB").save("web/favicon.png")
-    place(sprite, 192, 0.90, WHITE).convert("RGB").save("web/icons/Icon-192.png")
-    place(sprite, 512, 0.90, WHITE).convert("RGB").save("web/icons/Icon-512.png")
-    place(sprite, 192, 0.62, WHITE).convert("RGB").save("web/icons/Icon-maskable-192.png")
-    place(sprite, 512, 0.62, WHITE).convert("RGB").save("web/icons/Icon-maskable-512.png")
+    # Web / PWA icons + favicon (bold mark on white; maskable variants keep the
+    # mark in the ~66% safe zone so launcher masking never clips it).
+    place(mark, 64, 0.92, WHITE).convert("RGB").save("web/favicon.png")
+    place(mark, 192, 0.90, WHITE).convert("RGB").save("web/icons/Icon-192.png")
+    place(mark, 512, 0.90, WHITE).convert("RGB").save("web/icons/Icon-512.png")
+    place(mark, 192, 0.70, WHITE).convert("RGB").save("web/icons/Icon-maskable-192.png")
+    place(mark, 512, 0.70, WHITE).convert("RGB").save("web/icons/Icon-maskable-512.png")
 
     # Side-by-side preview for review (not shipped).
     prev = Image.new("RGB", (1100, 360), (235, 236, 240))
     prev.paste(Image.open("assets/icon/icon.png").resize((320, 320)), (20, 20))
     fg = Image.new("RGBA", (1024, 1024), (255, 255, 255, 255))
-    fg.alpha_composite(place(sprite, 1024, 0.62, (0, 0, 0, 0)))
+    fg.alpha_composite(Image.open("assets/icon/icon_foreground.png"))
     prev.paste(fg.convert("RGB").resize((320, 320)), (390, 20))
     ind = Image.new("RGBA", (1024, 1024), (58, 54, 219, 255))
     ind.alpha_composite(Image.open("assets/icon/splash_logo.png"))
