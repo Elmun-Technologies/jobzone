@@ -105,6 +105,9 @@ abstract final class Routes {
   static String employerEditJob(String id) => '/employer/jobs/$id/edit';
   static String employerJobApplicants(String id) =>
       '/employer/jobs/$id/applicants';
+  static String employerJobApplicantsMap(String id) =>
+      '/employer/jobs/$id/applicants/map';
+  static const employerApplicantsMap = '/employer/applicants/map';
   static String employerApplicant(String id) => '/employer/applicants/$id';
   static const employerCompanyEdit = '/employer/company/edit';
   static const employerCompanyPeople = '/employer/company/people';

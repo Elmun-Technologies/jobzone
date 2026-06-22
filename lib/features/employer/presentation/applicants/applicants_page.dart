@@ -7,13 +7,21 @@ import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../data/applicants_repository.dart';
 import 'widgets/applicant_card.dart';
+import 'widgets/applicant_sort_bar.dart';
 
 /// Cross-job applicant inbox — every applicant across the employer's jobs.
-class ApplicantsPage extends ConsumerWidget {
+class ApplicantsPage extends ConsumerStatefulWidget {
   const ApplicantsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ApplicantsPage> createState() => _ApplicantsPageState();
+}
+
+class _ApplicantsPageState extends ConsumerState<ApplicantsPage> {
+  ApplicantSort _sort = ApplicantSort.newest;
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final async = ref.watch(allApplicantsProvider);
 
@@ -39,24 +47,45 @@ class ApplicantsPage extends ConsumerWidget {
                       message: l.noApplicantsBody,
                     );
                   }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      0,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                    ),
-                    itemCount: applicants.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, i) => ApplicantCard(
-                      applicant: applicants[i],
-                      showJob: true,
-                      onTap: () => context.push(
-                        Routes.employerApplicant(applicants[i].id),
-                        extra: applicants[i],
+                  final sorted = sortApplicants(applicants, _sort);
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                        ),
+                        child: ApplicantSortBar(
+                          sort: _sort,
+                          onSort: (s) => setState(() => _sort = s),
+                          onMap: () =>
+                              context.push(Routes.employerApplicantsMap),
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            0,
+                            AppSpacing.lg,
+                            AppSpacing.lg,
+                          ),
+                          itemCount: sorted.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: AppSpacing.md),
+                          itemBuilder: (context, i) => ApplicantCard(
+                            applicant: sorted[i],
+                            showJob: true,
+                            onTap: () => context.push(
+                              Routes.employerApplicant(sorted[i].id),
+                              extra: sorted[i],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),

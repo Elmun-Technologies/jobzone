@@ -7,18 +7,26 @@ import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../data/applicants_repository.dart';
 import 'widgets/applicant_card.dart';
+import 'widgets/applicant_sort_bar.dart';
 
 /// Applicants for a single job posting.
-class JobApplicantsPage extends ConsumerWidget {
+class JobApplicantsPage extends ConsumerStatefulWidget {
   const JobApplicantsPage({super.key, required this.jobId, this.jobTitle});
 
   final String jobId;
   final String? jobTitle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JobApplicantsPage> createState() => _JobApplicantsPageState();
+}
+
+class _JobApplicantsPageState extends ConsumerState<JobApplicantsPage> {
+  ApplicantSort _sort = ApplicantSort.newest;
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
-    final async = ref.watch(jobApplicantsProvider(jobId));
+    final async = ref.watch(jobApplicantsProvider(widget.jobId));
 
     return Scaffold(
       body: SafeArea(
@@ -26,7 +34,7 @@ class JobApplicantsPage extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: JzTopBar(title: jobTitle ?? l.navApplicants),
+              child: JzTopBar(title: widget.jobTitle ?? l.navApplicants),
             ),
             Expanded(
               child: async.when(
@@ -40,23 +48,45 @@ class JobApplicantsPage extends ConsumerWidget {
                       message: l.noApplicantsBody,
                     );
                   }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      0,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                    ),
-                    itemCount: applicants.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, i) => ApplicantCard(
-                      applicant: applicants[i],
-                      onTap: () => context.push(
-                        Routes.employerApplicant(applicants[i].id),
-                        extra: applicants[i],
+                  final sorted = sortApplicants(applicants, _sort);
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                        ),
+                        child: ApplicantSortBar(
+                          sort: _sort,
+                          onSort: (s) => setState(() => _sort = s),
+                          onMap: () => context.push(
+                            Routes.employerJobApplicantsMap(widget.jobId),
+                          ),
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            0,
+                            AppSpacing.lg,
+                            AppSpacing.lg,
+                          ),
+                          itemCount: sorted.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: AppSpacing.md),
+                          itemBuilder: (context, i) => ApplicantCard(
+                            applicant: sorted[i],
+                            onTap: () => context.push(
+                              Routes.employerApplicant(sorted[i].id),
+                              extra: sorted[i],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),

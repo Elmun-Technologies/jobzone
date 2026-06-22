@@ -16,6 +16,10 @@ List<Applicant> seedApplicants() => [
     skills: const ['Flutter', 'Dart', 'Riverpod', 'CI/CD'],
     status: ApplicationStatus.submitted,
     appliedAt: DateTime(2026, 6, 12),
+    lat: 41.3200,
+    lng: 69.2750,
+    jobLat: 41.3111,
+    jobLng: 69.2797,
     coverLetter:
         'I have shipped several Flutter apps at scale and would love to '
         'bring that experience to your team.',
@@ -40,6 +44,10 @@ List<Applicant> seedApplicants() => [
     skills: const ['Flutter', 'Firebase', 'REST'],
     status: ApplicationStatus.shortlisted,
     appliedAt: DateTime(2026, 6, 11),
+    lat: 41.2000,
+    lng: 69.4000,
+    jobLat: 41.3111,
+    jobLng: 69.2797,
     history: [
       StatusEvent(
         status: ApplicationStatus.submitted,
@@ -65,6 +73,10 @@ List<Applicant> seedApplicants() => [
     skills: const ['Node.js', 'PostgreSQL', 'AWS'],
     status: ApplicationStatus.interview,
     appliedAt: DateTime(2026, 6, 9),
+    lat: 39.6500,
+    lng: 66.9500,
+    jobLat: 39.6270,
+    jobLng: 66.9750,
     history: [
       StatusEvent(
         status: ApplicationStatus.submitted,
@@ -86,6 +98,10 @@ List<Applicant> seedApplicants() => [
     skills: const ['Dart', 'Flutter'],
     status: ApplicationStatus.submitted,
     appliedAt: DateTime(2026, 6, 14),
+    lat: 41.3300,
+    lng: 69.2500,
+    jobLat: 41.2856,
+    jobLng: 69.2034,
     history: [
       StatusEvent(
         status: ApplicationStatus.submitted,

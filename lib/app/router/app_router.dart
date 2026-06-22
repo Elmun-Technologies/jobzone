@@ -33,6 +33,7 @@ import '../../features/companies/presentation/gallery_page.dart';
 import '../../features/companies/presentation/intro_video_page.dart';
 import '../../features/employer/domain/applicant.dart';
 import '../../features/employer/presentation/applicants/applicant_detail_page.dart';
+import '../../features/employer/presentation/applicants/applicants_map_page.dart';
 import '../../features/employer/presentation/applicants/applicants_page.dart';
 import '../../features/employer/presentation/applicants/job_applicants_page.dart';
 import '../../features/employer/presentation/company/company_manage_page.dart';
@@ -279,6 +280,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           jobId: s.pathParameters['id']!,
           jobTitle: (s.extra as Job?)?.title,
         ),
+      ),
+      GoRoute(
+        path: '/employer/jobs/:id/applicants/map',
+        builder: (c, s) => ApplicantsMapPage(jobId: s.pathParameters['id']!),
+      ),
+      // Must precede '/employer/applicants/:id' so "map" isn't read as an id.
+      GoRoute(
+        path: Routes.employerApplicantsMap,
+        builder: (c, s) => const ApplicantsMapPage(),
       ),
       GoRoute(
         path: '/employer/applicants/:id',
