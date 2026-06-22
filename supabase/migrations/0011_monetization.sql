@@ -141,7 +141,11 @@ create trigger trg_apply_promotion
 -- ---------------------------------------------------------------------------
 -- Read model: expose boost state + a computed active flag to the seeker feed.
 -- ---------------------------------------------------------------------------
-create or replace view public.job_feed
+-- Drop first: `jobs` gained boost columns above, so `j.*` shifts the view's
+-- column order — `create or replace view` rejects the rename (42P16). Nothing
+-- in the DB depends on this view (only the meili-reindex edge fn reads it).
+drop view if exists public.job_feed;
+create view public.job_feed
   with (security_invoker = true) as
   select
     j.*,
