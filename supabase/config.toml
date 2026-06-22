@@ -35,7 +35,7 @@ file_size_limit = "50MiB"
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["io.jobzone.app://login-callback"]
+additional_redirect_urls = ["io.jobzone.jobzone://login-callback"]
 jwt_expiry = 3600
 enable_signup = true
 
