@@ -36,8 +36,8 @@ class ApplicantsRepository {
     final rows = await client
         .from('applications')
         .select(
-          'id, current_status, applied_at, cover_letter, answers, '
-          'job_id, '
+          'id, applicant_id, current_status, applied_at, cover_letter, '
+          'answers, job_id, '
           'jobs!inner(title, screening_questions, company_id, '
           'companies!inner(owner_id)), '
           'profiles_public(full_name, headline, avatar_url)',
@@ -61,8 +61,8 @@ class ApplicantsRepository {
     final rows = await client
         .from('applications')
         .select(
-          'id, current_status, applied_at, cover_letter, answers, '
-          'job_id, jobs(title, screening_questions), '
+          'id, applicant_id, current_status, applied_at, cover_letter, '
+          'answers, job_id, jobs(title, screening_questions), '
           'profiles_public(full_name, headline, avatar_url)',
         )
         .eq('job_id', jobId)
@@ -133,6 +133,7 @@ class ApplicantsRepository {
     return Applicant(
       id: r['id'] as String,
       jobId: (r['job_id'] ?? '') as String,
+      workerId: (r['applicant_id'] ?? '') as String,
       jobTitle: (job?['title'] ?? '') as String,
       name: (profile?['full_name'] ?? '') as String,
       headline: profile?['headline'] as String?,

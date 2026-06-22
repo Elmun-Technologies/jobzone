@@ -7,6 +7,7 @@ class Applicant {
   const Applicant({
     required this.id,
     required this.jobId,
+    this.workerId = '',
     required this.jobTitle,
     required this.name,
     this.headline,
@@ -22,6 +23,9 @@ class Applicant {
   /// The application id (used as the key for status updates).
   final String id;
   final String jobId;
+
+  /// The candidate's profile id (`applications.applicant_id`) — for rating them.
+  final String workerId;
   final String jobTitle;
   final String name;
   final String? headline;
@@ -39,6 +43,7 @@ class Applicant {
       Applicant(
         id: id,
         jobId: jobId,
+        workerId: workerId,
         jobTitle: jobTitle,
         name: name,
         headline: headline,
