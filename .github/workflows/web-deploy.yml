@@ -39,8 +39,8 @@ jobs:
       # so it's passed inline; move it to a repo Variable later if preferred.
       - run: >
           flutter build web --release --base-href /jobzone/
-          --dart-define=SUPABASE_URL=https://wajotaeoulizhveparhz.supabase.co
-          --dart-define=SUPABASE_ANON_KEY=sb_publishable_YctSfyzY4fyj-Wbc8AMufA_4ZQE1tOP
+          --dart-define=SUPABASE_URL=https://nzxdnsxwxrstcrumwzwu.supabase.co
+          --dart-define=SUPABASE_ANON_KEY=sb_publishable_3OcEGaXAaF0x5bClTA_PkA_e6FvbeGG
       # enablement: true asks the action to turn on GitHub Pages (Actions
       # source) automatically, so the first deploy doesn't require toggling it
       # by hand in Settings → Pages.
