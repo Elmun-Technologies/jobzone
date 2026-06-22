@@ -175,6 +175,7 @@ final List<Job> mockJobs = [
     salaryPeriod: 'month',
     schedulePattern: '2_2',
     womenFriendly: true,
+    disabilityFriendly: true,
     skills: const ['Kassa apparati', 'Mijozlar bilan muloqot'],
     description: 'Do\'konda xaridorlarga xizmat va kassada hisob-kitob.',
     applicantsCount: 21,

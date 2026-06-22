@@ -16,6 +16,7 @@ class SearchFilters {
     this.city,
     this.womenFriendly = false,
     this.nightShift = false,
+    this.disabilityFriendly = false,
     this.sort = SearchSort.newest,
   });
 
@@ -32,6 +33,7 @@ class SearchFilters {
   /// roles and night-shift work.
   final bool womenFriendly;
   final bool nightShift;
+  final bool disabilityFriendly;
   final SearchSort sort;
 
   /// Number of active facet filters (excludes the free-text query & sort).
@@ -43,7 +45,8 @@ class SearchFilters {
       ((salaryMin != null || salaryMax != null) ? 1 : 0) +
       (city != null && city!.isNotEmpty ? 1 : 0) +
       (womenFriendly ? 1 : 0) +
-      (nightShift ? 1 : 0);
+      (nightShift ? 1 : 0) +
+      (disabilityFriendly ? 1 : 0);
 
   SearchFilters copyWith({
     String? query,
@@ -58,6 +61,7 @@ class SearchFilters {
     bool clearCity = false,
     bool? womenFriendly,
     bool? nightShift,
+    bool? disabilityFriendly,
     SearchSort? sort,
   }) => SearchFilters(
     query: query ?? this.query,
@@ -70,6 +74,7 @@ class SearchFilters {
     city: clearCity ? null : (city ?? this.city),
     womenFriendly: womenFriendly ?? this.womenFriendly,
     nightShift: nightShift ?? this.nightShift,
+    disabilityFriendly: disabilityFriendly ?? this.disabilityFriendly,
     sort: sort ?? this.sort,
   );
 }
@@ -112,6 +117,7 @@ class SearchQuery {
       if (f.city != null && f.city!.isNotEmpty) 'city = "${f.city}"',
       if (f.womenFriendly) 'women_friendly = true',
       if (f.nightShift) 'night_shift = true',
+      if (f.disabilityFriendly) 'disability_friendly = true',
     ];
 
     final sort = switch (f.sort) {

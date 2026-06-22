@@ -57,6 +57,10 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
         }
       }
     }
+    if (job.requireCoverLetter && _text.text.trim().isEmpty) {
+      showErrorSnack(context, context.l10n.valCoverLetterRequired);
+      return;
+    }
     setState(() => _submitting = true);
     try {
       await ref
@@ -143,7 +147,12 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
                                 ),
                               ),
                           ],
-                          Text(l.addText, style: context.text.labelLarge),
+                          Text(
+                            job.requireCoverLetter
+                                ? '${l.addText} *'
+                                : l.addText,
+                            style: context.text.labelLarge,
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                           JzTextField(
                             controller: _text,
