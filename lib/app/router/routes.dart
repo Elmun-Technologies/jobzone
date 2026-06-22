@@ -115,4 +115,6 @@ abstract final class Routes {
   static const employerCompanyPeople = '/employer/company/people';
   static const employerCompanyGallery = '/employer/company/gallery';
   static const employerPromotions = '/employer/promotions';
+  static String checkout(String jobId, String code) =>
+      '/employer/checkout/$jobId/$code';
 }
