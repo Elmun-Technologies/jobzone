@@ -86,5 +86,27 @@ void main() {
       expect(job.schedulePattern, isNull);
       expect(job.formalization, isNull);
     });
+
+    test('parses screening questions from jsonb', () {
+      final job = Job.fromMap({
+        'id': 'j',
+        'title': 't',
+        'company_id': 'c',
+        'company_name': 'co',
+        'screening_questions': [
+          {
+            'id': 'q1',
+            'label': 'Have a license?',
+            'type': 'yesno',
+            'required': true,
+          },
+          {'id': 'q2', 'label': 'Years?', 'type': 'number'},
+        ],
+      });
+      expect(job.screeningQuestions.length, 2);
+      expect(job.screeningQuestions.first.type, 'yesno');
+      expect(job.screeningQuestions.first.required, isTrue);
+      expect(job.screeningQuestions[1].required, isFalse);
+    });
   });
 }

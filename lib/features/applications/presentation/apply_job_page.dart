@@ -10,6 +10,7 @@ import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
+import '../../jobs/domain/screening_question.dart';
 import '../application/applications_controller.dart';
 
 class ApplyJobPage extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _text = TextEditingController();
+  final Map<String, dynamic> _answers = {};
   String? _cvName;
   bool _submitting = false;
 
@@ -46,6 +48,15 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
   }
 
   Future<void> _submit(Job job) async {
+    for (final q in job.screeningQuestions) {
+      if (q.required) {
+        final a = _answers[q.id];
+        if (a == null || (a is String && a.trim().isEmpty)) {
+          showErrorSnack(context, context.l10n.answerAllRequired);
+          return;
+        }
+      }
+    }
     setState(() => _submitting = true);
     try {
       await ref
@@ -53,6 +64,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
           .apply(
             job: job,
             coverLetter: _text.text.trim().isEmpty ? null : _text.text.trim(),
+            answers: _answers.isEmpty ? null : _answers,
           );
       if (mounted) context.go(Routes.applySuccess(widget.jobId));
     } catch (e) {
@@ -112,6 +124,25 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
                           const SizedBox(height: AppSpacing.sm),
                           _UploadBox(fileName: _cvName, onTap: _pickCv),
                           const SizedBox(height: AppSpacing.lg),
+                          if (job.screeningQuestions.isNotEmpty) ...[
+                            Text(
+                              l.screeningSection,
+                              style: context.text.labelLarge,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            for (final q in job.screeningQuestions)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.lg,
+                                ),
+                                child: _ScreeningAnswerField(
+                                  question: q,
+                                  value: _answers[q.id],
+                                  onChanged: (v) =>
+                                      setState(() => _answers[q.id] = v),
+                                ),
+                              ),
+                          ],
                           Text(l.addText, style: context.text.labelLarge),
                           const SizedBox(height: AppSpacing.sm),
                           JzTextField(
@@ -176,6 +207,57 @@ class _UploadBox extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Renders the input for one screening question by type: yes/no chips for
+/// `yesno`, a numeric/text field otherwise. Answers are reported via [onChanged].
+class _ScreeningAnswerField extends StatelessWidget {
+  const _ScreeningAnswerField({
+    required this.question,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final ScreeningQuestion question;
+  final Object? value;
+  final ValueChanged<Object?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final label = question.required ? '${question.label} *' : question.label;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: context.text.labelLarge),
+        const SizedBox(height: AppSpacing.sm),
+        if (question.type == 'yesno')
+          Row(
+            children: [
+              ChoiceChip(
+                label: Text(l.yes),
+                selected: value == true,
+                onSelected: (_) => onChanged(true),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              ChoiceChip(
+                label: Text(l.no),
+                selected: value == false,
+                onSelected: (_) => onChanged(false),
+              ),
+            ],
+          )
+        else
+          TextFormField(
+            initialValue: value is String ? value as String : null,
+            keyboardType: question.type == 'number'
+                ? TextInputType.number
+                : TextInputType.text,
+            onChanged: onChanged,
+          ),
+      ],
     );
   }
 }

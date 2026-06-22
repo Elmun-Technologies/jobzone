@@ -547,5 +547,14 @@
   "availImmediate": "Available now",
   "availTwoWeeks": "In two weeks",
   "availFlexible": "Flexible",
-  "verifyPhone": "Verify phone"
+  "verifyPhone": "Verify phone",
+  "screeningSection": "Screening questions",
+  "addQuestion": "Add question",
+  "questionTextHint": "Question for candidates",
+  "qTypeText": "Text",
+  "qTypeYesNo": "Yes / No",
+  "qTypeNumber": "Number",
+  "questionRequired": "Required",
+  "no": "No",
+  "answerAllRequired": "Please answer all required questions"
 }

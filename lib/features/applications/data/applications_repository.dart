@@ -59,7 +59,11 @@ class ApplicationsRepository {
         .toList();
   }
 
-  Future<void> apply({required Job job, String? coverLetter}) async {
+  Future<void> apply({
+    required Job job,
+    String? coverLetter,
+    Map<String, dynamic>? answers,
+  }) async {
     if (!_live) {
       _seedOffline();
       final now = DateTime.now();
@@ -70,6 +74,7 @@ class ApplicationsRepository {
           status: ApplicationStatus.submitted,
           appliedAt: now,
           coverLetter: coverLetter,
+          answers: answers ?? const {},
           history: [
             StatusEvent(status: ApplicationStatus.submitted, changedAt: now),
           ],
@@ -83,6 +88,7 @@ class ApplicationsRepository {
       'job_id': job.id,
       'applicant_id': uid,
       'cover_letter': coverLetter,
+      'answers': answers ?? <String, dynamic>{},
     });
   }
 

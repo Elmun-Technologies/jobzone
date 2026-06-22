@@ -18,6 +18,7 @@ class Application {
     required this.status,
     required this.appliedAt,
     this.coverLetter,
+    this.answers = const {},
     this.history = const [],
   });
 
@@ -26,5 +27,8 @@ class Application {
   final ApplicationStatus status;
   final DateTime appliedAt;
   final String? coverLetter;
+
+  /// Screening answers keyed by question id (mirrors `applications.answers`).
+  final Map<String, dynamic> answers;
   final List<StatusEvent> history;
 }

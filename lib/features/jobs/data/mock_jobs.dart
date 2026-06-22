@@ -1,4 +1,5 @@
 import '../domain/job.dart';
+import '../domain/screening_question.dart';
 
 /// Sample data used when no Supabase backend is configured, so Home, Job
 /// Details, Search results, etc. render real-looking content offline.
@@ -32,6 +33,19 @@ final List<Job> mockJobs = [
     applicantsCount: 42,
     categoryName: 'Engineering',
     postedAt: DateTime(2026, 6, 10),
+    screeningQuestions: const [
+      ScreeningQuestion(
+        id: 'q-exp',
+        label: 'Years of Flutter experience?',
+        type: 'number',
+        required: true,
+      ),
+      ScreeningQuestion(
+        id: 'q-remote',
+        label: 'Are you comfortable working fully remote?',
+        type: 'yesno',
+      ),
+    ],
   ),
   Job(
     id: 'mock-2',

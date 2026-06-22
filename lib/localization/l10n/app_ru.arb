@@ -547,5 +547,14 @@
   "availImmediate": "Готов сейчас",
   "availTwoWeeks": "Через две недели",
   "availFlexible": "Гибкий график",
-  "verifyPhone": "Подтвердить телефон"
+  "verifyPhone": "Подтвердить телефон",
+  "screeningSection": "Вопросы к кандидату",
+  "addQuestion": "Добавить вопрос",
+  "questionTextHint": "Вопрос кандидатам",
+  "qTypeText": "Текст",
+  "qTypeYesNo": "Да / Нет",
+  "qTypeNumber": "Число",
+  "questionRequired": "Обязательный",
+  "no": "Нет",
+  "answerAllRequired": "Ответьте на все обязательные вопросы"
 }
