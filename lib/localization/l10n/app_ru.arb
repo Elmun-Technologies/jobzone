@@ -563,5 +563,11 @@
   "ratingQuality": "Качество",
   "reliability": "Надёжность",
   "reviewNoteHint": "Заметка (необязательно)",
-  "reviewThanks": "Отзыв отправлен"
+  "reviewThanks": "Отзыв отправлен",
+  "connectTelegram": "Уведомления в Telegram",
+  "telegramConnected": "Подключено",
+  "telegramHint": "Получайте уведомления в Telegram",
+  "telegramConnectCta": "Подключить",
+  "telegramDisconnect": "Отключить",
+  "telegramSendToken": "Откройте бота и отправьте"
 }

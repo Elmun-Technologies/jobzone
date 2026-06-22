@@ -563,5 +563,11 @@
   "ratingQuality": "Quality",
   "reliability": "Reliability",
   "reviewNoteHint": "Add a note (optional)",
-  "reviewThanks": "Review submitted"
+  "reviewThanks": "Review submitted",
+  "connectTelegram": "Telegram alerts",
+  "telegramConnected": "Connected",
+  "telegramHint": "Get job & applicant alerts on Telegram",
+  "telegramConnectCta": "Connect",
+  "telegramDisconnect": "Disconnect",
+  "telegramSendToken": "Open our bot and send"
 }
