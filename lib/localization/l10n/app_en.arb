@@ -540,5 +540,12 @@
   "yes": "Yes",
   "fieldWorkAddress": "Work address",
   "pickOnMap": "Pick location on map",
-  "useThisLocation": "Use this location"
+  "useThisLocation": "Use this location",
+  "workerCardHint": "How employers see you",
+  "desiredPay": "Desired pay",
+  "availabilityLabel": "Availability",
+  "availImmediate": "Available now",
+  "availTwoWeeks": "In two weeks",
+  "availFlexible": "Flexible",
+  "verifyPhone": "Verify phone"
 }

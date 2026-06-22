@@ -10,6 +10,7 @@ import '../application/cv_providers.dart';
 import '../data/profile_repository.dart';
 import '../domain/cv_models.dart';
 import '../domain/user_profile.dart';
+import 'widgets/worker_card.dart';
 
 class YourProfilePage extends ConsumerWidget {
   const YourProfilePage({super.key});
@@ -92,6 +93,22 @@ class _ProfileCards extends ConsumerWidget {
         AppSpacing.lg,
       ),
       children: [
+        if (p != null) ...[
+          WorkerCard(
+            profile: p,
+            skills: skills,
+            onVerifyPhone: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              try {
+                await ref.read(profileRepositoryProvider).confirmPhone();
+                ref.invalidate(currentProfileProvider);
+              } catch (_) {
+                messenger.showSnackBar(SnackBar(content: Text(l.errUnknown)));
+              }
+            },
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         Row(
           children: [
             Expanded(

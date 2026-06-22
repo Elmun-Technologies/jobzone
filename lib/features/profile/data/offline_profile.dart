@@ -17,6 +17,12 @@ class OfflineProfile {
   bool isOpenToWork = true;
   SeekingStatus seekingStatus = SeekingStatus.activelyLooking;
   UserRole role = UserRole.jobSeeker;
+  bool phoneVerified = false;
+  bool workerVerified = true;
+  num? desiredPayMin = 4000000;
+  num? desiredPayMax = 7000000;
+  String desiredPayCurrency = 'UZS';
+  String? availability = 'immediate';
 }
 
 /// Process-wide offline profile instance.

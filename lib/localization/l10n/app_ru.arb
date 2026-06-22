@@ -540,5 +540,12 @@
   "yes": "Да",
   "fieldWorkAddress": "Адрес работы",
   "pickOnMap": "Выбрать на карте",
-  "useThisLocation": "Использовать это место"
+  "useThisLocation": "Использовать это место",
+  "workerCardHint": "Как вас видят работодатели",
+  "desiredPay": "Желаемая оплата",
+  "availabilityLabel": "Готовность",
+  "availImmediate": "Готов сейчас",
+  "availTwoWeeks": "Через две недели",
+  "availFlexible": "Гибкий график",
+  "verifyPhone": "Подтвердить телефон"
 }

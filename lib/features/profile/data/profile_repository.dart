@@ -59,6 +59,12 @@ class ProfileRepository {
       isOpenToWork: offlineProfile.isOpenToWork,
       seekingStatus: offlineProfile.seekingStatus,
       role: offlineProfile.role,
+      phoneVerified: offlineProfile.phoneVerified,
+      workerVerified: offlineProfile.workerVerified,
+      desiredPayMin: offlineProfile.desiredPayMin,
+      desiredPayMax: offlineProfile.desiredPayMax,
+      desiredPayCurrency: offlineProfile.desiredPayCurrency,
+      availability: offlineProfile.availability,
       experiences: [
         for (final e in exps)
           ExperienceEntry(
@@ -121,6 +127,12 @@ class ProfileRepository {
       isOpenToWork: (p['is_open_to_work'] ?? true) as bool,
       seekingStatus: _seekingStatusFromId(p['seeking_status_id'] as int?),
       role: UserRole.fromWire(p['role'] as String?) ?? UserRole.jobSeeker,
+      phoneVerified: p['phone_verified_at'] != null,
+      workerVerified: p['worker_verified_at'] != null,
+      desiredPayMin: p['desired_pay_min'] as num?,
+      desiredPayMax: p['desired_pay_max'] as num?,
+      desiredPayCurrency: (p['desired_pay_currency'] as String?) ?? 'UZS',
+      availability: p['availability'] as String?,
       experiences: (exp as List)
           .map(
             (e) => ExperienceEntry(
@@ -152,6 +164,16 @@ class ProfileRepository {
           .where((s) => s.isNotEmpty)
           .toList(),
     );
+  }
+
+  /// Marks the signed-in user's phone verified. Live: the `confirm_phone` RPC
+  /// (gated on Supabase Auth's phone confirmation); offline: flips the demo flag.
+  Future<void> confirmPhone() async {
+    if (!Env.hasSupabase) {
+      offlineProfile.phoneVerified = true;
+      return;
+    }
+    await _ref.read(supabaseClientProvider).rpc('confirm_phone');
   }
 }
 

@@ -39,6 +39,18 @@ void main() {
     expect(profile.isOpenToWork, isFalse);
   });
 
+  test('worker-card fields load offline and confirmPhone verifies', () async {
+    final repo = container.read(profileRepositoryProvider);
+    final before = (await repo.load())!;
+    expect(before.workerVerified, isTrue);
+    expect(before.phoneVerified, isFalse);
+    expect(before.desiredPayMin, isNotNull);
+    expect(before.availability, 'immediate');
+
+    await repo.confirmPhone();
+    expect((await repo.load())!.phoneVerified, isTrue);
+  });
+
   test('saved experience appears in the loaded profile', () async {
     final cv = container.read(cvRepositoryProvider);
     final before = (await container.read(profileRepositoryProvider).load())!
