@@ -197,6 +197,36 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                       ),
                     ),
                   ],
+                  if (a.screeningQA.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.xl),
+                    Text(l.screeningSection, style: context.text.titleSmall),
+                    const SizedBox(height: AppSpacing.sm),
+                    for (final qa in a.screeningQA)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              qa.question,
+                              style: context.text.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              qa.answer == 'yes'
+                                  ? l.yes
+                                  : qa.answer == 'no'
+                                  ? l.no
+                                  : qa.answer,
+                              style: context.text.bodyMedium?.copyWith(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                   const SizedBox(height: AppSpacing.xl),
                   Text(l.statusTimelineTitle, style: context.text.titleSmall),
                   const SizedBox(height: AppSpacing.md),

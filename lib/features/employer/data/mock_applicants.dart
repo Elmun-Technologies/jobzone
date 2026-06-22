@@ -24,6 +24,10 @@ List<Applicant> seedApplicants() => [
         changedAt: DateTime(2026, 6, 12),
       ),
     ],
+    screeningQA: const [
+      (question: 'Years of Flutter experience?', answer: '6'),
+      (question: 'Are you comfortable working fully remote?', answer: 'yes'),
+    ],
   ),
   Applicant(
     id: 'app-2',
