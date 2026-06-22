@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../localization/l10n_extension.dart';
+import '../../domain/job_language.dart';
 
 /// Localized labels for job attribute wire values (shared by cards & details).
 String? jobTypeLabel(BuildContext c, String? wire) => switch (wire) {
@@ -67,3 +68,24 @@ String? formalizationLabel(BuildContext c, String? wire) => switch (wire) {
   'none' => c.l10n.formNone,
   _ => null,
 };
+
+const _kLanguageNames = {
+  'uz': 'Oʻzbekcha',
+  'ru': 'Русский',
+  'en': 'English',
+  'kk': 'Қазақша',
+  'tr': 'Türkçe',
+  'ar': 'العربية',
+  'ko': '한국어',
+  'zh': '中文',
+  'de': 'Deutsch',
+};
+
+/// A required language as a display chip, e.g. "English · B2" / "Русский · Ona".
+String jobLanguageLabel(BuildContext c, JobLanguage lang) {
+  final name = _kLanguageNames[lang.code] ?? lang.code.toUpperCase();
+  final level = lang.level == 'native'
+      ? c.l10n.cefrNative
+      : lang.level.toUpperCase();
+  return '$name · $level';
+}
