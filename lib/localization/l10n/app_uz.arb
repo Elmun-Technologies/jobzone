@@ -556,5 +556,7 @@
   "qTypeNumber": "Raqam",
   "questionRequired": "Majburiy",
   "no": "Yo'q",
-  "answerAllRequired": "Barcha majburiy savollarga javob bering"
+  "answerAllRequired": "Barcha majburiy savollarga javob bering",
+  "aiGenerate": "AI generatsiya",
+  "aiNeedTitle": "Avval lavozim nomini kiriting"
 }

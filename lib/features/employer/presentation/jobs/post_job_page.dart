@@ -11,6 +11,7 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/domain/screening_question.dart';
+import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'widgets/job_location_picker.dart';
 
@@ -68,6 +69,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     ...?widget.job?.screeningQuestions,
   ];
   bool _saving = false;
+  bool _generating = false;
 
   bool get _isEdit => widget.job != null;
 
@@ -100,6 +102,40 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         _lat = picked.latitude;
         _lng = picked.longitude;
       });
+    }
+  }
+
+  Future<void> _generate() async {
+    if (_title.text.trim().isEmpty) {
+      showInfoSnack(context, context.l10n.aiNeedTitle);
+      return;
+    }
+    setState(() => _generating = true);
+    try {
+      final skills = _skills.text
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      final d = await ref
+          .read(aiContentRepositoryProvider)
+          .draftJob(
+            title: _title.text.trim(),
+            category: _categoryId,
+            jobType: _type,
+            skills: skills,
+          );
+      if (!mounted) return;
+      setState(() {
+        _description.text = d.description;
+        _responsibilities.text = d.responsibilities;
+        _requirements.text = d.requirements;
+        _benefits.text = d.benefits;
+      });
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e.toString());
+    } finally {
+      if (mounted) setState(() => _generating = false);
     }
   }
 
@@ -395,6 +431,26 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(label: l.fieldSkills, controller: _skills),
                     const SizedBox(height: AppSpacing.lg),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: _generating ? null : _generate,
+                        icon: _generating
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.auto_awesome_rounded, size: 18),
+                        label: Text(l.aiGenerate),
+                        style: OutlinedButton.styleFrom(
+                          shape: const StadiumBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
                     JzTextField(
                       label: l.fieldDescription,
                       controller: _description,

@@ -556,5 +556,7 @@
   "qTypeNumber": "Число",
   "questionRequired": "Обязательный",
   "no": "Нет",
-  "answerAllRequired": "Ответьте на все обязательные вопросы"
+  "answerAllRequired": "Ответьте на все обязательные вопросы",
+  "aiGenerate": "AI генерация",
+  "aiNeedTitle": "Сначала введите название вакансии"
 }
