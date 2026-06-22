@@ -17,6 +17,9 @@ export interface JobRow {
   night_shift?: boolean | null;
   formalization?: string | null;
   women_friendly?: boolean | null;
+  driver_licenses?: string[] | null;
+  languages?: unknown;
+  salary_gross?: boolean | null;
   country?: string | null;
   city?: string | null;
   location?: string | null;
@@ -65,6 +68,9 @@ export function toJobDocument(
     night_shift: job.night_shift ?? false,
     formalization: job.formalization ?? null,
     women_friendly: job.women_friendly ?? false,
+    driver_licenses: job.driver_licenses ?? [],
+    languages: job.languages ?? [],
+    salary_gross: job.salary_gross ?? true,
     country: job.country ?? null,
     city: job.city ?? null,
     location: job.location ?? null,
@@ -100,6 +106,7 @@ export const JOBS_SETTINGS = {
     "night_shift",
     "formalization",
     "women_friendly",
+    "driver_licenses",
     "category_id",
     "company_id",
     "country",

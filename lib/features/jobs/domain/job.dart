@@ -1,3 +1,4 @@
+import 'job_language.dart';
 import 'screening_question.dart';
 
 /// A job posting, flattened with the company display fields (mirrors the
@@ -29,6 +30,9 @@ class Job {
     this.nightShift = false,
     this.formalization,
     this.womenFriendly = false,
+    this.driverLicenses = const [],
+    this.languages = const [],
+    this.salaryGross = true,
     this.skills = const [],
     this.description,
     this.responsibilities,
@@ -79,6 +83,12 @@ class Job {
   /// (safe environment, flexible hours). Surfaced via the "Women-friendly"
   /// quick-find collection — not an exclusionary "women only" flag.
   final bool womenFriendly;
+
+  /// Requirements (hh-style): driver-license categories (`B`/`C`/…), required
+  /// [languages], and whether salaryMin/Max are gross (before tax) or net.
+  final List<String> driverLicenses;
+  final List<JobLanguage> languages;
+  final bool salaryGross;
   final List<String> skills;
   final String? description;
   final String? responsibilities;
@@ -192,6 +202,17 @@ class Job {
       nightShift: (m['night_shift'] ?? false) as bool,
       formalization: m['formalization'] as String?,
       womenFriendly: (m['women_friendly'] ?? false) as bool,
+      driverLicenses:
+          (m['driver_licenses'] as List?)?.map((e) => '$e').toList() ??
+          const [],
+      languages:
+          (m['languages'] as List?)
+              ?.map(
+                (e) => JobLanguage.fromMap((e as Map).cast<String, dynamic>()),
+              )
+              .toList() ??
+          const [],
+      salaryGross: (m['salary_gross'] ?? true) as bool,
       skills:
           (m['skills_required'] as List?)?.map((e) => '$e').toList() ??
           const [],
@@ -251,6 +272,9 @@ class Job {
     bool? nightShift,
     String? formalization,
     bool? womenFriendly,
+    List<String>? driverLicenses,
+    List<JobLanguage>? languages,
+    bool? salaryGross,
     List<String>? skills,
     String? description,
     String? responsibilities,
@@ -291,6 +315,9 @@ class Job {
     nightShift: nightShift ?? this.nightShift,
     formalization: formalization ?? this.formalization,
     womenFriendly: womenFriendly ?? this.womenFriendly,
+    driverLicenses: driverLicenses ?? this.driverLicenses,
+    languages: languages ?? this.languages,
+    salaryGross: salaryGross ?? this.salaryGross,
     skills: skills ?? this.skills,
     description: description ?? this.description,
     responsibilities: responsibilities ?? this.responsibilities,

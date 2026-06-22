@@ -10,10 +10,25 @@ import '../../../../shared/enums/enums.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
+import '../../../jobs/domain/job_language.dart';
 import '../../../jobs/domain/screening_question.dart';
 import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'widgets/job_location_picker.dart';
+
+/// Driver-license categories offered as chips on the post-job form.
+const _kLicenseCategories = [
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'BE',
+  'CE',
+  'DE',
+  'TM',
+  'TB',
+];
 
 /// Create or edit a job posting. Pass [job] (via the edit route's `extra`) to
 /// prefill the form for editing; omit it to create a new posting.
@@ -56,6 +71,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late String? _formalization = widget.job?.formalization;
   late bool _nightShift = widget.job?.nightShift ?? false;
   late bool _womenFriendly = widget.job?.womenFriendly ?? false;
+  late bool _salaryGross = widget.job?.salaryGross ?? true;
+  late final Set<String> _licenses = {...?widget.job?.driverLicenses};
+  late List<JobLanguage> _languages = [...?widget.job?.languages];
   late final _hours = TextEditingController(
     text: widget.job?.hoursPerDay?.toString(),
   );
@@ -166,6 +184,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             nightShift: _nightShift,
             formalization: _formalization,
             womenFriendly: _womenFriendly,
+            driverLicenses: _licenses.toList(),
+            languages: _languages,
+            salaryGross: _salaryGross,
             currency: _currency,
             categoryId: _categoryId,
             lat: _lat,
@@ -198,6 +219,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           nightShift: _nightShift,
           formalization: _formalization,
           womenFriendly: _womenFriendly,
+          driverLicenses: _licenses.toList(),
+          languages: _languages,
+          salaryGross: _salaryGross,
           currency: _currency,
           categoryId: _categoryId,
           lat: _lat,
@@ -392,6 +416,30 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       onChanged: (v) => setState(() => _currency = v ?? 'UZS'),
                     ),
                     const SizedBox(height: AppSpacing.lg),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l.payBasisLabel, style: context.text.labelLarge),
+                        const SizedBox(height: AppSpacing.sm),
+                        SegmentedButton<bool>(
+                          segments: [
+                            ButtonSegment(
+                              value: true,
+                              label: Text(l.salaryGross),
+                            ),
+                            ButtonSegment(
+                              value: false,
+                              label: Text(l.salaryNet),
+                            ),
+                          ],
+                          selected: {_salaryGross},
+                          showSelectedIcon: false,
+                          onSelectionChanged: (s) =>
+                              setState(() => _salaryGross = s.first),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     _Dropdown(
                       label: l.payTypeLabel,
                       value: _payType,
@@ -441,6 +489,37 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(label: l.fieldSkills, controller: _skills),
                     const SizedBox(height: AppSpacing.lg),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.driverLicenseLabel,
+                          style: context.text.labelLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          children: [
+                            for (final c in _kLicenseCategories)
+                              FilterChip(
+                                label: Text(c),
+                                selected: _licenses.contains(c),
+                                onSelected: (v) => setState(
+                                  () => v
+                                      ? _licenses.add(c)
+                                      : _licenses.remove(c),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _LanguagesEditor(
+                      languages: _languages,
+                      onChanged: (v) => setState(() => _languages = v),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: OutlinedButton.icon(
@@ -461,6 +540,33 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: context.colors.chipBackground,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                            color: context.colors.textSecondary,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              l.discriminationHint,
+                              style: context.text.bodySmall?.copyWith(
+                                color: context.colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     JzTextField(
                       label: l.fieldDescription,
                       controller: _description,
@@ -669,6 +775,105 @@ class _ScreeningEditor extends StatelessWidget {
             onPressed: _add,
             icon: const Icon(Icons.add_rounded, size: 18),
             label: Text(l.addQuestion),
+            style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Repeatable editor for required languages (language + CEFR level). Language
+/// names are shown as autonyms (no l10n); levels are A1–C2 plus "native".
+class _LanguagesEditor extends StatelessWidget {
+  const _LanguagesEditor({required this.languages, required this.onChanged});
+
+  final List<JobLanguage> languages;
+  final ValueChanged<List<JobLanguage>> onChanged;
+
+  static const _options = {
+    'uz': 'Oʻzbekcha',
+    'ru': 'Русский',
+    'en': 'English',
+    'kk': 'Қазақша',
+    'tr': 'Türkçe',
+    'ar': 'العربية',
+    'ko': '한국어',
+    'zh': '中文',
+    'de': 'Deutsch',
+  };
+  static const _levels = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'native'];
+
+  void _set(int i, JobLanguage v) => onChanged([...languages]..[i] = v);
+  void _removeAt(int i) => onChanged([...languages]..removeAt(i));
+  void _add() =>
+      onChanged([...languages, const JobLanguage(code: 'en', level: 'a1')]);
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l.languagesLabel, style: context.text.labelLarge),
+        const SizedBox(height: AppSpacing.sm),
+        for (var i = 0; i < languages.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _options.containsKey(languages[i].code)
+                        ? languages[i].code
+                        : null,
+                    isDense: true,
+                    isExpanded: true,
+                    hint: Text(l.selectLanguage),
+                    items: [
+                      for (final e in _options.entries)
+                        DropdownMenuItem(value: e.key, child: Text(e.value)),
+                    ],
+                    onChanged: (v) =>
+                        _set(i, languages[i].copyWith(code: v ?? 'en')),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  flex: 2,
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _levels.contains(languages[i].level)
+                        ? languages[i].level
+                        : null,
+                    isDense: true,
+                    isExpanded: true,
+                    items: [
+                      for (final lvl in _levels)
+                        DropdownMenuItem(
+                          value: lvl,
+                          child: Text(
+                            lvl == 'native' ? l.cefrNative : lvl.toUpperCase(),
+                          ),
+                        ),
+                    ],
+                    onChanged: (v) =>
+                        _set(i, languages[i].copyWith(level: v ?? 'a1')),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => _removeAt(i),
+                ),
+              ],
+            ),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: _add,
+            icon: const Icon(Icons.add_rounded, size: 18),
+            label: Text(l.addLanguage),
             style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
           ),
         ),

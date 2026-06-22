@@ -4,6 +4,7 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../jobs/data/categories_repository.dart';
 import '../../jobs/domain/job.dart';
+import '../../jobs/domain/job_language.dart';
 import '../../jobs/domain/screening_question.dart';
 import 'mock_employer.dart';
 
@@ -55,6 +56,9 @@ class EmployerJobsRepository {
     bool nightShift = false,
     String? formalization,
     bool womenFriendly = false,
+    List<String> driverLicenses = const [],
+    List<JobLanguage> languages = const [],
+    bool salaryGross = true,
     String currency = 'UZS',
     String? categoryId,
     double? lat,
@@ -90,6 +94,9 @@ class EmployerJobsRepository {
         nightShift: nightShift,
         formalization: formalization,
         womenFriendly: womenFriendly,
+        driverLicenses: driverLicenses,
+        languages: languages,
+        salaryGross: salaryGross,
         categoryId: categoryId,
         categoryName: CategoriesRepository.byId(categoryId)?.name,
         city: city,
@@ -133,6 +140,9 @@ class EmployerJobsRepository {
           'night_shift': nightShift,
           'formalization': ?formalization,
           'women_friendly': womenFriendly,
+          'driver_licenses': driverLicenses,
+          'languages': languages.map((e) => e.toMap()).toList(),
+          'salary_gross': salaryGross,
           'category_id': ?categoryId,
           'lat': ?lat,
           'lng': ?lng,
@@ -182,6 +192,9 @@ class EmployerJobsRepository {
           'night_shift': job.nightShift,
           'formalization': job.formalization,
           'women_friendly': job.womenFriendly,
+          'driver_licenses': job.driverLicenses,
+          'languages': job.languages.map((e) => e.toMap()).toList(),
+          'salary_gross': job.salaryGross,
           'category_id': job.categoryId,
           'lat': job.lat,
           'lng': job.lng,
