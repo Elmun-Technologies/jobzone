@@ -537,5 +537,8 @@
   "fieldNightShift": "Night shifts",
   "fieldResponsibilities": "Responsibilities",
   "fieldBenefits": "Benefits",
-  "yes": "Yes"
+  "yes": "Yes",
+  "fieldWorkAddress": "Work address",
+  "pickOnMap": "Pick location on map",
+  "useThisLocation": "Use this location"
 }

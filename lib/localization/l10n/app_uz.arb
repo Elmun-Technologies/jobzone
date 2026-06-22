@@ -537,5 +537,8 @@
   "fieldNightShift": "Tungi smenalar",
   "fieldResponsibilities": "Majburiyatlar",
   "fieldBenefits": "Imtiyozlar",
-  "yes": "Ha"
+  "yes": "Ha",
+  "fieldWorkAddress": "Ish manzili",
+  "pickOnMap": "Xaritada tanlash",
+  "useThisLocation": "Shu joyni tanlash"
 }

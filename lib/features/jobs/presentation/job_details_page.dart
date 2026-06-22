@@ -369,6 +369,8 @@ class _AboutTab extends StatelessWidget {
             children: [
               if (job.categoryName != null)
                 _SummaryRow(label: l.jobCategory, value: job.categoryName!),
+              if (job.addressText != null && job.addressText!.isNotEmpty)
+                _SummaryRow(label: l.fieldWorkAddress, value: job.addressText!),
               if (schedulePatternLabel(context, job.schedulePattern) != null)
                 _SummaryRow(
                   label: l.fieldSchedulePattern,

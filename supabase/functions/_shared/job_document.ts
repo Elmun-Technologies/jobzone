@@ -19,6 +19,7 @@ export interface JobRow {
   country?: string | null;
   city?: string | null;
   location?: string | null;
+  address_text?: string | null;
   lat?: number | null;
   lng?: number | null;
   salary_min?: number | null;
@@ -65,6 +66,7 @@ export function toJobDocument(
     country: job.country ?? null,
     city: job.city ?? null,
     location: job.location ?? null,
+    address_text: job.address_text ?? null,
     salary_min: job.salary_min ?? null,
     salary_max: job.salary_max ?? null,
     currency: job.currency ?? null,
