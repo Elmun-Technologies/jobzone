@@ -51,3 +51,4 @@ app.*.map.json
 # Generated localization (run `flutter gen-l10n`)
 /lib/localization/generated/
 
+tool/logo_preview.png
