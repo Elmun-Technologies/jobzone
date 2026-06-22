@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jobzone/features/companies/data/companies_repository.dart';
+import 'package:jobzone/features/companies/domain/company.dart';
 import 'package:jobzone/features/jobs/data/jobs_repository_impl.dart';
 
 void main() {
@@ -41,6 +42,21 @@ void main() {
 
       final nimbusJobs = await jobs.byCompany('c-nimbus');
       expect(nimbusJobs.every((j) => j.companyId == 'c-nimbus'), isTrue);
+    });
+  });
+
+  group('Company.fromMap', () {
+    test('parses verification audit fields', () {
+      final c = Company.fromMap({
+        'id': 'c1',
+        'name': 'Globex',
+        'is_verified': true,
+        'verification_method': 'licensed_agency',
+        'verified_at': '2026-06-20T00:00:00Z',
+      });
+      expect(c.isVerified, isTrue);
+      expect(c.verificationMethod, 'licensed_agency');
+      expect(c.verifiedAt, isNotNull);
     });
   });
 }

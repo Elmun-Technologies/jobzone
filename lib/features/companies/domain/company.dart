@@ -13,6 +13,8 @@ class Company {
     this.headquarters,
     this.introVideoUrl,
     this.isVerified = false,
+    this.verifiedAt,
+    this.verificationMethod,
   });
 
   final String id;
@@ -28,6 +30,10 @@ class Company {
   final String? introVideoUrl;
   final bool isVerified;
 
+  /// Verification audit: when granted and how (`legal_entity`/`licensed_agency`).
+  final DateTime? verifiedAt;
+  final String? verificationMethod;
+
   bool get hasIntroVideo => introVideoUrl != null && introVideoUrl!.isNotEmpty;
 
   Company copyWith({
@@ -42,6 +48,8 @@ class Company {
     String? headquarters,
     String? introVideoUrl,
     bool? isVerified,
+    DateTime? verifiedAt,
+    String? verificationMethod,
   }) => Company(
     id: id,
     name: name ?? this.name,
@@ -55,6 +63,8 @@ class Company {
     headquarters: headquarters ?? this.headquarters,
     introVideoUrl: introVideoUrl ?? this.introVideoUrl,
     isVerified: isVerified ?? this.isVerified,
+    verifiedAt: verifiedAt ?? this.verifiedAt,
+    verificationMethod: verificationMethod ?? this.verificationMethod,
   );
 
   factory Company.fromMap(Map<String, dynamic> m) => Company(
@@ -70,6 +80,10 @@ class Company {
     headquarters: m['headquarters'] as String?,
     introVideoUrl: m['intro_video_url'] as String?,
     isVerified: (m['is_verified'] ?? false) as bool,
+    verifiedAt: m['verified_at'] != null
+        ? DateTime.tryParse('${m['verified_at']}')
+        : null,
+    verificationMethod: m['verification_method'] as String?,
   );
 }
 

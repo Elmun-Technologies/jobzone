@@ -67,10 +67,10 @@ class CompanyHeader extends StatelessWidget {
                   ),
                   if (company.isVerified) ...[
                     const SizedBox(width: AppSpacing.xs),
-                    Icon(
-                      Icons.verified_rounded,
-                      size: 20,
-                      color: colors.primary,
+                    JzTrustBadge(
+                      kind: company.verificationMethod == 'licensed_agency'
+                          ? JzTrustKind.agency
+                          : JzTrustKind.employer,
                     ),
                   ],
                 ],

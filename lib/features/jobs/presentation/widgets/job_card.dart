@@ -81,11 +81,7 @@ class JobCard extends ConsumerWidget {
                           ),
                           if (job.companyVerified) ...[
                             const SizedBox(width: 4),
-                            Icon(
-                              Icons.verified_rounded,
-                              size: 14,
-                              color: colors.primary,
-                            ),
+                            const JzTrustBadge(kind: JzTrustKind.employer),
                           ],
                         ],
                       ),
