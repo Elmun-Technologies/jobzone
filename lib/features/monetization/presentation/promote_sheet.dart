@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
-import '../../../shared/widgets/snackbars.dart';
-import '../../employer/data/employer_jobs_repository.dart';
 import '../data/monetization_repository.dart';
 import 'widgets/promo_package_card.dart';
 
@@ -30,27 +31,15 @@ class _PromoteSheet extends ConsumerStatefulWidget {
 
 class _PromoteSheetState extends ConsumerState<_PromoteSheet> {
   String? _selected;
-  bool _saving = false;
 
-  Future<void> _buy() async {
+  void _continue() {
     final code = _selected;
     if (code == null) return;
-    setState(() => _saving = true);
-    try {
-      await ref
-          .read(monetizationRepositoryProvider)
-          .purchase(jobId: widget.jobId, productCode: code);
-      ref.invalidate(myJobsProvider);
-      ref.invalidate(myOrdersProvider);
-      if (mounted) {
-        showInfoSnack(context, context.l10n.promotedToast);
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+    // Close the sheet, then open checkout (capture the router first — the
+    // sheet's context is deactivated after pop).
+    final router = GoRouter.of(context);
+    Navigator.pop(context);
+    router.push(Routes.checkout(widget.jobId, code));
   }
 
   @override
@@ -116,9 +105,8 @@ class _PromoteSheetState extends ConsumerState<_PromoteSheet> {
           ),
           const SizedBox(height: AppSpacing.sm),
           JzPrimaryButton(
-            label: l.buyCta,
-            loading: _saving,
-            onPressed: _selected == null ? null : _buy,
+            label: l.continueLabel,
+            onPressed: _selected == null ? null : _continue,
           ),
         ],
       ),
