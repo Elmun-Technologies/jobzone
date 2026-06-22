@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -8,31 +7,20 @@ import '../../../../app/router/routes.dart';
 import '../../../../core/utils/geo.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/widgets/jz_map/jz_map.dart';
 import '../../data/applicants_repository.dart';
 import '../../domain/applicant.dart';
 
-/// Applicants plotted on an OpenStreetMap so an employer can see who lives near
-/// the job (solving the commute problem). Reuses the `explore_page` map setup.
-/// [jobId] null → the cross-job inbox; otherwise one job (its location is the
-/// origin pin and map center).
-class ApplicantsMapPage extends ConsumerStatefulWidget {
+/// Applicants plotted on a map so an employer can see who lives near the job
+/// (solving the commute problem). Yandex MapKit on mobile, OSM on web (via
+/// [JzMapView]). [jobId] null → the cross-job inbox; otherwise one job, whose
+/// location is the origin pin and map center.
+class ApplicantsMapPage extends ConsumerWidget {
   const ApplicantsMapPage({super.key, this.jobId});
 
   final String? jobId;
 
-  @override
-  ConsumerState<ApplicantsMapPage> createState() => _ApplicantsMapPageState();
-}
-
-class _ApplicantsMapPageState extends ConsumerState<ApplicantsMapPage> {
-  final _map = MapController();
   static const _tashkent = LatLng(41.3111, 69.2797);
-
-  @override
-  void dispose() {
-    _map.dispose();
-    super.dispose();
-  }
 
   void _showApplicant(BuildContext context, Applicant a) {
     final l = context.l10n;
@@ -80,13 +68,13 @@ class _ApplicantsMapPageState extends ConsumerState<ApplicantsMapPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final colors = context.colors;
     final topPad = MediaQuery.of(context).padding.top;
-    final async = widget.jobId == null
+    final async = jobId == null
         ? ref.watch(allApplicantsProvider)
-        : ref.watch(jobApplicantsProvider(widget.jobId!));
+        : ref.watch(jobApplicantsProvider(jobId!));
 
     final applicants = async.value ?? const <Applicant>[];
     final located = [
@@ -94,7 +82,7 @@ class _ApplicantsMapPageState extends ConsumerState<ApplicantsMapPage> {
         if (a.lat != null && a.lng != null) a,
     ];
     LatLng? origin;
-    if (widget.jobId != null) {
+    if (jobId != null) {
       for (final a in applicants) {
         if (a.jobLat != null && a.jobLng != null) {
           origin = LatLng(a.jobLat!, a.jobLng!);
@@ -102,71 +90,25 @@ class _ApplicantsMapPageState extends ConsumerState<ApplicantsMapPage> {
         }
       }
     }
+    final originPin = origin;
 
     return Scaffold(
       body: Stack(
         children: [
           Positioned.fill(
-            child: FlutterMap(
-              mapController: _map,
-              options: MapOptions(
-                initialCenter: origin ?? _tashkent,
-                initialZoom: origin == null ? 11 : 12,
-                minZoom: 3,
-                maxZoom: 18,
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                ),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'io.jobzone.jobzone',
-                ),
-                MarkerLayer(
-                  markers: [
-                    if (origin != null)
-                      Marker(
-                        point: origin,
-                        width: 44,
-                        height: 44,
-                        alignment: Alignment.topCenter,
-                        child: Icon(
-                          Icons.location_on_rounded,
-                          color: colors.primary,
-                          size: 40,
-                          shadows: const [
-                            Shadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    for (final a in located)
-                      Marker(
-                        point: LatLng(a.lat!, a.lng!),
-                        width: 44,
-                        height: 44,
-                        child: GestureDetector(
-                          onTap: () => _showApplicant(context, a),
-                          child: const Icon(
-                            Icons.person_pin_circle_rounded,
-                            color: Color(0xFF0D80F2),
-                            size: 40,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+            child: JzMapView(
+              initialCenter: originPin ?? _tashkent,
+              initialZoom: originPin == null ? 11 : 12,
+              markers: [
+                if (originPin != null)
+                  JzMapMarker(id: 'job-origin', point: originPin),
+                for (final a in located)
+                  JzMapMarker(
+                    id: 'a-${a.id}',
+                    point: LatLng(a.lat!, a.lng!),
+                    kind: JzMarkerKind.applicant,
+                    onTap: () => _showApplicant(context, a),
+                  ),
               ],
             ),
           ),

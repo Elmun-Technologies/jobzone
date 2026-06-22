@@ -54,6 +54,7 @@ dependencies:
   iconsax_plus: ^1.0.0
   flutter_map: ^8.0.0
   latlong2: ^0.9.0
+  yandex_mapkit: ^4.2.1
 
 # file_picker pins win32 ^5.9.0 while geolocator (via package_info_plus) needs
 # win32 ^6. win32 is Windows-only and this app targets iOS/Android, so we pin
