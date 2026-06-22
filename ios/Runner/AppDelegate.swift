@@ -10,7 +10,7 @@ import YandexMapsMobile
   ) -> Bool {
     // Yandex MapKit. Get a free "MapKit Mobile SDK" key at
     // https://developer.tech.yandex.ru/ and restrict it to this bundle id.
-    YMKMapKit.setApiKey("PASTE_YOUR_YANDEX_MAPKIT_API_KEY")
+    YMKMapKit.setApiKey("1d02f6b0-05d4-4eb6-ae5b-eea72724a6ff")
     YMKMapKit.setLocale("ru_RU")
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
