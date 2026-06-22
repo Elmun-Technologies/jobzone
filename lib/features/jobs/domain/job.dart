@@ -51,6 +51,7 @@ class Job {
     this.boostedUntil,
     this.boostKind,
     this.expiresAt,
+    this.publishAt,
     this.screeningQuestions = const [],
   });
 
@@ -121,6 +122,10 @@ class Job {
   final DateTime? boostedUntil;
   final String? boostKind; // 'top' / 'featured'
   final DateTime? expiresAt;
+
+  /// When set in the future, the job is scheduled: kept as a draft until
+  /// `publish_at` (a backend cron flips it to `open` via `publish_due_jobs()`).
+  final DateTime? publishAt;
 
   /// Screening questions authored on the posting; answers land in
   /// `applications.answers` keyed by each question's id.
@@ -253,6 +258,9 @@ class Job {
       expiresAt: m['expires_at'] != null
           ? DateTime.tryParse('${m['expires_at']}')
           : null,
+      publishAt: m['publish_at'] != null
+          ? DateTime.tryParse('${m['publish_at']}')
+          : null,
       screeningQuestions:
           (m['screening_questions'] as List?)
               ?.map(
@@ -312,6 +320,7 @@ class Job {
     DateTime? boostedUntil,
     String? boostKind,
     DateTime? expiresAt,
+    DateTime? publishAt,
     List<ScreeningQuestion>? screeningQuestions,
   }) => Job(
     id: id ?? this.id,
@@ -360,6 +369,7 @@ class Job {
     boostedUntil: boostedUntil ?? this.boostedUntil,
     boostKind: boostKind ?? this.boostKind,
     expiresAt: expiresAt ?? this.expiresAt,
+    publishAt: publishAt ?? this.publishAt,
     screeningQuestions: screeningQuestions ?? this.screeningQuestions,
   );
 }

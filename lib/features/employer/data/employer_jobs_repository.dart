@@ -78,6 +78,7 @@ class EmployerJobsRepository {
     String? benefits,
     List<ScreeningQuestion> screeningQuestions = const [],
     String status = 'open',
+    DateTime? publishAt,
   }) async {
     if (!_live) {
       final job = Job(
@@ -121,6 +122,7 @@ class EmployerJobsRepository {
         benefits: benefits,
         screeningQuestions: screeningQuestions,
         postedAt: DateTime.now(),
+        publishAt: publishAt,
         status: status,
       );
       mockEmployer.jobs.insert(0, job);
@@ -136,6 +138,7 @@ class EmployerJobsRepository {
           'posted_by': uid,
           'title': title,
           'status': status,
+          'publish_at': ?publishAt?.toIso8601String(),
           'skills_required': skills,
           'job_type': ?jobType,
           'experience_level': ?experienceLevel,
@@ -215,6 +218,7 @@ class EmployerJobsRepository {
           'allow_incomplete_resume': job.allowIncompleteResume,
           'show_phone_on_listing': job.showPhoneOnListing,
           'contact_phone': job.contactPhone,
+          'publish_at': job.publishAt?.toIso8601String(),
           'category_id': job.categoryId,
           'lat': job.lat,
           'lng': job.lng,

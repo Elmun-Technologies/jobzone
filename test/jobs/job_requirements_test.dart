@@ -61,5 +61,12 @@ void main() {
       expect(j.showPhoneOnListing, isFalse);
       expect(j.contactPhone, isNull);
     });
+
+    test('parses publish_at when scheduled, null otherwise', () {
+      final j = Job.fromMap({'id': 'j5', 'publish_at': '2030-01-02T09:00:00Z'});
+      expect(j.publishAt, isNotNull);
+      expect(j.publishAt!.year, 2030);
+      expect(Job.fromMap({'id': 'j6'}).publishAt, isNull);
+    });
   });
 }
