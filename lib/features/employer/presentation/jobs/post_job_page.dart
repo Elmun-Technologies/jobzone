@@ -82,6 +82,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late final _contactPhone = TextEditingController(
     text: widget.job?.contactPhone,
   );
+  late bool _scheduleOn = widget.job?.publishAt != null;
+  late DateTime? _publishAt = widget.job?.publishAt;
   late final _hours = TextEditingController(
     text: widget.job?.hoursPerDay?.toString(),
   );
@@ -133,6 +135,36 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     }
   }
 
+  Future<void> _pickPublishAt() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _publishAt ?? now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_publishAt ?? now),
+    );
+    if (!mounted) return;
+    setState(() {
+      _publishAt = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time?.hour ?? 9,
+        time?.minute ?? 0,
+      );
+    });
+  }
+
+  String _fmtPublishAt(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}'
+      '.${d.year} ${d.hour.toString().padLeft(2, '0')}:'
+      '${d.minute.toString().padLeft(2, '0')}';
+
   Future<void> _generate() async {
     if (_title.text.trim().isEmpty) {
       showInfoSnack(context, context.l10n.aiNeedTitle);
@@ -176,6 +208,13 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
         .toList();
+    // Scheduled publish: a future publish_at keeps the job a draft until then.
+    final scheduled =
+        _scheduleOn &&
+        _publishAt != null &&
+        _publishAt!.isAfter(DateTime.now());
+    final effectiveStatus = status == 'open' && scheduled ? 'draft' : status;
+    final publishAt = scheduled ? _publishAt : null;
     try {
       Job? created;
       if (_isEdit) {
@@ -216,7 +255,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             screeningQuestions: _questions
                 .where((q) => q.label.trim().isNotEmpty)
                 .toList(),
-            status: status,
+            status: effectiveStatus,
+            publishAt: publishAt,
           ),
         );
       } else {
@@ -256,13 +296,16 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           screeningQuestions: _questions
               .where((q) => q.label.trim().isNotEmpty)
               .toList(),
-          status: status,
+          status: effectiveStatus,
+          publishAt: publishAt,
         );
       }
       ref.invalidate(myJobsProvider);
       if (!mounted) return;
-      // Newly published job → offer the tariff/promote sheet before leaving.
-      if (created != null && status == 'open') {
+      if (scheduled) {
+        showInfoSnack(context, context.l10n.jobScheduledToast);
+      } else if (created != null && effectiveStatus == 'open') {
+        // Newly published job → offer the tariff/promote sheet before leaving.
         await showPromoteSheet(context, jobId: created.id);
       } else {
         showInfoSnack(context, context.l10n.jobSavedToast);
@@ -665,6 +708,26 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                         keyboardType: TextInputType.phone,
                       ),
                     ],
+                    const SizedBox(height: AppSpacing.lg),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.schedulePublishLabel),
+                      subtitle: Text(l.schedulePublishHint),
+                      value: _scheduleOn,
+                      onChanged: (v) => setState(() => _scheduleOn = v),
+                    ),
+                    if (_scheduleOn)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.event_outlined),
+                        title: Text(
+                          _publishAt == null
+                              ? l.pickDateTime
+                              : _fmtPublishAt(_publishAt!),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: _pickPublishAt,
+                      ),
                   ],
                 ),
               ),
