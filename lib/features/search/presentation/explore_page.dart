@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -7,13 +6,14 @@ import 'package:latlong2/latlong.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/widgets/jz_map/jz_map.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 import '../application/search_controller.dart';
 
-/// Map-style Explore screen backed by OpenStreetMap (via flutter_map — no API
-/// key needed). Job pins are plotted from each job's lat/lng; a floating search
-/// + filter sits on top and a job carousel along the bottom.
+/// Map-style Explore screen. Job pins are plotted from each job's lat/lng; a
+/// floating search + filter sits on top and a job carousel along the bottom.
+/// The map is Yandex MapKit on mobile and OpenStreetMap on web (via [JzMapView]).
 class ExplorePage extends ConsumerStatefulWidget {
   const ExplorePage({super.key});
 
@@ -22,16 +22,10 @@ class ExplorePage extends ConsumerStatefulWidget {
 }
 
 class _ExplorePageState extends ConsumerState<ExplorePage> {
-  final _map = MapController();
+  final _map = JzMapController();
 
   // Default view: Tashkent. Real device location lands with geolocator later.
   static const _initialCenter = LatLng(41.3111, 69.2797);
-
-  @override
-  void dispose() {
-    _map.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,36 +43,17 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: FlutterMap(
-              mapController: _map,
-              options: const MapOptions(
-                initialCenter: _initialCenter,
-                initialZoom: 11,
-                minZoom: 3,
-                maxZoom: 18,
-                interactionOptions: InteractionOptions(
-                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                ),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'io.jobzone.jobzone',
-                ),
-                MarkerLayer(
-                  markers: [
-                    for (final job in located)
-                      Marker(
-                        point: LatLng(job.lat!, job.lng!),
-                        width: 44,
-                        height: 44,
-                        alignment: Alignment.topCenter,
-                        child: _JobPin(
-                          onTap: () => context.push(Routes.jobDetails(job.id)),
-                        ),
-                      ),
-                  ],
-                ),
+            child: JzMapView(
+              controller: _map,
+              initialCenter: _initialCenter,
+              initialZoom: 11,
+              markers: [
+                for (final job in located)
+                  JzMapMarker(
+                    id: job.id,
+                    point: LatLng(job.lat!, job.lng!),
+                    onTap: () => context.push(Routes.jobDetails(job.id)),
+                  ),
               ],
             ),
           ),
@@ -149,7 +124,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             bottom: 250,
             child: _CircleFab(
               icon: Icons.my_location_rounded,
-              onTap: () => _map.move(_initialCenter, 12),
+              onTap: () => _map.moveTo(_initialCenter, zoom: 12),
             ),
           ),
           Positioned(
@@ -178,27 +153,6 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _JobPin extends StatelessWidget {
-  const _JobPin({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return GestureDetector(
-      onTap: onTap,
-      child: Icon(
-        Icons.location_on_rounded,
-        color: colors.primary,
-        size: 40,
-        shadows: const [
-          Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
     );

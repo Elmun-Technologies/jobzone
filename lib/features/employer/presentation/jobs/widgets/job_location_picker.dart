@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../../design_system/design_system.dart';
 import '../../../../../localization/l10n_extension.dart';
+import '../../../../../shared/widgets/jz_map/jz_map.dart';
 
-/// Full-screen OpenStreetMap picker for a job's work location. Tap the map to
-/// drop the pin; the chosen [LatLng] is returned via `Navigator.pop`. Reuses
-/// the keyless OSM tiles from the Explore screen — no API key needed.
+/// Full-screen map picker for a job's work location. Tap the map to drop the
+/// pin; the chosen [LatLng] is returned via `Navigator.pop`. Renders Yandex
+/// MapKit on mobile and OpenStreetMap on web (via [JzMapView]).
 class JobLocationPicker extends StatefulWidget {
   const JobLocationPicker({super.key, this.initial});
 
@@ -24,7 +24,6 @@ class _JobLocationPickerState extends State<JobLocationPicker> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
     final center = _picked ?? widget.initial ?? _tashkent;
     return Scaffold(
       body: SafeArea(
@@ -35,47 +34,19 @@ class _JobLocationPickerState extends State<JobLocationPicker> {
               child: JzTopBar(title: l.fieldWorkAddress),
             ),
             Expanded(
-              child: FlutterMap(
-                options: MapOptions(
-                  initialCenter: center,
-                  initialZoom: 13,
-                  minZoom: 3,
-                  maxZoom: 18,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                  ),
-                  onTap: (_, point) => setState(() => _picked = point),
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'io.jobzone.jobzone',
-                  ),
-                  if (_picked != null)
-                    MarkerLayer(
-                      markers: [
-                        Marker(
+              child: JzMapView(
+                initialCenter: center,
+                initialZoom: 13,
+                onMapTap: (point) => setState(() => _picked = point),
+                markers: _picked == null
+                    ? const []
+                    : [
+                        JzMapMarker(
+                          id: 'picked',
                           point: _picked!,
-                          width: 44,
-                          height: 44,
-                          alignment: Alignment.topCenter,
-                          child: Icon(
-                            Icons.location_on_rounded,
-                            color: colors.primary,
-                            size: 40,
-                            shadows: const [
-                              Shadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
+                          kind: JzMarkerKind.picked,
                         ),
                       ],
-                    ),
-                ],
               ),
             ),
             SafeArea(
