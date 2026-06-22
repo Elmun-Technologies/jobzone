@@ -12,6 +12,7 @@ import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/domain/job_language.dart';
 import '../../../jobs/domain/screening_question.dart';
+import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'widgets/job_location_picker.dart';
@@ -176,6 +177,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         .where((s) => s.isNotEmpty)
         .toList();
     try {
+      Job? created;
       if (_isEdit) {
         await repo.updateJob(
           widget.job!.copyWith(
@@ -218,7 +220,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           ),
         );
       } else {
-        await repo.createJob(
+        created = await repo.createJob(
           title: _title.text.trim(),
           jobType: _type,
           experienceLevel: _level,
@@ -258,10 +260,14 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         );
       }
       ref.invalidate(myJobsProvider);
-      if (mounted) {
+      if (!mounted) return;
+      // Newly published job → offer the tariff/promote sheet before leaving.
+      if (created != null && status == 'open') {
+        await showPromoteSheet(context, jobId: created.id);
+      } else {
         showInfoSnack(context, context.l10n.jobSavedToast);
-        context.pop();
       }
+      if (mounted) context.pop();
     } catch (e) {
       if (mounted) showErrorSnack(context, e.toString());
     } finally {
