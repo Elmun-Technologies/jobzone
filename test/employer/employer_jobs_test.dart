@@ -74,6 +74,18 @@ void main() {
       expect(created.formalization, 'employment_contract');
     });
 
+    test('createJob persists work location', () async {
+      final created = await repo().createJob(
+        title: 'Courier',
+        lat: 41.31,
+        lng: 69.28,
+        addressText: "Amir Temur ko'chasi 1",
+      );
+      expect(created.lat, 41.31);
+      expect(created.lng, 69.28);
+      expect(created.addressText, "Amir Temur ko'chasi 1");
+    });
+
     test('setStatus flips a job and the status filter respects it', () async {
       final r = repo();
       final job = (await r.myJobs()).first;

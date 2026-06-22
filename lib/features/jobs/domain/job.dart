@@ -9,6 +9,7 @@ class Job {
     this.companyLogoUrl,
     this.companyVerified = false,
     this.location,
+    this.addressText,
     this.city,
     this.country,
     this.lat,
@@ -47,6 +48,7 @@ class Job {
   final String? companyLogoUrl;
   final bool companyVerified;
   final String? location;
+  final String? addressText;
   final String? city;
   final String? country;
   final double? lat;
@@ -159,6 +161,7 @@ class Job {
       companyLogoUrl: m['company_logo_url'] as String?,
       companyVerified: (m['company_is_verified'] ?? false) as bool,
       location: m['location'] as String?,
+      addressText: m['address_text'] as String?,
       city: m['city'] as String?,
       country: m['country'] as String?,
       lat: (m['lat'] as num?)?.toDouble(),
@@ -207,6 +210,7 @@ class Job {
     String? companyLogoUrl,
     bool? companyVerified,
     String? location,
+    String? addressText,
     String? city,
     String? country,
     double? lat,
@@ -244,6 +248,7 @@ class Job {
     companyLogoUrl: companyLogoUrl ?? this.companyLogoUrl,
     companyVerified: companyVerified ?? this.companyVerified,
     location: location ?? this.location,
+    addressText: addressText ?? this.addressText,
     city: city ?? this.city,
     country: country ?? this.country,
     lat: lat ?? this.lat,

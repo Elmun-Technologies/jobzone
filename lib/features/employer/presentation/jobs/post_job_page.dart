@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
@@ -10,6 +11,7 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
 import '../../data/employer_jobs_repository.dart';
+import 'widgets/job_location_picker.dart';
 
 /// Create or edit a job posting. Pass [job] (via the edit route's `extra`) to
 /// prefill the form for editing; omit it to create a new posting.
@@ -58,6 +60,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     text: widget.job?.responsibilities,
   );
   late final _benefits = TextEditingController(text: widget.job?.benefits);
+  late final _address = TextEditingController(text: widget.job?.addressText);
+  late double? _lat = widget.job?.lat;
+  late double? _lng = widget.job?.lng;
   bool _saving = false;
 
   bool get _isEdit => widget.job != null;
@@ -74,7 +79,24 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     _hours.dispose();
     _responsibilities.dispose();
     _benefits.dispose();
+    _address.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickLocation() async {
+    final picked = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (_) => JobLocationPicker(
+          initial: _lat != null && _lng != null ? LatLng(_lat!, _lng!) : null,
+        ),
+      ),
+    );
+    if (picked != null) {
+      setState(() {
+        _lat = picked.latitude;
+        _lng = picked.longitude;
+      });
+    }
   }
 
   Future<void> _submit(String status) async {
@@ -104,6 +126,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             formalization: _formalization,
             currency: _currency,
             categoryId: _categoryId,
+            lat: _lat,
+            lng: _lng,
+            addressText: _address.text.trim(),
             city: _city.text.trim(),
             skills: skills,
             description: _description.text.trim(),
@@ -129,6 +154,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           formalization: _formalization,
           currency: _currency,
           categoryId: _categoryId,
+          lat: _lat,
+          lng: _lng,
+          addressText: _address.text.trim(),
           city: _city.text.trim(),
           skills: skills,
           description: _description.text.trim(),
@@ -335,6 +363,25 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(label: l.fieldCity, controller: _city),
+                    const SizedBox(height: AppSpacing.lg),
+                    JzTextField(
+                      label: l.fieldWorkAddress,
+                      controller: _address,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.map_outlined),
+                      title: Text(l.pickOnMap),
+                      subtitle: _lat != null && _lng != null
+                          ? Text(
+                              '${_lat!.toStringAsFixed(5)}, '
+                              '${_lng!.toStringAsFixed(5)}',
+                            )
+                          : null,
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: _pickLocation,
+                    ),
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(label: l.fieldSkills, controller: _skills),
                     const SizedBox(height: AppSpacing.lg),

@@ -537,5 +537,8 @@
   "fieldNightShift": "Ночные смены",
   "fieldResponsibilities": "Обязанности",
   "fieldBenefits": "Льготы",
-  "yes": "Да"
+  "yes": "Да",
+  "fieldWorkAddress": "Адрес работы",
+  "pickOnMap": "Выбрать на карте",
+  "useThisLocation": "Использовать это место"
 }
