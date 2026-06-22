@@ -20,6 +20,6 @@ class MainApplication : Application() {
     }
 
     companion object {
-        private const val YANDEX_MAPKIT_API_KEY = "PASTE_YOUR_YANDEX_MAPKIT_API_KEY"
+        private const val YANDEX_MAPKIT_API_KEY = "1d02f6b0-05d4-4eb6-ae5b-eea72724a6ff"
     }
 }
