@@ -11,6 +11,7 @@ class JzMapMarker {
     required this.id,
     required this.point,
     this.kind = JzMarkerKind.job,
+    this.label,
     this.onTap,
   });
 
@@ -18,6 +19,11 @@ class JzMapMarker {
   final String id;
   final LatLng point;
   final JzMarkerKind kind;
+
+  /// Optional short text shown on the marker (e.g. a salary). Mobile renders it
+  /// into the pin bitmap as a pill; web shows it as a pill widget. Null → a
+  /// plain pin.
+  final String? label;
   final VoidCallback? onTap;
 }
 

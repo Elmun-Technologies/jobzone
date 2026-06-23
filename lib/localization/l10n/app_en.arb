@@ -636,5 +636,8 @@
   "telegramConnectCta": "Connect",
   "telegramDisconnect": "Disconnect",
   "telegramSendToken": "Open our bot and send",
-  "copied": "Copied"
+  "copied": "Copied",
+  "tabMap": "Map",
+  "tabList": "List",
+  "locationUnavailable": "Location unavailable"
 }
