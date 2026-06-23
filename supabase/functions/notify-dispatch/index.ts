@@ -1,17 +1,20 @@
 // notify-dispatch — fans a freshly-inserted notification row out to the
-// recipient's external channels. Today: Telegram (when the user linked their
-// chat via the /start handshake and TELEGRAM_BOT_TOKEN is set). FCM fan-out is
-// added next. The in-app row already exists; this only mirrors it outward, and
-// it respects the recipient's notification_settings.
+// recipient's external channels: Telegram (when the user linked their chat via
+// the /start handshake and TELEGRAM_BOT_TOKEN is set) and FCM push (when
+// FCM_SERVICE_ACCOUNT is set and the user has registered devices). The in-app
+// row already exists; this only mirrors it outward, and it respects the
+// recipient's notification_settings.
 //
 // Invoked by the `notifications` AFTER-INSERT pg_net trigger (migration 0026)
 // with body { type:'INSERT', table:'notifications', record:{...} }.
 //
 // Required secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-// Optional: TELEGRAM_BOT_TOKEN (enables Telegram send), EDGE_SHARED_SECRET (gate)
+// Optional: TELEGRAM_BOT_TOKEN, FCM_SERVICE_ACCOUNT (each enables its channel),
+//           EDGE_SHARED_SECRET (gate)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
+import { sendFcmToUser } from "../_shared/fcm.ts";
 
 // Maps a notification type to its notification_settings push column. Types with
 // no column (e.g. 'system') are always delivered.
@@ -85,5 +88,14 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ok: true, telegram });
+  // Push fan-out (no-op without FCM_SERVICE_ACCOUNT or registered devices).
+  const fcm = await sendFcmToUser(
+    supa,
+    recipientId,
+    title,
+    body,
+    (rec?.data ?? {}) as Record<string, unknown>,
+  );
+
+  return json({ ok: true, telegram, fcm });
 });
