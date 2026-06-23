@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -95,12 +96,14 @@ class _JzMapViewState extends State<JzMapView> {
 
 /// A single (non-clustered) job/applicant marker.
 Marker _markerFor(JzMapMarker m) {
-  final labeled = m.label != null && m.kind == JzMarkerKind.job;
+  final job = m.kind == JzMarkerKind.job;
+  final hasLogo = job && (m.imageUrl?.isNotEmpty ?? false);
+  final rich = job && (hasLogo || m.label != null);
   return Marker(
     point: m.point,
-    width: labeled ? 130 : 44,
-    height: labeled ? 40 : 44,
-    alignment: labeled ? Alignment.center : Alignment.topCenter,
+    width: rich ? 130 : 44,
+    height: hasLogo ? 70 : (rich ? 40 : 44),
+    alignment: rich ? Alignment.center : Alignment.topCenter,
     child: _MarkerChild(marker: m),
   );
 }
@@ -155,38 +158,86 @@ class _MarkerChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (marker.label != null && marker.kind == JzMarkerKind.job) {
-      final pill = Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1F8F4E),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white, width: 1.5),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Text(
-          marker.label!,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 12,
-          ),
-        ),
+    final isJob = marker.kind == JzMarkerKind.job;
+    final hasLogo = marker.imageUrl?.isNotEmpty ?? false;
+    if (isJob && (marker.label != null || hasLogo)) {
+      final content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hasLogo) _LogoAvatar(url: marker.imageUrl!),
+          if (hasLogo && marker.label != null) const SizedBox(height: 3),
+          if (marker.label != null) _SalaryPill(label: marker.label!),
+        ],
       );
       return marker.onTap == null
-          ? pill
-          : GestureDetector(onTap: marker.onTap, child: pill);
+          ? content
+          : GestureDetector(onTap: marker.onTap, child: content);
     }
     return _Pin(kind: marker.kind, onTap: marker.onTap);
+  }
+}
+
+class _SalaryPill extends StatelessWidget {
+  const _SalaryPill({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F8F4E),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 1.5),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoAvatar extends StatelessWidget {
+  const _LogoAvatar({required this.url});
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    const fallback = ColoredBox(
+      color: Color(0xFF3A36DB),
+      child: Icon(Icons.business_rounded, color: Colors.white, size: 20),
+    );
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: url,
+          fit: BoxFit.cover,
+          errorWidget: (_, _, _) => fallback,
+          placeholder: (_, _) => const ColoredBox(color: Color(0xFFE5E7EB)),
+        ),
+      ),
+    );
   }
 }
 
