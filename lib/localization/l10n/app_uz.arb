@@ -622,5 +622,8 @@
   "telegramConnectCta": "Ulash",
   "telegramDisconnect": "Uzish",
   "telegramSendToken": "Botni ochib yuboring",
-  "copied": "Nusxalandi"
+  "copied": "Nusxalandi",
+  "tabMap": "Xarita",
+  "tabList": "Ro'yxat",
+  "locationUnavailable": "Joylashuv aniqlanmadi"
 }

@@ -622,5 +622,8 @@
   "telegramConnectCta": "Подключить",
   "telegramDisconnect": "Отключить",
   "telegramSendToken": "Откройте бота и отправьте",
-  "copied": "Скопировано"
+  "copied": "Скопировано",
+  "tabMap": "Карта",
+  "tabList": "Список",
+  "locationUnavailable": "Локация недоступна"
 }
