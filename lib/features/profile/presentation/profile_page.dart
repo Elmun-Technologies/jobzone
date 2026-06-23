@@ -8,6 +8,7 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/providers/app_flags.dart';
+import '../../notifications/application/push_providers.dart';
 import '../data/profile_repository.dart';
 import '../domain/user_profile.dart';
 
@@ -107,6 +108,9 @@ class ProfilePage extends ConsumerWidget {
     );
     if (ok != true) return;
     if (Env.hasSupabase) {
+      // Drop this device's push token first — RLS needs the uid, which the
+      // sign-out clears. No-op when push isn't configured.
+      await ref.read(pushServiceProvider).unregister();
       await ref.read(supabaseClientProvider).auth.signOut();
     }
     // Clear per-account onboarding (role + profile-complete) so the next

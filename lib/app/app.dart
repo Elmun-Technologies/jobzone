@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/config/flavors.dart';
+import '../core/supabase/supabase_providers.dart';
 import '../design_system/design_system.dart';
+import '../features/notifications/application/push_providers.dart';
 import '../localization/generated/app_localizations.dart';
 import '../localization/locale_controller.dart';
 import 'router/app_router.dart';
@@ -17,6 +20,16 @@ class JobzoneApp extends ConsumerWidget {
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final locale = ref.watch(localeControllerProvider);
+
+    // Register this device for push once the user is signed in. No-op unless
+    // Firebase is configured (else pushServiceProvider is a NoopPushService).
+    ref.listen(authStateChangesProvider, (_, next) {
+      final event = next.value?.event;
+      if (event == AuthChangeEvent.signedIn ||
+          event == AuthChangeEvent.initialSession) {
+        ref.read(pushServiceProvider).initialize();
+      }
+    });
 
     return MaterialApp.router(
       title: FlavorConfig.appTitle,

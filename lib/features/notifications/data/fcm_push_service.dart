@@ -1,39 +1,50 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../domain/push_service.dart';
 
-/// FCM implementation **template** (Phase 8).
+/// FCM implementation of [PushService] (Phase 8).
 ///
-/// This file does NOT import `firebase_messaging` / `firebase_core` so the
-/// project builds without those dependencies. To go live:
-///
-/// 1. `flutter pub add firebase_core firebase_messaging` and run flutterfire
-///    configure (adds platform Firebase config).
-/// 2. `await Firebase.initializeApp()` in `bootstrap()`.
-/// 3. Uncomment the `// FCM:` calls below.
-/// 4. Bind `pushServiceProvider` to `FcmPushService.new` and call
-///    `ref.read(pushServiceProvider).initialize()` after sign-in.
-/// 5. Apply migration `0008_devices_push.sql` (the `devices` table) and deploy
-///    the `push-dispatch` Edge Function.
+/// Bound by `pushServiceProvider` only when Firebase initialized successfully
+/// (`firebaseReady`), so its `firebase_messaging` calls never run without native
+/// config. To go live the host app must add the Firebase project files — see
+/// `docs/phase-8-realtime-and-push.md`. The server side (devices table +
+/// push-dispatch / notify-dispatch fan-out) is already in place.
 class FcmPushService implements PushService {
   FcmPushService(this._ref);
 
   final Ref _ref;
   String? _token;
+  final _controller = StreamController<PushMessage>.broadcast();
 
   @override
   Future<void> initialize() async {
-    // FCM:
-    // final messaging = FirebaseMessaging.instance;
-    // await messaging.requestPermission();
-    // _token = await messaging.getToken();
-    // FirebaseMessaging.onMessage.listen((m) => _controller.add(PushMessage(
-    //   title: m.notification?.title,
-    //   body: m.notification?.body,
-    //   data: m.data,
-    // )));
-    // messaging.onTokenRefresh.listen((t) { _token = t; registerDevice(); });
+    final messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission();
+    // Show foreground notifications on iOS (Android shows via the system tray /
+    // an in-app listener on [messages]).
+    await messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    _token = await messaging.getToken();
+    FirebaseMessaging.onMessage.listen(
+      (m) => _controller.add(
+        PushMessage(
+          title: m.notification?.title,
+          body: m.notification?.body,
+          data: m.data,
+        ),
+      ),
+    );
+    messaging.onTokenRefresh.listen((t) {
+      _token = t;
+      registerDevice();
+    });
     await registerDevice();
   }
 
@@ -41,7 +52,7 @@ class FcmPushService implements PushService {
   Future<String?> token() async => _token;
 
   @override
-  Stream<PushMessage> get messages => const Stream.empty();
+  Stream<PushMessage> get messages => _controller.stream;
 
   @override
   Future<void> registerDevice() async {
