@@ -6,6 +6,7 @@ import '../domain/screening_question.dart';
 final List<Job> mockJobs = [
   Job(
     id: 'mock-1',
+    companyLogoUrl: 'https://picsum.photos/seed/acme-logo/200/200',
     lat: 41.3111,
     lng: 69.2797,
     boostedUntil: DateTime(2027, 1, 1),
@@ -49,6 +50,7 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-2',
+    companyLogoUrl: 'https://picsum.photos/seed/nimbus-logo/200/200',
     lat: 41.2995,
     lng: 69.2401,
     title: 'Product Designer',
@@ -69,6 +71,7 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-3',
+    companyLogoUrl: 'https://picsum.photos/seed/acme-logo/200/200',
     lat: 39.6270,
     lng: 66.9750,
     title: 'Backend Developer (Node.js)',
@@ -158,6 +161,7 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-7',
+    companyLogoUrl: 'https://picsum.photos/seed/nimbus-logo/200/200',
     lat: 41.2700,
     lng: 69.2100,
     title: 'Kassir-sotuvchi',
@@ -209,6 +213,7 @@ final List<Job> mockJobs = [
   ),
   Job(
     id: 'mock-9',
+    companyLogoUrl: 'https://picsum.photos/seed/acme-logo/200/200',
     lat: 41.0500,
     lng: 71.6600,
     title: 'Qurilish ustasi (Vahta usuli)',

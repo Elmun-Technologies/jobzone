@@ -29,6 +29,21 @@ class MarkerBitmaps {
   static Future<Uint8List> meDot() =>
       _cached('me', () => _circle('', _blue, 13));
 
+  /// Decodes raw image bytes (e.g. a fetched logo) into a [ui.Image].
+  static Future<ui.Image> decodeImage(Uint8List bytes) async {
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  }
+
+  /// A circular [logo] (white ring) with the salary [label] in a pill below it.
+  /// Cached by [cacheKey] so a given company+salary is composited once.
+  static Future<Uint8List> markerWithLogo({
+    required String cacheKey,
+    required ui.Image logo,
+    String? label,
+  }) => _cached('logo:$cacheKey', () => _withLogo(logo, label));
+
   static Future<Uint8List> _cached(
     String key,
     Future<Uint8List> Function() build,
@@ -104,5 +119,79 @@ class MarkerBitmaps {
     canvas.drawRRect(rrect, Paint()..color = _brand);
     tp.paint(canvas, Offset(padH, padV));
     return _toPng(rec.endRecording(), w, h);
+  }
+
+  /// Circular [logo] (white ring) with the salary [label] in a pill below it.
+  static Future<Uint8List> _withLogo(ui.Image logo, String? label) async {
+    final logoD = 44 * _dpr;
+    final ring = 2.5 * _dpr;
+
+    TextPainter? tp;
+    var pillW = 0.0, pillH = 0.0;
+    if (label != null && label.isNotEmpty) {
+      tp = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: TextStyle(
+            color: _white,
+            fontSize: 12 * _dpr,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      pillW = tp.width + 18 * _dpr;
+      pillH = tp.height + 8 * _dpr;
+    }
+    final gap = pillH == 0 ? 0.0 : 3 * _dpr;
+    final w = logoD > pillW ? logoD : pillW;
+    final h = logoD + gap + pillH;
+
+    final rec = ui.PictureRecorder();
+    final canvas = Canvas(rec);
+    final logoCenter = Offset(w / 2, logoD / 2);
+
+    canvas.drawCircle(logoCenter, logoD / 2, Paint()..color = _white);
+    canvas.save();
+    canvas.clipPath(
+      Path()..addOval(
+        Rect.fromCircle(center: logoCenter, radius: logoD / 2 - ring),
+      ),
+    );
+    // Cover-fit: take the largest centered square of the source image.
+    final side = logo.width < logo.height
+        ? logo.width.toDouble()
+        : logo.height.toDouble();
+    final src = Rect.fromCenter(
+      center: Offset(logo.width / 2, logo.height / 2),
+      width: side,
+      height: side,
+    );
+    final dst = Rect.fromCircle(center: logoCenter, radius: logoD / 2 - ring);
+    canvas.drawImageRect(
+      logo,
+      src,
+      dst,
+      Paint()..filterQuality = FilterQuality.medium,
+    );
+    canvas.restore();
+
+    if (tp != null) {
+      final pillRect = Rect.fromLTWH(
+        (w - pillW) / 2,
+        logoD + gap,
+        pillW,
+        pillH,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(pillRect, Radius.circular(pillH / 2)),
+        Paint()..color = _brand,
+      );
+      tp.paint(
+        canvas,
+        Offset(pillRect.left + 9 * _dpr, pillRect.top + 4 * _dpr),
+      );
+    }
+    return _toPng(rec.endRecording(), w.round(), h.round());
   }
 }

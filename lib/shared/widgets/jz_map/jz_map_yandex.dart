@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -44,6 +48,12 @@ class _JzMapViewState extends State<JzMapView> {
 
   /// Salary-pill icons keyed by label; built asynchronously from bitmaps.
   final _pillIcons = <String, BitmapDescriptor>{};
+
+  /// Logo+salary marker icons keyed by "url|label".
+  final _logoIcons = <String, BitmapDescriptor>{};
+
+  /// Decoded company logos keyed by URL (so each logo is fetched once).
+  final _logoImages = <String, ui.Image>{};
   BitmapDescriptor? _meIcon;
 
   Point _toPoint(LatLng ll) =>
@@ -69,7 +79,9 @@ class _JzMapViewState extends State<JzMapView> {
     _buildIcons();
   }
 
-  /// Renders any missing salary-pill / "me" bitmaps, then repaints once ready.
+  /// Renders any missing pill / logo / "me" bitmaps, then repaints once ready.
+  /// Logos are fetched over the network; until one arrives (or if it fails) the
+  /// marker shows the salary pill, which is always built when there's a label.
   Future<void> _buildIcons() async {
     var changed = false;
     for (final m in widget.markers) {
@@ -80,6 +92,23 @@ class _JzMapViewState extends State<JzMapView> {
         );
         changed = true;
       }
+      final url = m.imageUrl;
+      if (m.kind == JzMarkerKind.job && url != null && url.isNotEmpty) {
+        final key = '$url|${label ?? ''}';
+        if (!_logoIcons.containsKey(key)) {
+          final img = await _logoImage(url);
+          if (img != null) {
+            _logoIcons[key] = BitmapDescriptor.fromBytes(
+              await MarkerBitmaps.markerWithLogo(
+                cacheKey: key,
+                logo: img,
+                label: label,
+              ),
+            );
+            changed = true;
+          }
+        }
+      }
     }
     if (widget.myLocation != null && _meIcon == null) {
       _meIcon = BitmapDescriptor.fromBytes(await MarkerBitmaps.meDot());
@@ -88,7 +117,37 @@ class _JzMapViewState extends State<JzMapView> {
     if (changed && mounted) setState(() {});
   }
 
+  /// Fetches + decodes a logo, caching by URL. Null on any network/decode error.
+  Future<ui.Image?> _logoImage(String url) async {
+    final cached = _logoImages[url];
+    if (cached != null) return cached;
+    try {
+      final client = HttpClient();
+      final resp = await (await client.getUrl(Uri.parse(url))).close();
+      if (resp.statusCode != 200) {
+        client.close();
+        return null;
+      }
+      final bytes = await consolidateHttpClientResponseBytes(resp);
+      client.close();
+      final img = await MarkerBitmaps.decodeImage(bytes);
+      _logoImages[url] = img;
+      return img;
+    } catch (_) {
+      return null;
+    }
+  }
+
   PlacemarkIcon _iconFor(JzMapMarker m) {
+    final url = m.imageUrl;
+    if (m.kind == JzMarkerKind.job && url != null && url.isNotEmpty) {
+      final logo = _logoIcons['$url|${m.label ?? ''}'];
+      if (logo != null) {
+        return PlacemarkIcon.single(
+          PlacemarkIconStyle(image: logo, anchor: const Offset(0.5, 0.5)),
+        );
+      }
+    }
     final pill = m.label == null ? null : _pillIcons[m.label];
     if (pill != null) {
       return PlacemarkIcon.single(

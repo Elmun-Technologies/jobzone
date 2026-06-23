@@ -105,6 +105,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                             id: job.id,
                             point: LatLng(job.lat!, job.lng!),
                             label: _salaryLabel(job),
+                            imageUrl: job.companyLogoUrl,
                             onTap: () =>
                                 context.push(Routes.jobDetails(job.id)),
                           ),

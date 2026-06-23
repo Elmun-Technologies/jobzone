@@ -12,6 +12,7 @@ class JzMapMarker {
     required this.point,
     this.kind = JzMarkerKind.job,
     this.label,
+    this.imageUrl,
     this.onTap,
   });
 
@@ -24,6 +25,10 @@ class JzMapMarker {
   /// into the pin bitmap as a pill; web shows it as a pill widget. Null → a
   /// plain pin.
   final String? label;
+
+  /// Optional logo (e.g. a company logo) shown as a circular avatar above the
+  /// label. Mobile composites it into the bitmap; web uses a network image.
+  final String? imageUrl;
   final VoidCallback? onTap;
 }
 
