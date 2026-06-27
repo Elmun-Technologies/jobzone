@@ -63,6 +63,7 @@ class ApplicationsRepository {
     required Job job,
     String? coverLetter,
     Map<String, dynamic>? answers,
+    String? resumeId,
   }) async {
     if (!_live) {
       _seedOffline();
@@ -89,6 +90,7 @@ class ApplicationsRepository {
       'applicant_id': uid,
       'cover_letter': coverLetter,
       'answers': answers ?? <String, dynamic>{},
+      'resume_id': ?resumeId,
     });
   }
 

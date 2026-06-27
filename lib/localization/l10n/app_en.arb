@@ -639,5 +639,7 @@
   "copied": "Copied",
   "tabMap": "Map",
   "tabList": "List",
-  "locationUnavailable": "Location unavailable"
+  "locationUnavailable": "Location unavailable",
+  "alreadyApplied": "You've already applied to this job",
+  "resumeRequired": "Please attach your CV / resume"
 }
