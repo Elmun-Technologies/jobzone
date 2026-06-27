@@ -273,6 +273,10 @@ class Job {
     );
   }
 
+  /// Sentinel so [copyWith] can distinguish "leave unchanged" from "set to
+  /// null" for nullable fields (e.g. un-scheduling a job, clearing max salary).
+  static const Object _unset = Object();
+
   Job copyWith({
     String? id,
     String? title,
@@ -289,8 +293,8 @@ class Job {
     String? jobType,
     String? experienceLevel,
     String? workingModel,
-    num? salaryMin,
-    num? salaryMax,
+    Object? salaryMin = _unset,
+    Object? salaryMax = _unset,
     String? currency,
     String? salaryPeriod,
     String? payoutFrequency,
@@ -320,7 +324,7 @@ class Job {
     DateTime? boostedUntil,
     String? boostKind,
     DateTime? expiresAt,
-    DateTime? publishAt,
+    Object? publishAt = _unset,
     List<ScreeningQuestion>? screeningQuestions,
   }) => Job(
     id: id ?? this.id,
@@ -338,8 +342,8 @@ class Job {
     jobType: jobType ?? this.jobType,
     experienceLevel: experienceLevel ?? this.experienceLevel,
     workingModel: workingModel ?? this.workingModel,
-    salaryMin: salaryMin ?? this.salaryMin,
-    salaryMax: salaryMax ?? this.salaryMax,
+    salaryMin: salaryMin == _unset ? this.salaryMin : salaryMin as num?,
+    salaryMax: salaryMax == _unset ? this.salaryMax : salaryMax as num?,
     currency: currency ?? this.currency,
     salaryPeriod: salaryPeriod ?? this.salaryPeriod,
     payoutFrequency: payoutFrequency ?? this.payoutFrequency,
@@ -369,7 +373,7 @@ class Job {
     boostedUntil: boostedUntil ?? this.boostedUntil,
     boostKind: boostKind ?? this.boostKind,
     expiresAt: expiresAt ?? this.expiresAt,
-    publishAt: publishAt ?? this.publishAt,
+    publishAt: publishAt == _unset ? this.publishAt : publishAt as DateTime?,
     screeningQuestions: screeningQuestions ?? this.screeningQuestions,
   );
 }
