@@ -54,12 +54,12 @@ class ChatRepository {
     final client = _ref.read(supabaseClientProvider);
     final other = await client
         .from('conversation_participants')
-        .select('profiles(full_name, avatar_url, headline)')
+        .select('profiles_public(full_name, avatar_url, headline)')
         .eq('conversation_id', id)
         .neq('profile_id', uid)
         .limit(1)
         .maybeSingle();
-    final profile = other?['profiles'] as Map<String, dynamic>?;
+    final profile = other?['profiles_public'] as Map<String, dynamic>?;
     final convo = await client
         .from('conversations')
         .select('last_message_at, messages(content, created_at)')

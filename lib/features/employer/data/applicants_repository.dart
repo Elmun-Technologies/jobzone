@@ -40,12 +40,13 @@ class ApplicantsRepository {
           'answers, job_id, '
           'jobs!inner(title, screening_questions, lat, lng, company_id, '
           'companies!inner(owner_id)), '
-          'profiles_public(full_name, headline, avatar_url, lat, lng)',
+          'profiles_public(full_name, headline, avatar_url)',
         )
         .eq('jobs.companies.owner_id', uid)
         .order('applied_at', ascending: false);
+    final coords = await _coords();
     return (rows as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
+        .map((r) => _fromRow(r as Map<String, dynamic>, coords))
         .toList();
   }
 
@@ -63,13 +64,40 @@ class ApplicantsRepository {
         .select(
           'id, applicant_id, current_status, applied_at, cover_letter, '
           'answers, job_id, jobs(title, screening_questions, lat, lng), '
-          'profiles_public(full_name, headline, avatar_url, lat, lng)',
+          'profiles_public(full_name, headline, avatar_url)',
         )
         .eq('job_id', jobId)
         .order('applied_at', ascending: false);
+    final coords = await _coords();
     return (rows as List)
-        .map((r) => _fromRow(r as Map<String, dynamic>))
+        .map((r) => _fromRow(r as Map<String, dynamic>, coords))
         .toList();
+  }
+
+  /// Worker coordinates for the caller's applicants, via the `is_job_owner`-
+  /// gated `applicant_locations` view (migration 0027). Keyed by applicant id.
+  /// Coords are no longer in `profiles_public`, so they only reach the employer
+  /// who owns the job. Best-effort: an empty map degrades to "no distance".
+  Future<Map<String, ({double? lat, double? lng})>> _coords() async {
+    try {
+      final rows = await _ref
+          .read(supabaseClientProvider)
+          .from('applicant_locations')
+          .select('applicant_id, lat, lng');
+      final m = <String, ({double? lat, double? lng})>{};
+      for (final e in rows as List) {
+        final mm = e as Map<String, dynamic>;
+        final id = mm['applicant_id'] as String?;
+        if (id == null) continue;
+        m[id] = (
+          lat: (mm['lat'] as num?)?.toDouble(),
+          lng: (mm['lng'] as num?)?.toDouble(),
+        );
+      }
+      return m;
+    } catch (_) {
+      return const {};
+    }
   }
 
   Future<List<StatusEvent>> statusHistory(String applicationId) async {
@@ -127,14 +155,19 @@ class ApplicantsRepository {
     });
   }
 
-  Applicant _fromRow(Map<String, dynamic> r) {
+  Applicant _fromRow(
+    Map<String, dynamic> r,
+    Map<String, ({double? lat, double? lng})> coords,
+  ) {
     final job = r['jobs'] as Map<String, dynamic>?;
     final profile = r['profiles_public'] as Map<String, dynamic>?;
     double? d(Object? v) => (v as num?)?.toDouble();
+    final workerId = (r['applicant_id'] ?? '') as String;
+    final c = coords[workerId];
     return Applicant(
       id: r['id'] as String,
       jobId: (r['job_id'] ?? '') as String,
-      workerId: (r['applicant_id'] ?? '') as String,
+      workerId: workerId,
       jobTitle: (job?['title'] ?? '') as String,
       name: (profile?['full_name'] ?? '') as String,
       headline: profile?['headline'] as String?,
@@ -145,8 +178,8 @@ class ApplicantsRepository {
       appliedAt: DateTime.tryParse('${r['applied_at']}') ?? DateTime.now(),
       coverLetter: r['cover_letter'] as String?,
       screeningQA: _screeningQA(job?['screening_questions'], r['answers']),
-      lat: d(profile?['lat']),
-      lng: d(profile?['lng']),
+      lat: c?.lat,
+      lng: c?.lng,
       jobLat: d(job?['lat']),
       jobLng: d(job?['lng']),
     );
