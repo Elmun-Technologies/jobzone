@@ -38,7 +38,8 @@ class CvSectionScaffold<T> extends StatelessWidget {
       ),
       body: async.when(
         loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) =>
+            JzErrorState(title: l.errorTitle, message: l.errUnknown),
         data: (items) => items.isEmpty
             ? JzEmptyState(
                 icon: emptyIcon,

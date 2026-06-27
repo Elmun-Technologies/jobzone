@@ -48,7 +48,7 @@ class _AboutEditPageState extends ConsumerState<AboutEditPage> {
       ref.invalidate(currentProfileProvider);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -63,7 +63,12 @@ class _AboutEditPageState extends ConsumerState<AboutEditPage> {
       loading: () => JzScaffold(title: l.sectionAbout, body: const JzLoader()),
       error: (_, _) => JzScaffold(
         title: l.sectionAbout,
-        body: Center(child: Text(l.errUnknown)),
+        body: JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(currentProfileProvider),
+        ),
       ),
       data: (profile) {
         if (!_initialized) {

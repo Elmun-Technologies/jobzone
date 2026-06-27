@@ -55,7 +55,12 @@ class EmployerDashboardPage extends ConsumerWidget {
                   padding: EdgeInsets.all(AppSpacing.xl),
                   child: JzLoader(),
                 ),
-                error: (_, _) => Text(l.errUnknown),
+                error: (_, _) => JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () => ref.invalidate(employerStatsProvider),
+                ),
                 data: (s) => _StatGrid(stats: s),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -77,7 +82,12 @@ class EmployerDashboardPage extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
               recent.when(
                 loading: () => const JzLoader(),
-                error: (_, _) => Text(l.errUnknown),
+                error: (_, _) => JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () => ref.invalidate(allApplicantsProvider),
+                ),
                 data: (applicants) {
                   if (applicants.isEmpty) {
                     return Padding(

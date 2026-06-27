@@ -641,5 +641,7 @@
   "tabList": "List",
   "locationUnavailable": "Location unavailable",
   "alreadyApplied": "You've already applied to this job",
-  "resumeRequired": "Please attach your CV / resume"
+  "resumeRequired": "Please attach your CV / resume",
+  "alreadyExists": "This already exists",
+  "notAllowed": "You don't have permission to do that"
 }

@@ -49,7 +49,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       );
       context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _paying = false);
     }
@@ -65,7 +65,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       body: SafeArea(
         child: async.when(
           loading: () => const JzLoader(),
-          error: (_, _) => Center(child: Text(l.errUnknown)),
+          error: (_, _) => JzErrorState(
+            title: l.errorTitle,
+            message: l.errUnknown,
+            retryLabel: l.retry,
+            onRetry: () => ref.invalidate(promotionProductsProvider),
+          ),
           data: (products) {
             final product = products.firstWhere(
               (p) => p.code == widget.productCode,

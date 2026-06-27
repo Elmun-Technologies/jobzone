@@ -81,7 +81,12 @@ class _PromoteSheetState extends ConsumerState<_PromoteSheet> {
               padding: EdgeInsets.all(AppSpacing.xl),
               child: JzLoader(),
             ),
-            error: (_, _) => Text(l.errUnknown),
+            error: (_, _) => JzErrorState(
+              title: l.errorTitle,
+              message: l.errUnknown,
+              retryLabel: l.retry,
+              onRetry: () => ref.invalidate(promotionProductsProvider),
+            ),
             data: (products) {
               // Skip the free "start" base — promoting means a paid boost.
               final buyable = [

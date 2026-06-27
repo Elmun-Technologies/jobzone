@@ -44,7 +44,7 @@ class _SkillsEditPageState extends ConsumerState<SkillsEditPage> {
       ref.invalidate(currentProfileProvider);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -59,7 +59,12 @@ class _SkillsEditPageState extends ConsumerState<SkillsEditPage> {
       loading: () => JzScaffold(title: l.sectionSkills, body: const JzLoader()),
       error: (_, _) => JzScaffold(
         title: l.sectionSkills,
-        body: Center(child: Text(l.errUnknown)),
+        body: JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(skillsControllerProvider),
+        ),
       ),
       data: (skills) {
         if (!_initialized) {

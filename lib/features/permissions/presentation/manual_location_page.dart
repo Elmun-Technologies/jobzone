@@ -60,7 +60,7 @@ class _ManualLocationPageState extends ConsumerState<ManualLocationPage> {
       }
       if (mounted) context.push(Routes.permNotifications);
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     }
   }
 

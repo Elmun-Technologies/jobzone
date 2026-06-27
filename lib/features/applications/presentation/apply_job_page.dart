@@ -128,7 +128,12 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
       body: SafeArea(
         child: jobAsync.when(
           loading: () => const JzLoader(),
-          error: (_, _) => Center(child: Text(l.errUnknown)),
+          error: (_, _) => JzErrorState(
+            title: l.errorTitle,
+            message: l.errUnknown,
+            retryLabel: l.retry,
+            onRetry: () => ref.invalidate(jobByIdProvider(widget.jobId)),
+          ),
           data: (job) => job == null
               ? JzEmptyState(
                   icon: Icons.search_off_rounded,

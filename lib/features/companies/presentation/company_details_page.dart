@@ -26,7 +26,12 @@ class CompanyDetailsPage extends ConsumerWidget {
     return Scaffold(
       body: async.when(
         loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(companyByIdProvider(companyId)),
+        ),
         data: (company) => company == null
             ? JzEmptyState(
                 icon: Icons.business_rounded,
@@ -91,7 +96,12 @@ class _OpenJobsTab extends ConsumerWidget {
     final async = ref.watch(companyJobsProvider(companyId));
     return async.when(
       loading: () => const JobListSkeleton(),
-      error: (_, _) => Center(child: Text(l.errUnknown)),
+      error: (_, _) => JzErrorState(
+        title: l.errorTitle,
+        message: l.errUnknown,
+        retryLabel: l.retry,
+        onRetry: () => ref.invalidate(companyJobsProvider(companyId)),
+      ),
       data: (jobs) => jobs.isEmpty
           ? JzEmptyState(icon: Icons.work_outline_rounded, title: l.noJobsTitle)
           : ListView(
@@ -437,7 +447,12 @@ class _PeopleTab extends ConsumerWidget {
     final async = ref.watch(companyPeopleProvider(companyId));
     return async.when(
       loading: () => const JzLoader(),
-      error: (_, _) => Center(child: Text(l.errUnknown)),
+      error: (_, _) => JzErrorState(
+        title: l.errorTitle,
+        message: l.errUnknown,
+        retryLabel: l.retry,
+        onRetry: () => ref.invalidate(companyPeopleProvider(companyId)),
+      ),
       data: (people) => people.isEmpty
           ? JzEmptyState(
               icon: Icons.people_outline_rounded,
@@ -531,7 +546,12 @@ class _GalleryTab extends ConsumerWidget {
     final async = ref.watch(companyGalleryProvider(company.id));
     return async.when(
       loading: () => const JzLoader(),
-      error: (_, _) => Center(child: Text(l.errUnknown)),
+      error: (_, _) => JzErrorState(
+        title: l.errorTitle,
+        message: l.errUnknown,
+        retryLabel: l.retry,
+        onRetry: () => ref.invalidate(companyGalleryProvider(company.id)),
+      ),
       data: (items) => items.isEmpty
           ? JzEmptyState(
               icon: Icons.photo_library_outlined,

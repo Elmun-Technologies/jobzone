@@ -31,7 +31,7 @@ class _NotificationSettingsPageState
       await ref.read(notificationsRepositoryProvider).saveSettings(next);
       ref.invalidate(notificationSettingsProvider);
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     }
   }
 
@@ -51,7 +51,12 @@ class _NotificationSettingsPageState
             Expanded(
               child: async.when(
                 loading: () => const JzLoader(),
-                error: (_, _) => Center(child: Text(l.errUnknown)),
+                error: (_, _) => JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () => ref.invalidate(notificationSettingsProvider),
+                ),
                 data: (loaded) {
                   final s = _settings ??= loaded;
                   return ListView(

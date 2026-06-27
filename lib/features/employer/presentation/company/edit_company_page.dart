@@ -63,7 +63,7 @@ class _EditCompanyPageState extends ConsumerState<EditCompanyPage> {
         context.pop();
       }
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
