@@ -58,3 +58,17 @@ verify_jwt = false
 
 [functions.send-notification]
 verify_jwt = false
+
+# Server-to-server: invoked by DB triggers (pg_net) with no user JWT, so JWT
+# verification must be off. They are instead gated by the fail-closed
+# EDGE_SHARED_SECRET (see supabase/functions/_shared/auth.ts).
+[functions.notify-dispatch]
+verify_jwt = false
+
+[functions.push-dispatch]
+verify_jwt = false
+
+# Telegram calls this webhook with no JWT; its security is the one-time /start
+# link-token handshake.
+[functions.telegram-webhook]
+verify_jwt = false

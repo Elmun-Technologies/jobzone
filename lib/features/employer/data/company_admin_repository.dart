@@ -26,6 +26,7 @@ class CompanyAdminRepository {
         .from('companies')
         .select()
         .eq('owner_id', uid)
+        .limit(1)
         .maybeSingle();
     return row == null ? null : Company.fromMap(row);
   }
@@ -54,6 +55,11 @@ class CompanyAdminRepository {
     }
     final client = _ref.read(supabaseClientProvider);
     final uid = client.auth.currentUser!.id;
+    // Idempotent: a second create for the same owner would brick the employer
+    // area (myCompany() then sees two rows). Return the existing one instead;
+    // a unique index on owner_id (migration 0028) enforces this server-side too.
+    final existing = await myCompany();
+    if (existing != null) return existing;
     final row = await client
         .from('companies')
         .insert({

@@ -10,6 +10,7 @@ import { MeiliSearch } from "https://esm.sh/meilisearch@0.41.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { JOBS_INDEX, toJobDocument } from "../_shared/job_document.ts";
+import { requireEdgeSecret } from "../_shared/auth.ts";
 
 const meili = new MeiliSearch({
   host: Deno.env.get("MEILI_HOST")!,
@@ -26,10 +27,9 @@ function adminClient() {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const secret = Deno.env.get("EDGE_SHARED_SECRET");
-  if (secret && req.headers.get("x-edge-secret") !== secret) {
-    return json({ ok: false, error: "unauthorized" }, 401);
-  }
+  // verify_jwt = false; invoked by the DB webhook. Fail closed.
+  const denied = requireEdgeSecret(req);
+  if (denied) return denied;
 
   const payload = await req.json().catch(() => null);
   if (!payload?.table) return json({ ok: false, error: "bad payload" }, 400);

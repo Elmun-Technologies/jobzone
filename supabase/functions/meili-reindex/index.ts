@@ -9,9 +9,14 @@ import { MeiliSearch } from "https://esm.sh/meilisearch@0.41.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { JOBS_INDEX, JOBS_SETTINGS, toJobDocument } from "../_shared/job_document.ts";
+import { requireEdgeSecret } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // A full reindex is expensive; gate it. Fail closed.
+  const denied = requireEdgeSecret(req);
+  if (denied) return denied;
 
   const meili = new MeiliSearch({
     host: Deno.env.get("MEILI_HOST")!,
