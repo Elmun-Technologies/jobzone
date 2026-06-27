@@ -62,43 +62,47 @@ the realtime stream. The channel id is the `conversationId`.
 
 ## 2. Push — Firebase Cloud Messaging
 
-### Architecture
-- `features/notifications/domain/push_service.dart` — `PushService` interface +
-  `PushMessage`.
-- `features/notifications/data/noop_push_service.dart` — **default**, no-op.
-- `features/notifications/data/fcm_push_service.dart` — **template**; documents
-  the `firebase_messaging` calls and upserts tokens into `devices`.
-- `features/notifications/application/push_providers.dart` — **the seam**:
-  `pushServiceProvider`.
-- DB: migration `0008_devices_push.sql` (`devices` table, owner-scoped RLS).
-- Server: `push-dispatch` Edge Function (fan-out to a recipient's tokens);
-  pair it with the existing `send-notification` (in-app row).
+**The client and server are now wired.** Push works end-to-end the moment the
+host app ships a Firebase project config — no code change needed.
 
-### Steps
-1. `flutter pub add firebase_core firebase_messaging` then
-   `flutterfire configure`.
-2. `await Firebase.initializeApp()` at the top of `bootstrap()`.
-3. Uncomment the `// FCM:` blocks in `fcm_push_service.dart`.
-4. Flip the seam in `push_providers.dart`:
-   ```dart
-   final pushServiceProvider =
-       Provider<PushService>((ref) => FcmPushService(ref));
-   ```
-5. Call it after sign-in (e.g. in `AppShell.initState` or right after a
-   successful auth action):
-   ```dart
-   await ref.read(pushServiceProvider).initialize();
-   ```
-   and on logout: `await ref.read(pushServiceProvider).unregister();`
-6. Apply the migration and deploy the dispatcher:
+### What's in place
+- `features/notifications/domain/push_service.dart` — `PushService` + `PushMessage`.
+- `features/notifications/data/fcm_push_service.dart` — real `firebase_messaging`:
+  requests permission, gets the token, listens for refreshes, exposes foreground
+  messages on `messages`, and upserts the token into `devices`.
+- `features/notifications/data/noop_push_service.dart` — fallback (push disabled).
+- `features/notifications/application/push_providers.dart` — `pushServiceProvider`
+  resolves to `FcmPushService` when **`firebaseReady`**, else `NoopPushService`.
+- `bootstrap()` guards `Firebase.initializeApp()` (sets `firebaseReady`); it
+  throws without native config (web/dev) and we catch it → push stays disabled,
+  no regression.
+- Lifecycle: `app.dart` calls `initialize()` on sign-in (`authStateChanges`);
+  `profile_page` calls `unregister()` before sign-out (RLS needs the uid).
+- DB: `0008_devices_push.sql` (`devices`, owner RLS).
+- Server fan-out: `_shared/fcm.ts` sends FCM HTTP v1; `push-dispatch` exposes it;
+  `notify-dispatch` (migration 0026 trigger) pushes every notification to the
+  recipient's devices alongside Telegram, respecting `notification_settings`.
+
+### To go live (host-app + ops only)
+1. Create a Firebase project; add an **Android app** (`io.jobzone.jobzone`) and
+   an **iOS app** (same bundle id).
+2. **Android:** drop `google-services.json` into `android/app/`, then add the
+   Gradle plugin (kept out of the repo so the build works without the file):
+   - `android/settings.gradle.kts` → `plugins { … id("com.google.gms.google-services") version "4.4.2" apply false }`
+   - `android/app/build.gradle.kts` → `plugins { … id("com.google.gms.google-services") }`
+3. **iOS:** drop `GoogleService-Info.plist` into `ios/Runner/`, add the **Push
+   Notifications** capability, and upload an **APNs auth key** in the Firebase
+   console. (`flutterfire configure` automates steps 2–3.)
+4. Server: from the service-account JSON,
    ```bash
-   supabase db push            # applies 0008_devices_push.sql
-   supabase functions deploy push-dispatch
-   supabase secrets set FCM_PROJECT_ID=... FCM_SERVICE_ACCOUNT='{...}'
+   supabase db push            # applies 0008 + 0026 (+ the rest)
+   supabase secrets set FCM_SERVICE_ACCOUNT='{...}'
+   supabase functions deploy push-dispatch notify-dispatch
    ```
-7. Have the notification triggers (migration 0005) also call `push-dispatch`
-   (via `pg_net`) so application-status / new-message events deliver a push in
-   addition to the in-app row.
+   (`project_id` is read from the JSON — no separate FCM_PROJECT_ID needed.)
+
+Until step 1–3 are done, `Firebase.initializeApp()` throws → `firebaseReady`
+stays false → `NoopPushService` → push silently disabled.
 
 ---
 
