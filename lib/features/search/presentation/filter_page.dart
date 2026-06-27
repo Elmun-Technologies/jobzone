@@ -48,9 +48,12 @@ class _FilterPageState extends ConsumerState<FilterPage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
+    // UZS-scaled range (this is a UZS-first market; jobs are in millions of
+    // so'm). A USD-scaled 20k–80k range silently excluded every UZS posting.
+    const salaryMax = 30000000.0; // 30 mln so'm
     final salary = RangeValues(
-      (_draft.salaryMin ?? 20000).toDouble(),
-      (_draft.salaryMax ?? 80000).toDouble(),
+      (_draft.salaryMin ?? 0).toDouble().clamp(0, salaryMax),
+      (_draft.salaryMax ?? salaryMax).toDouble().clamp(0, salaryMax),
     );
 
     return Scaffold(
@@ -87,12 +90,13 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                   Text(l.salaryLabel, style: _sectionStyle(context)),
                   RangeSlider(
                     values: salary,
-                    min: 20000,
-                    max: 80000,
+                    max: salaryMax,
                     divisions: 6,
                     labels: RangeLabels(
-                      '\$${(salary.start / 1000).round()}k',
-                      '\$${(salary.end / 1000).round()}k',
+                      '${(salary.start / 1000000).round()} mln',
+                      salary.end >= salaryMax
+                          ? '${(salaryMax / 1000000).round()} mln+'
+                          : '${(salary.end / 1000000).round()} mln',
                     ),
                     onChanged: (v) => setState(
                       () => _draft = _draft.copyWith(
@@ -104,9 +108,9 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      for (final k in const [20, 40, 60, 80])
+                      for (final k in const [0, 10, 20, 30])
                         Text(
-                          k == 80 ? '\$80k+' : '\$${k}k',
+                          k == 30 ? '30 mln+' : '$k mln',
                           style: context.text.labelSmall?.copyWith(
                             color: colors.textSecondary,
                           ),

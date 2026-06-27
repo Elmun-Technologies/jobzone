@@ -29,9 +29,16 @@ String? resolveRedirect({
   if (location == Routes.splash) return null; // splash performs the first hop
 
   final isEmployer = role == UserRole.employer;
-  final inAuth = location == Routes.welcome || location.startsWith('/auth');
+  // Password reset rides a recovery session (signed-in), so it must stay
+  // reachable even when onboarded — don't treat it as an auth screen to bounce.
+  final inAuth =
+      (location == Routes.welcome || location.startsWith('/auth')) &&
+      location != Routes.newPassword;
   final inOnboarding = location == Routes.onboarding;
   final inEmployerArea = location.startsWith('/employer');
+  // Chat + calls (`/chat/:id/call/...`) are shared by both roles — employers
+  // message candidates from there too.
+  final inShared = location.startsWith(Routes.chat);
 
   // The allowed "setup" zone differs by role: seekers run the preference +
   // permission chain; employers complete their profile then create a company.
@@ -56,11 +63,13 @@ String? resolveRedirect({
     return inSetup ? null : Routes.completeProfile;
   }
 
-  // Past setup: keep each role inside its own area.
+  // Past setup: keep each role inside its own area, but allow the shared chat
+  // surface and the password-reset screen for both.
   if (isEmployer) {
-    return (inAuth || inOnboarding || !inEmployerArea)
-        ? Routes.employerDashboard
-        : null;
+    if (inEmployerArea || inShared || location == Routes.newPassword) {
+      return null;
+    }
+    return Routes.employerDashboard;
   }
   if (inAuth || inOnboarding || inEmployerArea) return Routes.home;
   return null;

@@ -196,6 +196,10 @@ class JobListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer(
       child: ListView.separated(
+        // shrinkWrap so it renders inside unbounded parents (e.g. a Column or
+        // scroll view on the Home / Search loading state) without throwing an
+        // "unbounded height" RenderFlex error.
+        shrinkWrap: true,
         padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
         itemCount: count,
         physics: const NeverScrollableScrollPhysics(),

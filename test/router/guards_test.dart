@@ -254,6 +254,49 @@ void main() {
       );
     });
 
+    test('onboarded employer can reach the shared chat surface', () {
+      // Employers message candidates from /chat — they must not be bounced back
+      // to the dashboard.
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          role: UserRole.employer,
+          location: Routes.chatDetail('c1'),
+        ),
+        isNull,
+      );
+    });
+
+    test('password reset is reachable for an onboarded seeker', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          location: Routes.newPassword,
+        ),
+        isNull,
+      );
+    });
+
+    test('password reset is reachable for an onboarded employer', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: true,
+          role: UserRole.employer,
+          location: Routes.newPassword,
+        ),
+        isNull,
+      );
+    });
+
     test('offline mode never redirects regardless of role', () {
       expect(
         resolveRedirect(
