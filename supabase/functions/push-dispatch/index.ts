@@ -11,16 +11,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { sendFcmToUser } from "../_shared/fcm.ts";
+import { requireEdgeSecret } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const secret = Deno.env.get("EDGE_SHARED_SECRET");
-  if (secret && req.headers.get("x-edge-secret") !== secret) {
-    return json({ ok: false, error: "unauthorized" }, 401);
-  }
+  // Fail closed — this delivers push to arbitrary recipients.
+  const denied = requireEdgeSecret(req);
+  if (denied) return denied;
 
   const { recipient_id, title, body = "", data = {} } = await req.json().catch(
     () => ({}),

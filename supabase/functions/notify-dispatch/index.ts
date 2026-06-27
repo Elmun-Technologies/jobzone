@@ -15,6 +15,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { sendFcmToUser } from "../_shared/fcm.ts";
+import { requireEdgeSecret } from "../_shared/auth.ts";
 
 // Maps a notification type to its notification_settings push column. Types with
 // no column (e.g. 'system') are always delivered.
@@ -30,10 +31,9 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const secret = Deno.env.get("EDGE_SHARED_SECRET");
-  if (secret && req.headers.get("x-edge-secret") !== secret) {
-    return json({ ok: false, error: "unauthorized" }, 401);
-  }
+  // Invoked by the notifications AFTER-INSERT pg_net trigger. Fail closed.
+  const denied = requireEdgeSecret(req);
+  if (denied) return denied;
 
   const payload = await req.json().catch(() => ({}));
   const rec = payload?.record ?? payload;
