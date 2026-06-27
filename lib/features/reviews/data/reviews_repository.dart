@@ -18,7 +18,7 @@ class ReviewsRepository {
     final rows = await _ref
         .read(supabaseClientProvider)
         .from('company_reviews')
-        .select('*, author:profiles(full_name)')
+        .select('*, author:profiles_public(full_name)')
         .eq('company_id', companyId)
         .order('created_at', ascending: false);
     return (rows as List)
