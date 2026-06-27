@@ -353,30 +353,29 @@ class CvRepository {
         .toList();
   }
 
-  /// Uploads [bytes] to the private `resumes` bucket then records a row.
-  Future<void> addResume({
+  /// Uploads [bytes] to the private `resumes` bucket, records a row, and returns
+  /// the new resume id (used e.g. to attach a CV to a job application).
+  Future<String?> addResume({
     required String title,
     required String fileName,
     required Uint8List bytes,
     String mimeType = 'application/pdf',
   }) async {
     if (!_online) {
-      _offline.resumes.insert(
-        0,
-        Resume(
-          id: 'r${_offline.seq++}',
-          title: title,
-          filePath: fileName,
-          fileSize: bytes.length,
-          mimeType: mimeType,
-          isDefault: _offline.resumes.isEmpty,
-          uploadedAt: DateTime.now(),
-        ),
+      final resume = Resume(
+        id: 'r${_offline.seq++}',
+        title: title,
+        filePath: fileName,
+        fileSize: bytes.length,
+        mimeType: mimeType,
+        isDefault: _offline.resumes.isEmpty,
+        uploadedAt: DateTime.now(),
       );
-      return;
+      _offline.resumes.insert(0, resume);
+      return resume.id;
     }
     final uid = _uid;
-    if (uid == null) return;
+    if (uid == null) return null;
     final client = _ref.read(supabaseClientProvider);
     final path = '$uid/${DateTime.now().millisecondsSinceEpoch}_$fileName';
     await client.storage
@@ -391,14 +390,19 @@ class CvRepository {
         .select('id')
         .eq('profile_id', uid)
         .limit(1);
-    await client.from('resumes').insert({
-      'profile_id': uid,
-      'title': title,
-      'file_path': path,
-      'file_size': bytes.length,
-      'mime_type': mimeType,
-      'is_default': (existing as List).isEmpty,
-    });
+    final inserted = await client
+        .from('resumes')
+        .insert({
+          'profile_id': uid,
+          'title': title,
+          'file_path': path,
+          'file_size': bytes.length,
+          'mime_type': mimeType,
+          'is_default': (existing as List).isEmpty,
+        })
+        .select('id')
+        .single();
+    return inserted['id'] as String?;
   }
 
   Future<void> deleteResume(String id) => _delete(

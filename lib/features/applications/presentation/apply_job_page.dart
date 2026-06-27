@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
@@ -11,6 +12,7 @@ import '../../../shared/widgets/snackbars.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/domain/screening_question.dart';
+import '../../profile/data/cv_repository.dart';
 import '../application/applications_controller.dart';
 
 class ApplyJobPage extends ConsumerStatefulWidget {
@@ -26,7 +28,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
   final _email = TextEditingController();
   final _text = TextEditingController();
   final Map<String, dynamic> _answers = {};
-  String? _cvName;
+  PlatformFile? _cvFile;
   bool _submitting = false;
 
   @override
@@ -41,9 +43,10 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
     final res = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf', 'doc', 'docx'],
+      withData: true, // we need the bytes to actually upload the CV
     );
     if (res != null && res.files.isNotEmpty) {
-      setState(() => _cvName = res.files.first.name);
+      setState(() => _cvFile = res.files.first);
     }
   }
 
@@ -61,22 +64,60 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
       showErrorSnack(context, context.l10n.valCoverLetterRequired);
       return;
     }
+    // When the employer won't accept an incomplete resume, a CV is mandatory.
+    if (!job.allowIncompleteResume && _cvFile == null) {
+      showErrorSnack(context, context.l10n.resumeRequired);
+      return;
+    }
     setState(() => _submitting = true);
     try {
+      // Actually upload the picked CV and attach it to the application — the
+      // earlier version captured only the file name and dropped the file.
+      String? resumeId;
+      final cv = _cvFile;
+      if (cv != null && cv.bytes != null) {
+        resumeId = await ref
+            .read(cvRepositoryProvider)
+            .addResume(
+              title: cv.name,
+              fileName: cv.name,
+              bytes: cv.bytes!,
+              mimeType: _mimeFor(cv.extension),
+            );
+      }
       await ref
           .read(applicationsControllerProvider.notifier)
           .apply(
             job: job,
             coverLetter: _text.text.trim().isEmpty ? null : _text.text.trim(),
             answers: _answers.isEmpty ? null : _answers,
+            resumeId: resumeId,
           );
       if (mounted) context.go(Routes.applySuccess(widget.jobId));
-    } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+    } on PostgrestException catch (e) {
+      // 23505 = unique_violation on (job_id, applicant_id): already applied.
+      if (mounted) {
+        showErrorSnack(
+          context,
+          e.code == '23505'
+              ? context.l10n.alreadyApplied
+              : context.l10n.errUnknown,
+        );
+      }
+    } catch (_) {
+      if (mounted) showErrorSnack(context, context.l10n.errUnknown);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
   }
+
+  String _mimeFor(String? ext) => switch (ext?.toLowerCase()) {
+    'pdf' => 'application/pdf',
+    'doc' => 'application/msword',
+    'docx' =>
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    _ => 'application/octet-stream',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +167,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
                             style: context.text.labelLarge,
                           ),
                           const SizedBox(height: AppSpacing.sm),
-                          _UploadBox(fileName: _cvName, onTap: _pickCv),
+                          _UploadBox(fileName: _cvFile?.name, onTap: _pickCv),
                           const SizedBox(height: AppSpacing.lg),
                           if (job.screeningQuestions.isNotEmpty) ...[
                             Text(

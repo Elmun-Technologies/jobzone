@@ -14,10 +14,16 @@ class ApplicationsController extends AsyncNotifier<List<Application>> {
     required Job job,
     String? coverLetter,
     Map<String, dynamic>? answers,
+    String? resumeId,
   }) async {
     await ref
         .read(applicationsRepositoryProvider)
-        .apply(job: job, coverLetter: coverLetter, answers: answers);
+        .apply(
+          job: job,
+          coverLetter: coverLetter,
+          answers: answers,
+          resumeId: resumeId,
+        );
     ref.invalidateSelf();
     await future;
   }

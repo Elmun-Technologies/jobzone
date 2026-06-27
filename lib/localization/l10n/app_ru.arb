@@ -625,5 +625,7 @@
   "copied": "Скопировано",
   "tabMap": "Карта",
   "tabList": "Список",
-  "locationUnavailable": "Локация недоступна"
+  "locationUnavailable": "Локация недоступна",
+  "alreadyApplied": "Вы уже откликнулись на эту вакансию",
+  "resumeRequired": "Пожалуйста, прикрепите резюме"
 }
