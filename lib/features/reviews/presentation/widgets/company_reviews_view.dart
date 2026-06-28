@@ -32,7 +32,12 @@ class CompanyReviewsView extends ConsumerWidget {
 
     return async.when(
       loading: () => const JzLoader(),
-      error: (_, _) => Center(child: Text(l.errUnknown)),
+      error: (_, _) => JzErrorState(
+        title: l.errorTitle,
+        message: l.errUnknown,
+        retryLabel: l.retry,
+        onRetry: () => ref.invalidate(companyReviewsProvider(companyId)),
+      ),
       data: (reviews) {
         if (reviews.isEmpty) {
           return Column(

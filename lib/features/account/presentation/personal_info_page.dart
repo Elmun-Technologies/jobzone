@@ -66,7 +66,7 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
       ref.invalidate(currentProfileProvider);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

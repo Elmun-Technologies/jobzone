@@ -93,7 +93,7 @@ class _AwardEditPageState extends ConsumerState<AwardEditPage> {
       await ref.read(awardsControllerProvider.notifier).save(entry);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -107,7 +107,7 @@ class _AwardEditPageState extends ConsumerState<AwardEditPage> {
       await ref.read(awardsControllerProvider.notifier).remove(id);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

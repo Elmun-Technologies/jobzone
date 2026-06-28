@@ -47,7 +47,7 @@ class _ResumePageState extends ConsumerState<ResumePage> {
       ref.invalidate(resumesControllerProvider);
       if (mounted) showInfoSnack(context, context.l10n.resumeUploaded);
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }

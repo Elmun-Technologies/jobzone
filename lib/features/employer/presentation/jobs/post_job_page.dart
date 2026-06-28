@@ -205,7 +205,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         _benefits.text = d.benefits;
       });
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _generating = false);
     }
@@ -324,7 +324,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       }
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

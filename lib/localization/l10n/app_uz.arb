@@ -627,5 +627,7 @@
   "tabList": "Ro'yxat",
   "locationUnavailable": "Joylashuv aniqlanmadi",
   "alreadyApplied": "Siz bu ish o'rniga allaqachon ariza topshirgansiz",
-  "resumeRequired": "Iltimos, CV / rezyumeni biriktiring"
+  "resumeRequired": "Iltimos, CV / rezyumeni biriktiring",
+  "alreadyExists": "Bu allaqachon mavjud",
+  "notAllowed": "Buni bajarishga ruxsatingiz yo'q"
 }

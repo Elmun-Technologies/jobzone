@@ -30,7 +30,12 @@ class CompanyManagePage extends ConsumerWidget {
             Expanded(
               child: async.when(
                 loading: () => const JzLoader(),
-                error: (_, _) => Center(child: Text(l.errUnknown)),
+                error: (_, _) => JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () => ref.invalidate(myCompanyProvider),
+                ),
                 data: (company) => company == null
                     ? JzEmptyState(
                         icon: Icons.business_outlined,

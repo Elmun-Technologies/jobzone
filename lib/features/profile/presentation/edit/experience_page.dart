@@ -104,7 +104,7 @@ class _ExperienceEditPageState extends ConsumerState<ExperienceEditPage> {
       await ref.read(experiencesControllerProvider.notifier).save(entry);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -118,7 +118,7 @@ class _ExperienceEditPageState extends ConsumerState<ExperienceEditPage> {
       await ref.read(experiencesControllerProvider.notifier).remove(id);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

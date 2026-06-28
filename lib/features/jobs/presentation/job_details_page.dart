@@ -25,7 +25,12 @@ class JobDetailsPage extends ConsumerWidget {
     return Scaffold(
       body: jobAsync.when(
         loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(jobByIdProvider(jobId)),
+        ),
         data: (job) => job == null
             ? JzEmptyState(icon: Icons.search_off_rounded, title: l.noJobsTitle)
             : _JobDetail(job: job),

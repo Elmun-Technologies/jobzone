@@ -100,7 +100,7 @@ class _ProjectEditPageState extends ConsumerState<ProjectEditPage> {
       await ref.read(projectsControllerProvider.notifier).save(entry);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -114,7 +114,7 @@ class _ProjectEditPageState extends ConsumerState<ProjectEditPage> {
       await ref.read(projectsControllerProvider.notifier).remove(id);
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

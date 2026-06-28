@@ -627,5 +627,7 @@
   "tabList": "Список",
   "locationUnavailable": "Локация недоступна",
   "alreadyApplied": "Вы уже откликнулись на эту вакансию",
-  "resumeRequired": "Пожалуйста, прикрепите резюме"
+  "resumeRequired": "Пожалуйста, прикрепите резюме",
+  "alreadyExists": "Это уже существует",
+  "notAllowed": "У вас нет прав для этого действия"
 }

@@ -38,7 +38,7 @@ class _SeekingStatusPageState extends ConsumerState<SeekingStatusPage> {
           .setSeekingStatus(s, openToWork: s != SeekingStatus.notLooking);
       ref.invalidate(currentProfileProvider);
     } catch (e) {
-      if (mounted) showErrorSnack(context, e.toString());
+      if (mounted) showErrorSnack(context, localizedError(context, e));
     }
   }
 

@@ -19,7 +19,12 @@ class GalleryPage extends ConsumerWidget {
       title: l.tabGallery,
       body: async.when(
         loading: () => const JzLoader(),
-        error: (_, _) => Center(child: Text(l.errUnknown)),
+        error: (_, _) => JzErrorState(
+          title: l.errorTitle,
+          message: l.errUnknown,
+          retryLabel: l.retry,
+          onRetry: () => ref.invalidate(companyGalleryProvider(companyId)),
+        ),
         data: (items) => items.isEmpty
             ? JzEmptyState(
                 icon: Icons.photo_library_outlined,
