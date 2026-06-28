@@ -29,6 +29,18 @@ String? experienceLabel(BuildContext c, String? wire) => switch (wire) {
   _ => null,
 };
 
+/// Localized salary-period suffix (e.g. "/month", "/soat"). Null when no period.
+String? salaryPeriodLabel(BuildContext c, String? wire) => switch (wire) {
+  'hour' => c.l10n.perHour,
+  'day' => c.l10n.perDay,
+  'week' => c.l10n.perWeek,
+  'month' => c.l10n.perMonth,
+  'year' => c.l10n.perYear,
+  'shift' => c.l10n.perShift,
+  'task' => c.l10n.perTask,
+  _ => null,
+};
+
 /// Pay basis ("Оплата"): what the salary is per.
 String? payTypeLabel(BuildContext c, String? wire) => switch (wire) {
   'hour' => c.l10n.payHour,

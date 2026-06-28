@@ -180,17 +180,8 @@ class Job {
     return buf.toString();
   }
 
-  /// e.g. "/month", "/hr". Null when no period is set.
-  String? get salaryPeriodSuffix => switch (salaryPeriod) {
-    'hour' => '/hr',
-    'day' => '/day',
-    'week' => '/wk',
-    'month' => '/month',
-    'year' => '/yr',
-    'shift' => '/shift',
-    'task' => '/task',
-    _ => null,
-  };
+  // The salary-period suffix is localized in the presentation layer via
+  // `salaryPeriodLabel(context, salaryPeriod)` (job_labels.dart).
 
   factory Job.fromMap(Map<String, dynamic> m) {
     num? parseNum(Object? v) =>

@@ -643,5 +643,12 @@
   "alreadyApplied": "You've already applied to this job",
   "resumeRequired": "Please attach your CV / resume",
   "alreadyExists": "This already exists",
-  "notAllowed": "You don't have permission to do that"
+  "notAllowed": "You don't have permission to do that",
+  "perHour": "/hr",
+  "perDay": "/day",
+  "perWeek": "/wk",
+  "perMonth": "/mo",
+  "perYear": "/yr",
+  "perShift": "/shift",
+  "perTask": "/task"
 }

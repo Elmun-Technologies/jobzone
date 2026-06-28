@@ -169,9 +169,10 @@ class _Preview extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                   children: [
-                    if (job.salaryPeriodSuffix != null)
+                    if (salaryPeriodLabel(context, job.salaryPeriod) != null)
                       TextSpan(
-                        text: ' ${job.salaryPeriodSuffix}',
+                        text:
+                            ' ${salaryPeriodLabel(context, job.salaryPeriod)}',
                         style: context.text.bodySmall?.copyWith(
                           color: colors.textSecondary,
                           fontWeight: FontWeight.w400,
