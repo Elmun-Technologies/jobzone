@@ -10,6 +10,8 @@ class JzColors extends ThemeExtension<JzColors> {
     required this.primary,
     required this.onPrimary,
     required this.accent,
+    required this.gold,
+    required this.onGold,
     required this.background,
     required this.surface,
     required this.surfaceVariant,
@@ -25,6 +27,11 @@ class JzColors extends ThemeExtension<JzColors> {
   final Color primary;
   final Color onPrimary;
   final Color accent;
+
+  /// Brand gold (filter button, TOP/boost badges, ratings). Vivid in both
+  /// light and dark, so it — and its dark [onGold] foreground — are fixed.
+  final Color gold;
+  final Color onGold;
   final Color background;
   final Color surface;
   final Color surfaceVariant;
@@ -44,6 +51,8 @@ class JzColors extends ThemeExtension<JzColors> {
     primary: _indigo,
     onPrimary: Colors.white,
     accent: Color(0xFF6366F1),
+    gold: Color(0xFFFFC629),
+    onGold: Color(0xFF1A1A1A),
     background: Color(0xFFF7F8FA),
     surface: Colors.white,
     surfaceVariant: Color(0xFFF1F3F6),
@@ -60,6 +69,8 @@ class JzColors extends ThemeExtension<JzColors> {
     primary: _indigoDark,
     onPrimary: Colors.white,
     accent: Color(0xFF818CF8),
+    gold: Color(0xFFFFC629),
+    onGold: Color(0xFF1A1A1A),
     background: Color(0xFF0E1116),
     surface: Color(0xFF171A21),
     surfaceVariant: Color(0xFF1F242D),
@@ -77,6 +88,8 @@ class JzColors extends ThemeExtension<JzColors> {
     Color? primary,
     Color? onPrimary,
     Color? accent,
+    Color? gold,
+    Color? onGold,
     Color? background,
     Color? surface,
     Color? surfaceVariant,
@@ -92,6 +105,8 @@ class JzColors extends ThemeExtension<JzColors> {
       primary: primary ?? this.primary,
       onPrimary: onPrimary ?? this.onPrimary,
       accent: accent ?? this.accent,
+      gold: gold ?? this.gold,
+      onGold: onGold ?? this.onGold,
       background: background ?? this.background,
       surface: surface ?? this.surface,
       surfaceVariant: surfaceVariant ?? this.surfaceVariant,
@@ -112,6 +127,8 @@ class JzColors extends ThemeExtension<JzColors> {
       primary: Color.lerp(primary, other.primary, t)!,
       onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
+      gold: Color.lerp(gold, other.gold, t)!,
+      onGold: Color.lerp(onGold, other.onGold, t)!,
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       surfaceVariant: Color.lerp(surfaceVariant, other.surfaceVariant, t)!,

@@ -268,10 +268,10 @@ class _SearchBar extends StatelessWidget {
             height: 52,
             width: 52,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFC629),
+              color: colors.gold,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: const Icon(Icons.tune_rounded, color: Color(0xFF1A1A1A)),
+            child: Icon(Icons.tune_rounded, color: colors.onGold),
           ),
         ),
       ],

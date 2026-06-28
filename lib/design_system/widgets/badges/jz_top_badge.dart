@@ -10,29 +10,27 @@ class JzTopBadge extends StatelessWidget {
 
   final String label;
 
-  static const _gold = Color(0xFFFFC629);
-  static const _ink = Color(0xFF1A1A1A);
-
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: 3,
       ),
       decoration: BoxDecoration(
-        color: _gold,
+        color: colors.gold,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.bolt_rounded, size: 13, color: _ink),
+          Icon(Icons.bolt_rounded, size: 13, color: colors.onGold),
           const SizedBox(width: 2),
           Text(
             label,
             style: context.text.labelSmall?.copyWith(
-              color: _ink,
+              color: colors.onGold,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.5,
             ),

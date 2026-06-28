@@ -255,9 +255,7 @@ class _ProfileCard extends StatelessWidget {
                       value: completion,
                       strokeWidth: 4,
                       backgroundColor: Colors.white24,
-                      valueColor: const AlwaysStoppedAnimation(
-                        Color(0xFFFFC629),
-                      ),
+                      valueColor: AlwaysStoppedAnimation(colors.gold),
                     ),
                     Text(
                       '${(completion * 100).round()}%',
