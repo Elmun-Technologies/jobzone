@@ -47,7 +47,7 @@ class ApplicationStatusPage extends ConsumerWidget {
         : job.companyName.substring(0, 1).toUpperCase();
     final salary = job.salaryText == null
         ? '—'
-        : '${job.salaryText}${job.salaryPeriodSuffix != null ? ' ${job.salaryPeriodSuffix}' : ''}';
+        : '${job.salaryText}${salaryPeriodLabel(context, job.salaryPeriod) != null ? ' ${salaryPeriodLabel(context, job.salaryPeriod)}' : ''}';
 
     return Scaffold(
       body: SafeArea(

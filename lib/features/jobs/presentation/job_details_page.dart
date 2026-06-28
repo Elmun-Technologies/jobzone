@@ -196,7 +196,7 @@ class _InfoGrid extends StatelessWidget {
     final l = context.l10n;
     final salary = job.salaryText == null
         ? '—'
-        : '${job.salaryText}${job.salaryPeriodSuffix != null ? ' ${job.salaryPeriodSuffix}' : ''}';
+        : '${job.salaryText}${salaryPeriodLabel(context, job.salaryPeriod) != null ? ' ${salaryPeriodLabel(context, job.salaryPeriod)}' : ''}';
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
