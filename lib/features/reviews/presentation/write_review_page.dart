@@ -137,9 +137,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                           icon: Icon(
                             Icons.star_rounded,
                             size: 40,
-                            color: i <= _rating
-                                ? const Color(0xFFFFC629)
-                                : colors.border,
+                            color: i <= _rating ? colors.gold : colors.border,
                           ),
                         ),
                     ],

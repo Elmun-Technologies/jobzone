@@ -12,9 +12,6 @@ import '../../../localization/l10n_extension.dart';
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
 
-  // #Designer tag colour from the reference (golden yellow).
-  static const _tagYellow = Color(0xFFFFC629);
-
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -124,8 +121,8 @@ class _WelcomeArt extends StatelessWidget {
             alignment: const Alignment(-0.25, 0.45),
             child: _Tag(
               '#Designer',
-              bg: WelcomePage._tagYellow,
-              fg: const Color(0xFF1A1A1A),
+              bg: context.colors.gold,
+              fg: context.colors.onGold,
             ),
           ),
         ],

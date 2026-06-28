@@ -148,9 +148,9 @@ class _HomeHeader extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_rounded,
-                          color: Color(0xFFFFC629),
+                          color: colors.gold,
                           size: 18,
                         ),
                         const SizedBox(width: AppSpacing.xs),
@@ -212,9 +212,9 @@ class _HomeHeader extends ConsumerWidget {
               ),
               const SizedBox(width: AppSpacing.md),
               _IconSquare(
-                color: const Color(0xFFFFC629),
+                color: colors.gold,
                 icon: Icons.tune_rounded,
-                iconColor: const Color(0xFF1A1A1A),
+                iconColor: colors.onGold,
                 onTap: () => context.push(Routes.filter),
               ),
             ],

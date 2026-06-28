@@ -18,14 +18,12 @@ class PromoPackageCard extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  static const _gold = Color(0xFFFFC629);
-
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
     final disabled = product.isComingSoon;
-    final accent = product.isTop ? _gold : colors.primary;
+    final accent = product.isTop ? colors.gold : colors.primary;
 
     final priceText = product.isComingSoon
         ? l.comingSoon
@@ -53,7 +51,7 @@ class PromoPackageCard extends StatelessWidget {
                 if (product.isTop)
                   Padding(
                     padding: const EdgeInsets.only(right: AppSpacing.md),
-                    child: Icon(Icons.bolt_rounded, color: _gold),
+                    child: Icon(Icons.bolt_rounded, color: colors.gold),
                   ),
                 Expanded(
                   child: Column(
