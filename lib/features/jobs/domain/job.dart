@@ -15,6 +15,8 @@ class Job {
     this.addressText,
     this.city,
     this.country,
+    this.region,
+    this.district,
     this.lat,
     this.lng,
     this.jobType,
@@ -25,6 +27,11 @@ class Job {
     this.currency,
     this.salaryPeriod,
     this.payoutFrequency,
+    this.salaryDisplay = 'exact',
+    this.ageMin,
+    this.ageMax,
+    this.preferredGender = 'any',
+    this.startAvailability,
     this.schedulePattern,
     this.hoursPerDay,
     this.nightShift = false,
@@ -65,6 +72,11 @@ class Job {
   final String? addressText;
   final String? city;
   final String? country;
+
+  /// Structured Uzbekistan location: region (viloyat) and district (tuman).
+  final String? region;
+  final String? district;
+
   final double? lat;
   final double? lng;
   final String? jobType;
@@ -77,6 +89,20 @@ class Job {
 
   /// How often wages are paid: `monthly` / `biweekly` / `weekly` / `daily`.
   final String? payoutFrequency;
+
+  /// How the employer chose to display salary: `exact` | `negotiable` | `hidden`.
+  final String salaryDisplay;
+
+  /// Candidate age range requirements (optional).
+  final int? ageMin;
+  final int? ageMax;
+
+  /// Employer's preference for applicant gender: `any` | `male` | `female`.
+  final String preferredGender;
+
+  /// When the employer expects the new hire to start: `immediate` | `one_week`
+  /// | `two_weeks` | `one_month`.
+  final String? startAvailability;
 
   /// Blue-collar fit: schedule pattern (`6_1`/`5_2`…), hours/day, night shifts,
   /// and how the hire is formalized (`employment_contract`/`gph`/…).
@@ -197,6 +223,8 @@ class Job {
       addressText: m['address_text'] as String?,
       city: m['city'] as String?,
       country: m['country'] as String?,
+      region: m['region'] as String?,
+      district: m['district'] as String?,
       lat: (m['lat'] as num?)?.toDouble(),
       lng: (m['lng'] as num?)?.toDouble(),
       jobType: m['job_type'] as String?,
@@ -207,6 +235,11 @@ class Job {
       currency: m['currency'] as String?,
       salaryPeriod: m['salary_period'] as String?,
       payoutFrequency: m['payout_frequency'] as String?,
+      salaryDisplay: (m['salary_display'] as String?) ?? 'exact',
+      ageMin: (m['age_min'] as num?)?.toInt(),
+      ageMax: (m['age_max'] as num?)?.toInt(),
+      preferredGender: (m['preferred_gender'] as String?) ?? 'any',
+      startAvailability: m['start_availability'] as String?,
       schedulePattern: m['schedule_pattern'] as String?,
       hoursPerDay: parseNum(m['hours_per_day']),
       nightShift: (m['night_shift'] ?? false) as bool,
@@ -279,6 +312,8 @@ class Job {
     String? addressText,
     String? city,
     String? country,
+    String? region,
+    String? district,
     double? lat,
     double? lng,
     String? jobType,
@@ -289,6 +324,11 @@ class Job {
     String? currency,
     String? salaryPeriod,
     String? payoutFrequency,
+    String? salaryDisplay,
+    Object? ageMin = _unset,
+    Object? ageMax = _unset,
+    String? preferredGender,
+    String? startAvailability,
     String? schedulePattern,
     num? hoursPerDay,
     bool? nightShift,
@@ -328,6 +368,8 @@ class Job {
     addressText: addressText ?? this.addressText,
     city: city ?? this.city,
     country: country ?? this.country,
+    region: region ?? this.region,
+    district: district ?? this.district,
     lat: lat ?? this.lat,
     lng: lng ?? this.lng,
     jobType: jobType ?? this.jobType,
@@ -338,6 +380,11 @@ class Job {
     currency: currency ?? this.currency,
     salaryPeriod: salaryPeriod ?? this.salaryPeriod,
     payoutFrequency: payoutFrequency ?? this.payoutFrequency,
+    salaryDisplay: salaryDisplay ?? this.salaryDisplay,
+    ageMin: ageMin == _unset ? this.ageMin : ageMin as int?,
+    ageMax: ageMax == _unset ? this.ageMax : ageMax as int?,
+    preferredGender: preferredGender ?? this.preferredGender,
+    startAvailability: startAvailability ?? this.startAvailability,
     schedulePattern: schedulePattern ?? this.schedulePattern,
     hoursPerDay: hoursPerDay ?? this.hoursPerDay,
     nightShift: nightShift ?? this.nightShift,

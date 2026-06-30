@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../core/utils/markdown_edit.dart';
+import '../../../../core/utils/uzbekistan_regions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
@@ -13,6 +14,7 @@ import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/domain/job_language.dart';
 import '../../../jobs/domain/screening_question.dart';
+import '../../../jobs/presentation/job_details_page.dart';
 import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
@@ -87,6 +89,17 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late final _contactPhone = TextEditingController(
     text: widget.job?.contactPhone,
   );
+  late String? _region = widget.job?.region;
+  late String? _district = widget.job?.district;
+  late String _preferredGender = widget.job?.preferredGender ?? 'any';
+  late String? _startAvailability = widget.job?.startAvailability;
+  late String _salaryDisplay = widget.job?.salaryDisplay ?? 'exact';
+  late final _ageMin = TextEditingController(
+    text: widget.job?.ageMin?.toString() ?? '18',
+  );
+  late final _ageMax = TextEditingController(
+    text: widget.job?.ageMax?.toString(),
+  );
   late bool _scheduleOn = widget.job?.publishAt != null;
   late DateTime? _publishAt = widget.job?.publishAt;
   late final _hours = TextEditingController(
@@ -121,6 +134,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     _benefits.dispose();
     _address.dispose();
     _contactPhone.dispose();
+    _ageMin.dispose();
+    _ageMax.dispose();
     super.dispose();
   }
 
@@ -211,6 +226,64 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     }
   }
 
+  void _preview() {
+    final skills = _skills.text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    final tempJob = Job(
+      id: widget.job?.id ?? 'preview',
+      title: _title.text.trim().isEmpty ? '—' : _title.text.trim(),
+      companyId: widget.job?.companyId ?? 'preview',
+      companyName: widget.job?.companyName ?? '—',
+      companyLogoUrl: widget.job?.companyLogoUrl,
+      jobType: _type,
+      experienceLevel: _level,
+      workingModel: _model,
+      salaryMin: _salaryDisplay == 'exact' ? num.tryParse(_min.text) : null,
+      salaryMax: _salaryDisplay == 'exact' ? num.tryParse(_max.text) : null,
+      salaryDisplay: _salaryDisplay,
+      currency: _currency,
+      salaryPeriod: _payType,
+      payoutFrequency: _payoutFreq,
+      salaryGross: _salaryGross,
+      ageMin: int.tryParse(_ageMin.text),
+      ageMax: int.tryParse(_ageMax.text),
+      preferredGender: _preferredGender,
+      startAvailability: _startAvailability,
+      schedulePattern: _schedule,
+      hoursPerDay: num.tryParse(_hours.text),
+      nightShift: _nightShift,
+      formalization: _formalization,
+      womenFriendly: _womenFriendly,
+      disabilityFriendly: _disabilityFriendly,
+      driverLicenses: _licenses.toList(),
+      languages: _languages,
+      requireCoverLetter: _requireCoverLetter,
+      allowIncompleteResume: _allowIncompleteResume,
+      showPhoneOnListing: _showPhone,
+      contactPhone: _contactPhone.text.trim(),
+      region: _region,
+      district: _district,
+      city: _district ?? _city.text.trim(),
+      lat: _lat,
+      lng: _lng,
+      addressText: _address.text.trim(),
+      categoryId: _categoryId,
+      skills: skills,
+      description: _description.text.trim(),
+      responsibilities: _responsibilities.text.trim(),
+      requirements: _requirements.text.trim(),
+      benefits: _benefits.text.trim(),
+      screeningQuestions: _questions,
+      status: 'open',
+    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => JobPreviewPage(job: tempJob)));
+  }
+
   Future<void> _submit(String status) async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -236,8 +309,17 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             jobType: _type,
             experienceLevel: _level,
             workingModel: _model,
-            salaryMin: num.tryParse(_min.text),
-            salaryMax: num.tryParse(_max.text),
+            salaryMin: _salaryDisplay == 'exact'
+                ? num.tryParse(_min.text)
+                : null,
+            salaryMax: _salaryDisplay == 'exact'
+                ? num.tryParse(_max.text)
+                : null,
+            salaryDisplay: _salaryDisplay,
+            ageMin: int.tryParse(_ageMin.text),
+            ageMax: int.tryParse(_ageMax.text),
+            preferredGender: _preferredGender,
+            startAvailability: _startAvailability,
             salaryPeriod: _payType,
             payoutFrequency: _payoutFreq,
             schedulePattern: _schedule,
@@ -258,7 +340,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             lat: _lat,
             lng: _lng,
             addressText: _address.text.trim(),
-            city: _city.text.trim(),
+            city: _district ?? _city.text.trim(),
+            region: _region,
+            district: _district,
             skills: skills,
             description: _description.text.trim(),
             responsibilities: _responsibilities.text.trim(),
@@ -277,10 +361,15 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           jobType: _type,
           experienceLevel: _level,
           workingModel: _model,
-          salaryMin: num.tryParse(_min.text),
-          salaryMax: num.tryParse(_max.text),
+          salaryMin: _salaryDisplay == 'exact' ? num.tryParse(_min.text) : null,
+          salaryMax: _salaryDisplay == 'exact' ? num.tryParse(_max.text) : null,
           salaryPeriod: _payType,
           payoutFrequency: _payoutFreq,
+          salaryDisplay: _salaryDisplay,
+          ageMin: int.tryParse(_ageMin.text),
+          ageMax: int.tryParse(_ageMax.text),
+          preferredGender: _preferredGender,
+          startAvailability: _startAvailability,
           schedulePattern: _schedule,
           hoursPerDay: num.tryParse(_hours.text),
           nightShift: _nightShift,
@@ -299,7 +388,9 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           lat: _lat,
           lng: _lng,
           addressText: _address.text.trim(),
-          city: _city.text.trim(),
+          city: _district ?? _city.text.trim(),
+          region: _region,
+          district: _district,
           skills: skills,
           description: _description.text.trim(),
           responsibilities: _responsibilities.text.trim(),
@@ -341,7 +432,12 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: JzTopBar(title: _isEdit ? l.editJobTitle : l.postJobCta),
+              child: JzTopBar(
+                title: _isEdit ? l.editJobTitle : l.postJobCta,
+                actions: [
+                  TextButton(onPressed: _preview, child: Text(l.previewJob)),
+                ],
+              ),
             ),
             Expanded(
               child: Form(
@@ -460,40 +556,146 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       onChanged: (v) => setState(() => _disabilityFriendly = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
+                    // --- Candidate requirements ---
+                    Text(
+                      l.candidateRequirementsSection,
+                      style: context.text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: JzTextField(
-                            label: l.fieldSalaryMin,
-                            controller: _min,
+                            label: l.fieldAgeMin,
+                            controller: _ageMin,
                             keyboardType: TextInputType.number,
-                            validator: (v) {
-                              if (!Validators.isNotBlank(v)) {
-                                return l.valSalaryRequired;
-                              }
-                              return num.tryParse(v!.trim()) == null
-                                  ? l.valSalaryRequired
-                                  : null;
-                            },
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: JzTextField(
-                            label: l.fieldSalaryMax,
-                            controller: _max,
+                            label: l.fieldAgeMax,
+                            controller: _ageMax,
                             keyboardType: TextInputType.number,
-                            validator: (v) {
-                              if (!Validators.isNotBlank(v)) return null;
-                              return num.tryParse(v!.trim()) == null
-                                  ? l.valSalaryRequired
-                                  : null;
-                            },
                           ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: AppSpacing.md),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.fieldPreferredGender,
+                          style: context.text.labelLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          children: [
+                            for (final g in ['any', 'male', 'female'])
+                              ChoiceChip(
+                                label: Text(switch (g) {
+                                  'male' => l.preferGenderMale,
+                                  'female' => l.preferGenderFemale,
+                                  _ => l.preferGenderAny,
+                                }),
+                                selected: _preferredGender == g,
+                                onSelected: (_) =>
+                                    setState(() => _preferredGender = g),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.fieldStartAvailability,
+                          style: context.text.labelLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            for (final s in [
+                              'immediate',
+                              'one_week',
+                              'two_weeks',
+                              'one_month',
+                            ])
+                              ChoiceChip(
+                                label: Text(switch (s) {
+                                  'one_week' => l.startOneWeek,
+                                  'two_weeks' => l.startTwoWeeks,
+                                  'one_month' => l.startOneMonth,
+                                  _ => l.startImmediate,
+                                }),
+                                selected: _startAvailability == s,
+                                onSelected: (v) => setState(
+                                  () => _startAvailability = v ? s : null,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    // --- Salary ---
+                    _Dropdown(
+                      label: l.fieldSalaryDisplay,
+                      value: _salaryDisplay,
+                      items: {
+                        'exact': l.salaryDisplayExact,
+                        'negotiable': l.salaryDisplayNegotiable,
+                        'hidden': l.salaryDisplayHidden,
+                      },
+                      onChanged: (v) =>
+                          setState(() => _salaryDisplay = v ?? 'exact'),
+                    ),
+                    if (_salaryDisplay == 'exact') ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: JzTextField(
+                              label: l.fieldSalaryMin,
+                              controller: _min,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (!Validators.isNotBlank(v)) {
+                                  return l.valSalaryRequired;
+                                }
+                                return num.tryParse(v!.trim()) == null
+                                    ? l.valSalaryRequired
+                                    : null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: JzTextField(
+                              label: l.fieldSalaryMax,
+                              controller: _max,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (!Validators.isNotBlank(v)) return null;
+                                return num.tryParse(v!.trim()) == null
+                                    ? l.valSalaryRequired
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.lg),
                     _Dropdown(
                       label: l.currencyLabel,
@@ -550,6 +752,31 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                         'daily': l.payoutDaily,
                       },
                       onChanged: (v) => setState(() => _payoutFreq = v),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      key: ValueKey('region-$_region'),
+                      label: l.fieldRegion,
+                      value: uzbekistanRegions.containsKey(_region)
+                          ? _region
+                          : null,
+                      items: {for (final r in uzbekistanRegions.keys) r: r},
+                      onChanged: (v) => setState(() {
+                        _region = v;
+                        _district = null;
+                      }),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _Dropdown(
+                      key: ValueKey('district-$_region-$_district'),
+                      label: l.fieldDistrict,
+                      value:
+                          _region != null &&
+                              districtsFor(_region).contains(_district)
+                          ? _district
+                          : null,
+                      items: {for (final d in districtsFor(_region)) d: d},
+                      onChanged: (v) => setState(() => _district = v),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     JzTextField(label: l.fieldCity, controller: _city),

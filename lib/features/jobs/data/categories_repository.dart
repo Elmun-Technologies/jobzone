@@ -11,6 +11,34 @@ class JobCategory {
   final String name;
   final String slug;
 
+  /// Emoji icon derived from the category slug; used in browse-by-category UI.
+  String get emoji => _emojis[slug] ?? '🗂️';
+
+  static const _emojis = <String, String>{
+    'engineering': '💻',
+    'design': '🎨',
+    'product': '📋',
+    'marketing': '📢',
+    'sales': '🛒',
+    'finance': '💰',
+    'hr': '👥',
+    'support': '💬',
+    'data-ai': '🤖',
+    'operations': '⚙️',
+    'horeca': '🍽️',
+    'retail': '🛍️',
+    'logistics-delivery': '🚚',
+    'construction': '🏗️',
+    'driver': '🚗',
+    'warehouse': '📦',
+    'security': '🛡️',
+    'cleaning': '🧹',
+    'beauty': '✂️',
+    'manufacturing': '🏭',
+    'agriculture': '🌾',
+    'foreign-jobs': '✈️',
+  };
+
   factory JobCategory.fromMap(Map<String, dynamic> m) => JobCategory(
     id: (m['id'] ?? '') as String,
     name: (m['name'] ?? '') as String,
