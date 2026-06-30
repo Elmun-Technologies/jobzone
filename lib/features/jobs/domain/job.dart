@@ -303,8 +303,7 @@ class Job {
               )
               .toList() ??
           const [],
-      educationRequired:
-          (m['education_required'] as String?) ?? 'none',
+      educationRequired: (m['education_required'] as String?) ?? 'none',
       workHours: m['work_hours'] as String?,
     );
   }

@@ -37,8 +37,7 @@ class ScreeningQuestion {
         label: (m['label'] ?? '') as String,
         type: (m['type'] ?? 'text') as String,
         required: (m['required'] ?? false) as bool,
-        options:
-            (m['options'] as List?)?.map((e) => '$e').toList() ?? const [],
+        options: (m['options'] as List?)?.map((e) => '$e').toList() ?? const [],
       );
 
   Map<String, dynamic> toMap() => {
