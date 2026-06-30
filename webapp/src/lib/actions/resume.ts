@@ -38,10 +38,28 @@ export async function saveResume(
       desired_pay_min: Number.isFinite(pay) && pay > 0 ? pay : null,
       desired_pay_currency: draft.currency === "USD" ? "USD" : "UZS",
       phone: clean(draft.phone),
+      languages: draft.languages ?? {},
       onboarding_complete: true,
     })
     .eq("id", user.id);
 
   if (error) return { error: true };
+
+  // Replace the user's education entries with the wizard's set.
+  const year = (y: string) => (/^\d{4}$/.test(y) ? `${y}-01-01` : null);
+  const rows = (draft.educations ?? [])
+    .filter((e) => e.school.trim() !== "")
+    .map((e) => ({
+      profile_id: user.id,
+      school: e.school.trim(),
+      degree: clean(e.degree),
+      field: clean(e.field),
+      start_date: year(e.startYear),
+      end_date: e.isCurrent ? null : year(e.endYear),
+      is_current: e.isCurrent,
+    }));
+  await supabase.from("educations").delete().eq("profile_id", user.id);
+  if (rows.length > 0) await supabase.from("educations").insert(rows);
+
   return { ok: true };
 }

@@ -102,6 +102,31 @@
     "back": "Orqaga",
     "next": "Keyingi",
     "finish": "Saqlash",
+    "stepEducation": "Ta'lim",
+    "education": "Ta'lim",
+    "school": "O'quv yurti",
+    "degree": "Daraja",
+    "field": "Mutaxassislik",
+    "startYear": "Boshlanish yili",
+    "endYear": "Tugash yili",
+    "studying": "Hozir ham o'qiyapman",
+    "addEducation": "Ta'lim qo'shish",
+    "remove": "O'chirish",
+    "languages": "Tillar darajasi",
+    "lang": {
+      "ru": "Rus tili",
+      "en": "Ingliz tili",
+      "tr": "Turk tili",
+      "tg": "Tojik tili",
+      "uz": "O'zbek tili"
+    },
+    "level": {
+      "none": "Bilmayman",
+      "a1_a2": "Boshlang'ich",
+      "b1_b2": "O'rta",
+      "c1_c2": "Yuqori",
+      "native": "Ona tili"
+    },
     "errSave": "Saqlashda xatolik yuz berdi"
   },
   "bookmarks": {
