@@ -34,9 +34,21 @@
     "myApplications": "Mening arizalarim",
     "savedJobs": "Saqlangan ishlar",
     "employerArea": "Ish beruvchi paneli",
+    "editProfile": "Profilni tahrirlash",
     "signedInAs": "Tizimga kirgansiz:",
     "comingSoon": "CV tez orada shu yerda bo'ladi.",
     "signOut": "Chiqish"
+  },
+  "profile": {
+    "title": "Profilni tahrirlash",
+    "fullName": "To'liq ism",
+    "headline": "Kasb / lavozim",
+    "bio": "O'zingiz haqingizda",
+    "phone": "Telefon",
+    "city": "Shahar",
+    "country": "Davlat",
+    "save": "Saqlash",
+    "errUnknown": "Xatolik yuz berdi"
   },
   "bookmarks": {
     "title": "Saqlangan ishlar",
@@ -48,6 +60,8 @@
     "dashboard": "Boshqaruv paneli",
     "postJob": "Ish e'lon qilish",
     "myJobs": "Mening ishlarim",
+    "editCompany": "Kompaniyani tahrirlash",
+    "saveChanges": "Saqlash",
     "noJobs": "Hali ish e'lon qilmadingiz",
     "onboardingTitle": "Kompaniyangizni yarating",
     "onboardingSubtitle": "Ish e'lon qilishdan oldin kompaniya profilini to'ldiring.",

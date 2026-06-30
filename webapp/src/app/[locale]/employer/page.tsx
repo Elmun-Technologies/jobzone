@@ -67,6 +67,12 @@ export default async function EmployerDashboardPage({
         >
           {t("myJobs")}
         </Link>
+        <Link
+          href="/employer/company/edit"
+          className={cn(buttonVariants({ variant: "ghost", size: "md" }))}
+        >
+          {t("editCompany")}
+        </Link>
       </div>
     </Container>
   );
