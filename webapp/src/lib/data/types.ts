@@ -27,6 +27,8 @@ export interface Job {
   city: string | null;
   country: string | null;
   location: string | null;
+  lat: number | null;
+  lng: number | null;
   salaryMin: number | null;
   salaryMax: number | null;
   currency: string;
