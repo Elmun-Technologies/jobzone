@@ -19,7 +19,9 @@ android {
         applicationId = "io.jobzone.jobzone"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // yandex_mapkit requires Android API 26+ (its library manifest declares
+        // minSdk 26), so we pin it here rather than using flutter's default (24).
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -42,4 +44,13 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Yandex MapKit native SDK. The yandex_mapkit plugin declares this only as
+    // `implementation`, so MainApplication.kt (which calls MapKitFactory) can't
+    // see it unless the app module depends on it too — see the plugin README.
+    // The variant must match the plugin's default (`lite`); resolved from
+    // mavenCentral (already configured in android/build.gradle.kts).
+    implementation("com.yandex.android:maps.mobile:4.22.0-lite")
 }
