@@ -228,6 +228,29 @@
       "remove": "Remove"
     }
   },
+  "wallet": {
+    "title": "Wallet",
+    "balance": "Balance",
+    "balanceHint": "Funds available on your account",
+    "topUp": "Top up",
+    "topUpSub": "Choose an amount and add funds to your balance.",
+    "topUpPending": "Top-up request received — your balance updates once payment is confirmed.",
+    "amountHint": "Amount",
+    "errAmount": "Enter an amount of at least 1 000",
+    "errUnknown": "Something went wrong",
+    "history": "Transactions",
+    "historyEmpty": "No transactions yet",
+    "kind": {
+      "topup": "Top-up",
+      "spend": "Promotion",
+      "refund": "Refund",
+      "bonus": "Bonus"
+    },
+    "status": {
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    }
+  },
   "apply": {
     "applyTo": "Apply for a job",
     "coverLetter": "Cover letter",
