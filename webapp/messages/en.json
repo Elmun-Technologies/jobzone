@@ -35,9 +35,17 @@
     "savedJobs": "Saved jobs",
     "employerArea": "Employer area",
     "editProfile": "Edit profile",
+    "messages": "Messages",
     "signedInAs": "Signed in as:",
     "comingSoon": "Your CV will appear here soon.",
     "signOut": "Sign out"
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": "No conversations yet",
+    "message": "Message",
+    "messagePlaceholder": "Type a message…",
+    "send": "Send"
   },
   "profile": {
     "title": "Edit profile",

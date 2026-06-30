@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { StatusSelect } from "@/components/employer/status-select";
+import { MessageButton } from "@/components/chat/message-button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { getMyCompany } from "@/lib/data/employer";
@@ -87,10 +88,13 @@ export default async function JobApplicantsPage({
                     ) : null}
                   </div>
                 </div>
-                <StatusSelect
-                  applicationId={a.applicationId}
-                  initial={a.status}
-                />
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <StatusSelect
+                    applicationId={a.applicationId}
+                    initial={a.status}
+                  />
+                  <MessageButton profileId={a.applicantId} />
+                </div>
               </div>
 
               {a.coverLetter ? (

@@ -24,7 +24,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-foreground">
+      <span className="text-foreground mb-1 block text-sm font-medium">
         {label}
       </span>
       <input
@@ -53,7 +53,7 @@ export function ProfileForm({ initial }: { initial: ProfileDetails }) {
       <Field name="headline" label={t("headline")} value={initial.headline} />
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-foreground">
+        <span className="text-foreground mb-1 block text-sm font-medium">
           {t("bio")}
         </span>
         <textarea
@@ -76,7 +76,9 @@ export function ProfileForm({ initial }: { initial: ProfileDetails }) {
       </div>
 
       {state.error ? (
-        <p className="text-sm font-medium text-destructive">{t("errUnknown")}</p>
+        <p className="text-destructive text-sm font-medium">
+          {t("errUnknown")}
+        </p>
       ) : null}
 
       <button
