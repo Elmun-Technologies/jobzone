@@ -218,7 +218,11 @@
     "noOpenJobs": "Hozircha ochiq ish o'rni yo'q",
     "reviews": "Sharhlar",
     "noReviews": "Hali sharhlar yo'q",
-    "visitWebsite": "Veb-saytga o'tish"
+    "visitWebsite": "Veb-saytga o'tish",
+    "directoryTitle": "Kompaniyalar",
+    "searchPlaceholder": "Kompaniya nomi",
+    "openJobsCount": "{count} ochiq ish o'rni",
+    "none": "Kompaniya topilmadi"
   },
   "footer": {
     "tagline": "Ishonchli ish bozori.",

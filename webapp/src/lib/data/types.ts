@@ -53,6 +53,11 @@ export interface Company {
   isVerified: boolean;
 }
 
+export interface CompanyWithJobs extends Company {
+  /** Number of currently-open jobs at this company. */
+  openJobs: number;
+}
+
 export interface JobCategory {
   id: string;
   slug: string;

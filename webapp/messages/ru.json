@@ -218,7 +218,11 @@
     "noOpenJobs": "Пока нет открытых вакансий",
     "reviews": "Отзывы",
     "noReviews": "Пока нет отзывов",
-    "visitWebsite": "Перейти на сайт"
+    "visitWebsite": "Перейти на сайт",
+    "directoryTitle": "Компании",
+    "searchPlaceholder": "Название компании",
+    "openJobsCount": "{count} открытых вакансий",
+    "none": "Компании не найдены"
   },
   "footer": {
     "tagline": "Надёжный рынок труда.",

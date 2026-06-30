@@ -218,7 +218,11 @@
     "noOpenJobs": "No open positions yet",
     "reviews": "Reviews",
     "noReviews": "No reviews yet",
-    "visitWebsite": "Visit website"
+    "visitWebsite": "Visit website",
+    "directoryTitle": "Companies",
+    "searchPlaceholder": "Company name",
+    "openJobsCount": "{count} open jobs",
+    "none": "No companies found"
   },
   "footer": {
     "tagline": "The trusted job marketplace.",

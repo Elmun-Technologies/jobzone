@@ -42,6 +42,9 @@ export async function SiteHeader() {
             <Link href="/jobs" className={navLink}>
               {t("jobs")}
             </Link>
+            <Link href="/companies" className={navLink}>
+              {t("companies")}
+            </Link>
             <Link href="/account/bookmarks" className={navLink}>
               {t("saved")}
             </Link>
