@@ -644,5 +644,9 @@
   "perTask": "/task",
   "qualificationsTitle": "Do you have these skills?",
   "qualificationsHint": "Tap the ones you have to gauge your fit.",
-  "qualificationsMatch": "match"
+  "qualificationsMatch": "match",
+  "matchPrompt": "See how well your profile fits this job.",
+  "matchCta": "Check my match",
+  "matchStrengths": "Your strengths",
+  "matchGaps": "To work on"
 }

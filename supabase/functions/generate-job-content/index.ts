@@ -159,6 +159,100 @@ function rank(input: Record<string, unknown>) {
   return { ranked };
 }
 
+// ── "Am I a good match?" — seeker-facing fit assessment ──────────────────────
+function matchScore(input: Record<string, unknown>) {
+  const jobSkills = (Array.isArray(input.jobSkills) ? input.jobSkills : [])
+    .map(String);
+  const mySkills = (Array.isArray(input.mySkills) ? input.mySkills : [])
+    .map(String);
+  const js = jobSkills.map((s) => s.toLowerCase().trim()).filter(Boolean);
+  if (js.length === 0) {
+    return { score: 0, summary: "", strengths: [], gaps: [] };
+  }
+  const ms = new Set(mySkills.map((s) => s.toLowerCase().trim()));
+  const strengths = jobSkills.filter((s) => ms.has(s.toLowerCase().trim()));
+  const gaps = jobSkills.filter((s) => !ms.has(s.toLowerCase().trim()));
+  return {
+    score: Math.round((strengths.length / js.length) * 100),
+    summary: "",
+    strengths,
+    gaps,
+  };
+}
+
+async function claudeMatch(input: Record<string, unknown>) {
+  const title = String(input.title ?? "").trim();
+  const jobSkills = (Array.isArray(input.jobSkills) ? input.jobSkills : [])
+    .map(String);
+  const description = String(input.description ?? "").trim();
+  const mySkills = (Array.isArray(input.mySkills) ? input.mySkills : [])
+    .map(String);
+  const myHeadline = String(input.myHeadline ?? "").trim();
+  const lang = LANG[String(input.locale ?? "uz")] ?? LANG.uz;
+
+  const facts = [
+    `Job title: ${title || "(not specified)"}`,
+    jobSkills.length && `Job requires: ${jobSkills.join(", ")}`,
+    description && `Job description: ${description.slice(0, 1500)}`,
+    myHeadline && `Candidate headline: ${myHeadline}`,
+    `Candidate skills: ${mySkills.length ? mySkills.join(", ") : "(none listed)"}`,
+  ].filter(Boolean).join("\n");
+
+  const system =
+    "You are a career advisor for Jobzone, a blue-collar job marketplace in " +
+    `Uzbekistan. Assess how well a candidate fits a job. Answer in ${lang}. Be ` +
+    "honest, concise and encouraging. score = 0-100 (share of the job's needs " +
+    "the candidate clearly meets). strengths = the candidate's relevant skills; " +
+    "gaps = important job skills they appear to lack. Use the facts only.";
+
+  const tool = {
+    name: "emit_match",
+    description: "Return the candidate-job fit assessment.",
+    input_schema: {
+      type: "object",
+      properties: {
+        score: { type: "integer", description: "0-100 fit score." },
+        summary: {
+          type: "string",
+          description: "2-3 sentence assessment addressed to the candidate.",
+        },
+        strengths: { type: "array", items: { type: "string" } },
+        gaps: { type: "array", items: { type: "string" } },
+      },
+      required: ["score", "summary", "strengths", "gaps"],
+    },
+  };
+
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 1024,
+      system,
+      tools: [tool],
+      tool_choice: { type: "tool", name: "emit_match" },
+      messages: [{ role: "user", content: `Assess the fit:\n${facts}` }],
+    }),
+  });
+  if (!resp.ok) throw new Error(`anthropic ${resp.status}: ${await resp.text()}`);
+  const data = await resp.json();
+  const block = Array.isArray(data?.content)
+    ? data.content.find((b: Record<string, unknown>) => b?.type === "tool_use")
+    : null;
+  const out = (block?.input ?? {}) as Record<string, unknown>;
+  return {
+    score: Math.max(0, Math.min(100, Number(out.score) || 0)),
+    summary: String(out.summary ?? ""),
+    strengths: Array.isArray(out.strengths) ? out.strengths.map(String) : [],
+    gaps: Array.isArray(out.gaps) ? out.gaps.map(String) : [],
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -169,6 +263,17 @@ Deno.serve(async (req) => {
   }
   const body = await req.json().catch(() => ({}));
   if (body?.action === "rank") return json({ ok: true, ...rank(body) });
+
+  if (body?.action === "match") {
+    if (ANTHROPIC_API_KEY) {
+      try {
+        return json({ ok: true, source: "claude", ...(await claudeMatch(body)) });
+      } catch (e) {
+        console.error("claudeMatch failed, using rule-based:", e);
+      }
+    }
+    return json({ ok: true, source: "rule", ...matchScore(body) });
+  }
 
   // draft — real Claude when a key is present, templates otherwise. Any API
   // error falls back to the template so the button never dead-ends.

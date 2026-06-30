@@ -18,6 +18,22 @@ class JobDraft {
   final String benefits;
 }
 
+/// How well a seeker fits a job — shown by the "Am I a good match?" action.
+class JobMatch {
+  const JobMatch({
+    required this.score,
+    this.summary = '',
+    this.strengths = const [],
+    this.gaps = const [],
+  });
+
+  /// 0–100 fit score.
+  final int score;
+  final String summary;
+  final List<String> strengths; // job skills the seeker has
+  final List<String> gaps; // job skills the seeker is missing
+}
+
 /// AI assist for employers: drafts job-post text and ranks applicants by skill
 /// match. Currently a rule-based **stub** behind an edge-function seam — live
 /// calls the `generate-job-content` function; offline returns the same
@@ -77,6 +93,71 @@ class AiContentRepository {
           'good communicator.',
       benefits: 'Competitive pay. Supportive team. Room to grow.',
     );
+  }
+
+  /// Scores how well a seeker fits a job. Live: the `match` action of the
+  /// `generate-job-content` function (real Claude when ANTHROPIC_API_KEY is set,
+  /// else a skill-overlap score). Offline: the same skill-overlap locally.
+  Future<JobMatch> matchJob({
+    required String title,
+    List<String> jobSkills = const [],
+    String? description,
+    List<String> mySkills = const [],
+    String? myHeadline,
+    String locale = 'uz',
+  }) async {
+    if (_live) {
+      try {
+        final res = await _ref
+            .read(supabaseClientProvider)
+            .functions
+            .invoke(
+              'generate-job-content',
+              body: {
+                'action': 'match',
+                'title': title,
+                'jobSkills': jobSkills,
+                'description': description,
+                'mySkills': mySkills,
+                'myHeadline': myHeadline,
+                'locale': locale,
+              },
+            );
+        final m = (res.data as Map?)?.cast<String, dynamic>() ?? const {};
+        return JobMatch(
+          score:
+              (m['score'] as num?)?.round() ??
+              _localMatch(jobSkills, mySkills).score,
+          summary: (m['summary'] ?? '') as String,
+          strengths: ((m['strengths'] as List?) ?? const [])
+              .map((e) => '$e')
+              .toList(),
+          gaps: ((m['gaps'] as List?) ?? const []).map((e) => '$e').toList(),
+        );
+      } catch (_) {
+        return _localMatch(jobSkills, mySkills);
+      }
+    }
+    return _localMatch(jobSkills, mySkills);
+  }
+
+  JobMatch _localMatch(List<String> jobSkills, List<String> mySkills) {
+    final js = jobSkills
+        .map((s) => s.toLowerCase().trim())
+        .where((s) => s.isNotEmpty)
+        .toSet();
+    if (js.isEmpty) return const JobMatch(score: 0);
+    final ms = mySkills.map((s) => s.toLowerCase().trim()).toSet();
+    final strengths = [
+      for (final s in jobSkills)
+        if (ms.contains(s.toLowerCase().trim())) s,
+    ];
+    final gaps = [
+      for (final s in jobSkills)
+        if (!ms.contains(s.toLowerCase().trim())) s,
+    ];
+    final score = (strengths.length / js.length * 100).round();
+    return JobMatch(score: score, strengths: strengths, gaps: gaps);
   }
 
   /// Skill-overlap (Jaccard) ranking, highest first. Rule-based stub.

@@ -630,5 +630,9 @@
   "perTask": "/задача",
   "qualificationsTitle": "Есть ли у вас эти навыки?",
   "qualificationsHint": "Отметьте те, что у вас есть, чтобы оценить соответствие.",
-  "qualificationsMatch": "совпадений"
+  "qualificationsMatch": "совпадений",
+  "matchPrompt": "Узнайте, насколько ваш профиль подходит этой вакансии.",
+  "matchCta": "Проверить соответствие",
+  "matchStrengths": "Ваши сильные стороны",
+  "matchGaps": "Над чем поработать"
 }

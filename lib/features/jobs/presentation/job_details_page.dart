@@ -7,6 +7,9 @@ import 'package:intl/intl.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/widgets/snackbars.dart';
+import '../../employer/data/ai_content_repository.dart';
+import '../../profile/data/profile_repository.dart';
 import '../../reviews/presentation/widgets/company_reviews_view.dart';
 import '../application/bookmarks_controller.dart';
 import '../application/jobs_providers.dart';
@@ -334,6 +337,10 @@ class _AboutTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        if (job.skills.isNotEmpty) ...[
+          _MatchCard(job: job),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         if (job.womenFriendly || job.disabilityFriendly)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -563,6 +570,229 @@ class _Checks extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// "Am I a good match?" — runs the AI / skill-overlap match
+/// (ai_content_repository) against the signed-in seeker's profile skills and
+/// shows the fit score, strengths and gaps. Adapts Glassdoor's resume-match.
+class _MatchCard extends ConsumerStatefulWidget {
+  const _MatchCard({required this.job});
+  final Job job;
+
+  @override
+  ConsumerState<_MatchCard> createState() => _MatchCardState();
+}
+
+class _MatchCardState extends ConsumerState<_MatchCard> {
+  bool _loading = false;
+  JobMatch? _result;
+
+  Future<void> _run() async {
+    setState(() => _loading = true);
+    final profile = ref.read(currentProfileProvider).value;
+    final locale = Localizations.localeOf(context).languageCode;
+    try {
+      final m = await ref
+          .read(aiContentRepositoryProvider)
+          .matchJob(
+            title: widget.job.title,
+            jobSkills: widget.job.skills,
+            description: widget.job.description,
+            mySkills: profile?.skills ?? const [],
+            myHeadline: profile?.headline,
+            locale: locale,
+          );
+      if (mounted) {
+        setState(() {
+          _result = m;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        showErrorSnack(context, localizedError(context, e));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final r = _result;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colors.chipBackground,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.border),
+      ),
+      child: r == null
+          ? Row(
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: colors.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(l.matchPrompt, style: context.text.bodyMedium),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                FilledButton(
+                  onPressed: _loading ? null : _run,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    shape: const StadiumBorder(),
+                  ),
+                  child: _loading
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(l.matchCta),
+                ),
+              ],
+            )
+          : _MatchResult(result: r),
+    );
+  }
+}
+
+class _MatchResult extends StatelessWidget {
+  const _MatchResult({required this.result});
+  final JobMatch result;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final pct = result.score.clamp(0, 100);
+    final tone = pct >= 70
+        ? colors.success
+        : (pct >= 40 ? colors.gold : colors.danger);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '$pct%',
+              style: context.text.headlineMedium?.copyWith(
+                color: tone,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                l.qualificationsMatch,
+                style: context.text.bodyMedium?.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: pct / 100,
+            minHeight: 6,
+            backgroundColor: colors.surfaceVariant,
+            valueColor: AlwaysStoppedAnimation(tone),
+          ),
+        ),
+        if (result.summary.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(result.summary, style: context.text.bodyMedium),
+        ],
+        if (result.strengths.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l.matchStrengths,
+            style: context.text.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final s in result.strengths)
+                _MatchChip(
+                  label: s,
+                  color: colors.success,
+                  icon: Icons.check_rounded,
+                ),
+            ],
+          ),
+        ],
+        if (result.gaps.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l.matchGaps,
+            style: context.text.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final s in result.gaps)
+                _MatchChip(
+                  label: s,
+                  color: colors.textSecondary,
+                  icon: Icons.add_rounded,
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MatchChip extends StatelessWidget {
+  const _MatchChip({
+    required this.label,
+    required this.color,
+    required this.icon,
+  });
+  final String label;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: context.text.labelSmall?.copyWith(color: color)),
+        ],
+      ),
     );
   }
 }
