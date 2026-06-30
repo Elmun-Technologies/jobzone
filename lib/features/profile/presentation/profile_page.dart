@@ -8,7 +8,9 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/providers/app_flags.dart';
+import '../../../shared/widgets/snackbars.dart';
 import '../../notifications/application/push_providers.dart';
+import '../data/cv_repository.dart';
 import '../data/profile_repository.dart';
 import '../domain/user_profile.dart';
 
@@ -136,6 +138,16 @@ class ProfilePage extends ConsumerWidget {
               completion: _completion(profile),
               onTap: () => context.push(Routes.yourProfile),
             ),
+            const SizedBox(height: AppSpacing.md),
+            if (profile != null)
+              _OpenToWorkTile(
+                key: ValueKey(profile.isOpenToWork),
+                value: profile.isOpenToWork,
+              ),
+            if (_completion(profile) < 1.0) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _ProfileNudge(onTap: () => context.push(Routes.yourProfile)),
+            ],
             const SizedBox(height: AppSpacing.lg),
             _MenuTile(
               icon: Icons.person_outline_rounded,
@@ -269,6 +281,121 @@ class _ProfileCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Prominent open-to-work visibility toggle (LinkedIn-style "hiring employers
+/// can find you"). Persists `is_open_to_work` via cvRepository; optimistic with
+/// rollback on failure. Keyed to the profile value so it resyncs on refresh.
+class _OpenToWorkTile extends ConsumerStatefulWidget {
+  const _OpenToWorkTile({super.key, required this.value});
+  final bool value;
+
+  @override
+  ConsumerState<_OpenToWorkTile> createState() => _OpenToWorkTileState();
+}
+
+class _OpenToWorkTileState extends ConsumerState<_OpenToWorkTile> {
+  late bool _on = widget.value;
+
+  Future<void> _toggle(bool v) async {
+    setState(() => _on = v);
+    try {
+      await ref.read(cvRepositoryProvider).setOpenToWork(v);
+      ref.invalidate(currentProfileProvider);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _on = !v);
+      showErrorSnack(context, localizedError(context, e));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _on ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+            color: _on ? colors.primary : colors.textSecondary,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.openToWork,
+                  style: context.text.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  l.openToWorkHint,
+                  style: context.text.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(value: _on, onChanged: _toggle),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tappable "complete your profile" nudge shown while the profile is < 100%.
+class _ProfileNudge extends StatelessWidget {
+  const _ProfileNudge({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: colors.chipBackground,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: colors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.lightbulb_outline_rounded,
+              color: colors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(l.profileNudge, style: context.text.bodySmall),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: colors.textSecondary,
+              size: 20,
+            ),
+          ],
         ),
       ),
     );
