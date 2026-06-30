@@ -172,6 +172,46 @@
       "mid": "Mid",
       "senior": "Senior",
       "lead": "Lead"
+    },
+    "post": {
+      "sectionBasic": "Basics",
+      "sectionBasicSub": "Title, description and requirements",
+      "titleHint": "e.g. Sales manager",
+      "requirements": "Requirements",
+      "responsibilities": "Responsibilities",
+      "benefits": "Conditions / benefits",
+      "sectionSalary": "Salary",
+      "salaryPeriod": "Pay period",
+      "period": {
+        "hour": "Per hour",
+        "day": "Per day",
+        "week": "Per week",
+        "month": "Per month",
+        "year": "Per year"
+      },
+      "sectionLocation": "Location",
+      "sectionLocationSub": "Where the work happens",
+      "address": "Address",
+      "addressHint": "e.g. Amir Temur St, 15",
+      "sectionEmployment": "Employment",
+      "sectionEmploymentSub": "Type, format and schedule",
+      "schedule": "Schedule",
+      "sched": {
+        "5_2": "5/2",
+        "6_1": "6/1",
+        "4_4": "Rotational (4/4)",
+        "2_2": "2/2",
+        "custom": "Negotiable"
+      },
+      "nightShift": "Night shift",
+      "sectionContacts": "Applications & contacts",
+      "sectionContactsSub": "Choose how candidates reach you",
+      "contactPhone": "Phone",
+      "showPhone": "Show phone on the listing",
+      "requireCoverLetter": "Require a cover letter",
+      "womenFriendly": "Women-friendly",
+      "disabilityFriendly": "Disability-friendly",
+      "saveDraft": "Save draft"
     }
   },
   "apply": {

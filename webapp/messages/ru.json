@@ -172,6 +172,46 @@
       "mid": "Средний",
       "senior": "Старший",
       "lead": "Ведущий"
+    },
+    "post": {
+      "sectionBasic": "Основное",
+      "sectionBasicSub": "Название, описание и требования",
+      "titleHint": "Например, Менеджер по продажам",
+      "requirements": "Требования",
+      "responsibilities": "Обязанности",
+      "benefits": "Условия / льготы",
+      "sectionSalary": "Зарплата",
+      "salaryPeriod": "Период оплаты",
+      "period": {
+        "hour": "В час",
+        "day": "В день",
+        "week": "В неделю",
+        "month": "В месяц",
+        "year": "В год"
+      },
+      "sectionLocation": "Местоположение",
+      "sectionLocationSub": "Где будет работа",
+      "address": "Адрес",
+      "addressHint": "Например, ул. Амира Темура, 15",
+      "sectionEmployment": "Занятость",
+      "sectionEmploymentSub": "Тип занятости, формат и график",
+      "schedule": "График",
+      "sched": {
+        "5_2": "5/2",
+        "6_1": "6/1",
+        "4_4": "Вахта (4/4)",
+        "2_2": "2/2",
+        "custom": "По договорённости"
+      },
+      "nightShift": "Ночная смена",
+      "sectionContacts": "Отклики и контакты",
+      "sectionContactsSub": "Выберите, как кандидаты свяжутся с вами",
+      "contactPhone": "Телефон",
+      "showPhone": "Показывать телефон в вакансии",
+      "requireCoverLetter": "Требуется сопроводительное письмо",
+      "womenFriendly": "Удобно для женщин",
+      "disabilityFriendly": "Удобно для людей с инвалидностью",
+      "saveDraft": "Сохранить черновик"
     }
   },
   "apply": {
