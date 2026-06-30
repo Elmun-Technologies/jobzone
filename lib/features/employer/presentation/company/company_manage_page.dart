@@ -3,14 +3,104 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
+import '../../../../core/config/env.dart';
+import '../../../../core/supabase/supabase_providers.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/providers/app_flags.dart';
 import '../../../companies/domain/company.dart';
+import '../../../notifications/application/push_providers.dart';
 import '../../data/company_admin_repository.dart';
 
 /// The employer's own company profile, with an entry to edit it.
 class CompanyManagePage extends ConsumerWidget {
   const CompanyManagePage({super.key});
+
+  /// Confirms, then signs out — mirrors the seeker profile flow so employers
+  /// have a logout too (the employer shell has no profile tab).
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (c) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.sm,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: c.colors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              l.logout,
+              style: c.text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l.logoutConfirm,
+              style: c.text.bodyMedium?.copyWith(color: c.colors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(c, false),
+                    style: OutlinedButton.styleFrom(
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
+                      side: BorderSide(color: c.colors.border),
+                    ),
+                    child: Text(l.cancel, style: c.text.titleSmall),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(c, true),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: c.colors.primary,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
+                    ),
+                    child: Text(
+                      l.yesLogout,
+                      style: c.text.titleSmall?.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (ok != true) return;
+    if (Env.hasSupabase) {
+      await ref.read(pushServiceProvider).unregister();
+      await ref.read(supabaseClientProvider).auth.signOut();
+    }
+    await ref.read(appFlagsProvider.notifier).reset();
+    if (context.mounted) context.go(Routes.welcome);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,8 +113,20 @@ class CompanyManagePage extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Center(
-                child: Text(l.navCompany, style: context.text.titleLarge),
+              child: Row(
+                children: [
+                  const SizedBox(width: 40),
+                  Expanded(
+                    child: Center(
+                      child: Text(l.navCompany, style: context.text.titleLarge),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.logout_rounded),
+                    tooltip: l.logOut,
+                    onPressed: () => _logout(context, ref),
+                  ),
+                ],
               ),
             ),
             Expanded(
