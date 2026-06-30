@@ -67,7 +67,13 @@ export default async function AccountPage({
           <span className="font-medium">{t("savedJobs")}</span>
           <span aria-hidden>→</span>
         </Link>
-        <p className="text-muted-foreground text-sm">{t("comingSoon")}</p>
+        <Link
+          href="/account/profile"
+          className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
+        >
+          <span className="font-medium">{t("editProfile")}</span>
+          <span aria-hidden>→</span>
+        </Link>
       </div>
 
       <form action={signOutAction} className="mt-8">

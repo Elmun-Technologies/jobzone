@@ -54,6 +54,38 @@ export async function createCompany(
   redirect(`/${locale}/employer`);
 }
 
+/** Updates the employer's company (RLS confines the write to the owner). */
+export async function updateCompany(
+  _prev: CompanyFormState,
+  formData: FormData,
+): Promise<CompanyFormState> {
+  const locale = field(formData, "locale") || "uz";
+  const companyId = field(formData, "companyId");
+  const name = field(formData, "name");
+  if (!companyId || !name) return { error: "missing" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/${locale}/sign-in`);
+
+  const { error } = await supabase
+    .from("companies")
+    .update({
+      name,
+      about: optional(formData, "about"),
+      industry: optional(formData, "industry"),
+      website: optional(formData, "website"),
+      headquarters: optional(formData, "headquarters"),
+    })
+    .eq("id", companyId)
+    .eq("owner_id", user.id);
+  if (error) return { error: "unknown" };
+
+  redirect(`/${locale}/employer`);
+}
+
 /** Posts a new open job for the employer's company. */
 export async function createJob(
   _prev: JobFormState,

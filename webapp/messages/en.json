@@ -34,9 +34,21 @@
     "myApplications": "My applications",
     "savedJobs": "Saved jobs",
     "employerArea": "Employer area",
+    "editProfile": "Edit profile",
     "signedInAs": "Signed in as:",
     "comingSoon": "Your CV will appear here soon.",
     "signOut": "Sign out"
+  },
+  "profile": {
+    "title": "Edit profile",
+    "fullName": "Full name",
+    "headline": "Headline",
+    "bio": "About you",
+    "phone": "Phone",
+    "city": "City",
+    "country": "Country",
+    "save": "Save",
+    "errUnknown": "Something went wrong"
   },
   "bookmarks": {
     "title": "Saved jobs",
@@ -48,6 +60,8 @@
     "dashboard": "Dashboard",
     "postJob": "Post a job",
     "myJobs": "My jobs",
+    "editCompany": "Edit company",
+    "saveChanges": "Save changes",
     "noJobs": "You haven't posted any jobs yet",
     "onboardingTitle": "Create your company",
     "onboardingSubtitle": "Set up your company profile before posting jobs.",

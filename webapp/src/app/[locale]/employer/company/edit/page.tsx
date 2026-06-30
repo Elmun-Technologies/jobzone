@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { CompanyForm } from "@/components/employer/company-form";
 import { Container } from "@/components/ui/container";
-import { createCompany } from "@/lib/actions/employer";
+import { updateCompany } from "@/lib/actions/employer";
 import { getMyCompany } from "@/lib/data/employer";
 import { requireEmployer } from "@/lib/auth/require-employer";
 
@@ -15,10 +15,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "employer" });
-  return { title: t("onboardingTitle"), robots: { index: false } };
+  return { title: t("editCompany"), robots: { index: false } };
 }
 
-export default async function EmployerOnboardingPage({
+export default async function EditCompanyPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -28,19 +28,27 @@ export default async function EmployerOnboardingPage({
   await requireEmployer(locale);
 
   const company = await getMyCompany();
-  if (company) redirect(`/${locale}/employer`);
+  if (!company) redirect(`/${locale}/employer/onboarding`);
 
   const t = await getTranslations("employer");
 
   return (
     <Container className="max-w-xl py-12">
-      <h1 className="text-foreground mb-1 text-2xl font-bold">
-        {t("onboardingTitle")}
+      <h1 className="text-foreground mb-6 text-2xl font-bold">
+        {t("editCompany")}
       </h1>
-      <p className="text-muted-foreground mb-6 text-sm">
-        {t("onboardingSubtitle")}
-      </p>
-      <CompanyForm action={createCompany} submitLabel={t("createCompany")} />
+      <CompanyForm
+        action={updateCompany}
+        submitLabel={t("saveChanges")}
+        initial={{
+          id: company.id,
+          name: company.name,
+          about: company.about,
+          industry: company.industry,
+          website: company.website,
+          headquarters: company.headquarters,
+        }}
+      />
     </Container>
   );
 }
