@@ -60,6 +60,8 @@ class Job {
     this.expiresAt,
     this.publishAt,
     this.screeningQuestions = const [],
+    this.educationRequired = 'none',
+    this.workHours,
   });
 
   final String id;
@@ -156,6 +158,13 @@ class Job {
   /// Screening questions authored on the posting; answers land in
   /// `applications.answers` keyed by each question's id.
   final List<ScreeningQuestion> screeningQuestions;
+
+  /// Minimum education level required: `none` / `secondary` /
+  /// `specialized_secondary` / `higher`.
+  final String educationRequired;
+
+  /// Working hours as a free-form string, e.g. "9:00–18:00".
+  final String? workHours;
 
   /// True while a paid promotion is active.
   bool get isBoosted =>
@@ -294,6 +303,9 @@ class Job {
               )
               .toList() ??
           const [],
+      educationRequired:
+          (m['education_required'] as String?) ?? 'none',
+      workHours: m['work_hours'] as String?,
     );
   }
 
@@ -357,6 +369,8 @@ class Job {
     DateTime? expiresAt,
     Object? publishAt = _unset,
     List<ScreeningQuestion>? screeningQuestions,
+    String? educationRequired,
+    String? workHours,
   }) => Job(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -413,5 +427,7 @@ class Job {
     expiresAt: expiresAt ?? this.expiresAt,
     publishAt: publishAt == _unset ? this.publishAt : publishAt as DateTime?,
     screeningQuestions: screeningQuestions ?? this.screeningQuestions,
+    educationRequired: educationRequired ?? this.educationRequired,
+    workHours: workHours ?? this.workHours,
   );
 }

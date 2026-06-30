@@ -670,5 +670,18 @@
   "salaryDisplayNegotiable": "Negotiable",
   "salaryDisplayHidden": "Hidden",
   "fieldRegion": "Region (viloyat)",
-  "fieldDistrict": "District / city (tuman)"
+  "fieldDistrict": "District / city (tuman)",
+  "sectionEmployment": "Employment",
+  "fieldWorkHours": "Work hours (e.g. 9:00–18:00)",
+  "fieldEducationRequired": "Education required",
+  "eduNone": "Not required",
+  "eduSecondary": "Secondary",
+  "eduSpecializedSecondary": "Vocational",
+  "eduHigher": "Higher",
+  "qTypeMultipleChoice": "Multiple choice",
+  "addOption": "Add option",
+  "optionLabel": "Option",
+  "sectionSalary": "Salary",
+  "sectionLocation": "Location",
+  "sectionAboutJob": "About the job"
 }

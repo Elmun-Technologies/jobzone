@@ -5,8 +5,9 @@ class ScreeningQuestion {
   const ScreeningQuestion({
     required this.id,
     required this.label,
-    this.type = 'text', // 'text' | 'yesno' | 'number'
+    this.type = 'text', // 'text' | 'yesno' | 'number' | 'multiple_choice'
     this.required = false,
+    this.options = const [],
   });
 
   final String id;
@@ -14,13 +15,21 @@ class ScreeningQuestion {
   final String type;
   final bool required;
 
-  ScreeningQuestion copyWith({String? label, String? type, bool? required}) =>
-      ScreeningQuestion(
-        id: id,
-        label: label ?? this.label,
-        type: type ?? this.type,
-        required: required ?? this.required,
-      );
+  /// Answer options for [type] == `'multiple_choice'`. Ignored for other types.
+  final List<String> options;
+
+  ScreeningQuestion copyWith({
+    String? label,
+    String? type,
+    bool? required,
+    List<String>? options,
+  }) => ScreeningQuestion(
+    id: id,
+    label: label ?? this.label,
+    type: type ?? this.type,
+    required: required ?? this.required,
+    options: options ?? this.options,
+  );
 
   factory ScreeningQuestion.fromMap(Map<String, dynamic> m) =>
       ScreeningQuestion(
@@ -28,6 +37,8 @@ class ScreeningQuestion {
         label: (m['label'] ?? '') as String,
         type: (m['type'] ?? 'text') as String,
         required: (m['required'] ?? false) as bool,
+        options:
+            (m['options'] as List?)?.map((e) => '$e').toList() ?? const [],
       );
 
   Map<String, dynamic> toMap() => {
@@ -35,5 +46,6 @@ class ScreeningQuestion {
     'label': label,
     'type': type,
     'required': required,
+    'options': options,
   };
 }

@@ -86,6 +86,8 @@ class EmployerJobsRepository {
     List<ScreeningQuestion> screeningQuestions = const [],
     String status = 'open',
     DateTime? publishAt,
+    String educationRequired = 'none',
+    String? workHours,
   }) async {
     if (!_live) {
       final job = Job(
@@ -138,6 +140,8 @@ class EmployerJobsRepository {
         postedAt: DateTime.now(),
         publishAt: publishAt,
         status: status,
+        educationRequired: educationRequired,
+        workHours: workHours,
       );
       mockEmployer.jobs.insert(0, job);
       return job;
@@ -198,6 +202,8 @@ class EmployerJobsRepository {
           'screening_questions': screeningQuestions
               .map((q) => q.toMap())
               .toList(),
+          'education_required': educationRequired,
+          'work_hours': ?workHours,
         })
         .select()
         .single();
@@ -261,6 +267,8 @@ class EmployerJobsRepository {
           'screening_questions': job.screeningQuestions
               .map((q) => q.toMap())
               .toList(),
+          'education_required': job.educationRequired,
+          'work_hours': job.workHours,
         })
         .eq('id', job.id)
         .select()
