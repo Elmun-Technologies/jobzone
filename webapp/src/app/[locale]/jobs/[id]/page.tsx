@@ -6,7 +6,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { BookmarkButton } from "@/components/jobs/bookmark-button";
 import { hasApplied } from "@/lib/data/applications";
+import { isBookmarked } from "@/lib/data/bookmarks";
 import { getJobById } from "@/lib/data/jobs";
 import { getCurrentUser } from "@/lib/auth/user";
 import { formatDate, locationText, salaryText } from "@/lib/format";
@@ -64,7 +66,10 @@ export default async function JobDetailsPage({
   const loc = locationText(job);
 
   const user = await getCurrentUser();
-  const applied = user ? await hasApplied(job.id) : false;
+  const [applied, bookmarked] = await Promise.all([
+    user ? hasApplied(job.id) : Promise.resolve(false),
+    user ? isBookmarked(job.id) : Promise.resolve(false),
+  ]);
   const applyHref = user
     ? `/jobs/${id}/apply`
     : `/sign-in?next=/${locale}/jobs/${id}/apply`;
@@ -159,6 +164,11 @@ export default async function JobDetailsPage({
                 {t("apply")}
               </Link>
             )}
+            <BookmarkButton
+              jobId={id}
+              initial={bookmarked}
+              className="mt-2 w-full justify-center"
+            />
             {job.postedAt ? (
               <p className="text-muted-foreground mt-3 text-center text-xs">
                 {t("postedOn")} {formatDate(job.postedAt)}

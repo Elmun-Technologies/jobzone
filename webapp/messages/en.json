@@ -32,9 +32,16 @@
   "account": {
     "title": "Account",
     "myApplications": "My applications",
+    "savedJobs": "Saved jobs",
     "signedInAs": "Signed in as:",
-    "comingSoon": "Saved jobs and CV will appear here soon.",
+    "comingSoon": "Your CV will appear here soon.",
     "signOut": "Sign out"
+  },
+  "bookmarks": {
+    "title": "Saved jobs",
+    "empty": "You haven't saved any jobs yet",
+    "save": "Save",
+    "saved": "Saved"
   },
   "apply": {
     "applyTo": "Apply for a job",

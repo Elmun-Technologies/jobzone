@@ -32,9 +32,16 @@
   "account": {
     "title": "Hisob",
     "myApplications": "Mening arizalarim",
+    "savedJobs": "Saqlangan ishlar",
     "signedInAs": "Tizimga kirgansiz:",
-    "comingSoon": "Saqlangan ishlar va CV tez orada shu yerda bo'ladi.",
+    "comingSoon": "CV tez orada shu yerda bo'ladi.",
     "signOut": "Chiqish"
+  },
+  "bookmarks": {
+    "title": "Saqlangan ishlar",
+    "empty": "Hali ish saqlamadingiz",
+    "save": "Saqlash",
+    "saved": "Saqlangan"
   },
   "apply": {
     "applyTo": "Ariza topshirish",
