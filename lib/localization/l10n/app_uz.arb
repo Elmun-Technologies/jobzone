@@ -634,5 +634,6 @@
   "matchPrompt": "Profilingiz bu ishga qanchalik mosligini bilib oling.",
   "matchCta": "Mosligimni tekshirish",
   "matchStrengths": "Kuchli tomonlaringiz",
-  "matchGaps": "Rivojlantirish kerak"
+  "matchGaps": "Rivojlantirish kerak",
+  "browseByCategory": "Kategoriya bo'yicha"
 }

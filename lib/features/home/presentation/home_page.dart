@@ -9,6 +9,7 @@ import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 import '../../notifications/application/notifications_providers.dart';
+import '../../search/presentation/category_results_page.dart';
 import 'widgets/collection_card.dart';
 
 class HomePage extends ConsumerWidget {
@@ -45,6 +46,7 @@ class HomePage extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
                   const JobCollectionsRow(),
                   const SizedBox(height: AppSpacing.xl),
+                  const _BrowseByCategory(),
                   SectionHeader(
                     title: l.suggestedJobs,
                     actionLabel: l.seeAll,
@@ -328,6 +330,84 @@ class _RecentSectionState extends State<_RecentSection> {
             child: JobCard(job: j),
           ),
       ],
+    );
+  }
+}
+
+/// Profi.ru-style "browse by category" strip: cards showing the open-vacancy
+/// count per category; tapping opens that category's results. Hidden until the
+/// counts load and when there are none.
+class _BrowseByCategory extends ConsumerWidget {
+  const _BrowseByCategory();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cats = ref.watch(categoryCountsProvider).value ?? const [];
+    if (cats.isEmpty) return const SizedBox.shrink();
+    final top = cats.take(8).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(title: l.browseByCategory),
+        const SizedBox(height: AppSpacing.md),
+        SizedBox(
+          height: 92,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: top.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+            itemBuilder: (_, i) =>
+                _CategoryCountCard(name: top[i].name, count: top[i].count),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+      ],
+    );
+  }
+}
+
+class _CategoryCountCard extends StatelessWidget {
+  const _CategoryCountCard({required this.name, required this.count});
+  final String name;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return InkWell(
+      onTap: () => context.push(Routes.categoryResults(name)),
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: colors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: colors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '$count',
+              style: context.text.titleLarge?.copyWith(
+                color: colors.primary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
