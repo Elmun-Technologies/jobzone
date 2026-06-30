@@ -388,15 +388,7 @@ class _AboutTab extends StatelessWidget {
             title: l.perksAndBenefits,
             child: _Checks(text: job.benefits!),
           ),
-        if (job.skills.isNotEmpty)
-          _Section(
-            title: l.requiredSkills,
-            child: Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [for (final s in job.skills) _SkillChip(s)],
-            ),
-          ),
+        if (job.skills.isNotEmpty) _QualificationsCheck(skills: job.skills),
         if (job.driverLicenses.isNotEmpty)
           _Section(
             title: l.driverLicenseLabel,
@@ -571,6 +563,88 @@ class _Checks extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Interactive "do you have these skills?" self-check (Glassdoor-style). Shows
+/// the job's required skills as toggle rows so a seeker can gauge their fit
+/// before applying; the count + bar update live. Purely local — nothing is
+/// stored or sent.
+class _QualificationsCheck extends StatefulWidget {
+  const _QualificationsCheck({required this.skills});
+  final List<String> skills;
+
+  @override
+  State<_QualificationsCheck> createState() => _QualificationsCheckState();
+}
+
+class _QualificationsCheckState extends State<_QualificationsCheck> {
+  final _have = <String>{};
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final total = widget.skills.length;
+    final have = _have.length;
+    return _Section(
+      title: l.qualificationsTitle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.qualificationsHint,
+            style: context.text.bodySmall?.copyWith(
+              color: colors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          for (final s in widget.skills)
+            InkWell(
+              onTap: () => setState(
+                () => _have.contains(s) ? _have.remove(s) : _have.add(s),
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Icon(
+                      _have.contains(s)
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: _have.contains(s)
+                          ? colors.success
+                          : colors.textSecondary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: Text(s, style: context.text.bodyMedium)),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: AppSpacing.md),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: total == 0 ? 0 : have / total,
+              minHeight: 6,
+              backgroundColor: colors.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation(colors.success),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '$have / $total ${l.qualificationsMatch}',
+            style: context.text.labelMedium?.copyWith(
+              color: colors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

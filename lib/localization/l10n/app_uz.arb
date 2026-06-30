@@ -627,5 +627,8 @@
   "perMonth": "/oy",
   "perYear": "/yil",
   "perShift": "/smena",
-  "perTask": "/vazifa"
+  "perTask": "/vazifa",
+  "qualificationsTitle": "Bu ko'nikmalar sizda bormi?",
+  "qualificationsHint": "Mosligingizni bilish uchun o'zingizda borlarini belgilang.",
+  "qualificationsMatch": "mos"
 }
