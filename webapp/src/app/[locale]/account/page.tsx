@@ -49,6 +49,13 @@ export default async function AccountPage({
           <span className="font-medium">{t("myApplications")}</span>
           <span aria-hidden>→</span>
         </Link>
+        <Link
+          href="/account/bookmarks"
+          className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
+        >
+          <span className="font-medium">{t("savedJobs")}</span>
+          <span aria-hidden>→</span>
+        </Link>
         <p className="text-muted-foreground text-sm">{t("comingSoon")}</p>
       </div>
 
