@@ -627,5 +627,8 @@
   "perMonth": "/мес",
   "perYear": "/год",
   "perShift": "/смена",
-  "perTask": "/задача"
+  "perTask": "/задача",
+  "qualificationsTitle": "Есть ли у вас эти навыки?",
+  "qualificationsHint": "Отметьте те, что у вас есть, чтобы оценить соответствие.",
+  "qualificationsMatch": "совпадений"
 }

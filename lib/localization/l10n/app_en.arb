@@ -641,5 +641,8 @@
   "perMonth": "/mo",
   "perYear": "/yr",
   "perShift": "/shift",
-  "perTask": "/task"
+  "perTask": "/task",
+  "qualificationsTitle": "Do you have these skills?",
+  "qualificationsHint": "Tap the ones you have to gauge your fit.",
+  "qualificationsMatch": "match"
 }
