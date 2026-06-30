@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Anton, Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,9 +10,21 @@ import { routing } from "@/i18n/routing";
 
 import "../globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Yolla type system: Archivo for UI/body (variable weights), Anton for the
+// poster/display wordmark (Latin only), Space Mono for numbers/prices/tags.
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  fallback: ["system-ui", "sans-serif"],
+});
+const anton = Anton({
+  variable: "--font-anton",
+  weight: "400",
+  subsets: ["latin"],
+});
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
   subsets: ["latin"],
 });
 
@@ -52,7 +64,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${anton.variable} ${spaceMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
