@@ -192,7 +192,9 @@
     "loading": "Yuklanmoqda…",
     "empty": "Hech narsa topilmadi",
     "error": "Xatolik yuz berdi",
-    "retry": "Qayta urinish"
+    "retry": "Qayta urinish",
+    "notFound": "Sahifa topilmadi",
+    "goHome": "Bosh sahifaga"
   },
   "theme": {
     "light": "Yorug' rejim",

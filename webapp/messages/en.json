@@ -192,7 +192,9 @@
     "loading": "Loading…",
     "empty": "Nothing found",
     "error": "Something went wrong",
-    "retry": "Retry"
+    "retry": "Retry",
+    "notFound": "Page not found",
+    "goHome": "Go home"
   },
   "theme": {
     "light": "Light",
