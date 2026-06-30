@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
-import '../../../localization/l10n_extension.dart';
 
 /// Branded splash. In the Auth phase this will await the restored session and
 /// route to welcome / onboarding / home accordingly.
@@ -37,9 +36,11 @@ class _SplashPageState extends State<SplashPage> {
             Image.asset('assets/icon/splash_logo.png', width: 120, height: 120),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              context.l10n.appTitle,
+              'yolla',
               style: context.text.displayMedium?.copyWith(
                 color: colors.onPrimary,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -2,
               ),
             ),
           ],

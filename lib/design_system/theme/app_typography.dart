@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 /// Type scale. Colors are applied later in `app_theme.dart` via
-/// `textTheme.apply(...)`. A Latin + Cyrillic friendly family (Inter/Manrope)
-/// can be bundled later; for now we rely on the platform default so uz (Latin)
-/// and ru (Cyrillic) both render correctly.
+/// `textTheme.apply(...)`. The Yolla brand face is Archivo, bundled as static
+/// weights (see pubspec `fonts:`) so it renders offline and in tests. Archivo
+/// is Latin; Cyrillic (ru) falls back to the platform font automatically, so
+/// no glyphs are ever missing.
 abstract final class AppTypography {
-  static const String? fontFamily = null;
+  static const String fontFamily = 'Archivo';
 
   static const TextTheme textTheme = TextTheme(
     displayLarge: TextStyle(

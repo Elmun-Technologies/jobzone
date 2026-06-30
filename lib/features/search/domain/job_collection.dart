@@ -10,7 +10,7 @@ enum JobCollection {
   freshers(
     'freshers',
     Icons.school_outlined,
-    Color(0xFF3A36DB),
+    Color(0xFF0A0A0A),
     SearchFilters(experienceLevels: {'entry'}),
   ),
   remote(
