@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "Jobzone — O'zbekistondagi ishlar",
+    "description": "Jobzone — O'zbekistonda ishonchli ish topish va xodim yollash platformasi."
+  },
+  "nav": {
+    "jobs": "Ishlar",
+    "companies": "Kompaniyalar",
+    "signIn": "Kirish"
+  },
+  "home": {
+    "heroTitle": "Keyingi ishingizni toping",
+    "heroSubtitle": "O'zbekiston bo'ylab minglab ochiq ish o'rinlari — ishonchli kompaniyalardan.",
+    "searchPlaceholder": "Lavozim, kompaniya yoki shahar",
+    "searchCta": "Qidirish",
+    "browseAll": "Barcha ishlarni ko'rish"
+  },
+  "footer": {
+    "tagline": "Ishonchli ish bozori.",
+    "rights": "Barcha huquqlar himoyalangan."
+  },
+  "common": {
+    "loading": "Yuklanmoqda…",
+    "empty": "Hech narsa topilmadi",
+    "error": "Xatolik yuz berdi",
+    "retry": "Qayta urinish"
+  },
+  "theme": {
+    "light": "Yorug' rejim",
+    "dark": "Tungi rejim"
+  },
+  "localeSwitcher": {
+    "label": "Til"
+  }
+}
