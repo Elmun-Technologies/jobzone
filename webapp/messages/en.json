@@ -31,9 +31,36 @@
   },
   "account": {
     "title": "Account",
+    "myApplications": "My applications",
     "signedInAs": "Signed in as:",
-    "comingSoon": "Your applications, saved jobs and CV will appear here soon.",
+    "comingSoon": "Saved jobs and CV will appear here soon.",
     "signOut": "Sign out"
+  },
+  "apply": {
+    "applyTo": "Apply for a job",
+    "coverLetter": "Cover letter",
+    "coverLetterPlaceholder": "Why are you a great fit?",
+    "optional": "optional",
+    "submit": "Submit",
+    "yes": "Yes",
+    "no": "No",
+    "alreadyApplied": "You've already applied to this job",
+    "viewApplications": "View applications",
+    "errDuplicate": "You've already applied to this job",
+    "errUnknown": "Something went wrong"
+  },
+  "applications": {
+    "title": "My applications",
+    "empty": "You haven't applied yet",
+    "status": {
+      "submitted": "Submitted",
+      "viewed": "Viewed",
+      "shortlisted": "Shortlisted",
+      "interview": "Interview",
+      "offer": "Offer",
+      "rejected": "Rejected",
+      "hired": "Hired"
+    }
   },
   "home": {
     "heroTitle": "Find your next job",
@@ -54,6 +81,7 @@
     "workingModel": "Work model",
     "clear": "Clear",
     "apply": "Apply",
+    "applied": "Applied",
     "postedOn": "Posted",
     "aboutRole": "About the role",
     "responsibilities": "Responsibilities",

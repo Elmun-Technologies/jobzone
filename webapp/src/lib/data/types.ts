@@ -2,6 +2,13 @@
 // view and `companies` / `job_categories` / `company_reviews` tables. Snake_case
 // DB rows are converted to these camelCase shapes by the mappers in this folder.
 
+export interface ScreeningQuestion {
+  id: string;
+  label: string;
+  type: string; // "text" | "yesno" | "number"
+  required: boolean;
+}
+
 export interface Job {
   id: string;
   title: string;
@@ -28,6 +35,7 @@ export interface Job {
   postedAt: string | null;
   expiresAt: string | null;
   boostActive: boolean;
+  screeningQuestions: ScreeningQuestion[];
 }
 
 export interface Company {

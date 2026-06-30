@@ -29,6 +29,7 @@ const job: Job = {
   postedAt: "2026-06-20T09:00:00Z",
   expiresAt: "2026-08-20T09:00:00Z",
   boostActive: true,
+  screeningQuestions: [],
 };
 
 describe("jobPostingJsonLd", () => {

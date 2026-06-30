@@ -1,4 +1,10 @@
-import type { Company, CompanyReview, Job, JobCategory } from "./types";
+import type {
+  Company,
+  CompanyReview,
+  Job,
+  JobCategory,
+  ScreeningQuestion,
+} from "./types";
 
 type Row = Record<string, unknown>;
 
@@ -38,7 +44,25 @@ export function toJob(r: Row): Job {
     postedAt: str(r.posted_at),
     expiresAt: str(r.expires_at),
     boostActive: bool(r.boost_active),
+    screeningQuestions: toScreeningQuestions(r.screening_questions),
   };
+}
+
+function toScreeningQuestions(v: unknown): ScreeningQuestion[] {
+  if (!Array.isArray(v)) return [];
+  return v.flatMap((raw) => {
+    if (!raw || typeof raw !== "object") return [];
+    const q = raw as Record<string, unknown>;
+    if (!q.id || !q.label) return [];
+    return [
+      {
+        id: String(q.id),
+        label: String(q.label),
+        type: typeof q.type === "string" ? q.type : "text",
+        required: q.required === true,
+      },
+    ];
+  });
 }
 
 /** Maps a `companies` row to a [Company]. */

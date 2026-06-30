@@ -31,9 +31,36 @@
   },
   "account": {
     "title": "Hisob",
+    "myApplications": "Mening arizalarim",
     "signedInAs": "Tizimga kirgansiz:",
-    "comingSoon": "Arizalar, saqlangan ishlar va CV tez orada shu yerda bo'ladi.",
+    "comingSoon": "Saqlangan ishlar va CV tez orada shu yerda bo'ladi.",
     "signOut": "Chiqish"
+  },
+  "apply": {
+    "applyTo": "Ariza topshirish",
+    "coverLetter": "Motivatsion xat",
+    "coverLetterPlaceholder": "Nima uchun aynan siz mos kelasiz?",
+    "optional": "ixtiyoriy",
+    "submit": "Yuborish",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "alreadyApplied": "Siz bu ishga allaqachon ariza topshirgansiz",
+    "viewApplications": "Arizalarni ko'rish",
+    "errDuplicate": "Siz bu ishga allaqachon ariza topshirgansiz",
+    "errUnknown": "Xatolik yuz berdi"
+  },
+  "applications": {
+    "title": "Mening arizalarim",
+    "empty": "Hali ariza topshirmadingiz",
+    "status": {
+      "submitted": "Yuborilgan",
+      "viewed": "Ko'rilgan",
+      "shortlisted": "Tanlangan",
+      "interview": "Suhbat",
+      "offer": "Taklif",
+      "rejected": "Rad etilgan",
+      "hired": "Ishga olingan"
+    }
   },
   "home": {
     "heroTitle": "Keyingi ishingizni toping",
@@ -54,6 +81,7 @@
     "workingModel": "Format",
     "clear": "Tozalash",
     "apply": "Ariza topshirish",
+    "applied": "Ariza topshirilgan",
     "postedOn": "E'lon qilingan",
     "aboutRole": "Ish haqida",
     "responsibilities": "Majburiyatlar",
