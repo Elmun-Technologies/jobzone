@@ -10,11 +10,11 @@ export async function SiteFooter() {
     <footer className="border-border border-t py-8">
       <Container className="text-muted-foreground flex flex-col items-center justify-between gap-2 text-sm sm:flex-row">
         <p>
-          <span className="text-foreground font-semibold">Jobzone</span> —{" "}
+          <span className="text-foreground font-semibold">Yolla</span> —{" "}
           {t("tagline")}
         </p>
         <p>
-          © {year} Jobzone. {t("rights")}
+          © {year} Yolla. {t("rights")}
         </p>
       </Container>
     </footer>

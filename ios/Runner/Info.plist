@@ -7,7 +7,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Jobzone</string>
+		<string>Yolla</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -67,11 +67,11 @@
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Jobzone uses your location to show jobs near you.</string>
+		<string>Yolla uses your location to show jobs near you.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Jobzone needs access to your photos to set a profile picture.</string>
+		<string>Yolla needs access to your photos to set a profile picture.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>Jobzone needs camera access to take a profile picture.</string>
+		<string>Yolla needs camera access to take a profile picture.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>CFBundleURLTypes</key>

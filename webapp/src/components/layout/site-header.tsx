@@ -27,7 +27,7 @@ export async function SiteHeader() {
             href="/"
             className="text-primary text-lg font-bold tracking-tight"
           >
-            Jobzone
+            Yolla
           </Link>
           <div className="hidden sm:block">
             <RoleToggle />

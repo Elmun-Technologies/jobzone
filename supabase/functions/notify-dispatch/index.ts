@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
   const rec = payload?.record ?? payload;
   const recipientId = rec?.recipient_id;
   const type = String(rec?.type ?? "system");
-  const title = String(rec?.title ?? "Jobzone");
+  const title = String(rec?.title ?? "Yolla");
   const body = String(rec?.body ?? "");
   if (!recipientId) return json({ ok: false, error: "no recipient" }, 400);
 

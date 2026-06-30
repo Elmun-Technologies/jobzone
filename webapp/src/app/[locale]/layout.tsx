@@ -29,7 +29,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
   return {
-    title: { default: t("title"), template: "%s · Jobzone" },
+    title: { default: t("title"), template: "%s · Yolla" },
     description: t("description"),
   };
 }

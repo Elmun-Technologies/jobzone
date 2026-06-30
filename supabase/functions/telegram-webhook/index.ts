@@ -1,4 +1,4 @@
-// telegram-webhook — links a Telegram chat to a Jobzone profile via a
+// telegram-webhook — links a Telegram chat to a Yolla profile via a
 // `/start <token>` handshake, then confirms in-chat. Notification fan-out to
 // Telegram is sent from here too (later); cleanly no-ops until the bot exists.
 //
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
-        text: "✅ Jobzone connected. You'll get job & applicant alerts here.",
+        text: "✅ Yolla connected. You'll get job & applicant alerts here.",
       }),
     }).catch(() => {});
   }
