@@ -185,6 +185,7 @@
     "viewList": "List",
     "viewGrid": "Grid",
     "resultsCount": "{count} jobs found",
+    "loadMore": "Load more",
     "exp": {
       "entry": "Entry",
       "mid": "Mid",

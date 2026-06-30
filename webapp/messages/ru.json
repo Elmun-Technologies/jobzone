@@ -185,6 +185,7 @@
     "viewList": "Список",
     "viewGrid": "Сетка",
     "resultsCount": "Найдено вакансий: {count}",
+    "loadMore": "Показать ещё",
     "exp": {
       "entry": "Начальный",
       "mid": "Средний",

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { JobCard } from "@/components/jobs/job-card";
 import { JobFilters } from "@/components/jobs/job-filters";
+import { JobResults } from "@/components/jobs/job-results";
 import { JobToolbar } from "@/components/jobs/job-toolbar";
 import { Container } from "@/components/ui/container";
-import { EmptyState } from "@/components/ui/states";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import type { JobQuery } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
-import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 20;
 
 export async function generateMetadata({
   params,
@@ -52,7 +52,7 @@ export default async function JobsPage({
     currency: pick(sp.currency),
     postedWithin: num(sp.postedWithin),
     sort: pick(sp.sort),
-    limit: 30,
+    limit: PAGE_SIZE,
   };
 
   const [jobs, count, cities, savedIds] = await Promise.all([
@@ -86,22 +86,15 @@ export default async function JobsPage({
 
           <JobToolbar />
 
-          {jobs.length === 0 ? (
-            <EmptyState title={t("resultsZero")} />
-          ) : (
-            <ul
-              className={cn(
-                "grid gap-3",
-                view === "grid" ? "sm:grid-cols-2" : "grid-cols-1",
-              )}
-            >
-              {jobs.map((job) => (
-                <li key={job.id}>
-                  <JobCard job={job} saved={savedIds.has(job.id)} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <JobResults
+            key={`${JSON.stringify(query)}|${view}`}
+            initial={jobs}
+            savedIds={[...savedIds]}
+            query={query}
+            total={count}
+            pageSize={PAGE_SIZE}
+            view={view}
+          />
         </main>
       </div>
     </Container>
