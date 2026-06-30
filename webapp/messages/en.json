@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "Jobzone — Jobs in Uzbekistan",
+    "description": "Jobzone — the trusted platform to find work and hire across Uzbekistan."
+  },
+  "nav": {
+    "jobs": "Jobs",
+    "companies": "Companies",
+    "signIn": "Sign in"
+  },
+  "home": {
+    "heroTitle": "Find your next job",
+    "heroSubtitle": "Thousands of open positions across Uzbekistan from trusted companies.",
+    "searchPlaceholder": "Title, company or city",
+    "searchCta": "Search",
+    "browseAll": "Browse all jobs"
+  },
+  "footer": {
+    "tagline": "The trusted job marketplace.",
+    "rights": "All rights reserved."
+  },
+  "common": {
+    "loading": "Loading…",
+    "empty": "Nothing found",
+    "error": "Something went wrong",
+    "retry": "Retry"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "localeSwitcher": {
+    "label": "Language"
+  }
+}

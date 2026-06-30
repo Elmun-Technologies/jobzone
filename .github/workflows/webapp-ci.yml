@@ -1,0 +1,42 @@
+name: Web app CI
+
+# Scoped to the Next.js web client; the Flutter CI (ci.yml) is untouched.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "webapp/**"
+      - ".github/workflows/webapp-ci.yml"
+  pull_request:
+    paths:
+      - "webapp/**"
+      - ".github/workflows/webapp-ci.yml"
+
+defaults:
+  run:
+    working-directory: webapp
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: webapp/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (a `dark` class on <html>), so the theme switch works. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --radius: 0.75rem;
+
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+
+  /* Jobzone brand indigo */
+  --primary: #3a36db;
+  --primary-foreground: #ffffff;
+  --accent: #eef2ff;
+  --accent-foreground: #3a36db;
+  --ring: #3a36db;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #121214;
+  --card-foreground: #ededed;
+  --muted: #1f1f23;
+  --muted-foreground: #a1a1aa;
+  --border: #27272a;
+  --input: #27272a;
+
+  --primary: #7c79f2;
+  --primary-foreground: #0a0a0a;
+  --accent: #1e1b4b;
+  --accent-foreground: #c7d2fe;
+  --ring: #7c79f2;
+
+  --destructive: #f87171;
+  --destructive-foreground: #0a0a0a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
