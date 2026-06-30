@@ -648,5 +648,6 @@
   "matchPrompt": "See how well your profile fits this job.",
   "matchCta": "Check my match",
   "matchStrengths": "Your strengths",
-  "matchGaps": "To work on"
+  "matchGaps": "To work on",
+  "browseByCategory": "Browse by category"
 }

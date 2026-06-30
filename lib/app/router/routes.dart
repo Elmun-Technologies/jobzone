@@ -42,6 +42,10 @@ abstract final class Routes {
 
   /// Quick-find collection results (e.g. `/collection/part_time`).
   static String collection(String key) => '/collection/$key';
+
+  /// Open jobs in a category (name is URL-encoded — may contain spaces/quotes).
+  static String categoryResults(String name) =>
+      '/category/${Uri.encodeComponent(name)}';
   static String jobDetails(String id) => '/jobs/$id';
   static String applyJob(String id) => '/jobs/$id/apply';
   static String applySuccess(String id) => '/jobs/$id/apply/success';

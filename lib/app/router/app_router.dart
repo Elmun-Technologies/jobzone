@@ -77,6 +77,7 @@ import '../../features/profile/presentation/profile_page.dart';
 import '../../features/profile/presentation/your_profile_page.dart';
 import '../../features/reviews/presentation/write_review_page.dart';
 import '../../features/search/domain/job_collection.dart';
+import '../../features/search/presentation/category_results_page.dart';
 import '../../features/search/presentation/collection_results_page.dart';
 import '../../features/search/presentation/explore_page.dart';
 import '../../features/search/presentation/filter_page.dart';
@@ -352,6 +353,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           collection:
               JobCollection.fromKey(s.pathParameters['key']) ??
               JobCollection.freshers,
+        ),
+      ),
+      GoRoute(
+        path: '/category/:name',
+        builder: (c, s) => CategoryResultsPage(
+          category: Uri.decodeComponent(s.pathParameters['name']!),
         ),
       ),
       GoRoute(
