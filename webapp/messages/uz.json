@@ -69,6 +69,8 @@
     "statOpenJobs": "Ochiq ishlar",
     "statApplicants": "Nomzodlar",
     "statJobs": "Jami ishlar",
+    "applicants": "Nomzodlar",
+    "noApplicants": "Hali nomzod yo'q",
     "applicantsCount": "{count} nomzod",
     "errUnknown": "Xatolik yuz berdi",
     "status": { "draft": "Qoralama", "open": "Ochiq", "closed": "Yopiq" },

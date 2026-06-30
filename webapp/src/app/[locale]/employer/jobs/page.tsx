@@ -59,28 +59,30 @@ export default async function MyJobsPage({
       ) : (
         <ul className="space-y-3">
           {jobs.map((job) => (
-            <li
-              key={job.id}
-              className="border-border bg-card flex items-center justify-between gap-3 rounded-xl border p-4"
-            >
-              <div className="min-w-0">
-                <p className="text-foreground truncate font-semibold">
-                  {job.title}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {t("applicantsCount", { count: job.applicantsCount })}
-                  {job.postedAt ? ` · ${formatDate(job.postedAt)}` : ""}
-                </p>
-              </div>
-              <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                  STATUS_CLASS[job.status] ?? STATUS_CLASS.draft
-                }`}
+            <li key={job.id}>
+              <Link
+                href={`/employer/jobs/${job.id}/applicants`}
+                className="border-border bg-card hover:border-primary/40 flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors"
               >
-                {t.has(`status.${job.status}`)
-                  ? t(`status.${job.status}`)
-                  : job.status}
-              </span>
+                <div className="min-w-0">
+                  <p className="text-foreground truncate font-semibold">
+                    {job.title}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("applicantsCount", { count: job.applicantsCount })}
+                    {job.postedAt ? ` · ${formatDate(job.postedAt)}` : ""}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    STATUS_CLASS[job.status] ?? STATUS_CLASS.draft
+                  }`}
+                >
+                  {t.has(`status.${job.status}`)
+                    ? t(`status.${job.status}`)
+                    : job.status}
+                </span>
+              </Link>
             </li>
           ))}
         </ul>
