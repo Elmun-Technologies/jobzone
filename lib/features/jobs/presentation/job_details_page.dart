@@ -1079,3 +1079,31 @@ class _ApplyBar extends StatelessWidget {
     );
   }
 }
+
+/// Full-screen read-only preview of a [Job] used by the employer post-job form
+/// ("Oldindan ko'rish" / Preview). Wraps [_JobDetail] with a dismiss button.
+class JobPreviewPage extends StatelessWidget {
+  const JobPreviewPage({super.key, required this.job});
+
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _JobDetail(job: job),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: OutlinedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: OutlinedButton.styleFrom(
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            ),
+            child: Text(context.l10n.closePreview),
+          ),
+        ),
+      ),
+    );
+  }
+}

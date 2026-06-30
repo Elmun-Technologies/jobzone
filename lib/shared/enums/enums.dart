@@ -107,6 +107,40 @@ enum UserRole {
   static UserRole? fromWire(String? w) => _byWire(values, w);
 }
 
+/// Employer's preference for applicant gender on a job posting.
+enum PreferredGender {
+  any('any'),
+  male('male'),
+  female('female');
+
+  const PreferredGender(this.wire);
+  final String wire;
+  static PreferredGender? fromWire(String? w) => _byWire(values, w);
+}
+
+/// How soon the employer needs someone to start.
+enum StartAvailability {
+  immediate('immediate'),
+  oneWeek('one_week'),
+  twoWeeks('two_weeks'),
+  oneMonth('one_month');
+
+  const StartAvailability(this.wire);
+  final String wire;
+  static StartAvailability? fromWire(String? w) => _byWire(values, w);
+}
+
+/// How the employer wants salary displayed to job seekers.
+enum SalaryDisplay {
+  exact('exact'),
+  negotiable('negotiable'),
+  hidden('hidden');
+
+  const SalaryDisplay(this.wire);
+  final String wire;
+  static SalaryDisplay? fromWire(String? w) => _byWire(values, w);
+}
+
 T? _byWire<T extends Enum>(List<T> values, String? wire) {
   if (wire == null) return null;
   for (final v in values) {

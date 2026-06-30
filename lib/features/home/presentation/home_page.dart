@@ -357,8 +357,11 @@ class _BrowseByCategory extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             itemCount: top.length,
             separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (_, i) =>
-                _CategoryCountCard(name: top[i].name, count: top[i].count),
+            itemBuilder: (_, i) => _CategoryCountCard(
+              name: top[i].name,
+              count: top[i].count,
+              emoji: top[i].emoji,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -368,9 +371,14 @@ class _BrowseByCategory extends ConsumerWidget {
 }
 
 class _CategoryCountCard extends StatelessWidget {
-  const _CategoryCountCard({required this.name, required this.count});
+  const _CategoryCountCard({
+    required this.name,
+    required this.count,
+    required this.emoji,
+  });
   final String name;
   final int count;
+  final String emoji;
 
   @override
   Widget build(BuildContext context) {
@@ -390,20 +398,26 @@ class _CategoryCountCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '$count',
-              style: context.text.titleLarge?.copyWith(
-                color: colors.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            Text(
-              name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            Text(emoji, style: const TextStyle(fontSize: 26)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  '$count',
+                  style: context.text.labelSmall?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
