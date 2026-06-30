@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 
 import { signOutAction } from "@/lib/auth/actions";
 import { getCurrentUser } from "@/lib/auth/user";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -40,7 +41,14 @@ export default async function AccountPage({
         {t("signedInAs")} <span className="font-medium">{user?.email}</span>
       </p>
 
-      <div className="border-border bg-card mt-8 rounded-xl border p-5">
+      <div className="mt-8 flex flex-col gap-3">
+        <Link
+          href="/account/applications"
+          className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
+        >
+          <span className="font-medium">{t("myApplications")}</span>
+          <span aria-hidden>→</span>
+        </Link>
         <p className="text-muted-foreground text-sm">{t("comingSoon")}</p>
       </div>
 

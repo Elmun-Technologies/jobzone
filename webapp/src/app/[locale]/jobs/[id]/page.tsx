@@ -6,7 +6,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { hasApplied } from "@/lib/data/applications";
 import { getJobById } from "@/lib/data/jobs";
+import { getCurrentUser } from "@/lib/auth/user";
 import { formatDate, locationText, salaryText } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -60,6 +62,12 @@ export default async function JobDetailsPage({
   const t = await getTranslations("jobs");
   const salary = salaryText(job);
   const loc = locationText(job);
+
+  const user = await getCurrentUser();
+  const applied = user ? await hasApplied(job.id) : false;
+  const applyHref = user
+    ? `/jobs/${id}/apply`
+    : `/sign-in?next=/${locale}/jobs/${id}/apply`;
 
   return (
     <Container className="py-8">
@@ -136,15 +144,21 @@ export default async function JobDetailsPage({
             <p className="text-foreground mt-1 text-xl font-bold">
               {salary ?? t("negotiable")}
             </p>
-            <Link
-              href="/sign-in"
-              className={cn(
-                buttonVariants({ variant: "primary", size: "lg" }),
-                "mt-4 w-full",
-              )}
-            >
-              {t("apply")}
-            </Link>
+            {applied ? (
+              <p className="bg-muted text-muted-foreground mt-4 w-full rounded-full py-3 text-center text-sm font-semibold">
+                {t("applied")}
+              </p>
+            ) : (
+              <Link
+                href={applyHref}
+                className={cn(
+                  buttonVariants({ variant: "primary", size: "lg" }),
+                  "mt-4 w-full",
+                )}
+              >
+                {t("apply")}
+              </Link>
+            )}
             {job.postedAt ? (
               <p className="text-muted-foreground mt-3 text-center text-xs">
                 {t("postedOn")} {formatDate(job.postedAt)}

@@ -29,6 +29,7 @@ const base: Job = {
   postedAt: null,
   expiresAt: null,
   boostActive: false,
+  screeningQuestions: [],
 };
 
 describe("salaryText", () => {

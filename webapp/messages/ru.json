@@ -31,9 +31,36 @@
   },
   "account": {
     "title": "Аккаунт",
+    "myApplications": "Мои отклики",
     "signedInAs": "Вы вошли как:",
-    "comingSoon": "Отклики, сохранённые вакансии и резюме скоро появятся здесь.",
+    "comingSoon": "Сохранённые вакансии и резюме скоро появятся здесь.",
     "signOut": "Выйти"
+  },
+  "apply": {
+    "applyTo": "Отклик на вакансию",
+    "coverLetter": "Сопроводительное письмо",
+    "coverLetterPlaceholder": "Почему вы подходите?",
+    "optional": "необязательно",
+    "submit": "Отправить",
+    "yes": "Да",
+    "no": "Нет",
+    "alreadyApplied": "Вы уже откликнулись на эту вакансию",
+    "viewApplications": "Мои отклики",
+    "errDuplicate": "Вы уже откликнулись на эту вакансию",
+    "errUnknown": "Произошла ошибка"
+  },
+  "applications": {
+    "title": "Мои отклики",
+    "empty": "Вы ещё не откликались",
+    "status": {
+      "submitted": "Отправлено",
+      "viewed": "Просмотрено",
+      "shortlisted": "В шортлисте",
+      "interview": "Собеседование",
+      "offer": "Оффер",
+      "rejected": "Отклонено",
+      "hired": "Принят"
+    }
   },
   "home": {
     "heroTitle": "Найдите свою следующую работу",
@@ -54,6 +81,7 @@
     "workingModel": "Формат",
     "clear": "Сбросить",
     "apply": "Откликнуться",
+    "applied": "Вы откликнулись",
     "postedOn": "Опубликовано",
     "aboutRole": "О вакансии",
     "responsibilities": "Обязанности",
