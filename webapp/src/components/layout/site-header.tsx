@@ -38,6 +38,12 @@ export async function SiteHeader() {
           >
             {t("companies")}
           </Link>
+          <Link
+            href="/explore"
+            className="text-foreground hover:text-primary text-sm font-medium transition-colors"
+          >
+            {t("map")}
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">

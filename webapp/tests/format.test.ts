@@ -21,6 +21,8 @@ const base: Job = {
   city: null,
   country: null,
   location: null,
+  lat: null,
+  lng: null,
   salaryMin: null,
   salaryMax: null,
   currency: "UZS",

@@ -21,6 +21,8 @@ const job: Job = {
   city: "Tashkent",
   country: "UZ",
   location: null,
+  lat: 41.3111,
+  lng: 69.2797,
   salaryMin: 2500,
   salaryMax: 4000,
   currency: "USD",

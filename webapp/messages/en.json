@@ -6,8 +6,14 @@
   "nav": {
     "jobs": "Jobs",
     "companies": "Companies",
+    "map": "Map",
     "signIn": "Sign in",
     "account": "Account"
+  },
+  "explore": {
+    "title": "Jobs map",
+    "subtitle": "See jobs on the map",
+    "listView": "List"
   },
   "auth": {
     "signIn": "Sign in",

@@ -6,8 +6,14 @@
   "nav": {
     "jobs": "Ishlar",
     "companies": "Kompaniyalar",
+    "map": "Xarita",
     "signIn": "Kirish",
     "account": "Hisob"
+  },
+  "explore": {
+    "title": "Ishlar xaritasi",
+    "subtitle": "Ishlarni xaritada ko'ring",
+    "listView": "Ro'yxat"
   },
   "auth": {
     "signIn": "Kirish",

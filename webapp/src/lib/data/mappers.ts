@@ -34,6 +34,8 @@ export function toJob(r: Row): Job {
     city: str(r.city),
     country: str(r.country),
     location: str(r.location),
+    lat: num(r.lat),
+    lng: num(r.lng),
     salaryMin: num(r.salary_min),
     salaryMax: num(r.salary_max),
     currency: String(r.currency ?? "UZS"),
