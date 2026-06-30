@@ -33,6 +33,7 @@
     "title": "Account",
     "myApplications": "My applications",
     "savedJobs": "Saved jobs",
+    "employerArea": "Employer area",
     "signedInAs": "Signed in as:",
     "comingSoon": "Your CV will appear here soon.",
     "signOut": "Sign out"
@@ -42,6 +43,41 @@
     "empty": "You haven't saved any jobs yet",
     "save": "Save",
     "saved": "Saved"
+  },
+  "employer": {
+    "dashboard": "Dashboard",
+    "postJob": "Post a job",
+    "myJobs": "My jobs",
+    "noJobs": "You haven't posted any jobs yet",
+    "onboardingTitle": "Create your company",
+    "onboardingSubtitle": "Set up your company profile before posting jobs.",
+    "companyName": "Company name",
+    "companyAbout": "About the company",
+    "industry": "Industry",
+    "headquarters": "Location",
+    "website": "Website",
+    "createCompany": "Create company",
+    "jobTitle": "Job title",
+    "jobDescription": "Description",
+    "category": "Category",
+    "city": "City",
+    "experience": "Experience",
+    "salaryMin": "Salary (from)",
+    "salaryMax": "Salary (to)",
+    "currency": "Currency",
+    "publishJob": "Publish",
+    "statOpenJobs": "Open jobs",
+    "statApplicants": "Applicants",
+    "statJobs": "Total jobs",
+    "applicantsCount": "{count} applicants",
+    "errUnknown": "Something went wrong",
+    "status": { "draft": "Draft", "open": "Open", "closed": "Closed" },
+    "exp": {
+      "entry": "Entry",
+      "mid": "Mid",
+      "senior": "Senior",
+      "lead": "Lead"
+    }
   },
   "apply": {
     "applyTo": "Apply for a job",
@@ -105,7 +141,7 @@
       "rotational": "Rotational"
     },
     "model": {
-      "on_site": "On-site",
+      "onsite": "On-site",
       "remote": "Remote",
       "hybrid": "Hybrid"
     }

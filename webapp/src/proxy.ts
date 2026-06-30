@@ -11,7 +11,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 const intlMiddleware = createMiddleware(routing);
 
 const LOCALE = "(?:uz|ru|en)";
-const PROTECTED = new RegExp(`^/${LOCALE}/account(?:/|$)`);
+const PROTECTED = new RegExp(`^/${LOCALE}/(?:account|employer)(?:/|$)`);
 const AUTH_PAGES = new RegExp(`^/${LOCALE}/(?:sign-in|sign-up)(?:/|$)`);
 
 function localeOf(path: string): string {

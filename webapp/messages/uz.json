@@ -33,6 +33,7 @@
     "title": "Hisob",
     "myApplications": "Mening arizalarim",
     "savedJobs": "Saqlangan ishlar",
+    "employerArea": "Ish beruvchi paneli",
     "signedInAs": "Tizimga kirgansiz:",
     "comingSoon": "CV tez orada shu yerda bo'ladi.",
     "signOut": "Chiqish"
@@ -42,6 +43,41 @@
     "empty": "Hali ish saqlamadingiz",
     "save": "Saqlash",
     "saved": "Saqlangan"
+  },
+  "employer": {
+    "dashboard": "Boshqaruv paneli",
+    "postJob": "Ish e'lon qilish",
+    "myJobs": "Mening ishlarim",
+    "noJobs": "Hali ish e'lon qilmadingiz",
+    "onboardingTitle": "Kompaniyangizni yarating",
+    "onboardingSubtitle": "Ish e'lon qilishdan oldin kompaniya profilini to'ldiring.",
+    "companyName": "Kompaniya nomi",
+    "companyAbout": "Kompaniya haqida",
+    "industry": "Soha",
+    "headquarters": "Manzil",
+    "website": "Veb-sayt",
+    "createCompany": "Kompaniya yaratish",
+    "jobTitle": "Lavozim nomi",
+    "jobDescription": "Tavsif",
+    "category": "Kategoriya",
+    "city": "Shahar",
+    "experience": "Tajriba",
+    "salaryMin": "Maosh (dan)",
+    "salaryMax": "Maosh (gacha)",
+    "currency": "Valyuta",
+    "publishJob": "E'lon qilish",
+    "statOpenJobs": "Ochiq ishlar",
+    "statApplicants": "Nomzodlar",
+    "statJobs": "Jami ishlar",
+    "applicantsCount": "{count} nomzod",
+    "errUnknown": "Xatolik yuz berdi",
+    "status": { "draft": "Qoralama", "open": "Ochiq", "closed": "Yopiq" },
+    "exp": {
+      "entry": "Boshlang'ich",
+      "mid": "O'rta",
+      "senior": "Katta",
+      "lead": "Yetakchi"
+    }
   },
   "apply": {
     "applyTo": "Ariza topshirish",
@@ -105,7 +141,7 @@
       "rotational": "Vahta"
     },
     "model": {
-      "on_site": "Ofisda",
+      "onsite": "Ofisda",
       "remote": "Masofadan",
       "hybrid": "Gibrid"
     }

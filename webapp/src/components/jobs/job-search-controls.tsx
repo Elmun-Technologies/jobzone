@@ -15,7 +15,7 @@ const JOB_TYPES = [
   "internship",
   "rotational",
 ];
-const WORKING_MODELS = ["on_site", "remote", "hybrid"];
+const WORKING_MODELS = ["onsite", "remote", "hybrid"];
 
 const selectClass =
   "h-11 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
