@@ -215,7 +215,7 @@ class _LogoAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const fallback = ColoredBox(
-      color: Color(0xFF3A36DB),
+      color: Color(0xFF0A0A0A),
       child: Icon(Icons.business_rounded, color: Colors.white, size: 20),
     );
     return Container(
@@ -308,7 +308,7 @@ class _Pin extends StatelessWidget {
         : Icons.location_on_rounded;
     final color = isApplicant
         ? const Color(0xFF0D80F2)
-        : const Color(0xFF3A36DB);
+        : const Color(0xFF0A0A0A);
     final pin = Icon(
       icon,
       color: color,

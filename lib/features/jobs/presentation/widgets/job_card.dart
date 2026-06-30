@@ -195,7 +195,7 @@ class _Logo extends StatelessWidget {
   final String? url;
 
   static const _palette = [
-    Color(0xFF3A36DB),
+    Color(0xFF0A0A0A),
     Color(0xFF1A1A1A),
     Color(0xFF0EA5E9),
     Color(0xFF16A34A),
