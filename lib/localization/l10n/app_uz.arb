@@ -656,5 +656,18 @@
   "salaryDisplayNegotiable": "Kelishiladi",
   "salaryDisplayHidden": "Ko'rsatmaslik",
   "fieldRegion": "Viloyat",
-  "fieldDistrict": "Tuman / Shahar"
+  "fieldDistrict": "Tuman / Shahar",
+  "sectionEmployment": "Bandlik",
+  "fieldWorkHours": "Ish vaqti (masalan 9:00–18:00)",
+  "fieldEducationRequired": "Ta'lim darajasi",
+  "eduNone": "Talab qilinmaydi",
+  "eduSecondary": "O'rta",
+  "eduSpecializedSecondary": "O'rta maxsus",
+  "eduHigher": "Oliy",
+  "qTypeMultipleChoice": "Variantdan tanlash",
+  "addOption": "Variant qo'shish",
+  "optionLabel": "Variant",
+  "sectionSalary": "Maosh",
+  "sectionLocation": "Joylashuv",
+  "sectionAboutJob": "Ish haqida"
 }

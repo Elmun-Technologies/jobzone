@@ -115,6 +115,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late List<ScreeningQuestion> _questions = [
     ...?widget.job?.screeningQuestions,
   ];
+  late String _educationRequired = widget.job?.educationRequired ?? 'none';
+  late final _workHours = TextEditingController(text: widget.job?.workHours);
   bool _saving = false;
   bool _generating = false;
 
@@ -136,6 +138,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     _contactPhone.dispose();
     _ageMin.dispose();
     _ageMax.dispose();
+    _workHours.dispose();
     super.dispose();
   }
 
@@ -278,6 +281,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       benefits: _benefits.text.trim(),
       screeningQuestions: _questions,
       status: 'open',
+      educationRequired: _educationRequired,
+      workHours: _workHours.text.trim().isEmpty ? null : _workHours.text.trim(),
     );
     Navigator.of(
       context,
@@ -353,6 +358,10 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                 .toList(),
             status: effectiveStatus,
             publishAt: publishAt,
+            educationRequired: _educationRequired,
+            workHours: _workHours.text.trim().isEmpty
+                ? null
+                : _workHours.text.trim(),
           ),
         );
       } else {
@@ -401,6 +410,10 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
               .toList(),
           status: effectiveStatus,
           publishAt: publishAt,
+          educationRequired: _educationRequired,
+          workHours: _workHours.text.trim().isEmpty
+              ? null
+              : _workHours.text.trim(),
         );
       }
       ref.invalidate(myJobsProvider);
@@ -450,13 +463,14 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                     AppSpacing.lg,
                   ),
                   children: [
+                    // Title + category always visible at the top
                     JzTextField(
                       label: l.fieldJobTitle,
                       controller: _title,
                       validator: (v) =>
                           Validators.isNotBlank(v) ? null : l.valRequired,
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
                     _Dropdown(
                       key: ValueKey('cat-${_categoryId ?? ''}-${cats.length}'),
                       label: l.jobCategory,
@@ -466,128 +480,135 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       items: {for (final c in cats) c.id: c.name},
                       onChanged: (v) => setState(() => _categoryId = v),
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.fieldJobType,
-                      value: _type,
-                      items: {
-                        JobType.fullTime.wire: l.jobTypeFullTime,
-                        JobType.partTime.wire: l.jobTypePartTime,
-                        JobType.contract.wire: l.jobTypeContract,
-                        JobType.internship.wire: l.jobTypeInternship,
-                        JobType.temporary.wire: l.jobTypeTemporary,
-                        JobType.rotational.wire: l.jobTypeRotational,
-                      },
-                      onChanged: (v) => setState(() => _type = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.fieldExperience,
-                      value: _level,
-                      items: {
-                        ExperienceLevel.entry.wire: l.expEntry,
-                        ExperienceLevel.mid.wire: l.expMid,
-                        ExperienceLevel.senior.wire: l.expSenior,
-                        ExperienceLevel.lead.wire: l.expLead,
-                      },
-                      onChanged: (v) => setState(() => _level = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.fieldWorkingModel,
-                      value: _model,
-                      items: {
-                        WorkingModel.onsite.wire: l.wmOnsite,
-                        WorkingModel.remote.wire: l.wmRemote,
-                        WorkingModel.hybrid.wire: l.wmHybrid,
-                      },
-                      onChanged: (v) => setState(() => _model = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.fieldFormalization,
-                      value: _formalization,
-                      items: {
-                        Formalization.employmentContract.wire:
-                            l.formEmploymentContract,
-                        Formalization.gph.wire: l.formGph,
-                        Formalization.selfEmployed.wire: l.formSelfEmployed,
-                        Formalization.none.wire: l.formNone,
-                      },
-                      onChanged: (v) => setState(() => _formalization = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.fieldSchedulePattern,
-                      value: _schedule,
-                      items: {
-                        SchedulePattern.fiveTwo.wire: '5/2',
-                        SchedulePattern.sixOne.wire: '6/1',
-                        SchedulePattern.fourFour.wire: '4/4',
-                        SchedulePattern.twoTwo.wire: '2/2',
-                        SchedulePattern.custom.wire: l.schedCustom,
-                      },
-                      onChanged: (v) => setState(() => _schedule = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(
-                      label: l.fieldHoursPerDay,
-                      controller: _hours,
-                      keyboardType: TextInputType.number,
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.fieldNightShift),
-                      value: _nightShift,
-                      onChanged: (v) => setState(() => _nightShift = v),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.fieldWomenFriendly),
-                      subtitle: Text(l.fieldWomenFriendlyHint),
-                      value: _womenFriendly,
-                      onChanged: (v) => setState(() => _womenFriendly = v),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.fieldDisabilityFriendly),
-                      subtitle: Text(l.fieldDisabilityFriendlyHint),
-                      value: _disabilityFriendly,
-                      onChanged: (v) => setState(() => _disabilityFriendly = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // --- Candidate requirements ---
-                    Text(
-                      l.candidateRequirementsSection,
-                      style: context.text.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                     const SizedBox(height: AppSpacing.md),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                    // ── 1. Bandlik (Employment) ──────────────────────────────
+                    _FormSection(
+                      title: l.sectionEmployment,
+                      initiallyExpanded: true,
                       children: [
-                        Expanded(
-                          child: JzTextField(
-                            label: l.fieldAgeMin,
-                            controller: _ageMin,
-                            keyboardType: TextInputType.number,
-                          ),
+                        _Dropdown(
+                          label: l.fieldJobType,
+                          value: _type,
+                          items: {
+                            JobType.fullTime.wire: l.jobTypeFullTime,
+                            JobType.partTime.wire: l.jobTypePartTime,
+                            JobType.contract.wire: l.jobTypeContract,
+                            JobType.internship.wire: l.jobTypeInternship,
+                            JobType.temporary.wire: l.jobTypeTemporary,
+                            JobType.rotational.wire: l.jobTypeRotational,
+                          },
+                          onChanged: (v) => setState(() => _type = v),
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: JzTextField(
-                            label: l.fieldAgeMax,
-                            controller: _ageMax,
-                            keyboardType: TextInputType.number,
-                          ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.fieldExperience,
+                          value: _level,
+                          items: {
+                            ExperienceLevel.entry.wire: l.expEntry,
+                            ExperienceLevel.mid.wire: l.expMid,
+                            ExperienceLevel.senior.wire: l.expSenior,
+                            ExperienceLevel.lead.wire: l.expLead,
+                          },
+                          onChanged: (v) => setState(() => _level = v),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.fieldWorkingModel,
+                          value: _model,
+                          items: {
+                            WorkingModel.onsite.wire: l.wmOnsite,
+                            WorkingModel.remote.wire: l.wmRemote,
+                            WorkingModel.hybrid.wire: l.wmHybrid,
+                          },
+                          onChanged: (v) => setState(() => _model = v),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.fieldFormalization,
+                          value: _formalization,
+                          items: {
+                            Formalization.employmentContract.wire:
+                                l.formEmploymentContract,
+                            Formalization.gph.wire: l.formGph,
+                            Formalization.selfEmployed.wire: l.formSelfEmployed,
+                            Formalization.none.wire: l.formNone,
+                          },
+                          onChanged: (v) => setState(() => _formalization = v),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.fieldSchedulePattern,
+                          value: _schedule,
+                          items: {
+                            SchedulePattern.fiveTwo.wire: '5/2',
+                            SchedulePattern.sixOne.wire: '6/1',
+                            SchedulePattern.fourFour.wire: '4/4',
+                            SchedulePattern.twoTwo.wire: '2/2',
+                            SchedulePattern.custom.wire: l.schedCustom,
+                          },
+                          onChanged: (v) => setState(() => _schedule = v),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(
+                          label: l.fieldWorkHours,
+                          controller: _workHours,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(
+                          label: l.fieldHoursPerDay,
+                          controller: _hours,
+                          keyboardType: TextInputType.number,
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l.fieldNightShift),
+                          value: _nightShift,
+                          onChanged: (v) => setState(() => _nightShift = v),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l.fieldWomenFriendly),
+                          subtitle: Text(l.fieldWomenFriendlyHint),
+                          value: _womenFriendly,
+                          onChanged: (v) => setState(() => _womenFriendly = v),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l.fieldDisabilityFriendly),
+                          subtitle: Text(l.fieldDisabilityFriendlyHint),
+                          value: _disabilityFriendly,
+                          onChanged: (v) =>
+                              setState(() => _disabilityFriendly = v),
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                    // ── 2. Nomzodlarga talablar (Candidate requirements) ─────
+                    _FormSection(
+                      title: l.candidateRequirementsSection,
                       children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: JzTextField(
+                                label: l.fieldAgeMin,
+                                controller: _ageMin,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: JzTextField(
+                                label: l.fieldAgeMax,
+                                controller: _ageMax,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                           l.fieldPreferredGender,
                           style: context.text.labelLarge,
@@ -609,12 +630,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                               ),
                           ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                           l.fieldStartAvailability,
                           style: context.text.labelLarge,
@@ -644,167 +660,37 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                               ),
                           ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // --- Salary ---
-                    _Dropdown(
-                      label: l.fieldSalaryDisplay,
-                      value: _salaryDisplay,
-                      items: {
-                        'exact': l.salaryDisplayExact,
-                        'negotiable': l.salaryDisplayNegotiable,
-                        'hidden': l.salaryDisplayHidden,
-                      },
-                      onChanged: (v) =>
-                          setState(() => _salaryDisplay = v ?? 'exact'),
-                    ),
-                    if (_salaryDisplay == 'exact') ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: JzTextField(
-                              label: l.fieldSalaryMin,
-                              controller: _min,
-                              keyboardType: TextInputType.number,
-                              validator: (v) {
-                                if (!Validators.isNotBlank(v)) {
-                                  return l.valSalaryRequired;
-                                }
-                                return num.tryParse(v!.trim()) == null
-                                    ? l.valSalaryRequired
-                                    : null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: JzTextField(
-                              label: l.fieldSalaryMax,
-                              controller: _max,
-                              keyboardType: TextInputType.number,
-                              validator: (v) {
-                                if (!Validators.isNotBlank(v)) return null;
-                                return num.tryParse(v!.trim()) == null
-                                    ? l.valSalaryRequired
-                                    : null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.currencyLabel,
-                      value: _currency,
-                      items: {'UZS': l.currencyUzs, 'USD': l.currencyUsd},
-                      onChanged: (v) => setState(() => _currency = v ?? 'UZS'),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l.payBasisLabel, style: context.text.labelLarge),
-                        const SizedBox(height: AppSpacing.sm),
-                        SegmentedButton<bool>(
-                          segments: [
-                            ButtonSegment(
-                              value: true,
-                              label: Text(l.salaryGross),
-                            ),
-                            ButtonSegment(
-                              value: false,
-                              label: Text(l.salaryNet),
-                            ),
-                          ],
-                          selected: {_salaryGross},
-                          showSelectedIcon: false,
-                          onSelectionChanged: (s) =>
-                              setState(() => _salaryGross = s.first),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          l.fieldEducationRequired,
+                          style: context.text.labelLarge,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.payTypeLabel,
-                      value: _payType,
-                      items: {
-                        'month': l.payMonth,
-                        'hour': l.payHour,
-                        'day': l.payDay,
-                        'week': l.payWeek,
-                        'shift': l.payShift,
-                        'task': l.payTask,
-                      },
-                      onChanged: (v) => setState(() => _payType = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      label: l.payoutFreqLabel,
-                      value: _payoutFreq,
-                      items: {
-                        'monthly': l.payoutMonthly,
-                        'biweekly': l.payoutBiweekly,
-                        'weekly': l.payoutWeekly,
-                        'daily': l.payoutDaily,
-                      },
-                      onChanged: (v) => setState(() => _payoutFreq = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      key: ValueKey('region-$_region'),
-                      label: l.fieldRegion,
-                      value: uzbekistanRegions.containsKey(_region)
-                          ? _region
-                          : null,
-                      items: {for (final r in uzbekistanRegions.keys) r: r},
-                      onChanged: (v) => setState(() {
-                        _region = v;
-                        _district = null;
-                      }),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _Dropdown(
-                      key: ValueKey('district-$_region-$_district'),
-                      label: l.fieldDistrict,
-                      value:
-                          _region != null &&
-                              districtsFor(_region).contains(_district)
-                          ? _district
-                          : null,
-                      items: {for (final d in districtsFor(_region)) d: d},
-                      onChanged: (v) => setState(() => _district = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(label: l.fieldCity, controller: _city),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(
-                      label: l.fieldWorkAddress,
-                      controller: _address,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.map_outlined),
-                      title: Text(l.pickOnMap),
-                      subtitle: _lat != null && _lng != null
-                          ? Text(
-                              '${_lat!.toStringAsFixed(5)}, '
-                              '${_lng!.toStringAsFixed(5)}',
-                            )
-                          : null,
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: _pickLocation,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(label: l.fieldSkills, controller: _skills),
-                    const SizedBox(height: AppSpacing.lg),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            for (final e in [
+                              'none',
+                              'secondary',
+                              'specialized_secondary',
+                              'higher',
+                            ])
+                              ChoiceChip(
+                                label: Text(switch (e) {
+                                  'secondary' => l.eduSecondary,
+                                  'specialized_secondary' =>
+                                    l.eduSpecializedSecondary,
+                                  'higher' => l.eduHigher,
+                                  _ => l.eduNone,
+                                }),
+                                selected: _educationRequired == e,
+                                onSelected: (_) =>
+                                    setState(() => _educationRequired = e),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                           l.driverLicenseLabel,
                           style: context.text.labelLarge,
@@ -825,130 +711,307 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                               ),
                           ],
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        _LanguagesEditor(
+                          languages: _languages,
+                          onChanged: (v) => setState(() => _languages = v),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _LanguagesEditor(
-                      languages: _languages,
-                      onChanged: (v) => setState(() => _languages = v),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OutlinedButton.icon(
-                        onPressed: _generating ? null : _generate,
-                        icon: _generating
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.auto_awesome_rounded, size: 18),
-                        label: Text(l.aiGenerate),
-                        style: OutlinedButton.styleFrom(
-                          shape: const StadiumBorder(),
+
+                    // ── 3. Maosh (Salary) ────────────────────────────────────
+                    _FormSection(
+                      title: l.sectionSalary,
+                      children: [
+                        _Dropdown(
+                          label: l.fieldSalaryDisplay,
+                          value: _salaryDisplay,
+                          items: {
+                            'exact': l.salaryDisplayExact,
+                            'negotiable': l.salaryDisplayNegotiable,
+                            'hidden': l.salaryDisplayHidden,
+                          },
+                          onChanged: (v) =>
+                              setState(() => _salaryDisplay = v ?? 'exact'),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: context.colors.chipBackground,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            size: 18,
-                            color: context.colors.textSecondary,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              l.discriminationHint,
-                              style: context.text.bodySmall?.copyWith(
-                                color: context.colors.textSecondary,
+                        if (_salaryDisplay == 'exact') ...[
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: JzTextField(
+                                  label: l.fieldSalaryMin,
+                                  controller: _min,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) {
+                                    if (!Validators.isNotBlank(v)) {
+                                      return l.valSalaryRequired;
+                                    }
+                                    return num.tryParse(v!.trim()) == null
+                                        ? l.valSalaryRequired
+                                        : null;
+                                  },
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: JzTextField(
+                                  label: l.fieldSalaryMax,
+                                  controller: _max,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) {
+                                    if (!Validators.isNotBlank(v)) return null;
+                                    return num.tryParse(v!.trim()) == null
+                                        ? l.valSalaryRequired
+                                        : null;
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.currencyLabel,
+                          value: _currency,
+                          items: {'UZS': l.currencyUzs, 'USD': l.currencyUsd},
+                          onChanged: (v) =>
+                              setState(() => _currency = v ?? 'UZS'),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(l.payBasisLabel, style: context.text.labelLarge),
+                        const SizedBox(height: AppSpacing.sm),
+                        SegmentedButton<bool>(
+                          segments: [
+                            ButtonSegment(
+                              value: true,
+                              label: Text(l.salaryGross),
+                            ),
+                            ButtonSegment(
+                              value: false,
+                              label: Text(l.salaryNet),
+                            ),
+                          ],
+                          selected: {_salaryGross},
+                          showSelectedIcon: false,
+                          onSelectionChanged: (s) =>
+                              setState(() => _salaryGross = s.first),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.payTypeLabel,
+                          value: _payType,
+                          items: {
+                            'month': l.payMonth,
+                            'hour': l.payHour,
+                            'day': l.payDay,
+                            'week': l.payWeek,
+                            'shift': l.payShift,
+                            'task': l.payTask,
+                          },
+                          onChanged: (v) => setState(() => _payType = v),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          label: l.payoutFreqLabel,
+                          value: _payoutFreq,
+                          items: {
+                            'monthly': l.payoutMonthly,
+                            'biweekly': l.payoutBiweekly,
+                            'weekly': l.payoutWeekly,
+                            'daily': l.payoutDaily,
+                          },
+                          onChanged: (v) => setState(() => _payoutFreq = v),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    _MarkdownToolbar(controller: _description),
-                    JzTextField(
-                      label: l.fieldDescription,
-                      controller: _description,
-                      maxLines: 4,
-                      minLines: 3,
+
+                    // ── 4. Joylashuv (Location) ──────────────────────────────
+                    _FormSection(
+                      title: l.sectionLocation,
+                      children: [
+                        _Dropdown(
+                          key: ValueKey('region-$_region'),
+                          label: l.fieldRegion,
+                          value: uzbekistanRegions.containsKey(_region)
+                              ? _region
+                              : null,
+                          items: {for (final r in uzbekistanRegions.keys) r: r},
+                          onChanged: (v) => setState(() {
+                            _region = v;
+                            _district = null;
+                          }),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _Dropdown(
+                          key: ValueKey('district-$_region-$_district'),
+                          label: l.fieldDistrict,
+                          value:
+                              _region != null &&
+                                  districtsFor(_region).contains(_district)
+                              ? _district
+                              : null,
+                          items: {for (final d in districtsFor(_region)) d: d},
+                          onChanged: (v) => setState(() => _district = v),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(label: l.fieldCity, controller: _city),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(
+                          label: l.fieldWorkAddress,
+                          controller: _address,
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.map_outlined),
+                          title: Text(l.pickOnMap),
+                          subtitle: _lat != null && _lng != null
+                              ? Text(
+                                  '${_lat!.toStringAsFixed(5)}, '
+                                  '${_lng!.toStringAsFixed(5)}',
+                                )
+                              : null,
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: _pickLocation,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(
-                      label: l.fieldResponsibilities,
-                      controller: _responsibilities,
-                      maxLines: 4,
-                      minLines: 3,
+
+                    // ── 5. Ish haqida (About the job) ───────────────────────
+                    _FormSection(
+                      title: l.sectionAboutJob,
+                      children: [
+                        JzTextField(label: l.fieldSkills, controller: _skills),
+                        const SizedBox(height: AppSpacing.md),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: OutlinedButton.icon(
+                            onPressed: _generating ? null : _generate,
+                            icon: _generating
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.auto_awesome_rounded,
+                                    size: 18,
+                                  ),
+                            label: Text(l.aiGenerate),
+                            style: OutlinedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: context.colors.chipBackground,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.info_outline_rounded,
+                                size: 18,
+                                color: context.colors.textSecondary,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  l.discriminationHint,
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: context.colors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _MarkdownToolbar(controller: _description),
+                        JzTextField(
+                          label: l.fieldDescription,
+                          controller: _description,
+                          maxLines: 4,
+                          minLines: 3,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(
+                          label: l.fieldResponsibilities,
+                          controller: _responsibilities,
+                          maxLines: 4,
+                          minLines: 3,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(
+                          label: l.fieldRequirements,
+                          controller: _requirements,
+                          maxLines: 4,
+                          minLines: 3,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        JzTextField(
+                          label: l.fieldBenefits,
+                          controller: _benefits,
+                          maxLines: 4,
+                          minLines: 3,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(
-                      label: l.fieldRequirements,
-                      controller: _requirements,
-                      maxLines: 4,
-                      minLines: 3,
+
+                    // ── 6. Saralash savollari (Screening questions) ──────────
+                    _FormSection(
+                      title: l.screeningSection,
+                      children: [
+                        _ScreeningEditor(
+                          questions: _questions,
+                          onChanged: (q) => setState(() => _questions = q),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    JzTextField(
-                      label: l.fieldBenefits,
-                      controller: _benefits,
-                      maxLines: 4,
-                      minLines: 3,
+
+                    // ── 7. Javob sozlamalari (Response settings) ─────────────
+                    _FormSection(
+                      title: l.responseSettingsSection,
+                      children: [
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l.fieldRequireCoverLetter),
+                          value: _requireCoverLetter,
+                          onChanged: (v) =>
+                              setState(() => _requireCoverLetter = v),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l.fieldAllowIncompleteResume),
+                          subtitle: Text(l.fieldAllowIncompleteResumeHint),
+                          value: _allowIncompleteResume,
+                          onChanged: (v) =>
+                              setState(() => _allowIncompleteResume = v),
+                        ),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l.fieldShowPhone),
+                          value: _showPhone,
+                          onChanged: (v) => setState(() => _showPhone = v),
+                        ),
+                        if (_showPhone) ...[
+                          JzTextField(
+                            label: l.fieldContactPhone,
+                            controller: _contactPhone,
+                            keyboardType: TextInputType.phone,
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _ScreeningEditor(
-                      questions: _questions,
-                      onChanged: (q) => setState(() => _questions = q),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      l.responseSettingsSection,
-                      style: context.text.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.fieldRequireCoverLetter),
-                      value: _requireCoverLetter,
-                      onChanged: (v) => setState(() => _requireCoverLetter = v),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.fieldAllowIncompleteResume),
-                      subtitle: Text(l.fieldAllowIncompleteResumeHint),
-                      value: _allowIncompleteResume,
-                      onChanged: (v) =>
-                          setState(() => _allowIncompleteResume = v),
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.fieldShowPhone),
-                      value: _showPhone,
-                      onChanged: (v) => setState(() => _showPhone = v),
-                    ),
-                    if (_showPhone) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      JzTextField(
-                        label: l.fieldContactPhone,
-                        controller: _contactPhone,
-                        keyboardType: TextInputType.phone,
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.lg),
+
+                    // ── Scheduled publish ────────────────────────────────────
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(l.schedulePublishLabel),
@@ -1051,8 +1114,51 @@ class _Dropdown extends StatelessWidget {
   }
 }
 
-/// Repeatable editor for a job's screening questions (label + type + required).
-/// Emits a new list on every change; empty-label rows are dropped on submit.
+/// Collapsible card section for the post-job form. Wraps children in an
+/// [ExpansionTile] inside a [Card] so the form stays scannable.
+class _FormSection extends StatelessWidget {
+  const _FormSection({
+    required this.title,
+    required this.children,
+    this.initiallyExpanded = false,
+  });
+
+  final String title;
+  final List<Widget> children;
+  final bool initiallyExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        title: Text(
+          title,
+          style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        initiallyExpanded: initiallyExpanded,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Repeatable editor for a job's screening questions. Emits a new list on
+/// every change; empty-label rows are dropped on submit.
 class _ScreeningEditor extends StatelessWidget {
   const _ScreeningEditor({required this.questions, required this.onChanged});
 
@@ -1075,13 +1181,12 @@ class _ScreeningEditor extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l.screeningSection, style: context.text.labelLarge),
-        const SizedBox(height: AppSpacing.sm),
         for (var i = 0; i < questions.length; i++)
           Padding(
             key: ValueKey(questions[i].id),
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
@@ -1121,6 +1226,10 @@ class _ScreeningEditor extends StatelessWidget {
                             value: 'number',
                             child: Text(l.qTypeNumber),
                           ),
+                          DropdownMenuItem(
+                            value: 'multiple_choice',
+                            child: Text(l.qTypeMultipleChoice),
+                          ),
                         ],
                         onChanged: (v) =>
                             _set(i, questions[i].copyWith(type: v ?? 'text')),
@@ -1135,6 +1244,55 @@ class _ScreeningEditor extends StatelessWidget {
                     ),
                   ],
                 ),
+                // Options editor for multiple_choice type
+                if (questions[i].type == 'multiple_choice') ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  for (var j = 0; j < questions[i].options.length; j++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              key: ValueKey('${questions[i].id}-opt-$j'),
+                              initialValue: questions[i].options[j],
+                              decoration: InputDecoration(
+                                hintText: '${l.optionLabel} ${j + 1}',
+                                isDense: true,
+                              ),
+                              onChanged: (v) {
+                                final opts = [...questions[i].options];
+                                opts[j] = v;
+                                _set(i, questions[i].copyWith(options: opts));
+                              },
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 16),
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () {
+                              final opts = [...questions[i].options]
+                                ..removeAt(j);
+                              _set(i, questions[i].copyWith(options: opts));
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () => _set(
+                        i,
+                        questions[i].copyWith(
+                          options: [...questions[i].options, ''],
+                        ),
+                      ),
+                      icon: const Icon(Icons.add_rounded, size: 16),
+                      label: Text(l.addOption),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

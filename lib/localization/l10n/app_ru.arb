@@ -656,5 +656,18 @@
   "salaryDisplayNegotiable": "По договорённости",
   "salaryDisplayHidden": "Скрыть",
   "fieldRegion": "Регион (вилоят)",
-  "fieldDistrict": "Район / город (туман)"
+  "fieldDistrict": "Район / город (туман)",
+  "sectionEmployment": "Занятость",
+  "fieldWorkHours": "Рабочие часы (напр. 9:00–18:00)",
+  "fieldEducationRequired": "Требуемое образование",
+  "eduNone": "Не требуется",
+  "eduSecondary": "Среднее",
+  "eduSpecializedSecondary": "Средне-специальное",
+  "eduHigher": "Высшее",
+  "qTypeMultipleChoice": "Выбор варианта",
+  "addOption": "Добавить вариант",
+  "optionLabel": "Вариант",
+  "sectionSalary": "Зарплата",
+  "sectionLocation": "Расположение",
+  "sectionAboutJob": "О вакансии"
 }
