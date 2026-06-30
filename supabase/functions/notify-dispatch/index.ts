@@ -89,12 +89,13 @@ Deno.serve(async (req) => {
   }
 
   // Push fan-out (no-op without FCM_SERVICE_ACCOUNT or registered devices).
+  // Include the notification type so the client can deep-link to the right screen.
   const fcm = await sendFcmToUser(
     supa,
     recipientId,
     title,
     body,
-    (rec?.data ?? {}) as Record<string, unknown>,
+    { type, ...(rec?.data ?? {}) } as Record<string, unknown>,
   );
 
   return json({ ok: true, telegram, fcm });

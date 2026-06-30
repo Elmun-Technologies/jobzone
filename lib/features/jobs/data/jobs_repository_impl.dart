@@ -47,6 +47,26 @@ class JobsRepositoryImpl implements JobsRepository {
   }
 
   @override
+  Future<List<Job>> jobsPage({
+    required int offset,
+    required int limit,
+    bool recentFirst = true,
+  }) async {
+    if (!_live) {
+      final all = _boostedFirst(recentFirst ? mockJobs : mockJobs.reversed);
+      return all.skip(offset).take(limit).toList();
+    }
+    final rows = await _client
+        .from('job_feed')
+        .select()
+        .eq('status', 'open')
+        .order('boost_active', ascending: false)
+        .order('posted_at', ascending: !recentFirst)
+        .range(offset, offset + limit - 1);
+    return rows.map<Job>((r) => Job.fromMap(r)).toList();
+  }
+
+  @override
   Future<List<Job>> recent({int limit = 10}) async {
     if (!_live) return _boostedFirst(mockJobs).take(limit).toList();
     return _query(limit: limit);

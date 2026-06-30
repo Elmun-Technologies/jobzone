@@ -31,6 +31,12 @@ class JobzoneApp extends ConsumerWidget {
       }
     });
 
+    // Navigate to the relevant screen when the user taps a push notification.
+    ref.listen(pushDeepLinksProvider, (_, next) {
+      final path = next.value;
+      if (path != null) router.push(path);
+    });
+
     return MaterialApp.router(
       title: FlavorConfig.appTitle,
       debugShowCheckedModeBanner: false,

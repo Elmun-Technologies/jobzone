@@ -25,6 +25,10 @@ abstract interface class PushService {
   /// Foreground push messages.
   Stream<PushMessage> get messages;
 
+  /// Route paths emitted when the user taps a push notification. Listen in the
+  /// app root and call `router.push(path)` to land on the right screen.
+  Stream<String> get deepLinks;
+
   /// Persist the device token (e.g. into a `devices` table) for the signed-in
   /// user so the server can target this device.
   Future<void> registerDevice();

@@ -15,3 +15,10 @@ bool firebaseReady = false;
 final pushServiceProvider = Provider<PushService>(
   (ref) => firebaseReady ? FcmPushService(ref) : const NoopPushService(),
 );
+
+/// Emits a go_router path whenever the user taps a push notification that maps
+/// to a specific in-app screen. The app root listens and calls `router.push`.
+/// Emits nothing when Firebase is not configured (uses [NoopPushService]).
+final pushDeepLinksProvider = StreamProvider<String>(
+  (ref) => ref.watch(pushServiceProvider).deepLinks,
+);

@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
-import '../application/jobs_providers.dart';
-import '../domain/job.dart';
+import '../application/paginated_jobs_notifier.dart';
 import 'widgets/job_card.dart';
 
 enum SeeAllKind { suggested, recent }
@@ -21,13 +20,36 @@ class SeeAllJobsPage extends ConsumerStatefulWidget {
 }
 
 class _SeeAllJobsPageState extends ConsumerState<SeeAllJobsPage> {
+  late final ScrollController _scroll = ScrollController();
+  String _category = '';
+
+  bool get _isSuggested => widget.kind == SeeAllKind.suggested;
+
+  // Suggested = not recentFirst; Recent = recentFirst.
+  bool get _recentFirst => !_isSuggested;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 300) {
+      ref.read(paginatedJobsProvider(_recentFirst).notifier).loadMore();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final isSuggested = widget.kind == SeeAllKind.suggested;
-    final jobsAsync = ref.watch(
-      isSuggested ? suggestedJobsProvider : recentJobsProvider,
-    );
+    final state = ref.watch(paginatedJobsProvider(_recentFirst));
 
     return Scaffold(
       body: SafeArea(
@@ -36,7 +58,7 @@ class _SeeAllJobsPageState extends ConsumerState<SeeAllJobsPage> {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: JzTopBar(
-                title: isSuggested ? l.suggestedJobs : l.recentJobs,
+                title: _isSuggested ? l.suggestedJobs : l.recentJobs,
                 actions: [
                   JzCircleButton(
                     icon: Icons.search_rounded,
@@ -45,59 +67,57 @@ class _SeeAllJobsPageState extends ConsumerState<SeeAllJobsPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: jobsAsync.when(
-                loading: () => const JobListSkeleton(),
-                error: (_, _) => JzErrorState(
-                  title: l.errorTitle,
-                  message: l.errUnknown,
-                  retryLabel: l.retry,
-                  onRetry: () => ref.invalidate(
-                    isSuggested ? suggestedJobsProvider : recentJobsProvider,
-                  ),
-                ),
-                data: (jobs) => jobs.isEmpty
-                    ? JzEmptyState(
-                        icon: Icons.work_outline_rounded,
-                        title: l.noJobsTitle,
-                      )
-                    : _List(jobs: jobs, showCategories: !isSuggested),
-              ),
-            ),
+            Expanded(child: _buildBody(context, state, l)),
           ],
         ),
       ),
     );
   }
-}
 
-class _List extends StatefulWidget {
-  const _List({required this.jobs, required this.showCategories});
-  final List<Job> jobs;
-  final bool showCategories;
+  Widget _buildBody(BuildContext context, PaginatedJobsState state, dynamic l) {
+    // Initial load
+    if (state.jobs.isEmpty && state.isLoading) {
+      return const JobListSkeleton();
+    }
 
-  @override
-  State<_List> createState() => _ListState();
-}
+    // Error on first load (no items yet)
+    if (state.jobs.isEmpty && state.error != null) {
+      return JzErrorState(
+        title: l.errorTitle,
+        message: l.errUnknown,
+        retryLabel: l.retry,
+        onRetry: () =>
+            ref.read(paginatedJobsProvider(_recentFirst).notifier).refresh(),
+      );
+    }
 
-class _ListState extends State<_List> {
-  String _category = '';
+    // Genuinely empty
+    if (state.jobs.isEmpty) {
+      return JzEmptyState(
+        icon: Icons.work_outline_rounded,
+        title: l.noJobsTitle,
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final categories = <String>{
-      for (final j in widget.jobs)
-        if (j.categoryName != null && j.categoryName!.isNotEmpty)
-          j.categoryName!,
-    }.toList();
+    // Build category list from loaded jobs (Recent Jobs only).
+    final categories = !_isSuggested
+        ? <String>{
+            for (final j in state.jobs)
+              if (j.categoryName != null && j.categoryName!.isNotEmpty)
+                j.categoryName!,
+          }.toList()
+        : const <String>[];
+
     final filtered = _category.isEmpty
-        ? widget.jobs
-        : widget.jobs.where((j) => j.categoryName == _category).toList();
+        ? state.jobs
+        : state.jobs.where((j) => j.categoryName == _category).toList();
+
+    // +1 for the bottom loading indicator when more pages remain.
+    final itemCount = filtered.length + (state.hasMore ? 1 : 0);
 
     return Column(
       children: [
-        if (widget.showCategories && categories.isNotEmpty)
+        if (categories.isNotEmpty)
           SizedBox(
             height: 40,
             child: ListView(
@@ -120,10 +140,33 @@ class _ListState extends State<_List> {
           ),
         Expanded(
           child: ListView.separated(
+            controller: _scroll,
             padding: const EdgeInsets.all(AppSpacing.lg),
-            itemCount: filtered.length,
+            itemCount: itemCount,
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (_, i) => JobCard(job: filtered[i]),
+            itemBuilder: (_, i) {
+              // Last slot → loading spinner or an error retry button.
+              if (i == filtered.length) {
+                if (state.error != null) {
+                  return Center(
+                    child: TextButton.icon(
+                      onPressed: () => ref
+                          .read(paginatedJobsProvider(_recentFirst).notifier)
+                          .loadMore(),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l.retry),
+                    ),
+                  );
+                }
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.lg),
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                );
+              }
+              return JobCard(job: filtered[i]);
+            },
           ),
         ),
       ],
