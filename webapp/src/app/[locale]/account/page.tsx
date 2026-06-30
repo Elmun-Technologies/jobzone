@@ -61,6 +61,13 @@ export default async function AccountPage({
           <span aria-hidden>→</span>
         </Link>
         <Link
+          href="/account/messages"
+          className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
+        >
+          <span className="font-medium">{t("messages")}</span>
+          <span aria-hidden>→</span>
+        </Link>
+        <Link
           href="/account/bookmarks"
           className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
         >

@@ -6,6 +6,7 @@ import { hasSupabase } from "./supabase-env";
 
 export interface Applicant {
   applicationId: string;
+  applicantId: string;
   status: string;
   appliedAt: string | null;
   coverLetter: string | null;
@@ -69,6 +70,7 @@ export async function getJobApplicants(jobId: string): Promise<Applicant[]> {
       const p = profiles.get(String(r.applicant_id));
       return {
         applicationId: String(r.id),
+        applicantId: String(r.applicant_id),
         status: String(r.current_status ?? "submitted"),
         appliedAt: typeof r.applied_at === "string" ? r.applied_at : null,
         coverLetter: typeof r.cover_letter === "string" ? r.cover_letter : null,

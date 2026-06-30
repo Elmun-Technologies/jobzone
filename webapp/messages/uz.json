@@ -35,9 +35,17 @@
     "savedJobs": "Saqlangan ishlar",
     "employerArea": "Ish beruvchi paneli",
     "editProfile": "Profilni tahrirlash",
+    "messages": "Xabarlar",
     "signedInAs": "Tizimga kirgansiz:",
     "comingSoon": "CV tez orada shu yerda bo'ladi.",
     "signOut": "Chiqish"
+  },
+  "chat": {
+    "title": "Xabarlar",
+    "empty": "Hali suhbatlar yo'q",
+    "message": "Xabar yozish",
+    "messagePlaceholder": "Xabar yozing…",
+    "send": "Yuborish"
   },
   "profile": {
     "title": "Profilni tahrirlash",
