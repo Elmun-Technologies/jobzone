@@ -73,6 +73,14 @@ export interface JobQuery {
   jobType?: string;
   workingModel?: string;
   experienceLevel?: string;
+  /** Minimum salary the seeker will accept, in [currency]. */
+  salaryMin?: number;
+  /** Currency the salaryMin is expressed in ("UZS" | "USD"). */
+  currency?: string;
+  /** Only jobs posted within the last N days. */
+  postedWithin?: number;
+  /** Result ordering: "recent" (default) | "salary". */
+  sort?: string;
   limit?: number;
   offset?: number;
 }

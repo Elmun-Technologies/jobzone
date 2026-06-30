@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobCard } from "@/components/jobs/job-card";
-import { JobSearchControls } from "@/components/jobs/job-search-controls";
+import { JobFilters } from "@/components/jobs/job-filters";
+import { JobToolbar } from "@/components/jobs/job-toolbar";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
-import { getOpenJobs } from "@/lib/data/jobs";
+import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
+import type { JobQuery } from "@/lib/data/types";
+import { groupNumber } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -32,38 +36,73 @@ export default async function JobsPage({
 
   const pick = (v: string | string[] | undefined) =>
     Array.isArray(v) ? v[0] : v;
+  const num = (v: string | string[] | undefined) => {
+    const n = Number(pick(v));
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  };
 
-  const [jobs, savedIds] = await Promise.all([
-    getOpenJobs({
-      q: pick(sp.q),
-      category: pick(sp.category),
-      jobType: pick(sp.jobType),
-      workingModel: pick(sp.workingModel),
-      limit: 30,
-    }),
+  const query: JobQuery = {
+    q: pick(sp.q),
+    category: pick(sp.category),
+    city: pick(sp.city),
+    jobType: pick(sp.jobType),
+    workingModel: pick(sp.workingModel),
+    experienceLevel: pick(sp.experienceLevel),
+    salaryMin: num(sp.salaryMin),
+    currency: pick(sp.currency),
+    postedWithin: num(sp.postedWithin),
+    sort: pick(sp.sort),
+    limit: 30,
+  };
+
+  const [jobs, count, cities, savedIds] = await Promise.all([
+    getOpenJobs(query),
+    getJobCount(query),
+    getCities(),
     getBookmarkedJobIds(),
   ]);
 
+  const view = pick(sp.view) === "grid" ? "grid" : "list";
+  const title = query.category ?? t("title");
+
   return (
     <Container className="py-8">
-      <h1 className="text-foreground mb-6 text-2xl font-bold sm:text-3xl">
-        {t("title")}
-      </h1>
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        {/* Filters — top on mobile, right column on desktop */}
+        <aside className="lg:col-start-2 lg:row-start-1">
+          <JobFilters cities={cities} />
+        </aside>
 
-      <JobSearchControls />
+        {/* Results */}
+        <main className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <div className="mb-4">
+            <h1 className="text-foreground text-xl font-bold sm:text-2xl">
+              {title}
+            </h1>
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              {t("resultsCount", { count: groupNumber(count) })}
+            </p>
+          </div>
 
-      <div className="mt-6">
-        {jobs.length === 0 ? (
-          <EmptyState title={t("resultsZero")} />
-        ) : (
-          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {jobs.map((job) => (
-              <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
-              </li>
-            ))}
-          </ul>
-        )}
+          <JobToolbar />
+
+          {jobs.length === 0 ? (
+            <EmptyState title={t("resultsZero")} />
+          ) : (
+            <ul
+              className={cn(
+                "grid gap-3",
+                view === "grid" ? "sm:grid-cols-2" : "grid-cols-1",
+              )}
+            >
+              {jobs.map((job) => (
+                <li key={job.id}>
+                  <JobCard job={job} saved={savedIds.has(job.id)} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </main>
       </div>
     </Container>
   );

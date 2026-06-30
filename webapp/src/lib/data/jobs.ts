@@ -8,10 +8,16 @@ import { hasSupabase } from "./supabase-env";
 import type { Job, JobQuery } from "./types";
 
 const COLUMNS = "*";
+const DAY_MS = 86_400_000;
+
+function salaryTop(j: Job): number | null {
+  return j.salaryMax ?? j.salaryMin;
+}
 
 function filterMock(query: JobQuery): Job[] {
   const q = query.q?.toLowerCase().trim();
-  return mockJobs.filter((j) => {
+  const nowMs = Date.now();
+  const rows = mockJobs.filter((j) => {
     if (q && !`${j.title} ${j.companyName}`.toLowerCase().includes(q)) {
       return false;
     }
@@ -24,11 +30,34 @@ function filterMock(query: JobQuery): Job[] {
     if (query.experienceLevel && j.experienceLevel !== query.experienceLevel) {
       return false;
     }
+    if (query.salaryMin != null) {
+      if ((query.currency ?? "UZS") !== j.currency) return false;
+      const matches =
+        (j.salaryMax != null && j.salaryMax >= query.salaryMin) ||
+        (j.salaryMin != null && j.salaryMin >= query.salaryMin);
+      if (!matches) return false;
+    }
+    if (query.postedWithin != null && query.postedWithin > 0) {
+      const t = j.postedAt ? Date.parse(j.postedAt) : NaN;
+      if (Number.isNaN(t) || nowMs - t > query.postedWithin * DAY_MS) {
+        return false;
+      }
+    }
     return true;
   });
+  if (query.sort === "salary") {
+    return [...rows].sort((a, b) => (salaryTop(b) ?? 0) - (salaryTop(a) ?? 0));
+  }
+  return rows;
 }
 
-/** A page of open jobs matching [query]. Boosted jobs first, then recent. */
+// The `posted_at` cutoff for a "posted within N days" filter, or null.
+function postedCutoff(query: JobQuery): string | null {
+  if (query.postedWithin == null || query.postedWithin <= 0) return null;
+  return new Date(Date.now() - query.postedWithin * DAY_MS).toISOString();
+}
+
+/** A page of open jobs matching [query]. Boosted jobs first, then ordered. */
 export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
   const limit = query.limit ?? 20;
   const offset = query.offset ?? 0;
@@ -42,9 +71,14 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
     let req = supabase
       .from("job_feed")
       .select(COLUMNS)
-      .order("boost_active", { ascending: false })
-      .order("posted_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order("boost_active", { ascending: false });
+    if (query.sort === "salary") {
+      req = req
+        .order("salary_max", { ascending: false, nullsFirst: false })
+        .order("salary_min", { ascending: false, nullsFirst: false });
+    } else {
+      req = req.order("posted_at", { ascending: false });
+    }
 
     if (query.q) {
       req = req.or(`title.ilike.%${query.q}%,company_name.ilike.%${query.q}%`);
@@ -56,6 +90,17 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
     if (query.experienceLevel) {
       req = req.eq("experience_level", query.experienceLevel);
     }
+    if (query.salaryMin != null) {
+      req = req
+        .eq("currency", query.currency ?? "UZS")
+        .or(
+          `salary_max.gte.${query.salaryMin},salary_min.gte.${query.salaryMin}`,
+        );
+    }
+    const cutoff = postedCutoff(query);
+    if (cutoff) req = req.gte("posted_at", cutoff);
+
+    req = req.range(offset, offset + limit - 1);
 
     const { data, error } = await req;
     if (error) throw error;
@@ -85,6 +130,15 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
     if (query.experienceLevel) {
       req = req.eq("experience_level", query.experienceLevel);
     }
+    if (query.salaryMin != null) {
+      req = req
+        .eq("currency", query.currency ?? "UZS")
+        .or(
+          `salary_max.gte.${query.salaryMin},salary_min.gte.${query.salaryMin}`,
+        );
+    }
+    const cutoff = postedCutoff(query);
+    if (cutoff) req = req.gte("posted_at", cutoff);
 
     const { count, error } = await req;
     if (error) throw error;
