@@ -150,7 +150,9 @@
     "searchCta": "Qidirish",
     "browseAll": "Barcha ishlarni ko'rish",
     "recentJobs": "So'nggi ishlar",
-    "viewAll": "Hammasi"
+    "viewAll": "Hammasi",
+    "topCompanies": "Top kompaniyalar",
+    "popularSearches": "Ommabop qidiruvlar"
   },
   "jobs": {
     "title": "Ishlar",

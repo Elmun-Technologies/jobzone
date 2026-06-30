@@ -150,7 +150,9 @@
     "searchCta": "Поиск",
     "browseAll": "Смотреть все вакансии",
     "recentJobs": "Свежие вакансии",
-    "viewAll": "Все"
+    "viewAll": "Все",
+    "topCompanies": "Топ компании",
+    "popularSearches": "Популярные запросы"
   },
   "jobs": {
     "title": "Вакансии",

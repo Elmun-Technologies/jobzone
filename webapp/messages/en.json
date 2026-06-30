@@ -150,7 +150,9 @@
     "searchCta": "Search",
     "browseAll": "Browse all jobs",
     "recentJobs": "Recent jobs",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "topCompanies": "Top companies",
+    "popularSearches": "Popular searches"
   },
   "jobs": {
     "title": "Jobs",
