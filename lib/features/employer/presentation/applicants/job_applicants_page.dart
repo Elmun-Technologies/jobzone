@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/enums/enums.dart';
 import '../../data/applicants_repository.dart';
 import 'widgets/applicant_card.dart';
 import 'widgets/applicant_sort_bar.dart';
@@ -22,6 +23,7 @@ class JobApplicantsPage extends ConsumerStatefulWidget {
 
 class _JobApplicantsPageState extends ConsumerState<JobApplicantsPage> {
   ApplicantSort _sort = ApplicantSort.newest;
+  ApplicationStatus? _statusFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,17 @@ class _JobApplicantsPageState extends ConsumerState<JobApplicantsPage> {
                       message: l.noApplicantsBody,
                     );
                   }
+
+                  final counts = <ApplicationStatus, int>{};
+                  for (final a in applicants) {
+                    counts[a.status] = (counts[a.status] ?? 0) + 1;
+                  }
+
                   final sorted = sortApplicants(applicants, _sort);
+                  final filtered = _statusFilter == null
+                      ? sorted
+                      : sorted.where((a) => a.status == _statusFilter).toList();
+
                   return Column(
                     children: [
                       Padding(
@@ -70,27 +82,37 @@ class _JobApplicantsPageState extends ConsumerState<JobApplicantsPage> {
                           onMap: () => context.push(
                             Routes.employerJobApplicantsMap(widget.jobId),
                           ),
+                          statusCounts: counts,
+                          statusFilter: _statusFilter,
+                          onStatusFilter: (s) =>
+                              setState(() => _statusFilter = s),
                         ),
                       ),
                       Expanded(
-                        child: ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg,
-                            0,
-                            AppSpacing.lg,
-                            AppSpacing.lg,
-                          ),
-                          itemCount: sorted.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: AppSpacing.md),
-                          itemBuilder: (context, i) => ApplicantCard(
-                            applicant: sorted[i],
-                            onTap: () => context.push(
-                              Routes.employerApplicant(sorted[i].id),
-                              extra: sorted[i],
-                            ),
-                          ),
-                        ),
+                        child: filtered.isEmpty
+                            ? JzEmptyState(
+                                icon: Icons.filter_list_rounded,
+                                title: l.noApplicantsForStatus,
+                                message: '',
+                              )
+                            : ListView.separated(
+                                padding: const EdgeInsets.fromLTRB(
+                                  AppSpacing.lg,
+                                  0,
+                                  AppSpacing.lg,
+                                  AppSpacing.lg,
+                                ),
+                                itemCount: filtered.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: AppSpacing.md),
+                                itemBuilder: (context, i) => ApplicantCard(
+                                  applicant: filtered[i],
+                                  onTap: () => context.push(
+                                    Routes.employerApplicant(filtered[i].id),
+                                    extra: filtered[i],
+                                  ),
+                                ),
+                              ),
                       ),
                     ],
                   );

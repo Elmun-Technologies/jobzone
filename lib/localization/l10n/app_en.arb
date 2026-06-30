@@ -683,5 +683,7 @@
   "optionLabel": "Option",
   "sectionSalary": "Salary",
   "sectionLocation": "Location",
-  "sectionAboutJob": "About the job"
+  "sectionAboutJob": "About the job",
+  "filterAll": "All",
+  "noApplicantsForStatus": "No applicants with this status"
 }

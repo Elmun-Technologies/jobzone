@@ -669,5 +669,7 @@
   "optionLabel": "Variant",
   "sectionSalary": "Maosh",
   "sectionLocation": "Joylashuv",
-  "sectionAboutJob": "Ish haqida"
+  "sectionAboutJob": "Ish haqida",
+  "filterAll": "Barchasi",
+  "noApplicantsForStatus": "Bu holat uchun ariza yo'q"
 }

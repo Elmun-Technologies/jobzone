@@ -669,5 +669,7 @@
   "optionLabel": "Вариант",
   "sectionSalary": "Зарплата",
   "sectionLocation": "Расположение",
-  "sectionAboutJob": "О вакансии"
+  "sectionAboutJob": "О вакансии",
+  "filterAll": "Все",
+  "noApplicantsForStatus": "Нет кандидатов с этим статусом"
 }
