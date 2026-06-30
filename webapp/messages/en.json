@@ -102,6 +102,31 @@
     "back": "Back",
     "next": "Next",
     "finish": "Save",
+    "stepEducation": "Education",
+    "education": "Education",
+    "school": "Institution",
+    "degree": "Degree",
+    "field": "Field of study",
+    "startYear": "Start year",
+    "endYear": "End year",
+    "studying": "I'm still studying",
+    "addEducation": "Add education",
+    "remove": "Remove",
+    "languages": "Language levels",
+    "lang": {
+      "ru": "Russian",
+      "en": "English",
+      "tr": "Turkish",
+      "tg": "Tajik",
+      "uz": "Uzbek"
+    },
+    "level": {
+      "none": "None",
+      "a1_a2": "Beginner",
+      "b1_b2": "Intermediate",
+      "c1_c2": "Advanced",
+      "native": "Native"
+    },
     "errSave": "Couldn't save"
   },
   "bookmarks": {
