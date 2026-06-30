@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../core/supabase/supabase_providers.dart';
+import '../../../shared/enums/enums.dart';
+import '../../../shared/providers/app_flags.dart';
 import '../domain/push_service.dart';
 
 /// FCM implementation of [PushService] (Phase 8).
@@ -19,6 +22,7 @@ class FcmPushService implements PushService {
   final Ref _ref;
   String? _token;
   final _controller = StreamController<PushMessage>.broadcast();
+  final _deepLinkController = StreamController<String>.broadcast();
 
   @override
   Future<void> initialize() async {
@@ -32,6 +36,8 @@ class FcmPushService implements PushService {
       sound: true,
     );
     _token = await messaging.getToken();
+
+    // Foreground messages — surface via the [messages] stream.
     FirebaseMessaging.onMessage.listen(
       (m) => _controller.add(
         PushMessage(
@@ -41,6 +47,20 @@ class FcmPushService implements PushService {
         ),
       ),
     );
+
+    // Background tap: app was already running, user tapped the notification.
+    FirebaseMessaging.onMessageOpenedApp.listen((m) {
+      final path = _routeFor(m.data);
+      if (path != null) _deepLinkController.add(path);
+    });
+
+    // Cold start: app was killed, tapping the notification opened it.
+    final initial = await messaging.getInitialMessage();
+    if (initial != null) {
+      final path = _routeFor(initial.data);
+      if (path != null) _deepLinkController.add(path);
+    }
+
     messaging.onTokenRefresh.listen((t) {
       _token = t;
       registerDevice();
@@ -48,11 +68,35 @@ class FcmPushService implements PushService {
     await registerDevice();
   }
 
+  /// Maps a notification data payload to a go_router path, or null when the
+  /// notification has no associated screen (e.g. generic system alerts).
+  String? _routeFor(Map<String, dynamic> data) {
+    final type = data['type'] as String?;
+    switch (type) {
+      case 'message':
+        final cid = data['conversation_id'] as String?;
+        return cid != null ? Routes.chatDetail(cid) : null;
+      case 'application_update':
+        final aid = data['application_id'] as String?;
+        if (aid == null) return null;
+        final isEmployer =
+            _ref.read(appFlagsProvider).role == UserRole.employer;
+        return isEmployer
+            ? Routes.employerApplicant(aid)
+            : Routes.applicationStatus(aid);
+      default:
+        return null;
+    }
+  }
+
   @override
   Future<String?> token() async => _token;
 
   @override
   Stream<PushMessage> get messages => _controller.stream;
+
+  @override
+  Stream<String> get deepLinks => _deepLinkController.stream;
 
   @override
   Future<void> registerDevice() async {

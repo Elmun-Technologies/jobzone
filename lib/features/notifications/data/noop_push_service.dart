@@ -15,6 +15,9 @@ class NoopPushService implements PushService {
   Stream<PushMessage> get messages => const Stream.empty();
 
   @override
+  Stream<String> get deepLinks => const Stream.empty();
+
+  @override
   Future<void> registerDevice() async {}
 
   @override
