@@ -69,6 +69,8 @@
     "statOpenJobs": "Open jobs",
     "statApplicants": "Applicants",
     "statJobs": "Total jobs",
+    "applicants": "Applicants",
+    "noApplicants": "No applicants yet",
     "applicantsCount": "{count} applicants",
     "errUnknown": "Something went wrong",
     "status": { "draft": "Draft", "open": "Open", "closed": "Closed" },

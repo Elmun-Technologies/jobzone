@@ -69,6 +69,8 @@
     "statOpenJobs": "Открытые вакансии",
     "statApplicants": "Кандидаты",
     "statJobs": "Всего вакансий",
+    "applicants": "Кандидаты",
+    "noApplicants": "Пока нет кандидатов",
     "applicantsCount": "{count} кандидатов",
     "errUnknown": "Произошла ошибка",
     "status": { "draft": "Черновик", "open": "Открыта", "closed": "Закрыта" },
