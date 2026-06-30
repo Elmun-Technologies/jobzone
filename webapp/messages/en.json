@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Jobzone — Jobs in Uzbekistan",
-    "description": "Jobzone — the trusted platform to find work and hire across Uzbekistan."
+    "title": "Yolla — Jobs in Uzbekistan",
+    "description": "Yolla — the trusted platform to find work and hire across Uzbekistan."
   },
   "nav": {
     "home": "Home",
@@ -150,7 +150,9 @@
     "searchCta": "Search",
     "browseAll": "Browse all jobs",
     "recentJobs": "Recent jobs",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "topCompanies": "Top companies",
+    "popularSearches": "Popular searches"
   },
   "jobs": {
     "title": "Jobs",
@@ -169,6 +171,29 @@
     "postedYesterday": "Yesterday",
     "daysAgo": "{days}d ago",
     "share": "Share",
+    "filters": "Filters",
+    "experience": "Experience",
+    "region": "Region",
+    "allRegions": "All regions",
+    "salaryMin": "From",
+    "postedWithin": "Posted",
+    "last24h": "Last 24 hours",
+    "last3days": "Last 3 days",
+    "last7days": "Last 7 days",
+    "last30days": "Last 30 days",
+    "sort": "Sort",
+    "sortNewest": "Newest",
+    "sortSalary": "By salary",
+    "viewList": "List",
+    "viewGrid": "Grid",
+    "resultsCount": "{count} jobs found",
+    "loadMore": "Load more",
+    "exp": {
+      "entry": "Entry",
+      "mid": "Mid",
+      "senior": "Senior",
+      "lead": "Lead"
+    },
     "aboutRole": "About the role",
     "responsibilities": "Responsibilities",
     "requirements": "Requirements",
@@ -195,7 +220,11 @@
     "noOpenJobs": "No open positions yet",
     "reviews": "Reviews",
     "noReviews": "No reviews yet",
-    "visitWebsite": "Visit website"
+    "visitWebsite": "Visit website",
+    "directoryTitle": "Companies",
+    "searchPlaceholder": "Company name",
+    "openJobsCount": "{count} open jobs",
+    "none": "No companies found"
   },
   "footer": {
     "tagline": "The trusted job marketplace.",

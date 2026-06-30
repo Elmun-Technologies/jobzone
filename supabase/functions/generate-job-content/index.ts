@@ -66,7 +66,7 @@ async function claudeDraft(input: Record<string, unknown>): Promise<Draft> {
   ].filter(Boolean).join("\n");
 
   const system =
-    "You are a recruiting copywriter for Jobzone, a blue-collar and " +
+    "You are a recruiting copywriter for Yolla, a blue-collar and " +
     "mass-hiring job marketplace in Uzbekistan. Write a clear, concrete, " +
     `realistic job posting in ${lang} for hourly / shift work. Keep each ` +
     "section short and practical. Do NOT invent a salary, company name, or " +
@@ -199,7 +199,7 @@ async function claudeMatch(input: Record<string, unknown>) {
   ].filter(Boolean).join("\n");
 
   const system =
-    "You are a career advisor for Jobzone, a blue-collar job marketplace in " +
+    "You are a career advisor for Yolla, a blue-collar job marketplace in " +
     `Uzbekistan. Assess how well a candidate fits a job. Answer in ${lang}. Be ` +
     "honest, concise and encouraging. score = 0-100 (share of the job's needs " +
     "the candidate clearly meets). strengths = the candidate's relevant skills; " +

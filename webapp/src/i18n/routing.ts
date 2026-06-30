@@ -1,7 +1,7 @@
 import { defineRouting } from "next-intl/routing";
 
 /**
- * Locale routing for the Jobzone web app.
+ * Locale routing for the Yolla web app.
  *
  * - `uz` is the default (primary market), `ru` and `en` are secondary.
  * - `localePrefix: "always"` prefixes every locale (`/uz`, `/ru`, `/en`) so

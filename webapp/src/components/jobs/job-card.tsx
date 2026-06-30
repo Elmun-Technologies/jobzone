@@ -95,7 +95,9 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
           ) : null}
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-foreground text-sm font-semibold">
+            <span
+              className={`text-foreground text-sm font-semibold ${salary ? "font-mono" : ""}`}
+            >
               {salary ?? t("negotiable")}
             </span>
             {typeLabel ? <Chip>{typeLabel}</Chip> : null}

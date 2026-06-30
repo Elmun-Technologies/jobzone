@@ -10,5 +10,5 @@ class FlavorConfig {
   static bool get isProd => current == Flavor.prod;
   static bool get isDev => current == Flavor.dev;
 
-  static String get appTitle => isProd ? 'Jobzone' : 'Jobzone (dev)';
+  static String get appTitle => isProd ? 'Yolla' : 'Yolla (dev)';
 }

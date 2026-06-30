@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect width="48" height="48" rx="11" fill="#c7fb00" />
+  <text x="24" y="26" text-anchor="middle" dominant-baseline="central"
+    fill="#0a0a0a" font-family="Archivo, system-ui, sans-serif"
+    font-weight="800" font-size="24">yo</text>
+</svg>

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { LocaleSwitcher } from "./locale-switcher";
 import { RoleToggle } from "./role-toggle";
 import { ThemeToggle } from "./theme-toggle";
+import { YollaLogo } from "./yolla-logo";
 
 const navLink =
   "text-foreground hover:text-primary text-sm font-medium transition-colors";
@@ -23,11 +24,8 @@ export async function SiteHeader() {
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="text-primary text-lg font-bold tracking-tight"
-          >
-            Jobzone
+          <Link href="/" aria-label="Yolla">
+            <YollaLogo />
           </Link>
           <div className="hidden sm:block">
             <RoleToggle />
@@ -41,6 +39,9 @@ export async function SiteHeader() {
             </Link>
             <Link href="/jobs" className={navLink}>
               {t("jobs")}
+            </Link>
+            <Link href="/companies" className={navLink}>
+              {t("companies")}
             </Link>
             <Link href="/account/bookmarks" className={navLink}>
               {t("saved")}

@@ -1,12 +1,14 @@
-import { Search } from "lucide-react";
+import { ChevronRight, Search, TrendingUp } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { CompanyCard } from "@/components/companies/company-card";
 import { JobCard } from "@/components/jobs/job-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
+import { getCompanies } from "@/lib/data/companies";
 import { getCities, getJobCount, getRecentJobs } from "@/lib/data/jobs";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
@@ -20,14 +22,27 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("home");
+  const tj = await getTranslations("jobs");
 
-  const [recent, categories, total, cities, savedIds] = await Promise.all([
-    getRecentJobs(6),
-    getCategoriesWithCounts(),
-    getJobCount(),
-    getCities(),
-    getBookmarkedJobIds(),
-  ]);
+  const [recent, categories, total, cities, savedIds, topCompanies] =
+    await Promise.all([
+      getRecentJobs(6),
+      getCategoriesWithCounts(),
+      getJobCount(),
+      getCities(),
+      getBookmarkedJobIds(),
+      getCompanies({ limit: 8 }),
+    ]);
+
+  // Popular-search shortcuts, reusing existing job-filter labels.
+  const presets = [
+    { label: tj("exp.entry"), href: "/jobs?experienceLevel=entry" },
+    { label: tj("model.remote"), href: "/jobs?workingModel=remote" },
+    { label: tj("type.part_time"), href: "/jobs?jobType=part_time" },
+    { label: tj("type.full_time"), href: "/jobs?jobType=full_time" },
+    { label: tj("type.internship"), href: "/jobs?jobType=internship" },
+    { label: tj("type.rotational"), href: "/jobs?jobType=rotational" },
+  ];
 
   return (
     <>
@@ -107,6 +122,57 @@ export default async function HomePage({
                     {t("vacancyCount", { count: groupNumber(c.count) })}
                   </span>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      ) : null}
+
+      {/* Popular searches */}
+      <Container className="pb-16">
+        <h2 className="text-foreground mb-4 text-xl font-bold">
+          {t("popularSearches")}
+        </h2>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {presets.map((p) => (
+            <li key={p.href}>
+              <Link
+                href={p.href}
+                className="border-border bg-card hover:border-primary/40 flex items-center justify-between gap-2 rounded-xl border p-4 transition-all hover:shadow-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="bg-accent text-accent-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+                    <TrendingUp className="size-4" />
+                  </span>
+                  <span className="text-foreground truncate font-medium">
+                    {p.label}
+                  </span>
+                </span>
+                <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Container>
+
+      {/* Top companies */}
+      {topCompanies.length > 0 ? (
+        <Container className="pb-16">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground text-xl font-bold">
+              {t("topCompanies")}
+            </h2>
+            <Link
+              href="/companies"
+              className="text-primary text-sm font-semibold hover:underline"
+            >
+              {t("viewAll")}
+            </Link>
+          </div>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {topCompanies.map((c) => (
+              <li key={c.id}>
+                <CompanyCard company={c} />
               </li>
             ))}
           </ul>

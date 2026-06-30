@@ -24,7 +24,7 @@ export async function generateMetadata({
   const company = await getCompanyById(id);
   if (!company) return { title: "Company" };
   const description =
-    company.about?.slice(0, 155) ?? `${company.name} on Jobzone`;
+    company.about?.slice(0, 155) ?? `${company.name} on Yolla`;
   const url = `${siteUrl()}/${locale}/companies/${id}`;
   return {
     title: company.name,

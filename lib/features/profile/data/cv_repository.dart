@@ -509,7 +509,7 @@ class _OfflineCvStore {
   final projects = <Project>[
     Project(
       id: 'p1',
-      name: 'Jobzone',
+      name: 'Yolla',
       role: 'Lead Developer',
       url: 'https://github.com/example/jobzone',
       startDate: DateTime(2024),

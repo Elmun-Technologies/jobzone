@@ -6,21 +6,22 @@
 :root {
   --radius: 0.75rem;
 
+  /* Yolla — Qog'oz Oq / Siyoh Qora / Volt. 90% white+black, 10% volt. */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
   --card: #ffffff;
-  --card-foreground: #171717;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
+  --card-foreground: #0a0a0a;
+  --muted: #f3f3f1;
+  --muted-foreground: #54544f;
+  --border: #e2e2de;
+  --input: #e2e2de;
 
-  /* Jobzone brand indigo */
-  --primary: #3a36db;
-  --primary-foreground: #ffffff;
-  --accent: #eef2ff;
-  --accent-foreground: #3a36db;
-  --ring: #3a36db;
+  /* Yolla Volt — accent / CTA only (buttons, verified, active state). */
+  --primary: #c7fb00;
+  --primary-foreground: #0a0a0a;
+  --accent: #f3f3f1;
+  --accent-foreground: #0a0a0a;
+  --ring: #c7fb00;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
@@ -28,19 +29,19 @@
 
 .dark {
   --background: #0a0a0a;
-  --foreground: #ededed;
-  --card: #121214;
-  --card-foreground: #ededed;
-  --muted: #1f1f23;
-  --muted-foreground: #a1a1aa;
-  --border: #27272a;
-  --input: #27272a;
+  --foreground: #f3f3f1;
+  --card: #161616;
+  --card-foreground: #f3f3f1;
+  --muted: #1f1f1d;
+  --muted-foreground: #b8b8b2;
+  --border: #2a2a27;
+  --input: #2a2a27;
 
-  --primary: #7c79f2;
+  --primary: #c7fb00;
   --primary-foreground: #0a0a0a;
-  --accent: #1e1b4b;
-  --accent-foreground: #c7d2fe;
-  --ring: #7c79f2;
+  --accent: #1f1f1d;
+  --accent-foreground: #c7fb00;
+  --ring: #c7fb00;
 
   --destructive: #f87171;
   --destructive-foreground: #0a0a0a;
@@ -68,8 +69,9 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-archivo);
+  --font-mono: var(--font-space-mono);
+  --font-display: var(--font-anton);
 }
 
 body {

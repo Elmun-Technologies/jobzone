@@ -1,13 +1,13 @@
-# Jobzone Web
+# Yolla Web
 
-The Next.js web client for Jobzone — a responsive, SEO-friendly site for both
+The Next.js web client for Yolla — a responsive, SEO-friendly site for both
 job-seekers and employers, sharing the same Supabase backend as the Flutter
 mobile app. See the full plan in [`../docs/web-app-plan.md`](../docs/web-app-plan.md).
 
 ## Stack
 
 - **Next.js 16** (App Router, React Server Components) + **TypeScript**
-- **Tailwind CSS v4** + design tokens themed to the Jobzone indigo (`#3A36DB`), dark mode
+- **Tailwind CSS v4** + design tokens themed to the Yolla indigo (`#3A36DB`), dark mode
 - **Supabase** via `@supabase/ssr` (cookie auth; RLS-protected)
 - **next-intl** — `uz` (default), `ru`, `en`, locale-prefixed routes
 - **Vitest** (unit) · **ESLint** · **Prettier**
