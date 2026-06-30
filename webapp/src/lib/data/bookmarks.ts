@@ -45,6 +45,33 @@ export async function getBookmarkedJobs(): Promise<Job[]> {
   }
 }
 
+/**
+ * The set of job ids the signed-in user has bookmarked. One query — pass the
+ * set down to a list of cards so each can show its saved state without a
+ * per-card round-trip. Empty for signed-out / offline.
+ */
+export async function getBookmarkedJobIds(): Promise<Set<string>> {
+  if (!hasSupabase()) return new Set();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return new Set();
+    const { data, error } = await supabase
+      .from("bookmarks")
+      .select("job_id")
+      .eq("profile_id", user.id);
+    if (error) throw error;
+    return new Set(
+      (data ?? []).map((b) => String((b as { job_id: unknown }).job_id)),
+    );
+  } catch (e) {
+    console.error("getBookmarkedJobIds failed", e);
+    return new Set();
+  }
+}
+
 /** Whether the signed-in user has bookmarked a job. */
 export async function isBookmarked(jobId: string): Promise<boolean> {
   if (!hasSupabase()) return false;

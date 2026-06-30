@@ -4,9 +4,14 @@
     "description": "Jobzone — the trusted platform to find work and hire across Uzbekistan."
   },
   "nav": {
+    "home": "Home",
     "jobs": "Jobs",
     "companies": "Companies",
     "map": "Map",
+    "saved": "Saved",
+    "createResume": "Create resume",
+    "seeker": "Job seeker",
+    "employer": "Employer",
     "signIn": "Sign in",
     "account": "Account"
   },
@@ -136,8 +141,11 @@
     }
   },
   "home": {
-    "heroTitle": "Find your next job",
-    "heroSubtitle": "Thousands of open positions across Uzbekistan from trusted companies.",
+    "heroTitle": "Find the right job across Uzbekistan",
+    "heroSubtitle": "Any field. Any experience.",
+    "jobCount": "{count} jobs",
+    "allRegions": "All regions",
+    "vacancyCount": "{count} openings",
     "searchPlaceholder": "Title, company or city",
     "searchCta": "Search",
     "browseAll": "Browse all jobs",
@@ -156,6 +164,11 @@
     "apply": "Apply",
     "applied": "Applied",
     "postedOn": "Posted",
+    "justPosted": "Just posted",
+    "postedToday": "Today",
+    "postedYesterday": "Yesterday",
+    "daysAgo": "{days}d ago",
+    "share": "Share",
     "aboutRole": "About the role",
     "responsibilities": "Responsibilities",
     "requirements": "Requirements",

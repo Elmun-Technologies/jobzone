@@ -5,6 +5,7 @@ import { JobCard } from "@/components/jobs/job-card";
 import { JobSearchControls } from "@/components/jobs/job-search-controls";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
+import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getOpenJobs } from "@/lib/data/jobs";
 
 export async function generateMetadata({
@@ -32,13 +33,16 @@ export default async function JobsPage({
   const pick = (v: string | string[] | undefined) =>
     Array.isArray(v) ? v[0] : v;
 
-  const jobs = await getOpenJobs({
-    q: pick(sp.q),
-    category: pick(sp.category),
-    jobType: pick(sp.jobType),
-    workingModel: pick(sp.workingModel),
-    limit: 30,
-  });
+  const [jobs, savedIds] = await Promise.all([
+    getOpenJobs({
+      q: pick(sp.q),
+      category: pick(sp.category),
+      jobType: pick(sp.jobType),
+      workingModel: pick(sp.workingModel),
+      limit: 30,
+    }),
+    getBookmarkedJobIds(),
+  ]);
 
   return (
     <Container className="py-8">
@@ -55,7 +59,7 @@ export default async function JobsPage({
           <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {jobs.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} />
+                <JobCard job={job} saved={savedIds.has(job.id)} />
               </li>
             ))}
           </ul>

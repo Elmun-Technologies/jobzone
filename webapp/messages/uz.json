@@ -4,9 +4,14 @@
     "description": "Jobzone — O'zbekistonda ishonchli ish topish va xodim yollash platformasi."
   },
   "nav": {
+    "home": "Asosiy",
     "jobs": "Ishlar",
     "companies": "Kompaniyalar",
     "map": "Xarita",
+    "saved": "Saqlanganlar",
+    "createResume": "Rezyume yaratish",
+    "seeker": "Ish qidiruvchi",
+    "employer": "Ish beruvchi",
     "signIn": "Kirish",
     "account": "Hisob"
   },
@@ -136,8 +141,11 @@
     }
   },
   "home": {
-    "heroTitle": "Keyingi ishingizni toping",
-    "heroSubtitle": "O'zbekiston bo'ylab minglab ochiq ish o'rinlari — ishonchli kompaniyalardan.",
+    "heroTitle": "O'zbekiston bo'ylab mos ishni toping",
+    "heroSubtitle": "Har qanday soha. Har qanday tajriba.",
+    "jobCount": "{count} ta ish",
+    "allRegions": "Barcha hududlar",
+    "vacancyCount": "{count} ish o'rni",
     "searchPlaceholder": "Lavozim, kompaniya yoki shahar",
     "searchCta": "Qidirish",
     "browseAll": "Barcha ishlarni ko'rish",
@@ -156,6 +164,11 @@
     "apply": "Ariza topshirish",
     "applied": "Ariza topshirilgan",
     "postedOn": "E'lon qilingan",
+    "justPosted": "Hozirgina chiqdi",
+    "postedToday": "Bugun",
+    "postedYesterday": "Kecha",
+    "daysAgo": "{days} kun oldin",
+    "share": "Ulashish",
     "aboutRole": "Ish haqida",
     "responsibilities": "Majburiyatlar",
     "requirements": "Talablar",

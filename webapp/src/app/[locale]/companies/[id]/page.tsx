@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { JobCard } from "@/components/jobs/job-card";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
+import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import {
   getCompanyById,
   getCompanyJobs,
@@ -44,9 +45,10 @@ export default async function CompanyPage({
   if (!company) notFound();
 
   const t = await getTranslations("company");
-  const [jobs, reviews] = await Promise.all([
+  const [jobs, reviews, savedIds] = await Promise.all([
     getCompanyJobs(id),
     getCompanyReviews(id),
+    getBookmarkedJobIds(),
   ]);
 
   return (
@@ -122,7 +124,7 @@ export default async function CompanyPage({
           <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {jobs.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} />
+                <JobCard job={job} saved={savedIds.has(job.id)} />
               </li>
             ))}
           </ul>
