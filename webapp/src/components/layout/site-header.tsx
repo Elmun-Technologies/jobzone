@@ -49,7 +49,7 @@ export async function SiteHeader() {
           </nav>
 
           <Link
-            href="/account/profile"
+            href="/resumes/new"
             className={cn(
               buttonVariants({ variant: "primary", size: "sm" }),
               "hidden gap-1.5 sm:inline-flex",
