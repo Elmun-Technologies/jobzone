@@ -34,7 +34,7 @@ export default async function PostJobPage({
   const categories = await getCategories();
 
   return (
-    <Container className="max-w-2xl py-10">
+    <Container className="py-10">
       <h1 className="text-foreground mb-6 text-2xl font-bold">
         {t("postJob")}
       </h1>

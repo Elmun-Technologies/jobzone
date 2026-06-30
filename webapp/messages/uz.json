@@ -172,6 +172,46 @@
       "mid": "O'rta",
       "senior": "Katta",
       "lead": "Yetakchi"
+    },
+    "post": {
+      "sectionBasic": "Asosiy",
+      "sectionBasicSub": "Nomi, tavsifi va talablar",
+      "titleHint": "Masalan, Sotuv menejeri",
+      "requirements": "Talablar",
+      "responsibilities": "Vazifalar",
+      "benefits": "Sharoitlar / imtiyozlar",
+      "sectionSalary": "Maosh",
+      "salaryPeriod": "To'lov davri",
+      "period": {
+        "hour": "Soatlik",
+        "day": "Kunlik",
+        "week": "Haftalik",
+        "month": "Oylik",
+        "year": "Yillik"
+      },
+      "sectionLocation": "Joylashuv",
+      "sectionLocationSub": "Ish qayerda olib boriladi",
+      "address": "Manzil",
+      "addressHint": "Masalan, Amir Temur ko'chasi, 15",
+      "sectionEmployment": "Bandlik",
+      "sectionEmploymentSub": "Bandlik turi, format va grafik",
+      "schedule": "Grafik",
+      "sched": {
+        "5_2": "5/2",
+        "6_1": "6/1",
+        "4_4": "Vahta (4/4)",
+        "2_2": "2/2",
+        "custom": "Kelishiladi"
+      },
+      "nightShift": "Tungi smena",
+      "sectionContacts": "Arizalar va kontaktlar",
+      "sectionContactsSub": "Nomzodlar siz bilan qanday bog'lanishini tanlang",
+      "contactPhone": "Telefon",
+      "showPhone": "Telefonni e'londa ko'rsatish",
+      "requireCoverLetter": "Motivatsion xat talab qilinadi",
+      "womenFriendly": "Ayollar uchun qulay",
+      "disabilityFriendly": "Nogironlar uchun qulay",
+      "saveDraft": "Qoralamaga saqlash"
     }
   },
   "apply": {

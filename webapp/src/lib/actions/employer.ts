@@ -106,23 +106,36 @@ export async function createJob(
     const v = field(formData, name);
     return v ? Number(v) : null;
   };
+  const bool = (name: string) => field(formData, name) === "1";
+  const status = field(formData, "status") === "draft" ? "draft" : "open";
 
   const { error } = await supabase.from("jobs").insert({
     company_id: companyId,
     posted_by: user.id,
     title,
     description: optional(formData, "description"),
+    responsibilities: optional(formData, "responsibilities"),
+    requirements: optional(formData, "requirements"),
+    benefits: optional(formData, "benefits"),
     category_id: optional(formData, "categoryId"),
     city: optional(formData, "city"),
+    address_text: optional(formData, "addressText"),
     country: "UZ",
     salary_min: number("salaryMin"),
     salary_max: number("salaryMax"),
     currency: optional(formData, "currency") ?? "UZS",
-    salary_period: "month",
+    salary_period: optional(formData, "salaryPeriod") ?? "month",
     job_type: optional(formData, "jobType"),
     experience_level: optional(formData, "experienceLevel"),
     working_model: optional(formData, "workingModel"),
-    status: "open",
+    schedule_pattern: optional(formData, "schedulePattern"),
+    night_shift: bool("nightShift"),
+    contact_phone: optional(formData, "contactPhone"),
+    show_phone_on_listing: bool("showPhone"),
+    require_cover_letter: bool("requireCoverLetter"),
+    women_friendly: bool("womenFriendly"),
+    disability_friendly: bool("disabilityFriendly"),
+    status,
   });
   if (error) return { error: "unknown" };
 
