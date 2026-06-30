@@ -6,7 +6,34 @@
   "nav": {
     "jobs": "Jobs",
     "companies": "Companies",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "account": "Account"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signInSubtitle": "Sign in to your account",
+    "createAccount": "Create account",
+    "signUpSubtitle": "Create a new account",
+    "email": "Email",
+    "password": "Password",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "errInvalid": "Invalid email or password",
+    "errInUse": "This email is already registered",
+    "errWeak": "Password must be at least 6 characters",
+    "errUnknown": "Something went wrong",
+    "role": {
+      "job_seeker": "Job seeker",
+      "employer": "Employer"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "signedInAs": "Signed in as:",
+    "comingSoon": "Your applications, saved jobs and CV will appear here soon.",
+    "signOut": "Sign out"
   },
   "home": {
     "heroTitle": "Find your next job",

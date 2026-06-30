@@ -6,7 +6,34 @@
   "nav": {
     "jobs": "Ishlar",
     "companies": "Kompaniyalar",
-    "signIn": "Kirish"
+    "signIn": "Kirish",
+    "account": "Hisob"
+  },
+  "auth": {
+    "signIn": "Kirish",
+    "signInSubtitle": "Hisobingizga kiring",
+    "createAccount": "Ro'yxatdan o'tish",
+    "signUpSubtitle": "Yangi hisob yarating",
+    "email": "Email",
+    "password": "Parol",
+    "or": "yoki",
+    "continueWithGoogle": "Google bilan davom etish",
+    "noAccount": "Hisobingiz yo'qmi?",
+    "haveAccount": "Hisobingiz bormi?",
+    "errInvalid": "Email yoki parol noto'g'ri",
+    "errInUse": "Bu email allaqachon ro'yxatdan o'tgan",
+    "errWeak": "Parol kamida 6 ta belgidan iborat bo'lsin",
+    "errUnknown": "Xatolik yuz berdi",
+    "role": {
+      "job_seeker": "Ish izlovchi",
+      "employer": "Ish beruvchi"
+    }
+  },
+  "account": {
+    "title": "Hisob",
+    "signedInAs": "Tizimga kirgansiz:",
+    "comingSoon": "Arizalar, saqlangan ishlar va CV tez orada shu yerda bo'ladi.",
+    "signOut": "Chiqish"
   },
   "home": {
     "heroTitle": "Keyingi ishingizni toping",
