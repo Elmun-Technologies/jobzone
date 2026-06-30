@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anton, Archivo, Space_Mono } from "next/font/google";
+import { Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,17 +10,14 @@ import { routing } from "@/i18n/routing";
 
 import "../globals.css";
 
-// Yolla type system: Archivo for UI/body (variable weights), Anton for the
-// poster/display wordmark (Latin only), Space Mono for numbers/prices/tags.
+// Yolla type: Archivo for everything (UI, body, headings via weight, and the
+// wordmark at 900) — multilingual (uz Latin + ru Cyrillic). Space Mono for
+// numbers/prices/tags. Anton (the board's poster face) is Latin-only, so it is
+// intentionally not used on localized text.
 const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
   fallback: ["system-ui", "sans-serif"],
-});
-const anton = Anton({
-  variable: "--font-anton",
-  weight: "400",
-  subsets: ["latin"],
 });
 const spaceMono = Space_Mono({
   variable: "--font-space-mono",
@@ -64,7 +61,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${archivo.variable} ${anton.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${spaceMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
