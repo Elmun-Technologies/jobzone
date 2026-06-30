@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Semantic color tokens, exposed as a [ThemeExtension] so widgets read
 /// `Theme.of(context).extension<JzColors>()!` (see the `context.colors`
-/// extension in `app_theme.dart`). Matches the Figma reference: clean white
-/// surfaces, soft borders, a royal-indigo accent (#3A36DB).
+/// extension in `app_theme.dart`). Yolla brand: paper-white / ink-black
+/// surfaces, soft fog-gray borders, and Yolla Volt (#C7FB00) as the accent.
 @immutable
 class JzColors extends ThemeExtension<JzColors> {
   const JzColors({
@@ -43,44 +43,47 @@ class JzColors extends ThemeExtension<JzColors> {
   final Color danger;
   final Color chipBackground;
 
-  // Figma reference primary (royal indigo) + a lighter tint for dark mode.
-  static const Color _indigo = Color(0xFF3A36DB);
-  static const Color _indigoDark = Color(0xFF6C63FF);
+  // Yolla — Siyoh Qora ink is the high-contrast "primary" (buttons, text,
+  // active foregrounds); Yolla Volt is the vivid accent fill, mapped onto the
+  // existing `gold` token (bright in both themes, always paired with ink text).
+  static const Color _ink = Color(0xFF0A0A0A);
+  static const Color _paper = Color(0xFFF3F3F1);
+  static const Color _volt = Color(0xFFC7FB00);
 
   static const JzColors light = JzColors(
-    primary: _indigo,
+    primary: _ink,
     onPrimary: Colors.white,
-    accent: Color(0xFF6366F1),
-    gold: Color(0xFFFFC629),
-    onGold: Color(0xFF1A1A1A),
-    background: Color(0xFFF7F8FA),
+    accent: _volt,
+    gold: _volt,
+    onGold: _ink,
+    background: Color(0xFFFFFFFF),
     surface: Colors.white,
-    surfaceVariant: Color(0xFFF1F3F6),
-    border: Color(0xFFE6E8EC),
-    textPrimary: Color(0xFF111418),
-    textSecondary: Color(0xFF6B7280),
+    surfaceVariant: Color(0xFFF3F3F1),
+    border: Color(0xFFE2E2DE),
+    textPrimary: _ink,
+    textSecondary: Color(0xFF54544F),
     success: Color(0xFF16A34A),
     warning: Color(0xFFF59E0B),
     danger: Color(0xFFDC2626),
-    chipBackground: Color(0xFFEEF2FF),
+    chipBackground: Color(0xFFF3F3F1),
   );
 
   static const JzColors dark = JzColors(
-    primary: _indigoDark,
-    onPrimary: Colors.white,
-    accent: Color(0xFF818CF8),
-    gold: Color(0xFFFFC629),
-    onGold: Color(0xFF1A1A1A),
-    background: Color(0xFF0E1116),
-    surface: Color(0xFF171A21),
-    surfaceVariant: Color(0xFF1F242D),
-    border: Color(0xFF2A2F39),
-    textPrimary: Color(0xFFF3F4F6),
-    textSecondary: Color(0xFF9CA3AF),
+    primary: _paper,
+    onPrimary: _ink,
+    accent: _volt,
+    gold: _volt,
+    onGold: _ink,
+    background: _ink,
+    surface: Color(0xFF161616),
+    surfaceVariant: Color(0xFF1F1F1D),
+    border: Color(0xFF2A2A27),
+    textPrimary: _paper,
+    textSecondary: Color(0xFFB8B8B2),
     success: Color(0xFF22C55E),
     warning: Color(0xFFFBBF24),
     danger: Color(0xFFF87171),
-    chipBackground: Color(0xFF1E2433),
+    chipBackground: Color(0xFF1F1F1D),
   );
 
   @override
