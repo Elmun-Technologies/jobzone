@@ -7,6 +7,8 @@ import { createJob, type JobFormState } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 
+import { ScreeningEditor } from "./screening-editor";
+
 const inputClass =
   "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const areaClass =
@@ -280,6 +282,8 @@ export function PostJobForm({
           <Check name="womenFriendly" label={tp("womenFriendly")} />
           <Check name="disabilityFriendly" label={tp("disabilityFriendly")} />
         </Section>
+
+        <ScreeningEditor />
 
         {state.error ? (
           <p className="text-destructive text-sm">{t("errUnknown")}</p>

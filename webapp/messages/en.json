@@ -211,7 +211,21 @@
       "requireCoverLetter": "Require a cover letter",
       "womenFriendly": "Women-friendly",
       "disabilityFriendly": "Disability-friendly",
-      "saveDraft": "Save draft"
+      "saveDraft": "Save draft",
+      "screening": "Screening questions",
+      "screeningSub": "The candidate answers these before applying through Yolla.",
+      "optional": "(optional)",
+      "questionHint": "Enter your question",
+      "qtype": {
+        "text": "Free text",
+        "choice": "Multiple choice",
+        "yesno": "Yes / No"
+      },
+      "optionHint": "Answer option",
+      "addOption": "Add option",
+      "addQuestion": "Add question",
+      "required": "Required",
+      "remove": "Remove"
     }
   },
   "apply": {

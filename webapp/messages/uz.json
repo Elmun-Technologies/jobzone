@@ -211,7 +211,21 @@
       "requireCoverLetter": "Motivatsion xat talab qilinadi",
       "womenFriendly": "Ayollar uchun qulay",
       "disabilityFriendly": "Nogironlar uchun qulay",
-      "saveDraft": "Qoralamaga saqlash"
+      "saveDraft": "Qoralamaga saqlash",
+      "screening": "Saralash uchun savollar",
+      "screeningSub": "Nomzod Yolla orqali ariza yuborishdan oldin javob beradi.",
+      "optional": "(ixtiyoriy)",
+      "questionHint": "Savolingizni kiriting",
+      "qtype": {
+        "text": "Erkin javob",
+        "choice": "Variantdan tanlash",
+        "yesno": "Ha / yo'q"
+      },
+      "optionHint": "Javob varianti",
+      "addOption": "Variant qo'shish",
+      "addQuestion": "Savol qo'shish",
+      "required": "Majburiy",
+      "remove": "O'chirish"
     }
   },
   "apply": {

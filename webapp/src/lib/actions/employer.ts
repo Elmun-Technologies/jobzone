@@ -109,6 +109,13 @@ export async function createJob(
   const bool = (name: string) => field(formData, name) === "1";
   const status = field(formData, "status") === "draft" ? "draft" : "open";
 
+  let screening: unknown = [];
+  try {
+    screening = JSON.parse(field(formData, "screeningQuestions") || "[]");
+  } catch {
+    screening = [];
+  }
+
   const { error } = await supabase.from("jobs").insert({
     company_id: companyId,
     posted_by: user.id,
@@ -135,6 +142,7 @@ export async function createJob(
     require_cover_letter: bool("requireCoverLetter"),
     women_friendly: bool("womenFriendly"),
     disability_friendly: bool("disabilityFriendly"),
+    screening_questions: Array.isArray(screening) ? screening : [],
     status,
   });
   if (error) return { error: "unknown" };
