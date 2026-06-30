@@ -22,6 +22,17 @@ void main() {
       expect(d.benefits, isNotEmpty);
     });
 
+    test('matchJob scores skill overlap offline (case-insensitive)', () async {
+      final m = await repo().matchJob(
+        title: 'Barista',
+        jobSkills: const ['Coffee', 'POS', 'Teamwork'],
+        mySkills: const ['coffee', 'teamwork'],
+      );
+      expect(m.score, 67); // 2 of 3 required skills
+      expect(m.strengths, containsAll(<String>['Coffee', 'Teamwork']));
+      expect(m.gaps, contains('POS'));
+    });
+
     test('rankBySkills orders applicants by skill overlap', () {
       final ranked = repo().rankBySkills(
         jobSkills: const ['flutter', 'dart'],

@@ -630,5 +630,9 @@
   "perTask": "/vazifa",
   "qualificationsTitle": "Bu ko'nikmalar sizda bormi?",
   "qualificationsHint": "Mosligingizni bilish uchun o'zingizda borlarini belgilang.",
-  "qualificationsMatch": "mos"
+  "qualificationsMatch": "mos",
+  "matchPrompt": "Profilingiz bu ishga qanchalik mosligini bilib oling.",
+  "matchCta": "Mosligimni tekshirish",
+  "matchStrengths": "Kuchli tomonlaringiz",
+  "matchGaps": "Rivojlantirish kerak"
 }
