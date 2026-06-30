@@ -42,6 +42,7 @@ dependencies:
   shared_preferences: ^2.5.5
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.17
+  google_fonts: ^6.1.0
   intl: ^0.20.2
   permission_handler: ^12.0.3
   geolocator: ^14.0.3
@@ -85,22 +86,22 @@ flutter_launcher_icons:
   remove_alpha_ios: true
   image_path: "assets/icon/icon.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "#0A0A0A"
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   web:
     generated: true
-    background_color: "#3A36DB"
-    theme_color: "#3A36DB"
+    background_color: "#0A0A0A"
+    theme_color: "#C7FB00"
 
 # Native splash screen (run: dart run flutter_native_splash:create).
-# Brand-indigo background with a white-circle logo, matching the Figma splash.
+# Yolla: ink-black background with the volt "yo" speech-bubble mark.
 flutter_native_splash:
-  color: "#3A36DB"
-  color_dark: "#3A36DB"
+  color: "#0A0A0A"
+  color_dark: "#0A0A0A"
   image: "assets/icon/splash_logo.png"
   android_12:
-    color: "#3A36DB"
-    color_dark: "#3A36DB"
+    color: "#0A0A0A"
+    color_dark: "#0A0A0A"
     image: "assets/icon/splash_logo.png"
 
 # For information on the generic Dart part of this file, see the

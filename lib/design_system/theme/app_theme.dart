@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 import 'app_spacing.dart';
@@ -27,11 +28,10 @@ abstract final class AppTheme {
           error: c.danger,
         );
 
-    final textTheme = AppTypography.textTheme.apply(
-      bodyColor: c.textPrimary,
-      displayColor: c.textPrimary,
-      fontFamily: AppTypography.fontFamily,
-    );
+    // Yolla type: Archivo across the UI (multilingual, variable weights).
+    final textTheme = GoogleFonts.archivoTextTheme(
+      AppTypography.textTheme,
+    ).apply(bodyColor: c.textPrimary, displayColor: c.textPrimary);
 
     OutlinedBorder rounded([double r = AppRadius.md]) =>
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(r));
@@ -48,7 +48,7 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
-      fontFamily: AppTypography.fontFamily,
+      fontFamily: GoogleFonts.archivo().fontFamily,
       textTheme: textTheme,
       dividerColor: c.border,
       extensions: <ThemeExtension<dynamic>>[c],
