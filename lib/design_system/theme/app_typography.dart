@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// is Latin; Cyrillic (ru) falls back to the platform font automatically, so
 /// no glyphs are ever missing.
 abstract final class AppTypography {
-  static const String? fontFamily = 'Archivo';
+  static const String fontFamily = 'Archivo';
 
   static const TextTheme textTheme = TextTheme(
     displayLarge: TextStyle(
