@@ -10,6 +10,8 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Required by flutter_local_notifications (uses java.time APIs).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -47,6 +49,9 @@ flutter {
 }
 
 dependencies {
+    // Enables core library desugaring required by flutter_local_notifications.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
     // Yandex MapKit native SDK. The yandex_mapkit plugin declares this only as
     // `implementation`, so MainApplication.kt (which calls MapKitFactory) can't
     // see it unless the app module depends on it too — see the plugin README.
