@@ -13,7 +13,48 @@
     "heroSubtitle": "Thousands of open positions across Uzbekistan from trusted companies.",
     "searchPlaceholder": "Title, company or city",
     "searchCta": "Search",
-    "browseAll": "Browse all jobs"
+    "browseAll": "Browse all jobs",
+    "recentJobs": "Recent jobs",
+    "viewAll": "View all"
+  },
+  "jobs": {
+    "title": "Jobs",
+    "searchPlaceholder": "Title or company",
+    "search": "Search",
+    "negotiable": "Negotiable",
+    "resultsZero": "No jobs found",
+    "jobType": "Job type",
+    "workingModel": "Work model",
+    "clear": "Clear",
+    "apply": "Apply",
+    "postedOn": "Posted",
+    "aboutRole": "About the role",
+    "responsibilities": "Responsibilities",
+    "requirements": "Requirements",
+    "benefits": "Benefits",
+    "skills": "Skills",
+    "salary": "Salary",
+    "type": {
+      "full_time": "Full-time",
+      "part_time": "Part-time",
+      "contract": "Contract",
+      "temporary": "Temporary",
+      "internship": "Internship",
+      "rotational": "Rotational"
+    },
+    "model": {
+      "on_site": "On-site",
+      "remote": "Remote",
+      "hybrid": "Hybrid"
+    }
+  },
+  "company": {
+    "about": "About",
+    "openJobs": "Open positions",
+    "noOpenJobs": "No open positions yet",
+    "reviews": "Reviews",
+    "noReviews": "No reviews yet",
+    "visitWebsite": "Visit website"
   },
   "footer": {
     "tagline": "The trusted job marketplace.",

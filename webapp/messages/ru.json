@@ -13,7 +13,48 @@
     "heroSubtitle": "Тысячи открытых вакансий по всему Узбекистану от проверенных компаний.",
     "searchPlaceholder": "Должность, компания или город",
     "searchCta": "Поиск",
-    "browseAll": "Смотреть все вакансии"
+    "browseAll": "Смотреть все вакансии",
+    "recentJobs": "Свежие вакансии",
+    "viewAll": "Все"
+  },
+  "jobs": {
+    "title": "Вакансии",
+    "searchPlaceholder": "Должность или компания",
+    "search": "Поиск",
+    "negotiable": "Договорная",
+    "resultsZero": "Вакансии не найдены",
+    "jobType": "Тип работы",
+    "workingModel": "Формат",
+    "clear": "Сбросить",
+    "apply": "Откликнуться",
+    "postedOn": "Опубликовано",
+    "aboutRole": "О вакансии",
+    "responsibilities": "Обязанности",
+    "requirements": "Требования",
+    "benefits": "Преимущества",
+    "skills": "Навыки",
+    "salary": "Зарплата",
+    "type": {
+      "full_time": "Полная занятость",
+      "part_time": "Частичная занятость",
+      "contract": "Контракт",
+      "temporary": "Временная",
+      "internship": "Стажировка",
+      "rotational": "Вахта"
+    },
+    "model": {
+      "on_site": "В офисе",
+      "remote": "Удалённо",
+      "hybrid": "Гибрид"
+    }
+  },
+  "company": {
+    "about": "О компании",
+    "openJobs": "Открытые вакансии",
+    "noOpenJobs": "Пока нет открытых вакансий",
+    "reviews": "Отзывы",
+    "noReviews": "Пока нет отзывов",
+    "visitWebsite": "Перейти на сайт"
   },
   "footer": {
     "tagline": "Надёжный рынок труда.",

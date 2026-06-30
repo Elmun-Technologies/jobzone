@@ -13,7 +13,48 @@
     "heroSubtitle": "O'zbekiston bo'ylab minglab ochiq ish o'rinlari — ishonchli kompaniyalardan.",
     "searchPlaceholder": "Lavozim, kompaniya yoki shahar",
     "searchCta": "Qidirish",
-    "browseAll": "Barcha ishlarni ko'rish"
+    "browseAll": "Barcha ishlarni ko'rish",
+    "recentJobs": "So'nggi ishlar",
+    "viewAll": "Hammasi"
+  },
+  "jobs": {
+    "title": "Ishlar",
+    "searchPlaceholder": "Lavozim yoki kompaniya",
+    "search": "Qidirish",
+    "negotiable": "Kelishilgan",
+    "resultsZero": "Hech qanday ish topilmadi",
+    "jobType": "Ish turi",
+    "workingModel": "Format",
+    "clear": "Tozalash",
+    "apply": "Ariza topshirish",
+    "postedOn": "E'lon qilingan",
+    "aboutRole": "Ish haqida",
+    "responsibilities": "Majburiyatlar",
+    "requirements": "Talablar",
+    "benefits": "Imtiyozlar",
+    "skills": "Ko'nikmalar",
+    "salary": "Maosh",
+    "type": {
+      "full_time": "To'liq stavka",
+      "part_time": "Yarim stavka",
+      "contract": "Shartnoma",
+      "temporary": "Vaqtinchalik",
+      "internship": "Amaliyot",
+      "rotational": "Vahta"
+    },
+    "model": {
+      "on_site": "Ofisda",
+      "remote": "Masofadan",
+      "hybrid": "Gibrid"
+    }
+  },
+  "company": {
+    "about": "Kompaniya haqida",
+    "openJobs": "Ochiq ish o'rinlari",
+    "noOpenJobs": "Hozircha ochiq ish o'rni yo'q",
+    "reviews": "Sharhlar",
+    "noReviews": "Hali sharhlar yo'q",
+    "visitWebsite": "Veb-saytga o'tish"
   },
   "footer": {
     "tagline": "Ishonchli ish bozori.",
