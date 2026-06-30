@@ -78,6 +78,7 @@ export const mockJobs: Job[] = [
     salaryMax: 4000,
     currency: "USD",
     skills: ["Dart", "Flutter", "Riverpod", "Supabase"],
+    postedAt: "2026-06-30T07:00:00Z",
     boostActive: true,
   }),
   job({
@@ -91,6 +92,7 @@ export const mockJobs: Job[] = [
     salaryMin: 3000000,
     salaryMax: 5000000,
     skills: ["Mijozlar bilan ishlash", "Kassa"],
+    postedAt: "2026-06-29T15:00:00Z",
   }),
   job({
     id: "mock-3",
@@ -102,6 +104,7 @@ export const mockJobs: Job[] = [
     salaryMin: 4000000,
     salaryMax: 6000000,
     skills: ["1C", "Inventarizatsiya"],
+    postedAt: "2026-06-25T10:00:00Z",
   }),
 ];
 

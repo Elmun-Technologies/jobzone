@@ -1,11 +1,14 @@
 "use client";
 
-import { BadgeCheck, MapPin } from "lucide-react";
+import { BadgeCheck, Clock, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 import type { Job } from "@/lib/data/types";
-import { locationText, salaryText } from "@/lib/format";
+import { locationText, postedInfo, salaryText } from "@/lib/format";
+import { useNow } from "@/lib/use-now";
+
+import { JobCardActions } from "./job-card-actions";
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
@@ -15,8 +18,9 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function JobCard({ job }: { job: Job }) {
+export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
   const t = useTranslations("jobs");
+  const nowMs = useNow();
   const salary = salaryText(job);
   const loc = locationText(job);
 
@@ -28,6 +32,15 @@ export function JobCard({ job }: { job: Job }) {
     job.workingModel && t.has(`model.${job.workingModel}`)
       ? t(`model.${job.workingModel}`)
       : job.workingModel;
+
+  const info = nowMs == null ? null : postedInfo(job.postedAt, nowMs);
+  let timeText = "";
+  if (info) {
+    if (info.dayOffset === 0) timeText = `${t("postedToday")} ${info.clock}`;
+    else if (info.dayOffset === 1)
+      timeText = `${t("postedYesterday")} ${info.clock}`;
+    else timeText = t("daysAgo", { days: info.dayOffset });
+  }
 
   return (
     <Link
@@ -53,21 +66,25 @@ export function JobCard({ job }: { job: Job }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-foreground truncate font-semibold">
-              {job.title}
-            </h3>
-            {job.boostActive ? (
-              <span className="bg-primary text-primary-foreground shrink-0 rounded-full px-2 py-0.5 text-xs font-bold">
-                TOP
-              </span>
-            ) : null}
-          </div>
-
-          <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-sm">
-            <span className="truncate">{job.companyName}</span>
-            {job.companyVerified ? (
-              <BadgeCheck className="text-primary size-4 shrink-0" />
-            ) : null}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-foreground truncate font-semibold">
+                  {job.title}
+                </h3>
+                {job.boostActive ? (
+                  <span className="bg-primary text-primary-foreground shrink-0 rounded-full px-2 py-0.5 text-xs font-bold">
+                    TOP
+                  </span>
+                ) : null}
+              </div>
+              <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-sm">
+                <span className="truncate">{job.companyName}</span>
+                {job.companyVerified ? (
+                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                ) : null}
+              </div>
+            </div>
+            <JobCardActions jobId={job.id} initialSaved={saved} />
           </div>
 
           {loc ? (
@@ -84,6 +101,26 @@ export function JobCard({ job }: { job: Job }) {
             {typeLabel ? <Chip>{typeLabel}</Chip> : null}
             {modelLabel ? <Chip>{modelLabel}</Chip> : null}
           </div>
+
+          {info ? (
+            <div
+              className="mt-3 flex items-center gap-2 text-xs"
+              suppressHydrationWarning
+            >
+              {info.fresh ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-700 dark:bg-green-500/15 dark:text-green-400">
+                  <span className="size-1.5 rounded-full bg-current" />
+                  {t("justPosted")}
+                </span>
+              ) : null}
+              {timeText ? (
+                <span className="text-muted-foreground inline-flex items-center gap-1">
+                  <Clock className="size-3.5" />
+                  {timeText}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </Link>

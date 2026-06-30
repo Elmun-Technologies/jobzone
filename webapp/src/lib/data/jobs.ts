@@ -66,6 +66,62 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
   }
 }
 
+/** Exact count of open jobs matching [query] (for result headers + totals). */
+export async function getJobCount(query: JobQuery = {}): Promise<number> {
+  if (!hasSupabase()) return filterMock(query).length;
+  try {
+    const supabase = await createClient();
+    let req = supabase
+      .from("job_feed")
+      .select("id", { count: "exact", head: true });
+
+    if (query.q) {
+      req = req.or(`title.ilike.%${query.q}%,company_name.ilike.%${query.q}%`);
+    }
+    if (query.city) req = req.eq("city", query.city);
+    if (query.category) req = req.eq("category_name", query.category);
+    if (query.jobType) req = req.eq("job_type", query.jobType);
+    if (query.workingModel) req = req.eq("working_model", query.workingModel);
+    if (query.experienceLevel) {
+      req = req.eq("experience_level", query.experienceLevel);
+    }
+
+    const { count, error } = await req;
+    if (error) throw error;
+    return count ?? 0;
+  } catch (e) {
+    console.error("getJobCount failed", e);
+    return 0;
+  }
+}
+
+/** Distinct cities that currently have open jobs (for the region selector). */
+export async function getCities(limit = 1000): Promise<string[]> {
+  if (!hasSupabase()) {
+    return [
+      ...new Set(mockJobs.map((j) => j.city).filter((c): c is string => !!c)),
+    ].sort((a, b) => a.localeCompare(b));
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("job_feed")
+      .select("city")
+      .not("city", "is", null)
+      .limit(limit);
+    if (error) throw error;
+    const set = new Set<string>();
+    for (const row of data ?? []) {
+      const c = (row as { city: unknown }).city;
+      if (typeof c === "string" && c.trim()) set.add(c.trim());
+    }
+    return [...set].sort((a, b) => a.localeCompare(b));
+  } catch (e) {
+    console.error("getCities failed", e);
+    return [];
+  }
+}
+
 /** Recent open jobs for the landing page. */
 export async function getRecentJobs(limit = 6): Promise<Job[]> {
   if (!hasSupabase()) return mockJobs.slice(0, limit);

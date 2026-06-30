@@ -35,7 +35,7 @@ export default async function BookmarksPage({
         <ul className="space-y-3">
           {jobs.map((job) => (
             <li key={job.id}>
-              <JobCard job={job} />
+              <JobCard job={job} saved />
             </li>
           ))}
         </ul>
