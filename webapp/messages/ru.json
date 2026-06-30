@@ -33,6 +33,7 @@
     "title": "Аккаунт",
     "myApplications": "Мои отклики",
     "savedJobs": "Сохранённые вакансии",
+    "employerArea": "Панель работодателя",
     "signedInAs": "Вы вошли как:",
     "comingSoon": "Резюме скоро появится здесь.",
     "signOut": "Выйти"
@@ -42,6 +43,41 @@
     "empty": "Вы ещё не сохраняли вакансии",
     "save": "Сохранить",
     "saved": "Сохранено"
+  },
+  "employer": {
+    "dashboard": "Панель управления",
+    "postJob": "Разместить вакансию",
+    "myJobs": "Мои вакансии",
+    "noJobs": "Вы ещё не размещали вакансии",
+    "onboardingTitle": "Создайте компанию",
+    "onboardingSubtitle": "Заполните профиль компании перед публикацией вакансий.",
+    "companyName": "Название компании",
+    "companyAbout": "О компании",
+    "industry": "Отрасль",
+    "headquarters": "Адрес",
+    "website": "Сайт",
+    "createCompany": "Создать компанию",
+    "jobTitle": "Название должности",
+    "jobDescription": "Описание",
+    "category": "Категория",
+    "city": "Город",
+    "experience": "Опыт",
+    "salaryMin": "Зарплата (от)",
+    "salaryMax": "Зарплата (до)",
+    "currency": "Валюта",
+    "publishJob": "Опубликовать",
+    "statOpenJobs": "Открытые вакансии",
+    "statApplicants": "Кандидаты",
+    "statJobs": "Всего вакансий",
+    "applicantsCount": "{count} кандидатов",
+    "errUnknown": "Произошла ошибка",
+    "status": { "draft": "Черновик", "open": "Открыта", "closed": "Закрыта" },
+    "exp": {
+      "entry": "Начальный",
+      "mid": "Средний",
+      "senior": "Старший",
+      "lead": "Ведущий"
+    }
   },
   "apply": {
     "applyTo": "Отклик на вакансию",
@@ -105,7 +141,7 @@
       "rotational": "Вахта"
     },
     "model": {
-      "on_site": "В офисе",
+      "onsite": "В офисе",
       "remote": "Удалённо",
       "hybrid": "Гибрид"
     }

@@ -45,7 +45,7 @@ function job(p: Partial<Job> & Pick<Job, "id" | "title" | "companyId">): Job {
     categoryName: null,
     jobType: "full_time",
     experienceLevel: "mid",
-    workingModel: "on_site",
+    workingModel: "onsite",
     city: "Tashkent",
     country: "UZ",
     location: null,
