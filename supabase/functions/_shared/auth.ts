@@ -22,7 +22,8 @@ export function requireEdgeSecret(req: Request): Response | null {
   return null;
 }
 
-function timingSafeEqual(a: string, b: string): boolean {
+/** Constant-time string comparison, exported for other secret/signature checks. */
+export function timingSafeEqual(a: string, b: string): boolean {
   // Compare against a fixed length so a length mismatch doesn't early-return.
   let diff = a.length ^ b.length;
   for (let i = 0; i < a.length; i++) {

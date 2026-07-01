@@ -35,6 +35,15 @@
     "errInUse": "Этот email уже зарегистрирован",
     "errWeak": "Пароль должен быть не короче 6 символов",
     "errUnknown": "Произошла ошибка",
+    "phone": "Номер телефона",
+    "phoneHint": "Мы отправим одноразовый код сообщением в Telegram",
+    "sendCode": "Отправить код через Telegram",
+    "code": "Код",
+    "codeHint": "Отправлено в Telegram на {phone}",
+    "verifyCode": "Подтвердить",
+    "changeNumber": "Использовать другой номер",
+    "errPhoneInvalid": "Введите корректный номер телефона",
+    "errCodeInvalid": "Неверный или истёкший код",
     "role": {
       "job_seeker": "Соискатель",
       "employer": "Работодатель"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { GoogleButton } from "@/components/auth/google-button";
+import { PhoneOtpForm } from "@/components/auth/phone-otp-form";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
@@ -55,7 +56,15 @@ export default async function SignInPage({
         <span className="bg-border h-px flex-1" />
       </div>
 
-      <GoogleButton />
+      <GoogleButton next={next} />
+
+      <div className="text-muted-foreground my-4 flex items-center gap-3 text-xs">
+        <span className="bg-border h-px flex-1" />
+        {t("or")}
+        <span className="bg-border h-px flex-1" />
+      </div>
+
+      <PhoneOtpForm next={next} />
 
       <p className="text-muted-foreground mt-6 text-center text-sm">
         {t("noAccount")}{" "}
