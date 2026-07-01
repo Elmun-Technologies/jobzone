@@ -22,6 +22,12 @@ export async function generateMetadata({
   return { title: t("title"), robots: { index: false } };
 }
 
+// Auth-gated, per-user page. Render per request — getCurrentUser()'s try/catch
+// swallows the cookies() dynamic signal, so without this Next.js bakes the
+// build-time redirect (no session at prerender) into static HTML and bounces
+// even signed-in users to sign-in.
+export const dynamic = "force-dynamic";
+
 /** Builds the /jobs URL that re-runs a saved search's criteria. */
 function runHref(keywords: string | null, city: string | null): string {
   const sp = new URLSearchParams();

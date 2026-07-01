@@ -17,6 +17,11 @@ export async function generateMetadata({
   return { title: t("title"), robots: { index: false } };
 }
 
+// Per-user page (reads the session inside getMyApplications, whose catch
+// swallows the cookies() dynamic signal). Without this Next.js statically
+// bakes the guest render — a permanently empty list for signed-in users.
+export const dynamic = "force-dynamic";
+
 // Tailwind classes per status (amber/green/red/etc.).
 const STATUS_CLASS: Record<string, string> = {
   submitted: "bg-muted text-muted-foreground",
