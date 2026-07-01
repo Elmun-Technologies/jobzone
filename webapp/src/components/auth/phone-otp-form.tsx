@@ -50,7 +50,11 @@ export function PhoneOtpForm({ next }: { next?: string }) {
     });
     setPending(false);
     if (sendError) {
-      setError(t("errUnknown"));
+      // Surface the real reason (rate limit, phone auth disabled, SMS-hook /
+      // Telegram Gateway failure…) — a generic message here made live
+      // misconfiguration undiagnosable from the screen.
+      console.error("phone OTP send failed", sendError);
+      setError(sendError.message || t("errUnknown"));
       return;
     }
     setPhone(normalized);
@@ -69,7 +73,14 @@ export function PhoneOtpForm({ next }: { next?: string }) {
     });
     setPending(false);
     if (verifyError) {
-      setError(t("errCodeInvalid"));
+      console.error("phone OTP verify failed", verifyError);
+      // 403 = genuinely wrong/expired code; anything else is operational
+      // (rate limit, config) — show the real reason.
+      setError(
+        verifyError.status === 403
+          ? t("errCodeInvalid")
+          : verifyError.message || t("errCodeInvalid"),
+      );
       return;
     }
     router.push(next || "/account");
