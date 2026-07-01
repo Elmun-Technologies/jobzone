@@ -12,7 +12,7 @@ import 'routes.dart';
 ///
 /// Order: onboarding slides → authentication → profile/preferences setup → app.
 /// After setup, [role] keeps each account type in its own area: job seekers in
-/// the bottom-nav shell, employers in the `/employer` (Jobzone Business) shell.
+/// the bottom-nav shell, employers in the `/employer` (Yolla Business) shell.
 /// When Supabase isn't configured we skip gating entirely so the app still
 /// boots to the shell (offline / dev mode), and [role] defaults to
 /// [UserRole.jobSeeker] so existing seeker behavior is unchanged.

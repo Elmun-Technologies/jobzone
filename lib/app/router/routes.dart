@@ -93,7 +93,7 @@ abstract final class Routes {
   static const accountPrivacy = '/account/privacy';
   static const accountInvite = '/account/invite';
 
-  // ── Employer (Jobzone Business / HR side) ────────────────────────────────
+  // ── Employer (Yolla Business / HR side) ────────────────────────────────
   // Create-company onboarding (the employer's "complete setup" step).
   static const employerOnboard = '/employer/onboarding';
 

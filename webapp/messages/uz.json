@@ -228,6 +228,29 @@
       "remove": "O'chirish"
     }
   },
+  "wallet": {
+    "title": "Hamyon",
+    "balance": "Balans",
+    "balanceHint": "Hisobingizdagi mavjud mablag'",
+    "topUp": "To'ldirish",
+    "topUpSub": "Summani tanlang va hisobingizni to'ldiring.",
+    "topUpPending": "To'ldirish so'rovi qabul qilindi — to'lov tasdiqlangach balans yangilanadi.",
+    "amountHint": "Summa",
+    "errAmount": "Kamida 1 000 miqdorida summa kiriting",
+    "errUnknown": "Xatolik yuz berdi",
+    "history": "Tranzaksiyalar",
+    "historyEmpty": "Hali tranzaksiyalar yo'q",
+    "kind": {
+      "topup": "To'ldirish",
+      "spend": "Reklama",
+      "refund": "Qaytarish",
+      "bonus": "Bonus"
+    },
+    "status": {
+      "pending": "Kutilmoqda",
+      "cancelled": "Bekor qilingan"
+    }
+  },
   "apply": {
     "applyTo": "Ariza topshirish",
     "coverLetter": "Motivatsion xat",

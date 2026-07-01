@@ -12,8 +12,8 @@ import 'router/app_router.dart';
 
 /// Root widget. Watches the router, theme mode and locale providers so the
 /// whole app re-renders when the user changes appearance or language.
-class JobzoneApp extends ConsumerWidget {
-  const JobzoneApp({super.key});
+class YollaApp extends ConsumerWidget {
+  const YollaApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

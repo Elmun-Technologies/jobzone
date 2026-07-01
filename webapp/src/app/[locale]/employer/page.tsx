@@ -41,6 +41,7 @@ export default async function EmployerDashboardPage({
   if (!company) redirect(`/${locale}/employer/onboarding`);
 
   const t = await getTranslations("employer");
+  const tw = await getTranslations("wallet");
   const stats = await getEmployerStats(company.id);
 
   return (
@@ -66,6 +67,12 @@ export default async function EmployerDashboardPage({
           className={cn(buttonVariants({ variant: "outline", size: "md" }))}
         >
           {t("myJobs")}
+        </Link>
+        <Link
+          href="/employer/wallet"
+          className={cn(buttonVariants({ variant: "outline", size: "md" }))}
+        >
+          {tw("title")}
         </Link>
         <Link
           href="/employer/company/edit"
