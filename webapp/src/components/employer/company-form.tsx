@@ -24,6 +24,7 @@ export function CompanyForm({
   action,
   initial,
   submitLabel,
+  next,
 }: {
   action: (
     prev: CompanyFormState,
@@ -31,6 +32,9 @@ export function CompanyForm({
   ) => Promise<CompanyFormState>;
   initial?: CompanyInitial;
   submitLabel: string;
+  /** Where to land after creating the company (e.g. back on a post-vacancy
+   * draft that was waiting on a company to exist). */
+  next?: string;
 }) {
   const t = useTranslations("employer");
   const locale = useLocale();
@@ -42,6 +46,7 @@ export function CompanyForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="locale" value={locale} />
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       {initial?.id ? (
         <input type="hidden" name="companyId" value={initial.id} />
       ) : null}

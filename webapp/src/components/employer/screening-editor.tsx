@@ -14,6 +14,14 @@ interface Q {
   options: string[];
 }
 
+export interface StashedQuestion {
+  id?: string;
+  label: string;
+  type: QType;
+  required: boolean;
+  options?: string[];
+}
+
 const EMPTY_Q: Q = {
   label: "",
   type: "text",
@@ -30,9 +38,20 @@ const inputClass =
  * mirrors it into a hidden input as JSON (shape: {id,label,type,required,
  * options?}) so it posts with the job form and lands in jobs.screening_questions.
  */
-export function ScreeningEditor() {
+export function ScreeningEditor({
+  initialQuestions = [],
+}: {
+  initialQuestions?: StashedQuestion[];
+}) {
   const t = useTranslations("employer.post");
-  const [qs, setQs] = useState<Q[]>([]);
+  const [qs, setQs] = useState<Q[]>(() =>
+    initialQuestions.map((q) => ({
+      label: q.label,
+      type: q.type,
+      required: q.required,
+      options: q.options && q.options.length > 0 ? q.options : ["", ""],
+    })),
+  );
 
   const update = (i: number, patch: Partial<Q>) =>
     setQs((prev) => prev.map((q, j) => (j === i ? { ...q, ...patch } : q)));

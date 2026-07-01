@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { PostJobForm } from "@/components/employer/post-job-form";
 import { Container } from "@/components/ui/container";
 import { getCategories } from "@/lib/data/categories";
 import { getMyCompany } from "@/lib/data/employer";
-import { requireEmployer } from "@/lib/auth/require-employer";
 
 export async function generateMetadata({
   params,
@@ -18,6 +16,16 @@ export async function generateMetadata({
   return { title: t("postJob"), robots: { index: false } };
 }
 
+// Auth-dependent (prefills companyId for a signed-in employer) — render per
+// request rather than prerendering a shared, sessionless page: without this,
+// Next.js would statically build the page once with no user, permanently
+// baking in companyId=null for every visitor, including real employers.
+export const dynamic = "force-dynamic";
+
+// Guest-first: a visitor (or a signed-in employer without a company yet) can
+// fill this out freely. getMyCompany() is null-safe for both. Publishing asks
+// for whatever's missing (auth and/or a company) at that point — see
+// PostJobForm and createJob.
 export default async function PostJobPage({
   params,
 }: {
@@ -25,11 +33,8 @@ export default async function PostJobPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireEmployer(locale);
 
   const company = await getMyCompany();
-  if (!company) redirect(`/${locale}/employer/onboarding`);
-
   const t = await getTranslations("employer");
   const categories = await getCategories();
 
@@ -38,7 +43,7 @@ export default async function PostJobPage({
       <h1 className="text-foreground mb-6 text-2xl font-bold">
         {t("postJob")}
       </h1>
-      <PostJobForm companyId={company.id} categories={categories} />
+      <PostJobForm companyId={company?.id ?? null} categories={categories} />
     </Container>
   );
 }

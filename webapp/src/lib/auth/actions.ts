@@ -54,7 +54,8 @@ export async function signUpAction(
     return { error: error.message.includes("already") ? "inUse" : "unknown" };
 
   // With email confirmations disabled the user is signed in immediately.
-  redirect(localePath(formData, "/account"));
+  const next = field(formData, "next");
+  redirect(next || localePath(formData, "/account"));
 }
 
 /** Sign out and return to the welcome/landing page. */

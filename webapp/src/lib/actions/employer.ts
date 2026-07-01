@@ -9,6 +9,8 @@ export interface CompanyFormState {
 }
 export interface JobFormState {
   error?: string;
+  signedOut?: boolean;
+  noCompany?: boolean;
 }
 
 function field(formData: FormData, name: string): string {
@@ -25,7 +27,11 @@ function slugify(name: string): string {
     .slice(0, 40);
 }
 
-/** Creates the employer's company (owner_id = uid) and lands on the dashboard. */
+/**
+ * Creates the employer's company (owner_id = uid). Lands on `next` when given
+ * (e.g. back on a post-vacancy draft that was waiting on a company to exist)
+ * or the dashboard otherwise.
+ */
 export async function createCompany(
   _prev: CompanyFormState,
   formData: FormData,
@@ -51,7 +57,16 @@ export async function createCompany(
   });
   if (error) return { error: "unknown" };
 
-  redirect(`/${locale}/employer`);
+  // Owning a company is what makes this account an employer — flip the role
+  // regardless of how they signed up (defaulted to job_seeker, or via Google,
+  // which carries no role at all), so requireEmployer() doesn't strand them.
+  await supabase
+    .from("profiles")
+    .update({ role: "employer" })
+    .eq("id", user.id);
+
+  const next = field(formData, "next");
+  redirect(next || `/${locale}/employer`);
 }
 
 /** Updates the employer's company (RLS confines the write to the owner). */
@@ -86,22 +101,29 @@ export async function updateCompany(
   redirect(`/${locale}/employer`);
 }
 
-/** Posts a new open job for the employer's company. */
+/**
+ * Posts a new open job for the employer's company. Guest-first: a visitor can
+ * fill out and submit this without an account or a company yet — this
+ * reports what's missing (`signedOut` / `noCompany`) instead of redirecting,
+ * so the caller can send them to get it and come back with the draft intact.
+ */
 export async function createJob(
   _prev: JobFormState,
   formData: FormData,
 ): Promise<JobFormState> {
-  const locale = field(formData, "locale") || "uz";
-  const companyId = field(formData, "companyId");
   const title = field(formData, "title");
-  if (!companyId || !title) return { error: "missing" };
+  if (!title) return { error: "missing" };
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/sign-in`);
+  if (!user) return { signedOut: true };
 
+  const companyId = field(formData, "companyId");
+  if (!companyId) return { noCompany: true };
+
+  const locale = field(formData, "locale") || "uz";
   const number = (name: string) => {
     const v = field(formData, name);
     return v ? Number(v) : null;
