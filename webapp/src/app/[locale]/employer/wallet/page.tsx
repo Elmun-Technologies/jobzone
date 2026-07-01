@@ -64,6 +64,11 @@ function TxRow({
   );
 }
 
+// Auth-gated, per-employer page (reads the session via requireEmployer). Render
+// per request — getCurrentUser()'s try/catch swallows the cookies() dynamic
+// signal, so without this Next.js would prerender one shared, logged-out copy.
+export const dynamic = "force-dynamic";
+
 export default async function WalletPage({
   params,
 }: {

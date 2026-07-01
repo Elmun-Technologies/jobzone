@@ -27,6 +27,11 @@ const STATUS_CLASS: Record<string, string> = {
   closed: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
 };
 
+// Auth-gated, per-employer page (reads the session via requireEmployer). Render
+// per request — getCurrentUser()'s try/catch swallows the cookies() dynamic
+// signal, so without this Next.js would prerender one shared, logged-out copy.
+export const dynamic = "force-dynamic";
+
 export default async function MyJobsPage({
   params,
 }: {
