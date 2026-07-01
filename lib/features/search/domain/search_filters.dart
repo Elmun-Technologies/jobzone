@@ -10,6 +10,8 @@ class SearchFilters {
     this.jobTypes = const {},
     this.experienceLevels = const {},
     this.workingModels = const {},
+    this.schedulePatterns = const {},
+    this.formalizations = const {},
     this.titles = const {},
     this.salaryMin,
     this.salaryMax,
@@ -24,6 +26,8 @@ class SearchFilters {
   final Set<String> jobTypes;
   final Set<String> experienceLevels;
   final Set<String> workingModels;
+  final Set<String> schedulePatterns;
+  final Set<String> formalizations;
   final Set<String> titles;
   final num? salaryMin;
   final num? salaryMax;
@@ -41,6 +45,8 @@ class SearchFilters {
       jobTypes.length +
       experienceLevels.length +
       workingModels.length +
+      schedulePatterns.length +
+      formalizations.length +
       titles.length +
       ((salaryMin != null || salaryMax != null) ? 1 : 0) +
       (city != null && city!.isNotEmpty ? 1 : 0) +
@@ -53,6 +59,8 @@ class SearchFilters {
     Set<String>? jobTypes,
     Set<String>? experienceLevels,
     Set<String>? workingModels,
+    Set<String>? schedulePatterns,
+    Set<String>? formalizations,
     Set<String>? titles,
     num? salaryMin,
     num? salaryMax,
@@ -68,6 +76,8 @@ class SearchFilters {
     jobTypes: jobTypes ?? this.jobTypes,
     experienceLevels: experienceLevels ?? this.experienceLevels,
     workingModels: workingModels ?? this.workingModels,
+    schedulePatterns: schedulePatterns ?? this.schedulePatterns,
+    formalizations: formalizations ?? this.formalizations,
     titles: titles ?? this.titles,
     salaryMin: clearSalary ? null : (salaryMin ?? this.salaryMin),
     salaryMax: clearSalary ? null : (salaryMax ?? this.salaryMax),
@@ -112,6 +122,10 @@ class SearchQuery {
       if (f.experienceLevels.isNotEmpty)
         inList('experience_level', f.experienceLevels),
       if (f.workingModels.isNotEmpty) inList('working_model', f.workingModels),
+      if (f.schedulePatterns.isNotEmpty)
+        inList('schedule_pattern', f.schedulePatterns),
+      if (f.formalizations.isNotEmpty)
+        inList('formalization', f.formalizations),
       if (f.salaryMin != null) 'salary_max >= ${f.salaryMin}',
       if (f.salaryMax != null) 'salary_min <= ${f.salaryMax}',
       if (f.city != null && f.city!.isNotEmpty) 'city = "${f.city}"',

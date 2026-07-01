@@ -153,6 +153,47 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.fieldSchedulePattern,
+                    options: {
+                      for (final e in SchedulePattern.values)
+                        e.wire: schedulePatternLabel(context, e.wire) ?? e.wire,
+                    },
+                    selected: _draft.schedulePatterns,
+                    onChanged: (s) => setState(
+                      () => _draft = _draft.copyWith(schedulePatterns: s),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.fieldFormalization,
+                    options: {
+                      for (final e in Formalization.values)
+                        e.wire: formalizationLabel(context, e.wire) ?? e.wire,
+                    },
+                    selected: _draft.formalizations,
+                    onChanged: (s) => setState(
+                      () => _draft = _draft.copyWith(formalizations: s),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l.fieldNightShift,
+                          style: _sectionStyle(context),
+                        ),
+                      ),
+                      Switch(
+                        value: _draft.nightShift,
+                        onChanged: (v) => setState(
+                          () => _draft = _draft.copyWith(nightShift: v),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   Text(l.fieldJobTitle, style: _sectionStyle(context)),
                   const SizedBox(height: AppSpacing.sm),
                   OptionCheckList(

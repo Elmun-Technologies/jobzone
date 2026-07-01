@@ -48,6 +48,14 @@ class SearchRepository {
           !f.workingModels.contains(j.workingModel)) {
         return false;
       }
+      if (f.schedulePatterns.isNotEmpty &&
+          !f.schedulePatterns.contains(j.schedulePattern)) {
+        return false;
+      }
+      if (f.formalizations.isNotEmpty &&
+          !f.formalizations.contains(j.formalization)) {
+        return false;
+      }
       if (f.salaryMin != null &&
           (j.salaryMax ?? j.salaryMin ?? 0) < f.salaryMin!) {
         return false;
