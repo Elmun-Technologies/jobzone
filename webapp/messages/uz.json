@@ -53,6 +53,7 @@
     "title": "Hisob",
     "myApplications": "Mening arizalarim",
     "savedJobs": "Saqlangan ishlar",
+    "savedSearches": "Obunalar",
     "employerArea": "Ish beruvchi paneli",
     "editProfile": "Profilni tahrirlash",
     "messages": "Xabarlar",
@@ -143,6 +144,16 @@
     "empty": "Hali ish saqlamadingiz",
     "save": "Saqlash",
     "saved": "Saqlangan"
+  },
+  "savedSearches": {
+    "title": "Obunalar",
+    "subtitle": "Saqlangan qidiruvni istalgan vaqtda qayta ishga tushiring.",
+    "save": "Qidiruvni saqlash",
+    "saved": "Saqlandi",
+    "run": "Ochish",
+    "delete": "O'chirish",
+    "emptyTitle": "Hali obunalar yo'q",
+    "emptyBody": "Yangi vakansiyalarni o'tkazib yubormaslik uchun ishlar sahifasida qidiruvni saqlang."
   },
   "employer": {
     "dashboard": "Boshqaruv paneli",

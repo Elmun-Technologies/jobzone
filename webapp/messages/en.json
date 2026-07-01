@@ -53,6 +53,7 @@
     "title": "Account",
     "myApplications": "My applications",
     "savedJobs": "Saved jobs",
+    "savedSearches": "Saved searches",
     "employerArea": "Employer area",
     "editProfile": "Edit profile",
     "messages": "Messages",
@@ -143,6 +144,16 @@
     "empty": "You haven't saved any jobs yet",
     "save": "Save",
     "saved": "Saved"
+  },
+  "savedSearches": {
+    "title": "Saved searches",
+    "subtitle": "Re-run a saved search anytime.",
+    "save": "Save search",
+    "saved": "Saved",
+    "run": "Open",
+    "delete": "Delete",
+    "emptyTitle": "No saved searches yet",
+    "emptyBody": "Save a search from the jobs page to catch new vacancies faster."
   },
   "employer": {
     "dashboard": "Dashboard",
