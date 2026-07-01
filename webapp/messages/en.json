@@ -13,7 +13,8 @@
     "seeker": "Job seeker",
     "employer": "Employer",
     "signIn": "Sign in",
-    "account": "Account"
+    "account": "Account",
+    "notifications": "Notifications"
   },
   "explore": {
     "title": "Jobs map",
@@ -54,6 +55,7 @@
     "myApplications": "My applications",
     "savedJobs": "Saved jobs",
     "savedSearches": "Saved searches",
+    "notifications": "Notifications",
     "employerArea": "Employer area",
     "editProfile": "Edit profile",
     "messages": "Messages",
@@ -155,6 +157,13 @@
     "emptyTitle": "No saved searches yet",
     "emptyBody": "Save a search from the jobs page to catch new vacancies faster."
   },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Job matches, application updates and messages land here.",
+    "markAllRead": "Mark all as read",
+    "emptyTitle": "No notifications yet",
+    "emptyBody": "Save a search or apply to jobs — updates will show up here."
+  },
   "employer": {
     "dashboard": "Dashboard",
     "postJob": "Post a job",
@@ -186,7 +195,11 @@
     "noApplicants": "No applicants yet",
     "applicantsCount": "{count} applicants",
     "errUnknown": "Something went wrong",
-    "status": { "draft": "Draft", "open": "Open", "closed": "Closed" },
+    "status": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed"
+    },
     "exp": {
       "entry": "Entry",
       "mid": "Mid",
