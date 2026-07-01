@@ -11,10 +11,16 @@ import { EmailPasswordFields, FormError } from "./auth-fields";
 
 const ROLES = ["job_seeker", "employer"] as const;
 
-export function SignUpForm() {
+export function SignUpForm({
+  next = "",
+  initialRole = "job_seeker",
+}: {
+  next?: string;
+  initialRole?: string;
+}) {
   const t = useTranslations("auth");
   const locale = useLocale();
-  const [role, setRole] = useState<string>("job_seeker");
+  const [role, setRole] = useState<string>(initialRole);
   const [state, action, pending] = useActionState<AuthFormState, FormData>(
     signUpAction,
     {},
@@ -32,6 +38,7 @@ export function SignUpForm() {
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="role" value={role} />
+      <input type="hidden" name="next" value={next} />
 
       {/* Role choice */}
       <div className="grid grid-cols-2 gap-2">

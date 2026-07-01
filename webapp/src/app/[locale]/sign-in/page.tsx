@@ -27,7 +27,18 @@ export default async function SignInPage({
   setRequestLocale(locale);
   const sp = await searchParams;
   const next = typeof sp.next === "string" ? sp.next : undefined;
+  const role = typeof sp.role === "string" ? sp.role : undefined;
   const t = await getTranslations("auth");
+
+  // Carry next/role across to sign-up so a guest who came from an auth-last
+  // flow (e.g. publishing a job) doesn't lose their way back if they don't
+  // have an account yet.
+  const signUpQuery = new URLSearchParams();
+  if (next) signUpQuery.set("next", next);
+  if (role) signUpQuery.set("role", role);
+  const signUpHref = signUpQuery.size
+    ? `/sign-up?${signUpQuery.toString()}`
+    : "/sign-up";
 
   return (
     <Container className="flex max-w-md flex-col py-16">
@@ -49,7 +60,7 @@ export default async function SignInPage({
       <p className="text-muted-foreground mt-6 text-center text-sm">
         {t("noAccount")}{" "}
         <Link
-          href="/sign-up"
+          href={signUpHref}
           className="text-primary font-semibold hover:underline"
         >
           {t("createAccount")}

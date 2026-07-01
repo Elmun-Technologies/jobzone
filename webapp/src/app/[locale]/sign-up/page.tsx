@@ -18,12 +18,26 @@ export async function generateMetadata({
 
 export default async function SignUpPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const sp = await searchParams;
+  const next = typeof sp.next === "string" ? sp.next : undefined;
+  const role = typeof sp.role === "string" ? sp.role : undefined;
   const t = await getTranslations("auth");
+
+  // Carry next/role across to sign-in for the reverse switch (e.g. a guest
+  // who already has an account clicks "create account" by mistake).
+  const signInQuery = new URLSearchParams();
+  if (next) signInQuery.set("next", next);
+  if (role) signInQuery.set("role", role);
+  const signInHref = signInQuery.size
+    ? `/sign-in?${signInQuery.toString()}`
+    : "/sign-in";
 
   return (
     <Container className="flex max-w-md flex-col py-16">
@@ -34,7 +48,7 @@ export default async function SignUpPage({
         {t("signUpSubtitle")}
       </p>
 
-      <SignUpForm />
+      <SignUpForm next={next} initialRole={role} />
 
       <div className="text-muted-foreground my-4 flex items-center gap-3 text-xs">
         <span className="bg-border h-px flex-1" />
@@ -42,12 +56,12 @@ export default async function SignUpPage({
         <span className="bg-border h-px flex-1" />
       </div>
 
-      <GoogleButton />
+      <GoogleButton next={next} />
 
       <p className="text-muted-foreground mt-6 text-center text-sm">
         {t("haveAccount")}{" "}
         <Link
-          href="/sign-in"
+          href={signInHref}
           className="text-primary font-semibold hover:underline"
         >
           {t("signIn")}

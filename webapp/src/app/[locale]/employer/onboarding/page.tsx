@@ -6,7 +6,7 @@ import { CompanyForm } from "@/components/employer/company-form";
 import { Container } from "@/components/ui/container";
 import { createCompany } from "@/lib/actions/employer";
 import { getMyCompany } from "@/lib/data/employer";
-import { requireEmployer } from "@/lib/auth/require-employer";
+import { getCurrentUser } from "@/lib/auth/user";
 
 export async function generateMetadata({
   params,
@@ -20,15 +20,25 @@ export async function generateMetadata({
 
 export default async function EmployerOnboardingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireEmployer(locale);
+  const sp = await searchParams;
+  const next = typeof sp.next === "string" ? sp.next : undefined;
+
+  // Auth-only gate (no role check): creating a company is how a signed-in
+  // seeker *becomes* an employer — createCompany flips profiles.role to match.
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect(`/${locale}/sign-in?next=/${locale}/employer/onboarding`);
+  }
 
   const company = await getMyCompany();
-  if (company) redirect(`/${locale}/employer`);
+  if (company) redirect(next || `/${locale}/employer`);
 
   const t = await getTranslations("employer");
 
@@ -40,7 +50,11 @@ export default async function EmployerOnboardingPage({
       <p className="text-muted-foreground mb-6 text-sm">
         {t("onboardingSubtitle")}
       </p>
-      <CompanyForm action={createCompany} submitLabel={t("createCompany")} />
+      <CompanyForm
+        action={createCompany}
+        submitLabel={t("createCompany")}
+        next={next}
+      />
     </Container>
   );
 }

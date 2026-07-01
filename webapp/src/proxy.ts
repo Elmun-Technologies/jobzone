@@ -11,11 +11,12 @@ import { updateSession } from "@/lib/supabase/middleware";
 const intlMiddleware = createMiddleware(routing);
 
 const LOCALE = "(?:uz|ru|en)";
-// Web is guest-first: a visitor can browse and *start* the seeker flows without
-// a login — résumé creation asks for auth only at save-time (handled in the
-// action + wizard). The account hub and the employer area stay gated for now
-// (the employer flow becomes auth-last in a follow-up).
+// Web is guest-first: a visitor can browse and *start* the seeker/employer
+// flows without a login — auth is asked for only at the last step (save
+// résumé, submit an application, publish a job), handled in each action +
+// form. The account hub and the rest of the employer area stay gated.
 const PROTECTED = new RegExp(`^/${LOCALE}/(?:account|employer)(?:/|$)`);
+const GUEST_OK = new RegExp(`^/${LOCALE}/employer/jobs/new(?:/|$)`);
 const AUTH_PAGES = new RegExp(`^/${LOCALE}/(?:sign-in|sign-up)(?:/|$)`);
 
 function localeOf(path: string): string {
@@ -31,7 +32,7 @@ export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request, intlResponse);
   const path = request.nextUrl.pathname;
 
-  if (!user && PROTECTED.test(path)) {
+  if (!user && PROTECTED.test(path) && !GUEST_OK.test(path)) {
     const url = new URL(`/${localeOf(path)}/sign-in`, request.url);
     url.searchParams.set("next", path);
     return NextResponse.redirect(url);
