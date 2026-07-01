@@ -71,6 +71,7 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
     let req = supabase
       .from("job_feed")
       .select(COLUMNS)
+      .eq("status", "open")
       .order("boost_active", { ascending: false });
     if (query.sort === "salary") {
       req = req
@@ -118,7 +119,8 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
     const supabase = await createClient();
     let req = supabase
       .from("job_feed")
-      .select("id", { count: "exact", head: true });
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open");
 
     if (query.q) {
       req = req.or(`title.ilike.%${query.q}%,company_name.ilike.%${query.q}%`);
@@ -161,6 +163,7 @@ export async function getCities(limit = 1000): Promise<string[]> {
     const { data, error } = await supabase
       .from("job_feed")
       .select("city")
+      .eq("status", "open")
       .not("city", "is", null)
       .limit(limit);
     if (error) throw error;
@@ -184,6 +187,7 @@ export async function getRecentJobs(limit = 6): Promise<Job[]> {
     const { data, error } = await supabase
       .from("job_feed")
       .select(COLUMNS)
+      .eq("status", "open")
       .order("boost_active", { ascending: false })
       .order("posted_at", { ascending: false })
       .limit(limit);
@@ -221,6 +225,7 @@ export async function getAllJobIds(limit = 1000): Promise<string[]> {
     const { data, error } = await supabase
       .from("job_feed")
       .select("id")
+      .eq("status", "open")
       .limit(limit);
     if (error) throw error;
     return (data ?? []).map((r) => String((r as { id: unknown }).id));
