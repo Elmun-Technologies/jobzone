@@ -4,28 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../jobs/data/categories_repository.dart';
+import '../../jobs/data/jobs_repository_impl.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
-import '../data/search_repository.dart';
-import '../domain/search_filters.dart';
 
 /// Open vacancies grouped by category, with counts and emoji — powers the Home
 /// "browse by category" cards. Computed from the open-job feed and sorted by
 /// count (desc). One fetch backs both this and [categoryJobsProvider].
 final categoryCountsProvider =
     FutureProvider<List<({String name, int count, String emoji})>>((ref) async {
-      final jobs = await ref
-          .read(searchRepositoryProvider)
-          .search(const SearchFilters());
+      final counts = await ref.read(jobsRepositoryProvider).categoryCounts();
       final nameToEmoji = {
         for (final c in CategoriesRepository.seed) c.name: c.emoji,
       };
-      final counts = <String, int>{};
-      for (final j in jobs) {
-        final c = j.categoryName;
-        if (c == null || c.isEmpty) continue;
-        counts[c] = (counts[c] ?? 0) + 1;
-      }
       final list =
           counts.entries
               .map(
@@ -40,16 +31,14 @@ final categoryCountsProvider =
       return list;
     });
 
-/// Open jobs in a single category (client-side filter over the feed — no
-/// search-index/Meili change needed).
+/// Open jobs in a single category, read straight from the `job_feed` view so a
+/// freshly-posted vacancy shows up in its category immediately — no Meili
+/// reindex, matching how the web app reads the same feed.
 final categoryJobsProvider = FutureProvider.family<List<Job>, String>((
   ref,
   name,
 ) async {
-  final jobs = await ref
-      .read(searchRepositoryProvider)
-      .search(const SearchFilters());
-  return jobs.where((j) => j.categoryName == name).toList();
+  return ref.read(jobsRepositoryProvider).byCategory(name);
 });
 
 /// Titled results list for a category, reached from the Home category cards.

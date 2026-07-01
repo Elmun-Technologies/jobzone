@@ -121,6 +121,47 @@ class JobsRepositoryImpl implements JobsRepository {
         .limit(limit);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
+
+  @override
+  Future<List<Job>> byCategory(String categoryName, {int limit = 50}) async {
+    if (!_live) {
+      return _boostedFirst(
+        mockJobs.where((j) => j.categoryName == categoryName),
+      ).take(limit).toList();
+    }
+    final rows = await _client
+        .from('job_feed')
+        .select()
+        .eq('status', 'open')
+        .eq('category_name', categoryName)
+        .order('boost_active', ascending: false)
+        .order('posted_at', ascending: false)
+        .limit(limit);
+    return rows.map<Job>((r) => Job.fromMap(r)).toList();
+  }
+
+  @override
+  Future<Map<String, int>> categoryCounts() async {
+    final counts = <String, int>{};
+    if (!_live) {
+      for (final j in mockJobs) {
+        final c = j.categoryName;
+        if (c != null && c.isNotEmpty) counts[c] = (counts[c] ?? 0) + 1;
+      }
+      return counts;
+    }
+    // Only the category name is needed, so keep the projection light.
+    final rows = await _client
+        .from('job_feed')
+        .select('category_name')
+        .eq('status', 'open')
+        .limit(1000);
+    for (final r in rows) {
+      final c = r['category_name'] as String?;
+      if (c != null && c.isNotEmpty) counts[c] = (counts[c] ?? 0) + 1;
+    }
+    return counts;
+  }
 }
 
 final jobsRepositoryProvider = Provider<JobsRepository>(
