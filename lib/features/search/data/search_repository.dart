@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
@@ -24,18 +25,60 @@ class SearchRepository {
     return _filterMock(filters);
   }
 
-  Future<List<Job>> _searchViaFeed(SearchFilters f) async {
-    var q = _ref
-        .read(supabaseClientProvider)
-        .from('job_feed')
-        .select()
-        .eq('status', 'open');
+  /// Exact number of open vacancies matching [filters] — a HEAD-only count
+  /// (no rows fetched) that powers the filter page's live "N vakansiya"
+  /// preview. Shares [_applyFilters] with [search] so the previewed count can
+  /// never drift from the results it promises.
+  Future<int> count(SearchFilters filters) async {
+    if (!Env.hasSupabase) return _filterMock(filters).length;
+    final q = _applyFilters(
+      _ref
+          .read(supabaseClientProvider)
+          .from('job_feed')
+          .count(CountOption.exact)
+          .eq('status', 'open'),
+      filters,
+    );
+    return await q;
+  }
 
-    final query = f.query.trim();
-    if (query.isNotEmpty) {
+  Future<List<Job>> _searchViaFeed(SearchFilters f) async {
+    final q = _applyFilters(
+      _ref
+          .read(supabaseClientProvider)
+          .from('job_feed')
+          .select()
+          .eq('status', 'open'),
+      f,
+    );
+
+    final orderCol = switch (f.sort) {
+      SearchSort.newest => 'posted_at',
+      SearchSort.salaryHigh => 'salary_max',
+      SearchSort.salaryLow => 'salary_min',
+    };
+    final rows = await q
+        // Active paid promotions float to the top, then the chosen sort.
+        .order('boost_active', ascending: false)
+        .order(orderCol, ascending: f.sort == SearchSort.salaryLow)
+        .limit(60);
+    return rows.map<Job>((r) => Job.fromMap(r)).toList();
+  }
+
+  /// Applies the free-text + facet filters shared by [search] and [count] to a
+  /// `job_feed` query builder (the caller has already scoped it to
+  /// `status = 'open'`). Generic over the builder's row type so the same logic
+  /// serves both the row query (`select`) and the head count (`count`).
+  PostgrestFilterBuilder<T> _applyFilters<T>(
+    PostgrestFilterBuilder<T> query,
+    SearchFilters f,
+  ) {
+    var q = query;
+    final text = f.query.trim();
+    if (text.isNotEmpty) {
       // Strip PostgREST filter delimiters so the term can't break out of the
       // or() grammar; a plain substring match across the key text columns.
-      final safe = query.replaceAll(RegExp(r'[,%()]'), ' ').trim();
+      final safe = text.replaceAll(RegExp(r'[,%()]'), ' ').trim();
       if (safe.isNotEmpty) {
         q = q.or(
           'title.ilike.%$safe%,company_name.ilike.%$safe%,'
@@ -79,18 +122,7 @@ class SearchRepository {
       );
       q = q.gte('posted_at', cutoff.toIso8601String());
     }
-
-    final orderCol = switch (f.sort) {
-      SearchSort.newest => 'posted_at',
-      SearchSort.salaryHigh => 'salary_max',
-      SearchSort.salaryLow => 'salary_min',
-    };
-    final rows = await q
-        // Active paid promotions float to the top, then the chosen sort.
-        .order('boost_active', ascending: false)
-        .order(orderCol, ascending: f.sort == SearchSort.salaryLow)
-        .limit(60);
-    return rows.map<Job>((r) => Job.fromMap(r)).toList();
+    return q;
   }
 
   List<Job> _filterMock(SearchFilters f) {

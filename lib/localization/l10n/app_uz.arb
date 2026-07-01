@@ -570,6 +570,7 @@
   "salaryGross": "Soliqdan oldin",
   "salaryNet": "Qo'lga",
   "driverLicenseLabel": "Haydovchilik guvohnomasi",
+  "filterShowCount": "{count} ta vakansiyani ko'rsatish",
   "languagesLabel": "Tillar",
   "selectLanguage": "Til",
   "cefrNative": "Ona tili",
