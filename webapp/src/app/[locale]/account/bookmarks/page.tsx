@@ -16,6 +16,11 @@ export async function generateMetadata({
   return { title: t("title"), robots: { index: false } };
 }
 
+// Per-user page (reads the session inside getBookmarkedJobs, whose catch
+// swallows the cookies() dynamic signal). Without this Next.js statically
+// bakes the guest render — a permanently empty list for signed-in users.
+export const dynamic = "force-dynamic";
+
 export default async function BookmarksPage({
   params,
 }: {
