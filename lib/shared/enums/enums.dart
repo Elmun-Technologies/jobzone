@@ -97,7 +97,7 @@ enum NotificationType {
 }
 
 /// Which in-app experience a signed-in user gets. `job_seeker` is the default
-/// (today's app); `employer` unlocks the Jobzone Business / HR side.
+/// (today's app); `employer` unlocks the Yolla Business / HR side.
 enum UserRole {
   jobSeeker('job_seeker'),
   employer('employer');

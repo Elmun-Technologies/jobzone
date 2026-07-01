@@ -40,7 +40,7 @@ Future<void> bootstrap() async {
   runApp(
     ProviderScope(
       overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const JobzoneApp(),
+      child: const YollaApp(),
     ),
   );
 }

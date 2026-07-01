@@ -215,7 +215,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
-      // Employer (Jobzone Business) — onboarding + its own bottom-nav shell
+      // Employer (Yolla Business) — onboarding + its own bottom-nav shell
       GoRoute(
         path: Routes.employerOnboard,
         builder: (c, s) => const CreateCompanyPage(),

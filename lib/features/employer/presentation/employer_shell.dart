@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../localization/l10n_extension.dart';
 
-/// Persistent bottom-navigation scaffold for the employer ("Jobzone Business")
+/// Persistent bottom-navigation scaffold for the employer ("Yolla Business")
 /// experience. Mirrors the seeker [AppShell] but with the five recruiter tabs:
 /// Dashboard · My Jobs · Applicants · Messages · Company.
 class EmployerShell extends StatelessWidget {

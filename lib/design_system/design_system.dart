@@ -1,4 +1,4 @@
-/// Single import for the Jobzone design system: tokens, theme and widgets.
+/// Single import for the Yolla design system: tokens, theme and widgets.
 library;
 
 export 'theme/app_colors.dart';
