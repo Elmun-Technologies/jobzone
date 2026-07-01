@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import '../../../shared/enums/enums.dart';
 import '../../jobs/presentation/util/job_labels.dart';
 import '../../preferences/presentation/widgets/preference_step.dart';
 import '../application/search_controller.dart';
+import '../data/search_repository.dart';
 import '../domain/search_filters.dart';
 
 const _cities = ['Tashkent', 'Samarkand', 'Remote'];
@@ -32,10 +35,32 @@ class FilterPage extends ConsumerStatefulWidget {
 class _FilterPageState extends ConsumerState<FilterPage> {
   late SearchFilters _draft;
 
+  /// Live count of vacancies matching [_draft], shown on the apply button.
+  /// Null until the first (debounced) count resolves.
+  int? _count;
+  Timer? _countTimer;
+
   @override
   void initState() {
     super.initState();
     _draft = ref.read(searchControllerProvider.notifier).filters;
+  }
+
+  @override
+  void dispose() {
+    _countTimer?.cancel();
+    super.dispose();
+  }
+
+  // Debounced live result count. Called from build (i.e. after each facet
+  // change); the change-guard lets it settle — an unchanged count skips
+  // setState, so no further rebuild reschedules the timer.
+  void _scheduleCount() {
+    _countTimer?.cancel();
+    _countTimer = Timer(const Duration(milliseconds: 350), () async {
+      final n = await ref.read(searchRepositoryProvider).count(_draft);
+      if (mounted && n != _count) setState(() => _count = n);
+    });
   }
 
   Set<String> _toggled(Set<String> set, String value) {
@@ -46,6 +71,7 @@ class _FilterPageState extends ConsumerState<FilterPage> {
 
   @override
   Widget build(BuildContext context) {
+    _scheduleCount();
     final l = context.l10n;
     final colors = context.colors;
     // UZS-scaled range (this is a UZS-first market; jobs are in millions of
@@ -281,7 +307,9 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: JzPrimaryButton(
-                      label: l.applyFilters,
+                      label: _count == null
+                          ? l.applyFilters
+                          : l.filterShowCount(_count!),
                       onPressed: () {
                         ref
                             .read(searchControllerProvider.notifier)

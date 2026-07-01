@@ -577,6 +577,14 @@
   "salaryGross": "Before tax",
   "salaryNet": "Take-home",
   "driverLicenseLabel": "Driver's license",
+  "filterShowCount": "Show {count} jobs",
+  "@filterShowCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "languagesLabel": "Languages",
   "selectLanguage": "Language",
   "cefrNative": "Native",

@@ -570,6 +570,7 @@
   "salaryGross": "До вычета налогов",
   "salaryNet": "На руки",
   "driverLicenseLabel": "Водительские права",
+  "filterShowCount": "Показать {count}",
   "languagesLabel": "Языки",
   "selectLanguage": "Язык",
   "cefrNative": "Родной",

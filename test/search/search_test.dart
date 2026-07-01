@@ -56,6 +56,15 @@ void main() {
       expect(res.every((j) => j.driverLicenses.contains('C')), isTrue);
     });
 
+    test('count matches search result length', () async {
+      final repo = container.read(searchRepositoryProvider);
+      const f = SearchFilters(jobTypes: {'internship'});
+      final total = await repo.count(f);
+      final res = await repo.search(f);
+      expect(total, res.length);
+      expect(total, greaterThan(0));
+    });
+
     test('sorts by highest pay', () async {
       final repo = container.read(searchRepositoryProvider);
       final res = await repo.search(
