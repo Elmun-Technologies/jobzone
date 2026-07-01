@@ -88,6 +88,13 @@ export default async function AccountPage({
           <span aria-hidden>→</span>
         </Link>
         <Link
+          href="/account/notifications"
+          className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
+        >
+          <span className="font-medium">{t("notifications")}</span>
+          <span aria-hidden>→</span>
+        </Link>
+        <Link
           href="/account/profile"
           className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
         >

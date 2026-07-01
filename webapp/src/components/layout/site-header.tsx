@@ -1,9 +1,10 @@
-import { CircleUser, FilePlus2 } from "lucide-react";
+import { Bell, CircleUser, FilePlus2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { getCurrentUser } from "@/lib/auth/user";
+import { getUnreadNotificationCount } from "@/lib/data/notifications";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ const navLink =
 export async function SiteHeader() {
   const t = await getTranslations("nav");
   const user = await getCurrentUser();
+  const unread = user ? await getUnreadNotificationCount() : 0;
 
   return (
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
@@ -63,16 +65,33 @@ export async function SiteHeader() {
           <ThemeToggle />
 
           {user ? (
-            <Link
-              href="/account"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "gap-1.5",
-              )}
-            >
-              <CircleUser className="size-4" />
-              <span className="hidden sm:inline">{t("account")}</span>
-            </Link>
+            <>
+              <Link
+                href="/account/notifications"
+                aria-label={t("notifications")}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "relative px-2.5",
+                )}
+              >
+                <Bell className="size-4" />
+                {unread > 0 ? (
+                  <span className="bg-primary text-primary-foreground absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                ) : null}
+              </Link>
+              <Link
+                href="/account"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "gap-1.5",
+                )}
+              >
+                <CircleUser className="size-4" />
+                <span className="hidden sm:inline">{t("account")}</span>
+              </Link>
+            </>
           ) : (
             <Link
               href="/sign-in"

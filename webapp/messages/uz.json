@@ -13,7 +13,8 @@
     "seeker": "Ish qidiruvchi",
     "employer": "Ish beruvchi",
     "signIn": "Kirish",
-    "account": "Hisob"
+    "account": "Hisob",
+    "notifications": "Bildirishnomalar"
   },
   "explore": {
     "title": "Ishlar xaritasi",
@@ -54,6 +55,7 @@
     "myApplications": "Mening arizalarim",
     "savedJobs": "Saqlangan ishlar",
     "savedSearches": "Obunalar",
+    "notifications": "Bildirishnomalar",
     "employerArea": "Ish beruvchi paneli",
     "editProfile": "Profilni tahrirlash",
     "messages": "Xabarlar",
@@ -155,6 +157,13 @@
     "emptyTitle": "Hali obunalar yo'q",
     "emptyBody": "Yangi vakansiyalarni o'tkazib yubormaslik uchun ishlar sahifasida qidiruvni saqlang."
   },
+  "notifications": {
+    "title": "Bildirishnomalar",
+    "subtitle": "Mos vakansiyalar, otkliklar yangilanishi va xabarlar shu yerga keladi.",
+    "markAllRead": "Hammasini o'qilgan deb belgilash",
+    "emptyTitle": "Hozircha bildirishnomalar yo'q",
+    "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga otklik qoldiring — yangiliklar shu yerda ko'rinadi."
+  },
   "employer": {
     "dashboard": "Boshqaruv paneli",
     "postJob": "Ish e'lon qilish",
@@ -186,7 +195,11 @@
     "noApplicants": "Hali nomzod yo'q",
     "applicantsCount": "{count} nomzod",
     "errUnknown": "Xatolik yuz berdi",
-    "status": { "draft": "Qoralama", "open": "Ochiq", "closed": "Yopiq" },
+    "status": {
+      "draft": "Qoralama",
+      "open": "Ochiq",
+      "closed": "Yopiq"
+    },
     "exp": {
       "entry": "Boshlang'ich",
       "mid": "O'rta",
