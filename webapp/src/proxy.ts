@@ -11,7 +11,11 @@ import { updateSession } from "@/lib/supabase/middleware";
 const intlMiddleware = createMiddleware(routing);
 
 const LOCALE = "(?:uz|ru|en)";
-const PROTECTED = new RegExp(`^/${LOCALE}/(?:account|employer|resumes)(?:/|$)`);
+// Web is guest-first: a visitor can browse and *start* the seeker flows without
+// a login — résumé creation asks for auth only at save-time (handled in the
+// action + wizard). The account hub and the employer area stay gated for now
+// (the employer flow becomes auth-last in a follow-up).
+const PROTECTED = new RegExp(`^/${LOCALE}/(?:account|employer)(?:/|$)`);
 const AUTH_PAGES = new RegExp(`^/${LOCALE}/(?:sign-in|sign-up)(?:/|$)`);
 
 function localeOf(path: string): string {

@@ -1,8 +1,8 @@
 "use client";
 
 import { Check, Plus, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
@@ -17,6 +17,9 @@ const EXP = ["none", "under_1", "1_3", "3_5", "5_plus"] as const;
 const MARITAL = ["single", "married", "divorced"] as const;
 const LANGS = ["ru", "en", "tr", "tg", "uz"] as const;
 const LEVELS = ["none", "a1_a2", "b1_b2", "c1_c2", "native"] as const;
+
+// Where an in-progress résumé is parked while a guest signs in at save-time.
+const STASH_KEY = "yolla-resume-draft";
 
 const EMPTY_EDU: EducationEntry = {
   school: "",
@@ -88,6 +91,25 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
   const [draft, setDraft] = useState<ResumeDraft>(initial);
   const [error, setError] = useState(false);
   const [pending, start] = useTransition();
+  const locale = useLocale();
+
+  // Auth-last: if the guest signed in at save-time and came back, restore the
+  // résumé they were filling (stashed below) and jump to the final step so a
+  // single tap finishes the save. No work is lost to the sign-in detour.
+  useEffect(() => {
+    const saved = sessionStorage.getItem(STASH_KEY);
+    if (!saved) return;
+    sessionStorage.removeItem(STASH_KEY);
+    // Restoring client-only storage after mount is intentional here (a lazy
+    // initializer would desync SSR hydration).
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDraft(JSON.parse(saved) as ResumeDraft);
+      setStep(3);
+    } catch {
+      // Ignore a malformed stash.
+    }
+  }, []);
 
   const set = <K extends keyof ResumeDraft>(key: K, value: ResumeDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
@@ -142,8 +164,13 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
     setError(false);
     start(async () => {
       const res = await saveResume(draft);
-      if (res.signedOut) router.push("/sign-in");
-      else if (res.error) setError(true);
+      if (res.signedOut) {
+        // Auth-last: park the draft and sign in, returning here to finish.
+        sessionStorage.setItem(STASH_KEY, JSON.stringify(draft));
+        router.push(
+          `/sign-in?next=${encodeURIComponent(`/${locale}/resumes/new`)}`,
+        );
+      } else if (res.error) setError(true);
       else router.push("/account");
     });
   }
