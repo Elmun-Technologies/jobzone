@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Authenticated areas (added in later phases) shouldn't be crawled.
-      disallow: ["/api/", "/*/account/", "/*/employer/"],
+      disallow: ["/api/", "/*/account/", "/*/employer/", "/*/admin/"],
     },
     sitemap: `${siteUrl()}/sitemap.xml`,
   };

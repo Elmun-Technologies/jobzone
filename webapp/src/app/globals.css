@@ -25,6 +25,10 @@
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
+
+  /* Admin charts: single-series monochrome (ink on light, volt on dark) —
+     both clear 15:1 on their surfaces, so no palette juggling needed. */
+  --chart-series: #0a0a0a;
 }
 
 .dark {
@@ -45,6 +49,8 @@
 
   --destructive: #f87171;
   --destructive-foreground: #0a0a0a;
+
+  --chart-series: #c7fb00;
 }
 
 @theme inline {
