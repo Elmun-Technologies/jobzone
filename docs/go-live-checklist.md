@@ -42,12 +42,17 @@ Set with `supabase secrets set NAME=…` (values are yours — never commit them
 | `FCM_SERVICE_ACCOUNT` | push-dispatch, notify-dispatch (push) | Firebase service-account JSON — *optional, only when push is provisioned* |
 | `ANTHROPIC_API_KEY` | generate-job-content | *optional, only to enable real AI job-text generation* |
 
-**DB settings** the `notify_dispatch` trigger (0026) reads to fan a notification
-out via `pg_net`:
+**DB-side secrets** (read by the `notify_dispatch` trigger and the
+`send_sms_telegram` hook) go into `private.app_secrets` (0038) via the SQL
+editor. Do **not** use `alter database … set` — Supabase's managed `postgres`
+role is denied it (`42501: permission denied to set parameter`):
 
 ```sql
-alter database postgres set app.notify_dispatch_url = 'https://<ref>.functions.supabase.co/notify-dispatch';
-alter database postgres set app.edge_shared_secret = '<same as EDGE_SHARED_SECRET>';
+insert into private.app_secrets (name, value) values
+  ('telegram_gateway_token', '<gateway.telegram.org token>'),
+  ('notify_dispatch_url', 'https://<ref>.functions.supabase.co/notify-dispatch'),
+  ('edge_shared_secret',  '<same as EDGE_SHARED_SECRET>')
+on conflict (name) do update set value = excluded.value;
 ```
 
 ---
