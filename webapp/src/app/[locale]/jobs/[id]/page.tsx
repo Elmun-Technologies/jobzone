@@ -70,9 +70,9 @@ export default async function JobDetailsPage({
     user ? hasApplied(job.id) : Promise.resolve(false),
     user ? isBookmarked(job.id) : Promise.resolve(false),
   ]);
-  const applyHref = user
-    ? `/jobs/${id}/apply`
-    : `/sign-in?next=/${locale}/jobs/${id}/apply`;
+  // Guest-first: the apply page itself asks for auth at submit-time, so the
+  // link always goes there directly rather than pre-routing to sign-in.
+  const applyHref = `/jobs/${id}/apply`;
 
   return (
     <Container className="py-8">

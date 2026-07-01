@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ApplyForm } from "@/components/jobs/apply-form";
@@ -7,7 +7,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { hasApplied } from "@/lib/data/applications";
 import { getJobById } from "@/lib/data/jobs";
-import { getCurrentUser } from "@/lib/auth/user";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -29,11 +28,8 @@ export default async function ApplyPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect(`/${locale}/sign-in?next=/${locale}/jobs/${id}/apply`);
-  }
-
+  // Guest-first: a visitor can fill this out freely. hasApplied is false for a
+  // guest (no user id to match), and applyToJob asks for auth at submit-time.
   const job = await getJobById(id);
   if (!job) notFound();
 
