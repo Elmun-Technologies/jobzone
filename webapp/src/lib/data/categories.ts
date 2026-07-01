@@ -57,6 +57,7 @@ export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
         const { count } = await supabase
           .from("job_feed")
           .select("id", { count: "exact", head: true })
+          .eq("status", "open")
           .eq("category_name", c.name);
         return { ...c, count: count ?? 0 };
       }),

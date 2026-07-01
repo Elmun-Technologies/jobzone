@@ -54,6 +54,7 @@ export async function getCompanies(opts?: {
     const { data: jobRows } = await supabase
       .from("job_feed")
       .select("company_id")
+      .eq("status", "open")
       .in("company_id", ids);
     for (const row of jobRows ?? []) {
       const id = String((row as { company_id: unknown }).company_id);
@@ -97,6 +98,7 @@ export async function getCompanyJobs(companyId: string): Promise<Job[]> {
       .from("job_feed")
       .select("*")
       .eq("company_id", companyId)
+      .eq("status", "open")
       .order("posted_at", { ascending: false });
     if (error) throw error;
     const { toJob } = await import("./mappers");
