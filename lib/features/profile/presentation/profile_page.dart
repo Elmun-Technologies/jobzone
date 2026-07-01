@@ -155,6 +155,11 @@ class ProfilePage extends ConsumerWidget {
               onTap: () => context.push(Routes.accountPersonalInfo),
             ),
             _MenuTile(
+              icon: Icons.description_outlined,
+              label: l.sectionResume,
+              onTap: () => context.push(Routes.resumeHome),
+            ),
+            _MenuTile(
               icon: Icons.insights_rounded,
               label: l.analytics,
               onTap: () => context.push(Routes.accountAnalytics),

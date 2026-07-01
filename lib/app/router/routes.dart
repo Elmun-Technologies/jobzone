@@ -78,6 +78,7 @@ abstract final class Routes {
   static const profileAwards = '/profile/awards';
   static const profileSkills = '/profile/skills';
   static const profileResume = '/profile/resume';
+  static const resumeHome = '/profile/resume-home';
 
   // Account subtree
   static const accountPersonalInfo = '/account/personal-info';

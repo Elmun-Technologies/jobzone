@@ -72,6 +72,7 @@ import '../../features/profile/presentation/edit/experience_page.dart';
 import '../../features/profile/presentation/edit/projects_page.dart';
 import '../../features/profile/presentation/edit/resume_page.dart';
 import '../../features/profile/presentation/edit/skills_edit_page.dart';
+import '../../features/profile/presentation/resume_home_page.dart';
 import '../../features/profile/presentation/edit/volunteer_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/profile/presentation/your_profile_page.dart';
@@ -475,6 +476,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.profileResume,
         builder: (c, s) => const ResumePage(),
+      ),
+      GoRoute(
+        path: Routes.resumeHome,
+        builder: (c, s) => const ResumeHomePage(),
       ),
 
       // Account subtree
