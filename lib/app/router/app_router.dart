@@ -72,6 +72,7 @@ import '../../features/profile/presentation/edit/experience_page.dart';
 import '../../features/profile/presentation/edit/projects_page.dart';
 import '../../features/profile/presentation/edit/resume_page.dart';
 import '../../features/profile/presentation/edit/skills_edit_page.dart';
+import '../../features/profile/presentation/resume_home_page.dart';
 import '../../features/profile/presentation/edit/volunteer_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/profile/presentation/your_profile_page.dart';
@@ -81,6 +82,7 @@ import '../../features/search/presentation/category_results_page.dart';
 import '../../features/search/presentation/collection_results_page.dart';
 import '../../features/search/presentation/explore_page.dart';
 import '../../features/search/presentation/filter_page.dart';
+import '../../features/search/presentation/saved_searches_page.dart';
 import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
@@ -476,6 +478,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.profileResume,
         builder: (c, s) => const ResumePage(),
       ),
+      GoRoute(
+        path: Routes.resumeHome,
+        builder: (c, s) => const ResumeHomePage(),
+      ),
 
       // Account subtree
       GoRoute(
@@ -498,6 +504,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.accountSeekingStatus,
         builder: (c, s) => const SeekingStatusPage(),
+      ),
+      GoRoute(
+        path: Routes.savedSearches,
+        builder: (c, s) => const SavedSearchesPage(),
       ),
       GoRoute(
         path: Routes.accountSettings,

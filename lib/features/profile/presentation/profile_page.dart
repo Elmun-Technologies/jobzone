@@ -155,6 +155,11 @@ class ProfilePage extends ConsumerWidget {
               onTap: () => context.push(Routes.accountPersonalInfo),
             ),
             _MenuTile(
+              icon: Icons.description_outlined,
+              label: l.sectionResume,
+              onTap: () => context.push(Routes.resumeHome),
+            ),
+            _MenuTile(
               icon: Icons.insights_rounded,
               label: l.analytics,
               onTap: () => context.push(Routes.accountAnalytics),
@@ -168,6 +173,11 @@ class ProfilePage extends ConsumerWidget {
               icon: Icons.remove_red_eye_outlined,
               label: l.jobSeekingStatus,
               onTap: () => context.push(Routes.accountSeekingStatus),
+            ),
+            _MenuTile(
+              icon: Icons.notifications_none_rounded,
+              label: l.savedSearches,
+              onTap: () => context.push(Routes.savedSearches),
             ),
             _MenuTile(
               icon: Icons.settings_outlined,
