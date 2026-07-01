@@ -43,30 +43,95 @@ class MyApplicationsPage extends ConsumerWidget {
                   retryLabel: l.retry,
                   onRetry: () => ref.invalidate(applicationsControllerProvider),
                 ),
-                data: (apps) => apps.isEmpty
-                    ? JzEmptyState(
-                        icon: Icons.description_outlined,
-                        title: l.noApplicationsTitle,
-                        message: l.noApplicationsBody,
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          0,
-                          AppSpacing.lg,
-                          AppSpacing.lg,
-                        ),
-                        itemCount: apps.length,
-                        separatorBuilder: (_, _) =>
-                            const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (_, i) =>
-                            _ApplicationCard(application: apps[i]),
-                      ),
+                data: (apps) => _TabbedApplications(apps: apps),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Applications grouped into SuperJob-style tabs: Actual (live), Invitations
+/// (employer moved you forward), Under review (shortlisted), and Archive
+/// (final outcomes). Grouping is client-side over the single fetched list.
+class _TabbedApplications extends StatelessWidget {
+  const _TabbedApplications({required this.apps});
+  final List<Application> apps;
+
+  static const _actual = {
+    ApplicationStatus.submitted,
+    ApplicationStatus.viewed,
+  };
+  static const _invitations = {
+    ApplicationStatus.interview,
+    ApplicationStatus.offer,
+  };
+  static const _underReview = {ApplicationStatus.shortlisted};
+  static const _archive = {ApplicationStatus.rejected, ApplicationStatus.hired};
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    List<Application> pick(Set<ApplicationStatus> s) =>
+        apps.where((a) => s.contains(a.status)).toList();
+
+    return DefaultTabController(
+      length: 4,
+      child: Column(
+        children: [
+          TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            labelColor: colors.primary,
+            unselectedLabelColor: colors.textSecondary,
+            indicatorColor: colors.primary,
+            dividerColor: colors.border,
+            tabs: [
+              Tab(text: l.appTabActual),
+              Tab(text: l.appTabInvitations),
+              Tab(text: l.appTabReview),
+              Tab(text: l.appTabArchive),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _ApplicationList(apps: pick(_actual)),
+                _ApplicationList(apps: pick(_invitations)),
+                _ApplicationList(apps: pick(_underReview)),
+                _ApplicationList(apps: pick(_archive)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One tab's list of applications, or an empty state when the group is empty.
+class _ApplicationList extends StatelessWidget {
+  const _ApplicationList({required this.apps});
+  final List<Application> apps;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    if (apps.isEmpty) {
+      return JzEmptyState(
+        icon: Icons.description_outlined,
+        title: l.noApplicationsTitle,
+        message: l.noApplicationsBody,
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      itemCount: apps.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+      itemBuilder: (_, i) => _ApplicationCard(application: apps[i]),
     );
   }
 }
