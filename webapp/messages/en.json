@@ -35,6 +35,15 @@
     "errInUse": "This email is already registered",
     "errWeak": "Password must be at least 6 characters",
     "errUnknown": "Something went wrong",
+    "phone": "Phone number",
+    "phoneHint": "We'll send a one-time code as a Telegram message",
+    "sendCode": "Send code via Telegram",
+    "code": "Code",
+    "codeHint": "Sent via Telegram to {phone}",
+    "verifyCode": "Confirm",
+    "changeNumber": "Use a different number",
+    "errPhoneInvalid": "Enter a valid phone number",
+    "errCodeInvalid": "Incorrect or expired code",
     "role": {
       "job_seeker": "Job seeker",
       "employer": "Employer"

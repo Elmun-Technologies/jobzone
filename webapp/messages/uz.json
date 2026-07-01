@@ -35,6 +35,15 @@
     "errInUse": "Bu email allaqachon ro'yxatdan o'tgan",
     "errWeak": "Parol kamida 6 ta belgidan iborat bo'lsin",
     "errUnknown": "Xatolik yuz berdi",
+    "phone": "Telefon raqami",
+    "phoneHint": "Bir martalik kodni Telegram xabari sifatida yuboramiz",
+    "sendCode": "Telegram orqali kod yuborish",
+    "code": "Kod",
+    "codeHint": "{phone} raqamiga Telegram orqali yuborildi",
+    "verifyCode": "Tasdiqlash",
+    "changeNumber": "Boshqa raqamdan foydalanish",
+    "errPhoneInvalid": "To'g'ri telefon raqamini kiriting",
+    "errCodeInvalid": "Kod noto'g'ri yoki muddati o'tgan",
     "role": {
       "job_seeker": "Ish izlovchi",
       "employer": "Ish beruvchi"
