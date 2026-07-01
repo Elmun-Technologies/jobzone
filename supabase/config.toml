@@ -72,3 +72,14 @@ verify_jwt = false
 # link-token handshake.
 [functions.telegram-webhook]
 verify_jwt = false
+
+# Supabase Auth's Send-SMS hook calls this with a Standard-Webhooks HMAC
+# signature (SEND_SMS_HOOK_SECRET) — no user JWT, so verification must be off
+# or the platform rejects the hook call before the function runs.
+[functions.send-sms-hook]
+verify_jwt = false
+
+# Invoked by a scheduler (cron/pg_net) with no user JWT; gated by the
+# fail-closed EDGE_SHARED_SECRET instead.
+[functions.saved-search-alerts]
+verify_jwt = false
