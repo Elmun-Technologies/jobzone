@@ -1,0 +1,92 @@
+name: Telegram OTP setup
+
+# One-shot ops workflow: takes Telegram-OTP sign-in live without any local
+# tooling. It deploys the send-sms-hook edge function, sets its secrets, and
+# configures Supabase Auth (phone provider + Send SMS hook) via the Management
+# API. Trigger it manually from the Actions tab (workflow_dispatch).
+#
+# Requires two repository secrets (GitHub: Settings -> Secrets and variables ->
+# Actions -> New repository secret):
+#   SUPABASE_ACCESS_TOKEN   personal access token — supabase.com/dashboard/account/tokens
+#   TELEGRAM_GATEWAY_TOKEN  from https://gateway.telegram.org
+#
+# Safe to re-run: deploy overwrites, secrets upsert, and the auth PATCH sets
+# the same values. The hook signing secret is regenerated on each run and
+# written to both sides (auth config + function secret) in the same run.
+
+on:
+  workflow_dispatch:
+
+env:
+  PROJECT_REF: wajotaeoulizhveparhz
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # --no-verify-jwt: Supabase Auth calls the hook with a Standard-Webhooks
+      # HMAC signature, not a user JWT (config.toml also pins this).
+      - name: Deploy send-sms-hook
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy send-sms-hook --project-ref "$PROJECT_REF" --no-verify-jwt
+
+      - name: Generate hook signing secret
+        id: gen
+        run: |
+          SECRET="v1,whsec_$(openssl rand -base64 24)"
+          echo "::add-mask::$SECRET"
+          echo "secret=$SECRET" >> "$GITHUB_OUTPUT"
+
+      - name: Set function secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          TELEGRAM_GATEWAY_TOKEN: ${{ secrets.TELEGRAM_GATEWAY_TOKEN }}
+          HOOK_SECRET: ${{ steps.gen.outputs.secret }}
+        run: |
+          supabase secrets set --project-ref "$PROJECT_REF" \
+            TELEGRAM_GATEWAY_TOKEN="$TELEGRAM_GATEWAY_TOKEN" \
+            SEND_SMS_HOOK_SECRET="$HOOK_SECRET"
+
+      - name: Enable phone auth + register the Send SMS hook
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          HOOK_SECRET: ${{ steps.gen.outputs.secret }}
+        run: |
+          BODY=$(jq -n \
+            --arg uri "https://${PROJECT_REF}.supabase.co/functions/v1/send-sms-hook" \
+            --arg secret "$HOOK_SECRET" \
+            '{external_phone_enabled: true,
+              sms_otp_exp: 300,
+              hook_send_sms_enabled: true,
+              hook_send_sms_uri: $uri,
+              hook_send_sms_secrets: $secret}')
+          RESP=$(curl -sS -w "\n%{http_code}" -X PATCH \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$BODY" \
+            "https://api.supabase.com/v1/projects/${PROJECT_REF}/config/auth")
+          CODE=$(echo "$RESP" | tail -n1)
+          echo "$RESP" | sed '$d' | head -c 2000; echo
+          if [ "$CODE" != "200" ]; then
+            echo "::error::auth config PATCH failed (HTTP $CODE)"; exit 1
+          fi
+
+      # Our hook answers HTTP 200 with an in-body signature error for unsigned
+      # calls (Auth hooks report failures in the body). A platform-level 401
+      # would mean JWT verification is still enabled on the function.
+      - name: Smoke-check the deployed hook
+        run: |
+          CODE=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" -d '{}' \
+            "https://${PROJECT_REF}.supabase.co/functions/v1/send-sms-hook")
+          cat /tmp/resp.json; echo
+          if [ "$CODE" != "200" ]; then
+            echo "::error::unexpected status $CODE (JWT gate still on?)"; exit 1
+          fi
