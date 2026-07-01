@@ -75,6 +75,13 @@ export default async function AccountPage({
           <span aria-hidden>→</span>
         </Link>
         <Link
+          href="/account/saved-searches"
+          className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
+        >
+          <span className="font-medium">{t("savedSearches")}</span>
+          <span aria-hidden>→</span>
+        </Link>
+        <Link
           href="/account/profile"
           className="border-border bg-card text-foreground hover:border-primary/40 flex items-center justify-between rounded-xl border p-4 transition-colors"
         >

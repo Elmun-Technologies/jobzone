@@ -6,6 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
+import { SaveSearchButton } from "./save-search-button";
+
 /** Search box + sort selector + list/grid view toggle for the jobs page. */
 export function JobToolbar() {
   const t = useTranslations("jobs");
@@ -47,6 +49,7 @@ export function JobToolbar() {
       </form>
 
       <div className="flex items-center gap-2">
+        <SaveSearchButton />
         <select
           value={params.get("sort") ?? ""}
           onChange={(e) => update({ sort: e.target.value })}
