@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/enums/enums.dart';
@@ -153,11 +155,7 @@ class _NotificationTile extends ConsumerWidget {
     final colors = context.colors;
     final unread = !notification.isRead;
     return InkWell(
-      onTap: unread
-          ? () => ref
-                .read(notificationsControllerProvider.notifier)
-                .markRead(notification.id)
-          : null,
+      onTap: () => _open(context, ref),
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -221,6 +219,36 @@ class _NotificationTile extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  // Mark read on tap, then deep-link by type — this completes the alert loop:
+  // tapping a job-match notification opens the matching vacancy.
+  void _open(BuildContext context, WidgetRef ref) {
+    if (!notification.isRead) {
+      ref
+          .read(notificationsControllerProvider.notifier)
+          .markRead(notification.id);
+    }
+    final dest = _destination();
+    if (dest != null) context.push(dest);
+  }
+
+  String? _destination() {
+    final data = notification.data;
+    String? nav(String key, String Function(String) route) {
+      final v = data[key];
+      return v is String && v.isNotEmpty ? route(v) : null;
+    }
+
+    return switch (notification.type) {
+      NotificationType.jobMatch => nav('job_id', Routes.jobDetails),
+      NotificationType.message => nav('conversation_id', Routes.chatDetail),
+      NotificationType.applicationUpdate => nav(
+        'application_id',
+        Routes.applicationStatus,
+      ),
+      NotificationType.review || NotificationType.system => null,
+    };
   }
 
   IconData _icon(NotificationType type) => switch (type) {
