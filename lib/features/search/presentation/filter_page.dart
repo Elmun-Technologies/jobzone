@@ -194,6 +194,55 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xl),
+                  Text(l.postedWithinLabel, style: _sectionStyle(context)),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _Chip(
+                          label: l.postedAny,
+                          selected: _draft.postedWithin == null,
+                          onTap: () => setState(
+                            () => _draft = _draft.copyWith(
+                              clearPostedWithin: true,
+                            ),
+                          ),
+                        ),
+                        for (final e in [
+                          (1, l.posted1d),
+                          (3, l.posted3d),
+                          (7, l.posted7d),
+                          (30, l.posted30d),
+                        ])
+                          _Chip(
+                            label: e.$2,
+                            selected: _draft.postedWithin == e.$1,
+                            onTap: () => setState(
+                              () =>
+                                  _draft = _draft.copyWith(postedWithin: e.$1),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.salaryPeriodLabel,
+                    options: {
+                      'hour': l.periodHour,
+                      'day': l.periodDay,
+                      'week': l.periodWeek,
+                      'month': l.periodMonth,
+                      'year': l.periodYear,
+                    },
+                    selected: _draft.salaryPeriods,
+                    onChanged: (s) => setState(
+                      () => _draft = _draft.copyWith(salaryPeriods: s),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   Text(l.fieldJobTitle, style: _sectionStyle(context)),
                   const SizedBox(height: AppSpacing.sm),
                   OptionCheckList(

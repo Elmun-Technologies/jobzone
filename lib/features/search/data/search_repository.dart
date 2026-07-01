@@ -6,31 +6,92 @@ import '../../jobs/data/mock_jobs.dart';
 import '../../jobs/domain/job.dart';
 import '../domain/search_filters.dart';
 
-/// Runs job search via the `search-jobs` Edge Function (Meilisearch proxy) when
-/// Supabase is configured; otherwise filters [mockJobs] locally so search works
-/// offline.
+/// Runs job search against the `job_feed` view (Postgres) when Supabase is
+/// configured — the same source the home/category feeds read, so a freshly
+/// posted vacancy is searchable immediately and every facet filters reliably
+/// without a Meilisearch reindex. Offline it filters [mockJobs] locally.
 class SearchRepository {
   SearchRepository(this._ref);
 
   final Ref _ref;
 
+  // Matches the filter page's salary slider ceiling; at/above it the upper
+  // bound means "no maximum", so we skip the filter (mirrors the mock).
+  static const int _salaryCeil = 30000000;
+
   Future<List<Job>> search(SearchFilters filters) async {
-    if (Env.hasSupabase) {
-      final res = await _ref
-          .read(supabaseClientProvider)
-          .functions
-          .invoke('search-jobs', body: SearchQuery.from(filters).toJson());
-      final data = res.data;
-      final hits = (data is Map ? data['hits'] : null) as List? ?? const [];
-      return hits
-          .map<Job>((h) => Job.fromMap(Map<String, dynamic>.from(h as Map)))
-          .toList();
-    }
+    if (Env.hasSupabase) return _searchViaFeed(filters);
     return _filterMock(filters);
+  }
+
+  Future<List<Job>> _searchViaFeed(SearchFilters f) async {
+    var q = _ref
+        .read(supabaseClientProvider)
+        .from('job_feed')
+        .select()
+        .eq('status', 'open');
+
+    final query = f.query.trim();
+    if (query.isNotEmpty) {
+      // Strip PostgREST filter delimiters so the term can't break out of the
+      // or() grammar; a plain substring match across the key text columns.
+      final safe = query.replaceAll(RegExp(r'[,%()]'), ' ').trim();
+      if (safe.isNotEmpty) {
+        q = q.or(
+          'title.ilike.%$safe%,company_name.ilike.%$safe%,'
+          'category_name.ilike.%$safe%',
+        );
+      }
+    }
+    if (f.jobTypes.isNotEmpty) q = q.inFilter('job_type', f.jobTypes.toList());
+    if (f.experienceLevels.isNotEmpty) {
+      q = q.inFilter('experience_level', f.experienceLevels.toList());
+    }
+    if (f.workingModels.isNotEmpty) {
+      q = q.inFilter('working_model', f.workingModels.toList());
+    }
+    if (f.schedulePatterns.isNotEmpty) {
+      q = q.inFilter('schedule_pattern', f.schedulePatterns.toList());
+    }
+    if (f.formalizations.isNotEmpty) {
+      q = q.inFilter('formalization', f.formalizations.toList());
+    }
+    if (f.salaryPeriods.isNotEmpty) {
+      q = q.inFilter('salary_period', f.salaryPeriods.toList());
+    }
+    if (f.city != null && f.city!.isNotEmpty) q = q.eq('city', f.city!);
+    if (f.womenFriendly) q = q.eq('women_friendly', true);
+    if (f.nightShift) q = q.eq('night_shift', true);
+    if (f.disabilityFriendly) q = q.eq('disability_friendly', true);
+    if (f.salaryMin != null && f.salaryMin! > 0) {
+      q = q.gte('salary_max', f.salaryMin!);
+    }
+    if (f.salaryMax != null && f.salaryMax! < _salaryCeil) {
+      q = q.lte('salary_min', f.salaryMax!);
+    }
+    if (f.postedWithin != null) {
+      final cutoff = DateTime.now().toUtc().subtract(
+        Duration(days: f.postedWithin!),
+      );
+      q = q.gte('posted_at', cutoff.toIso8601String());
+    }
+
+    final orderCol = switch (f.sort) {
+      SearchSort.newest => 'posted_at',
+      SearchSort.salaryHigh => 'salary_max',
+      SearchSort.salaryLow => 'salary_min',
+    };
+    final rows = await q
+        // Active paid promotions float to the top, then the chosen sort.
+        .order('boost_active', ascending: false)
+        .order(orderCol, ascending: f.sort == SearchSort.salaryLow)
+        .limit(60);
+    return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
 
   List<Job> _filterMock(SearchFilters f) {
     final q = f.query.trim().toLowerCase();
+    final now = DateTime.now();
     final list = mockJobs.where((j) {
       if (q.isNotEmpty) {
         final haystack = '${j.title} ${j.companyName} ${j.skills.join(' ')}'
@@ -56,6 +117,10 @@ class SearchRepository {
           !f.formalizations.contains(j.formalization)) {
         return false;
       }
+      if (f.salaryPeriods.isNotEmpty &&
+          !f.salaryPeriods.contains(j.salaryPeriod)) {
+        return false;
+      }
       if (f.salaryMin != null &&
           (j.salaryMax ?? j.salaryMin ?? 0) < f.salaryMin!) {
         return false;
@@ -63,6 +128,10 @@ class SearchRepository {
       if (f.salaryMax != null &&
           (j.salaryMin ?? j.salaryMax ?? 0) > f.salaryMax!) {
         return false;
+      }
+      if (f.postedWithin != null) {
+        final cutoff = now.subtract(Duration(days: f.postedWithin!));
+        if (j.postedAt == null || j.postedAt!.isBefore(cutoff)) return false;
       }
       if (f.titles.isNotEmpty &&
           !f.titles.any(
