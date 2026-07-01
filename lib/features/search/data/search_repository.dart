@@ -59,6 +59,10 @@ class SearchRepository {
     if (f.salaryPeriods.isNotEmpty) {
       q = q.inFilter('salary_period', f.salaryPeriods.toList());
     }
+    if (f.driverLicenses.isNotEmpty) {
+      // A job matches if its required licenses overlap the seeker's selection.
+      q = q.overlaps('driver_licenses', f.driverLicenses.toList());
+    }
     if (f.city != null && f.city!.isNotEmpty) q = q.eq('city', f.city!);
     if (f.womenFriendly) q = q.eq('women_friendly', true);
     if (f.nightShift) q = q.eq('night_shift', true);
@@ -119,6 +123,10 @@ class SearchRepository {
       }
       if (f.salaryPeriods.isNotEmpty &&
           !f.salaryPeriods.contains(j.salaryPeriod)) {
+        return false;
+      }
+      if (f.driverLicenses.isNotEmpty &&
+          !f.driverLicenses.any((c) => j.driverLicenses.contains(c))) {
         return false;
       }
       if (f.salaryMin != null &&

@@ -49,6 +49,13 @@ void main() {
       expect(res.every((j) => j.jobType == 'internship'), isTrue);
     });
 
+    test('filters by driver license (any selected)', () async {
+      final repo = container.read(searchRepositoryProvider);
+      final res = await repo.search(const SearchFilters(driverLicenses: {'C'}));
+      expect(res, isNotEmpty);
+      expect(res.every((j) => j.driverLicenses.contains('C')), isTrue);
+    });
+
     test('sorts by highest pay', () async {
       final repo = container.read(searchRepositoryProvider);
       final res = await repo.search(

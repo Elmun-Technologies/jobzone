@@ -12,6 +12,7 @@ class SearchFilters {
     this.workingModels = const {},
     this.schedulePatterns = const {},
     this.formalizations = const {},
+    this.driverLicenses = const {},
     this.salaryPeriods = const {},
     this.titles = const {},
     this.salaryMin,
@@ -30,6 +31,10 @@ class SearchFilters {
   final Set<String> workingModels;
   final Set<String> schedulePatterns;
   final Set<String> formalizations;
+
+  /// Driver-license categories the job requires (Uzbek classes A/B/C/…). A job
+  /// matches when it requires any of the selected classes.
+  final Set<String> driverLicenses;
 
   /// Pay period(s) the amount is quoted in: hour / day / week / month / year.
   final Set<String> salaryPeriods;
@@ -55,6 +60,7 @@ class SearchFilters {
       workingModels.length +
       schedulePatterns.length +
       formalizations.length +
+      driverLicenses.length +
       salaryPeriods.length +
       titles.length +
       ((salaryMin != null || salaryMax != null) ? 1 : 0) +
@@ -71,6 +77,7 @@ class SearchFilters {
     Set<String>? workingModels,
     Set<String>? schedulePatterns,
     Set<String>? formalizations,
+    Set<String>? driverLicenses,
     Set<String>? salaryPeriods,
     Set<String>? titles,
     num? salaryMin,
@@ -91,6 +98,7 @@ class SearchFilters {
     workingModels: workingModels ?? this.workingModels,
     schedulePatterns: schedulePatterns ?? this.schedulePatterns,
     formalizations: formalizations ?? this.formalizations,
+    driverLicenses: driverLicenses ?? this.driverLicenses,
     salaryPeriods: salaryPeriods ?? this.salaryPeriods,
     titles: titles ?? this.titles,
     salaryMin: clearSalary ? null : (salaryMin ?? this.salaryMin),

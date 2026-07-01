@@ -1,6 +1,23 @@
 // Domain enums mirrored from the Postgres check constraints. `wire` is the
 // value stored in the DB / sent to Meilisearch; `fromWire` parses it back.
 
+/// Driver-license categories an employer can require on a posting and a seeker
+/// can filter by (Uzbek license classes A/B/C/D/E, trailer BE/CE/DE, tram TM,
+/// trolleybus TB). Shared by the post-job form and the search filter so the
+/// two lists never drift apart.
+const kDriverLicenseCategories = <String>[
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'BE',
+  'CE',
+  'DE',
+  'TM',
+  'TB',
+];
+
 enum JobType {
   fullTime('full_time'),
   partTime('part_time'),
