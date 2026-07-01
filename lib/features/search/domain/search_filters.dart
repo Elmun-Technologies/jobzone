@@ -12,9 +12,11 @@ class SearchFilters {
     this.workingModels = const {},
     this.schedulePatterns = const {},
     this.formalizations = const {},
+    this.salaryPeriods = const {},
     this.titles = const {},
     this.salaryMin,
     this.salaryMax,
+    this.postedWithin,
     this.city,
     this.womenFriendly = false,
     this.nightShift = false,
@@ -28,9 +30,15 @@ class SearchFilters {
   final Set<String> workingModels;
   final Set<String> schedulePatterns;
   final Set<String> formalizations;
+
+  /// Pay period(s) the amount is quoted in: hour / day / week / month / year.
+  final Set<String> salaryPeriods;
   final Set<String> titles;
   final num? salaryMin;
   final num? salaryMax;
+
+  /// "Posted within the last N days" (1 / 3 / 7 / 30), or null for any time.
+  final int? postedWithin;
   final String? city;
 
   /// Quick-find facets (set by the Home "collection" presets): women-friendly
@@ -47,8 +55,10 @@ class SearchFilters {
       workingModels.length +
       schedulePatterns.length +
       formalizations.length +
+      salaryPeriods.length +
       titles.length +
       ((salaryMin != null || salaryMax != null) ? 1 : 0) +
+      (postedWithin != null ? 1 : 0) +
       (city != null && city!.isNotEmpty ? 1 : 0) +
       (womenFriendly ? 1 : 0) +
       (nightShift ? 1 : 0) +
@@ -61,10 +71,13 @@ class SearchFilters {
     Set<String>? workingModels,
     Set<String>? schedulePatterns,
     Set<String>? formalizations,
+    Set<String>? salaryPeriods,
     Set<String>? titles,
     num? salaryMin,
     num? salaryMax,
     bool clearSalary = false,
+    int? postedWithin,
+    bool clearPostedWithin = false,
     String? city,
     bool clearCity = false,
     bool? womenFriendly,
@@ -78,9 +91,13 @@ class SearchFilters {
     workingModels: workingModels ?? this.workingModels,
     schedulePatterns: schedulePatterns ?? this.schedulePatterns,
     formalizations: formalizations ?? this.formalizations,
+    salaryPeriods: salaryPeriods ?? this.salaryPeriods,
     titles: titles ?? this.titles,
     salaryMin: clearSalary ? null : (salaryMin ?? this.salaryMin),
     salaryMax: clearSalary ? null : (salaryMax ?? this.salaryMax),
+    postedWithin: clearPostedWithin
+        ? null
+        : (postedWithin ?? this.postedWithin),
     city: clearCity ? null : (city ?? this.city),
     womenFriendly: womenFriendly ?? this.womenFriendly,
     nightShift: nightShift ?? this.nightShift,
