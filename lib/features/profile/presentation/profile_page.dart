@@ -175,6 +175,11 @@ class ProfilePage extends ConsumerWidget {
               onTap: () => context.push(Routes.accountSeekingStatus),
             ),
             _MenuTile(
+              icon: Icons.notifications_none_rounded,
+              label: l.savedSearches,
+              onTap: () => context.push(Routes.savedSearches),
+            ),
+            _MenuTile(
               icon: Icons.settings_outlined,
               label: l.settings,
               onTap: () => context.push(Routes.accountSettings),

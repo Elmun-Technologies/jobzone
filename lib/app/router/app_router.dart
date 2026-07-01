@@ -82,6 +82,7 @@ import '../../features/search/presentation/category_results_page.dart';
 import '../../features/search/presentation/collection_results_page.dart';
 import '../../features/search/presentation/explore_page.dart';
 import '../../features/search/presentation/filter_page.dart';
+import '../../features/search/presentation/saved_searches_page.dart';
 import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
@@ -503,6 +504,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.accountSeekingStatus,
         builder: (c, s) => const SeekingStatusPage(),
+      ),
+      GoRoute(
+        path: Routes.savedSearches,
+        builder: (c, s) => const SavedSearchesPage(),
       ),
       GoRoute(
         path: Routes.accountSettings,
