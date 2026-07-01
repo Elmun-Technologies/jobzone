@@ -20,20 +20,6 @@ import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'widgets/job_location_picker.dart';
 
-/// Driver-license categories offered as chips on the post-job form.
-const _kLicenseCategories = [
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'BE',
-  'CE',
-  'DE',
-  'TM',
-  'TB',
-];
-
 /// Create or edit a job posting. Pass [job] (via the edit route's `extra`) to
 /// prefill the form for editing; omit it to create a new posting.
 class PostJobPage extends ConsumerStatefulWidget {
@@ -699,7 +685,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                         Wrap(
                           spacing: AppSpacing.sm,
                           children: [
-                            for (final c in _kLicenseCategories)
+                            for (final c in kDriverLicenseCategories)
                               FilterChip(
                                 label: Text(c),
                                 selected: _licenses.contains(c),

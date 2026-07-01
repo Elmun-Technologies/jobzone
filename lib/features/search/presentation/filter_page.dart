@@ -177,6 +177,15 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
+                  _ChipSection(
+                    title: l.driverLicenseLabel,
+                    options: {for (final c in kDriverLicenseCategories) c: c},
+                    selected: _draft.driverLicenses,
+                    onChanged: (s) => setState(
+                      () => _draft = _draft.copyWith(driverLicenses: s),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   Row(
                     children: [
                       Expanded(

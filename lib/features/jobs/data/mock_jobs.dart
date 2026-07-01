@@ -231,6 +231,7 @@ final List<Job> mockJobs = [
     schedulePattern: 'custom',
     formalization: 'employment_contract',
     skills: const ['G\'isht terish', 'Suvoq', 'Beton'],
+    driverLicenses: const ['C', 'E'],
     description:
         'Vahta usulida qurilish ob\'ektlarida ishlash. Yotoqxona bilan.',
     applicantsCount: 33,
@@ -254,6 +255,7 @@ final List<Job> mockJobs = [
     currency: 'UZS',
     salaryPeriod: 'month',
     skills: const ['Shahar yo\'llarini bilish', 'Vaqtида yetkazish'],
+    driverLicenses: const ['B'],
     description:
         'Buyurtmalarni mijozlarga yetkazib berish. Moslashuvchan grafik.',
     applicantsCount: 48,
