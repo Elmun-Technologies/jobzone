@@ -5,7 +5,7 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../localization/l10n_extension.dart';
-import '../../../shared/providers/app_flags.dart';
+import '../../auth/application/session_flags.dart';
 import '../data/permission_service.dart';
 import 'widgets/permission_scaffold.dart';
 
@@ -15,7 +15,9 @@ class NotificationAccessPage extends ConsumerWidget {
   const NotificationAccessPage({super.key});
 
   Future<void> _finish(BuildContext context, WidgetRef ref) async {
-    await ref.read(appFlagsProvider.notifier).setProfileComplete(true);
+    // Local flag + profiles.onboarding_complete, so the next sign-in on any
+    // device skips the setup chain.
+    await completeProfileSetup(ref);
     if (context.mounted) context.go(Routes.home);
   }
 

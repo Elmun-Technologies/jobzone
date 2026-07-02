@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
+import '../../../../core/config/env.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/enums/enums.dart';
 import '../../application/role_controller.dart';
+import '../../application/session_flags.dart';
 import '../widgets/auth_header.dart';
 
 /// Sits between Verify and Complete Profile during signup: the user picks
@@ -24,6 +26,23 @@ class _ChooseRolePageState extends ConsumerState<ChooseRolePage> {
   UserRole? _selected;
   bool _saving = false;
 
+  // A returning account (Google/email/phone) lands here with blank local
+  // flags; check the server profile first — if it already finished
+  // onboarding, hydration flips the flags and the router bounces straight to
+  // its shell instead of re-asking the role.
+  bool _checking = Env.hasSupabase;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_checking) _hydrate();
+  }
+
+  Future<void> _hydrate() async {
+    await hydrateSessionFlags(ref);
+    if (mounted) setState(() => _checking = false);
+  }
+
   Future<void> _continue() async {
     final role = _selected;
     if (role == null) return;
@@ -39,6 +58,9 @@ class _ChooseRolePageState extends ConsumerState<ChooseRolePage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    if (_checking) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       body: SafeArea(
         child: Padding(
