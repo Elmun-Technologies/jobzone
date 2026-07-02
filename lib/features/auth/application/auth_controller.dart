@@ -49,6 +49,12 @@ class AuthController extends AsyncNotifier<void> {
   Future<bool> resendSignupOtp(String email) =>
       _run(() => _repo.resendSignupOtp(email));
 
+  Future<bool> sendPhoneOtp(String phone) =>
+      _run(() => _repo.sendPhoneOtp(phone));
+
+  Future<bool> verifyPhoneOtp({required String phone, required String token}) =>
+      _run(() => _repo.verifyPhoneOtp(phone: phone, token: token));
+
   Future<bool> sendPasswordReset(String email) =>
       _run(() => _repo.resetPasswordForEmail(email));
 

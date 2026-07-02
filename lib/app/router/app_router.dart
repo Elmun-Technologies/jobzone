@@ -21,6 +21,7 @@ import '../../features/auth/presentation/pages/choose_role_page.dart';
 import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/auth/presentation/pages/create_account_page.dart';
 import '../../features/auth/presentation/pages/new_password_page.dart';
+import '../../features/auth/presentation/pages/phone_sign_in_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/verify_code_page.dart';
 import '../../features/chat/domain/chat_models.dart';
@@ -119,6 +120,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // Auth
       GoRoute(path: Routes.signIn, builder: (c, s) => const SignInPage()),
+      GoRoute(
+        path: Routes.phoneSignIn,
+        builder: (c, s) => const PhoneSignInPage(),
+      ),
       GoRoute(
         path: Routes.createAccount,
         builder: (c, s) => const CreateAccountPage(),

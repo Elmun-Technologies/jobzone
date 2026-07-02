@@ -27,6 +27,15 @@ abstract interface class AuthRepository {
 
   Future<void> resendSignupOtp(String email);
 
+  /// Sends a one-time code to [phone] (E.164). Delivery goes through the
+  /// project's Send-SMS auth hook — for Yolla that's a Telegram message, not
+  /// an SMS. Creates the account on first use (sign-in and sign-up are the
+  /// same flow).
+  Future<void> sendPhoneOtp(String phone);
+
+  /// Verifies the phone code; Supabase mints the session on success.
+  Future<void> verifyPhoneOtp({required String phone, required String token});
+
   Future<void> resetPasswordForEmail(String email);
 
   Future<void> updatePassword(String newPassword);
