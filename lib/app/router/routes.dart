@@ -8,6 +8,7 @@ abstract final class Routes {
 
   // Auth
   static const signIn = '/auth/sign-in';
+  static const phoneSignIn = '/auth/phone';
   static const createAccount = '/auth/create-account';
   static const verifyCode = '/auth/verify-code';
   static const newPassword = '/auth/new-password';
