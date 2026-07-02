@@ -198,7 +198,8 @@
     "status": {
       "draft": "Draft",
       "open": "Open",
-      "closed": "Closed"
+      "closed": "Closed",
+      "blocked": "Blocked"
     },
     "exp": {
       "entry": "Entry",
