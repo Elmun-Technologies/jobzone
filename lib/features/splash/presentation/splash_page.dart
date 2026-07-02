@@ -1,27 +1,34 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
+import '../../auth/application/session_flags.dart';
 
-/// Branded splash. In the Auth phase this will await the restored session and
-/// route to welcome / onboarding / home accordingly.
-class SplashPage extends StatefulWidget {
+/// Branded splash. While the brand frame shows, the router flags are hydrated
+/// from the restored session's profile, so the first hop lands right — a
+/// returning account goes straight to its shell instead of re-onboarding.
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(milliseconds: 1200), () {
-      if (mounted) context.go(Routes.welcome);
-    });
+    _boot();
+  }
+
+  Future<void> _boot() async {
+    await Future.wait([
+      hydrateSessionFlags(ref), // no-op offline / signed out
+      Future<void>.delayed(const Duration(milliseconds: 1200)),
+    ]);
+    if (mounted) context.go(Routes.welcome);
   }
 
   @override

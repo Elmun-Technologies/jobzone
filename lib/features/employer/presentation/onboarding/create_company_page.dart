@@ -6,8 +6,8 @@ import '../../../../app/router/routes.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
-import '../../../../shared/providers/app_flags.dart';
 import '../../../../shared/widgets/snackbars.dart';
+import '../../../auth/application/session_flags.dart';
 import '../../data/company_admin_repository.dart';
 
 /// Employer onboarding: create the company. Finishing it persists the company
@@ -56,7 +56,9 @@ class _CreateCompanyPageState extends ConsumerState<CreateCompanyPage> {
             website: _website.text.trim(),
             headquarters: _hq.text.trim(),
           );
-      await ref.read(appFlagsProvider.notifier).setProfileComplete(true);
+      // Local flag + profiles.onboarding_complete, so the next sign-in on any
+      // device skips the setup chain.
+      await completeProfileSetup(ref);
       ref.invalidate(myCompanyProvider);
       if (mounted) context.go(Routes.employerDashboard);
     } catch (e) {
