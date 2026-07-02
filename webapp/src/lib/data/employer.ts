@@ -55,6 +55,8 @@ export interface EmployerJob {
   status: string;
   applicantsCount: number;
   postedAt: string | null;
+  /** Set when an admin took the job down (0038) — owners can't clear it. */
+  blockedAt: string | null;
 }
 
 /** All jobs (any status) for a company the user owns. */
@@ -64,7 +66,7 @@ export async function getMyJobs(companyId: string): Promise<EmployerJob[]> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("jobs")
-      .select("id, title, status, applicants_count, posted_at")
+      .select("id, title, status, applicants_count, posted_at, blocked_at")
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
     if (error) throw error;
@@ -76,6 +78,7 @@ export async function getMyJobs(companyId: string): Promise<EmployerJob[]> {
         status: String(r.status ?? "open"),
         applicantsCount: Number(r.applicants_count ?? 0),
         postedAt: typeof r.posted_at === "string" ? r.posted_at : null,
+        blockedAt: typeof r.blocked_at === "string" ? r.blocked_at : null,
       };
     });
   } catch (e) {

@@ -198,7 +198,8 @@
     "status": {
       "draft": "Qoralama",
       "open": "Ochiq",
-      "closed": "Yopiq"
+      "closed": "Yopiq",
+      "blocked": "Bloklangan"
     },
     "exp": {
       "entry": "Boshlang'ich",

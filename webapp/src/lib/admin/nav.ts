@@ -28,10 +28,10 @@ export const adminNav: AdminNavGroup[] = [
   {
     label: n.groups.moderation,
     items: [
-      { key: "users", label: n.users, href: "/admin/users", enabled: false },
-      { key: "companies", label: n.companies, href: "/admin/companies", enabled: false },
-      { key: "jobs", label: n.jobs, href: "/admin/jobs", enabled: false },
-      { key: "reviews", label: n.reviews, href: "/admin/reviews", enabled: false },
+      { key: "users", label: n.users, href: "/admin/users", enabled: true },
+      { key: "companies", label: n.companies, href: "/admin/companies", enabled: true },
+      { key: "jobs", label: n.jobs, href: "/admin/jobs", enabled: true },
+      { key: "reviews", label: n.reviews, href: "/admin/reviews", enabled: true },
     ],
   },
   {
@@ -54,7 +54,7 @@ export const adminNav: AdminNavGroup[] = [
     items: [
       { key: "broadcast", label: n.broadcast, href: "/admin/broadcast", enabled: false },
       { key: "settings", label: n.settings, href: "/admin/settings", enabled: false },
-      { key: "audit", label: n.audit, href: "/admin/audit", enabled: false },
+      { key: "audit", label: n.audit, href: "/admin/audit", enabled: true },
     ],
   },
 ];
