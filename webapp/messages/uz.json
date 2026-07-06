@@ -14,7 +14,8 @@
     "employer": "Ish beruvchi",
     "signIn": "Kirish",
     "account": "Hisob",
-    "notifications": "Bildirishnomalar"
+    "notifications": "Bildirishnomalar",
+    "about": "Loyiha"
   },
   "explore": {
     "title": "Ishlar xaritasi",
@@ -425,5 +426,253 @@
   },
   "localeSwitcher": {
     "label": "Til"
+  },
+  "landing": {
+    "meta": {
+      "title": "yollla — ishlar xaritasi",
+      "description": "Uyingizga yaqin ish — bitta xaritada. Maosh, jadval, masofa va ikki klikda ariza."
+    },
+    "hero": {
+      "badge": "Tez orada · Toshkent",
+      "title": "Uyingizga yaqin ish",
+      "subtitle": "Shahardagi barcha ish — bitta xaritada. Belgiga kursorni olib boring yoki bosing: maosh, jadval, masofa — va ikki klikda ariza, rezyumesiz.",
+      "ctaFind": "Ish topish",
+      "ctaPost": "Vakansiya joylash",
+      "free": "Ish izlovchilarga — doim bepul"
+    },
+    "map": {
+      "eyebrow": "Nega xarita",
+      "title": "Masofa — birinchi omil",
+      "body": "Sotuvchi, kuryer va ofitsiant uchun asosiy savol — «kim bo'lib» emas, «qayerda» ishlash. Bir soatlik yo'l maosh va kuchni yeb qo'yadi. E'lon lentalari buni e'tiborsiz qoldiradi — biz masofani qidiruv asosiga aylantiramiz.",
+      "hint": "Belgiga kursorni olib boring yoki bosing — vakansiya ochiladi",
+      "feedTitle": "E'lonlar lentasi",
+      "feedTag": "hozirgidek",
+      "feedBody": "Bu qayerda? Noma'lum. Yuzlab bir xil qator.",
+      "mapTitle": "yollla xaritasi",
+      "mapTag": "bizning usul",
+      "mapBody": "Darhol ko'rinadi: mana bunisi — piyoda 10 daqiqada."
+    },
+    "how": {
+      "eyebrow": "Ish izlovchilarga",
+      "title": "Ishgacha uch qadam",
+      "steps": {
+        "open": {
+          "title": "Xaritani oching",
+          "body": "Ro'yxatdan o'tish va rezyumesiz. Uyingiz yaqinida kim odam izlayotgani darhol ko'rinadi."
+        },
+        "filter": {
+          "title": "Filtrlang",
+          "body": "Soha, maosh, jadval va «yonimda» radiusi — faqat keraklisi qoladi."
+        },
+        "apply": {
+          "title": "Ikki klikda ariza qoldiring",
+          "body": "Ism va telefon — bo'ldi. Ish beruvchi arizani darhol Telegramda oladi."
+        }
+      }
+    },
+    "employers": {
+      "eyebrow": "Ish beruvchilarga",
+      "title": "Vakansiya xaritada — 3 daqiqada",
+      "body": "Menejerlar va uzoq kelishuvlarsiz: formani to'ldirdingiz — belgi allaqachon tumaningiz xaritasida.",
+      "points": {
+        "area": "Nomzodlar o'z tumaningizdan — suhbatga yetib keladi",
+        "telegram": "Arizalar darhol Telegramda: ism va telefon",
+        "pay": "To'lov Payme yoki Click, kompaniyalarga — hisob-faktura",
+        "free": "Birinchi vakansiya — bepul"
+      },
+      "cta": "Vakansiya joylash",
+      "card": {
+        "badge": "Yangi ariza",
+        "store": "Sizning do'koningiz",
+        "district": "Chilonzor · 3 vakansiya",
+        "appsTitle": "Arizalar",
+        "name1": "Diyora",
+        "name2": "Sanjar"
+      }
+    },
+    "reputation": {
+      "eyebrow": "Bunday hech kimda yo'q",
+      "title": "«Gullar va pashshalar» — obro' xaritada",
+      "body": "Ish izlovchilar qo'ng'iroqdan oldin qayerga borishini ko'radi. Faqat yollla orqali haqiqatan ishga kirganlar baholaydi.",
+      "steps": {
+        "s1": "yollla orqali ishga kirdi → «ishga joylashdim» tugmasi",
+        "s2": "30 kundan so'ng bot 3 savol beradi: maosh o'z vaqtidami, shartlar mos keldimi, tavsiya qilasizmi",
+        "s3": "Reyting belgida ko'rinadi: gullar va asalarilar — yoki pashshalar"
+      },
+      "chips": {
+        "verified": "faqat tasdiqlangan naymlar",
+        "badge": "belgi — 5 bahodan",
+        "notForSale": "pulga o'chirilmaydi",
+        "reply": "ochiq javob huquqi"
+      },
+      "note": "«Ishga joylashdim» tugmasi — birinchi kundan · reyting — 4–6-oydan",
+      "good": {
+        "name": "«Bahor» kafesi",
+        "caption": "maosh o'z vaqtida · 47 baho"
+      },
+      "bad": {
+        "name": "7-ombor",
+        "caption": "shartlar mos kelmadi · 11 baho"
+      },
+      "footnote": "baholar — faqat haqiqiy naymlardan"
+    },
+    "pricing": {
+      "eyebrow": "Tariflar",
+      "title": "Bir kunlik bo'sh joydan arzon",
+      "free": {
+        "name": "Free",
+        "price": "0",
+        "unit": "so'm · start uchun",
+        "f1": "1 faol vakansiya",
+        "f2": "Xaritada oddiy belgi"
+      },
+      "standard": {
+        "name": "Standard",
+        "price": "99 000",
+        "unit": "so'm · vakansiya · 30 kun",
+        "f1": "Qidiruvda ustunlik",
+        "f2": "Barcha asosiy funksiyalar"
+      },
+      "highlight": {
+        "name": "Highlight",
+        "price": "199 000",
+        "unit": "so'm · vakansiya · 30 kun",
+        "tag": "Eng ko'rinarli",
+        "f1": "Xaritada yorqin volt-belgi",
+        "f2": "Ro'yxat boshida"
+      },
+      "business": {
+        "name": "Business",
+        "price": "499 000",
+        "unit": "so'm · oyiga",
+        "f1": "10 tagacha vakansiya",
+        "f2": "Kompaniya logotipi xaritada",
+        "f3": "Arizalar statistikasi"
+      },
+      "note": "Faqat ish beruvchilar to'laydi. Ish izlovchilarga — doim bepul.",
+      "footnote": "Tariflar — startdagi mo'ljal, aniqlashtiriladi"
+    },
+    "comparison": {
+      "eyebrow": "Taqqoslash",
+      "title": "Ularda xarita — qo'shimcha. Bizda — mahsulot",
+      "cols": {
+        "us": "yollla",
+        "hh": "hh.uz",
+        "olx": "OLX",
+        "tg": "Telegram"
+      },
+      "rows": {
+        "map": "Xarita — qidiruv asosi",
+        "near": "«Yonimda» filtri",
+        "noResume": "Rezyumesiz ariza",
+        "price": "Kichik biznesga narxlar",
+        "reputation": "Ish beruvchi obro'si"
+      },
+      "mapCell": "mahsulot asosi",
+      "partial": "qisman"
+    },
+    "economics": {
+      "eyebrow": "Model",
+      "title": "Oddiy iqtisod",
+      "body": "To'lovni ish beruvchilar qiladi. Ish izlovchilarga — doim bepul: bu baza va arizalar o'sishining dvigateli.",
+      "payers": "300",
+      "payersLabel": "pullik ish beruvchi",
+      "check": "150 000",
+      "checkLabel": "o'rtacha chek, so'm",
+      "total": "45 mln",
+      "totalLabel": "so'm oyiga",
+      "totalNote": "oyiga ≈ $3 500 · 12-oyga mo'ljal",
+      "metrics": {
+        "conversion": "Free → pullik konversiya ≥ 10%",
+        "cac": "CAC < 1 oylik chek",
+        "main": "asosiy metrika — vakansiyaga arizalar"
+      },
+      "budgetTitle": "Start byudjeti",
+      "budgetTotal": "$5 000",
+      "budgetNote": "solo-founder · vibe-coding",
+      "budget": {
+        "marketing": {
+          "label": "Marketing",
+          "value": "$1 500"
+        },
+        "base": {
+          "label": "Bazani to'ldirish",
+          "value": "$600"
+        },
+        "ai": {
+          "label": "AI vositalari",
+          "value": "$500"
+        },
+        "infra": {
+          "label": "Domen, hosting, API",
+          "value": "$300"
+        },
+        "legal": {
+          "label": "Rasmiylashtirish va to'lovlar",
+          "value": "$300"
+        },
+        "design": {
+          "label": "Dizayn",
+          "value": "$200"
+        },
+        "reserve": {
+          "label": "Zaxira",
+          "value": "$1 600"
+        }
+      }
+    },
+    "roadmap": {
+      "eyebrow": "Reja",
+      "title": "Marshrut: Toshkent → butun mamlakat",
+      "hereLabel": "BIZ SHU YERDAMIZ",
+      "items": {
+        "m12": {
+          "period": "1–2-OY",
+          "title": "MVP tayyor",
+          "body": "Toshkent xaritasida 2 000 vakansiya"
+        },
+        "m3": {
+          "period": "3-OY",
+          "title": "Ochiq start",
+          "body": "5 000 foydalanuvchi, ilk 20 pullik"
+        },
+        "m46": {
+          "period": "4–6-OY",
+          "title": "O'zini oqlash",
+          "body": "20 000 MAU, 100 pullik, «gullar» starti"
+        },
+        "m79": {
+          "period": "7–9-OY",
+          "title": "To'rt shahar",
+          "body": "Samarqand, Namangan, Andijon, Buxoro"
+        },
+        "m1012": {
+          "period": "10–12-OY",
+          "title": "Butun mamlakat",
+          "body": "300 pullik + mobil ilova"
+        }
+      }
+    },
+    "partners": {
+      "eyebrow": "Hamkorlarga",
+      "title": "Birinchi kun hamkorlarini izlaymiz",
+      "telegram": {
+        "tag": "01 — TELEGRAM",
+        "title": "Vakansiya kanallariga",
+        "body": "E'lonlaringizni manba ko'rsatilgan holda xaritaga chiqaramiz: auditoriyaga — qulay format, sizga — trafik va yangi obunachilar."
+      },
+      "business": {
+        "tag": "02 — BIZNES",
+        "title": "Dastlabki 50 biznesga",
+        "body": "Chakana savdo, umumiy ovqatlanish, servis, omborlar. Startgacha vakansiyalaringizni bepul joylaymiz va kabinetni shaxsan sozlab beramiz."
+      }
+    },
+    "contact": {
+      "title": "Toshkentda ishga tushamiz",
+      "body": "2026-yil kuzi. Birinchi ish beruvchilar startgacha bepul joylashadi va asoschining shaxsiy yordamini oladi.",
+      "ctaPost": "Vakansiya joylash",
+      "ctaWrite": "Muallifga yozish",
+      "author": "Jamshid Fayziyev · Toshkent"
+    }
   }
 }
