@@ -16,6 +16,7 @@ import {
 } from "@/lib/format";
 import { haversineMeters, useUserLocation, type LatLng } from "@/lib/geo";
 import { cn } from "@/lib/utils";
+import { jobLatLng } from "@/lib/uz-geo";
 
 const TASHKENT: [number, number] = [41.3111, 69.2797];
 const NEAR_RADIUS_M = 10_000;
@@ -74,10 +75,13 @@ export default function JobsMapInner({
   const located = useMemo<Located[]>(
     () =>
       jobs
-        .filter(
-          (j): j is Job & { lat: number; lng: number } =>
-            j.lat != null && j.lng != null,
-        )
+        // Resolve each job to a map point: its exact pin, else its city
+        // centroid (jittered). Jobs with neither drop off the map.
+        .map((j) => {
+          const pos = jobLatLng(j);
+          return pos ? { ...j, lat: pos.lat, lng: pos.lng } : null;
+        })
+        .filter((j): j is Job & { lat: number; lng: number } => j != null)
         .map((j) => ({
           ...j,
           distance: loc
