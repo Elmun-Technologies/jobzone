@@ -334,7 +334,12 @@
     "recentJobs": "Recent jobs",
     "viewAll": "View all",
     "topCompanies": "Top companies",
-    "popularSearches": "Popular searches"
+    "popularSearches": "Popular searches",
+    "heroBadge": "Jobs near you · on the map",
+    "mapTitle": "Jobs near you — on the map",
+    "mapLead": "Tap a pin: salary, schedule, distance — and apply in 2 clicks.",
+    "exploreCta": "Open the full map",
+    "learnMore": "Learn more"
   },
   "jobs": {
     "title": "Jobs",
