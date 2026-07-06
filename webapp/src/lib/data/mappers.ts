@@ -31,6 +31,7 @@ export function toJob(r: Row): Job {
     jobType: str(r.job_type),
     experienceLevel: str(r.experience_level),
     workingModel: str(r.working_model),
+    schedulePattern: str(r.schedule_pattern),
     city: str(r.city),
     country: str(r.country),
     location: str(r.location),

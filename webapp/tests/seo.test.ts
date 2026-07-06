@@ -18,6 +18,7 @@ const job: Job = {
   jobType: "full_time",
   experienceLevel: "senior",
   workingModel: "remote",
+  schedulePattern: "5_2",
   city: "Tashkent",
   country: "UZ",
   location: null,

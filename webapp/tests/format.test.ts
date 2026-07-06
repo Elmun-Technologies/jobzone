@@ -18,6 +18,7 @@ const base: Job = {
   jobType: null,
   experienceLevel: null,
   workingModel: null,
+  schedulePattern: null,
   city: null,
   country: null,
   location: null,
