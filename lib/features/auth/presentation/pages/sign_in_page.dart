@@ -187,6 +187,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               ),
               const SizedBox(height: AppSpacing.xl),
               AuthSocialRow(label: l.orSignInWith),
+              const SizedBox(height: AppSpacing.lg),
+              OutlinedButton.icon(
+                onPressed: () => context.push(Routes.phoneSignIn),
+                icon: const Icon(Icons.send_rounded, size: 18),
+                label: Text(l.continueWithPhone),
+              ),
               const SizedBox(height: AppSpacing.xl),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
