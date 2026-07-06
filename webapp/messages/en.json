@@ -14,7 +14,8 @@
     "employer": "Employer",
     "signIn": "Sign in",
     "account": "Account",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "about": "About"
   },
   "explore": {
     "title": "Jobs map",
@@ -425,5 +426,253 @@
   },
   "localeSwitcher": {
     "label": "Language"
+  },
+  "landing": {
+    "meta": {
+      "title": "yollla — the jobs map",
+      "description": "Work close to home on one map. Salary, schedule, distance, and apply in two clicks."
+    },
+    "hero": {
+      "badge": "Coming soon · Tashkent",
+      "title": "Work close to home",
+      "subtitle": "Every job in the city on one map. Point at a pin or tap it — salary, schedule, distance — and apply in two clicks, no résumé.",
+      "ctaFind": "Find a job",
+      "ctaPost": "Post a vacancy",
+      "free": "For job seekers — free forever"
+    },
+    "map": {
+      "eyebrow": "Why a map",
+      "title": "Distance is factor #1",
+      "body": "For a salesperson, courier or waiter the main question isn't “what job” but “where”. An hour's commute eats your pay and your energy. Listing feeds ignore this — we make distance the basis of the search.",
+      "hint": "Point at a pin or tap it — the vacancy opens",
+      "feedTitle": "Listing feed",
+      "feedTag": "as it is today",
+      "feedBody": "Where is it? Unknown. Hundreds of identical rows.",
+      "mapTitle": "The yollla map",
+      "mapTag": "our way",
+      "mapBody": "You see it at once: this one is a 10-minute walk."
+    },
+    "how": {
+      "eyebrow": "For job seekers",
+      "title": "Three steps to a job",
+      "steps": {
+        "open": {
+          "title": "Open the map",
+          "body": "No sign-up, no résumé. You instantly see who's hiring near your home."
+        },
+        "filter": {
+          "title": "Filter",
+          "body": "Field, salary, schedule and a “near me” radius — only what you need remains."
+        },
+        "apply": {
+          "title": "Apply in two clicks",
+          "body": "Name and phone — that's it. The employer gets your application straight to Telegram."
+        }
+      }
+    },
+    "employers": {
+      "eyebrow": "For employers",
+      "title": "A vacancy on the map — in 3 minutes",
+      "body": "No managers, no drawn-out approvals: you fill the form — your pin is already on your district's map.",
+      "points": {
+        "area": "Candidates from your own district — they actually reach the interview",
+        "telegram": "Applications straight to Telegram: name and phone",
+        "pay": "Pay with Payme or Click, an invoice for companies",
+        "free": "First vacancy — free"
+      },
+      "cta": "Post a vacancy",
+      "card": {
+        "badge": "New application",
+        "store": "Your store",
+        "district": "Chilanzar · 3 vacancies",
+        "appsTitle": "Applications",
+        "name1": "Diyora",
+        "name2": "Sanjar"
+      }
+    },
+    "reputation": {
+      "eyebrow": "No one else has this",
+      "title": "“Flowers and flies” — reputation on the map",
+      "body": "Job seekers see where they're going to work before they even call. Only those actually hired through yollla can rate.",
+      "steps": {
+        "s1": "Hired through yollla → taps “I got the job”",
+        "s2": "After 30 days a bot asks 3 questions: paid on time, conditions matched, would you recommend",
+        "s3": "The rating shows right on the pin: flowers and bees — or flies"
+      },
+      "chips": {
+        "verified": "only confirmed hires",
+        "badge": "badge — from 5 ratings",
+        "notForSale": "can't be removed for money",
+        "reply": "right to a public reply"
+      },
+      "note": "The “I got the job” button — from day one · the map rating — from month 4–6",
+      "good": {
+        "name": "Bahor Café",
+        "caption": "paid on time · 47 ratings"
+      },
+      "bad": {
+        "name": "Warehouse #7",
+        "caption": "conditions didn't match · 11 ratings"
+      },
+      "footnote": "ratings — only from real hires"
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "Cheaper than one day of downtime",
+      "free": {
+        "name": "Free",
+        "price": "0",
+        "unit": "UZS · to get started",
+        "f1": "1 active vacancy",
+        "f2": "A plain pin on the map"
+      },
+      "standard": {
+        "name": "Standard",
+        "price": "99 000",
+        "unit": "UZS · vacancy · 30 days",
+        "f1": "Priority in results",
+        "f2": "All core features"
+      },
+      "highlight": {
+        "name": "Highlight",
+        "price": "199 000",
+        "unit": "UZS · vacancy · 30 days",
+        "tag": "Most visible",
+        "f1": "A bright volt pin on the map",
+        "f2": "Top of the vacancy list"
+      },
+      "business": {
+        "name": "Business",
+        "price": "499 000",
+        "unit": "UZS · per month",
+        "f1": "Up to 10 vacancies",
+        "f2": "Company logo on the map",
+        "f3": "Application analytics"
+      },
+      "note": "Only employers pay. For job seekers — free forever.",
+      "footnote": "Prices are a launch estimate, subject to refinement"
+    },
+    "comparison": {
+      "eyebrow": "Comparison",
+      "title": "For them the map is a feature. For us — the product",
+      "cols": {
+        "us": "yollla",
+        "hh": "hh.uz",
+        "olx": "OLX",
+        "tg": "Telegram"
+      },
+      "rows": {
+        "map": "Map as the basis of search",
+        "near": "“Near me” filter",
+        "noResume": "Apply without a résumé",
+        "price": "Pricing for small business",
+        "reputation": "Employer reputation"
+      },
+      "mapCell": "core of the product",
+      "partial": "partly"
+    },
+    "economics": {
+      "eyebrow": "Model",
+      "title": "Simple economics",
+      "body": "Employers pay. For job seekers — free forever: that is the engine that grows the base and the applications.",
+      "payers": "300",
+      "payersLabel": "paying employers",
+      "check": "150 000",
+      "checkLabel": "average check, UZS",
+      "total": "45M",
+      "totalLabel": "UZS per month",
+      "totalNote": "≈ $3,500 per month · target by month 12",
+      "metrics": {
+        "conversion": "Free → paid conversion ≥ 10%",
+        "cac": "CAC < 1 monthly check",
+        "main": "main metric — applications per vacancy"
+      },
+      "budgetTitle": "Launch budget",
+      "budgetTotal": "$5 000",
+      "budgetNote": "solo founder · vibe-coding",
+      "budget": {
+        "marketing": {
+          "label": "Marketing",
+          "value": "$1 500"
+        },
+        "base": {
+          "label": "Seeding the base",
+          "value": "$600"
+        },
+        "ai": {
+          "label": "AI tools",
+          "value": "$500"
+        },
+        "infra": {
+          "label": "Domain, hosting, API",
+          "value": "$300"
+        },
+        "legal": {
+          "label": "Registration & payments",
+          "value": "$300"
+        },
+        "design": {
+          "label": "Design",
+          "value": "$200"
+        },
+        "reserve": {
+          "label": "Reserve",
+          "value": "$1 600"
+        }
+      }
+    },
+    "roadmap": {
+      "eyebrow": "Roadmap",
+      "title": "Route: Tashkent → the whole country",
+      "hereLabel": "WE ARE HERE",
+      "items": {
+        "m12": {
+          "period": "MONTH 1–2",
+          "title": "MVP ready",
+          "body": "2,000 vacancies on the Tashkent map"
+        },
+        "m3": {
+          "period": "MONTH 3",
+          "title": "Public launch",
+          "body": "5,000 users, first 20 paying"
+        },
+        "m46": {
+          "period": "MONTH 4–6",
+          "title": "Break-even",
+          "body": "20,000 MAU, 100 paying, “flowers and flies” launch"
+        },
+        "m79": {
+          "period": "MONTH 7–9",
+          "title": "Four cities",
+          "body": "Samarkand, Namangan, Andijan, Bukhara"
+        },
+        "m1012": {
+          "period": "MONTH 10–12",
+          "title": "The whole country",
+          "body": "300 paying + a mobile app"
+        }
+      }
+    },
+    "partners": {
+      "eyebrow": "For partners",
+      "title": "We're looking for day-one partners",
+      "telegram": {
+        "tag": "01 — TELEGRAM",
+        "title": "For vacancy channels",
+        "body": "We'll put your listings on the map with a source credit: a convenient format for the audience, traffic and new subscribers for you."
+      },
+      "business": {
+        "tag": "02 — BUSINESS",
+        "title": "For the first 50 businesses",
+        "body": "Retail, food service, services, warehouses. Before launch we post your vacancies for free and personally help set up your cabinet."
+      }
+    },
+    "contact": {
+      "title": "We launch in Tashkent",
+      "body": "Autumn 2026. The first employers post for free before launch and get the founder's personal support.",
+      "ctaPost": "Post a vacancy",
+      "ctaWrite": "Write to the author",
+      "author": "Jamshid Fayziyev · Tashkent"
+    }
   }
 }
