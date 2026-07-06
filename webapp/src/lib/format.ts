@@ -109,3 +109,51 @@ export function groupNumber(n: number): string {
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
+
+/**
+ * Compact salary for a map marker: "4 mln" / "4,2 mln" (UZS) or "$1.5k" (USD);
+ * null when no salary is set. Uses the upper bound (or the min if that's all).
+ */
+export function salaryPill(job: Job): string | null {
+  const top = job.salaryMax ?? job.salaryMin;
+  if (top == null) return null;
+  if (job.currency.toUpperCase() === "USD") {
+    if (top >= 1000) {
+      const k = top / 1000;
+      return `$${(k < 10 ? Math.round(k * 10) / 10 : Math.round(k))
+        .toString()
+        .replace(".", ",")}k`;
+    }
+    return `$${Math.round(top)}`;
+  }
+  if (top >= 1_000_000) {
+    const mln = top / 1_000_000;
+    return `${(mln < 10 ? Math.round(mln * 10) / 10 : Math.round(mln))
+      .toString()
+      .replace(".", ",")} mln`;
+  }
+  return groupNumber(top);
+}
+
+/** Work-schedule pattern -> short label ("6/1", "2/2"); null for custom/unknown. */
+export function schedulePatternLabel(p: string | null): string | null {
+  switch (p) {
+    case "6_1":
+      return "6/1";
+    case "5_2":
+      return "5/2";
+    case "4_4":
+      return "4/4";
+    case "2_2":
+      return "2/2";
+    default:
+      return null;
+  }
+}
+
+/** Distance for a map pin: "750 m" under 1 km, else "1,2 km" (comma decimal). */
+export function formatDistanceMeters(m: number): string {
+  if (m < 1000) return `${Math.round(m / 10) * 10} m`;
+  const km = m / 1000;
+  return `${km.toFixed(km < 10 ? 1 : 0).replace(".", ",")} km`;
+}

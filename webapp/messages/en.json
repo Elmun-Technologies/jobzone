@@ -19,7 +19,17 @@
   "explore": {
     "title": "Jobs map",
     "subtitle": "See jobs on the map",
-    "listView": "List"
+    "listView": "List",
+    "map": {
+      "nearMe": "Near me",
+      "locating": "Locating…",
+      "salaryFrom": "From 4M so'm",
+      "schedule22": "Schedule 2/2",
+      "results": "{count} jobs",
+      "youAreHere": "You are here",
+      "apply": "Apply · 2 clicks",
+      "locationDenied": "Location unavailable — allow it to see jobs near you."
+    }
   },
   "auth": {
     "signIn": "Sign in",

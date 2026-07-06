@@ -24,6 +24,8 @@ export interface Job {
   jobType: string | null;
   experienceLevel: string | null;
   workingModel: string | null;
+  /** Blue-collar work schedule: "6_1" | "5_2" | "4_4" | "2_2" | "custom". */
+  schedulePattern: string | null;
   city: string | null;
   country: string | null;
   location: string | null;

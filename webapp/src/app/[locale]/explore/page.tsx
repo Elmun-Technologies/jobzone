@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { ExploreMap } from "@/components/explore/explore-map";
+import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { getOpenJobs } from "@/lib/data/jobs";
@@ -44,7 +44,7 @@ export default async function ExplorePage({
           {t("listView")}
         </Link>
       </div>
-      <ExploreMap jobs={jobs} />
+      <JobsMap jobs={jobs} />
     </Container>
   );
 }

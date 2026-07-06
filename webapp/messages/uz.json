@@ -19,7 +19,17 @@
   "explore": {
     "title": "Ishlar xaritasi",
     "subtitle": "Ishlarni xaritada ko'ring",
-    "listView": "Ro'yxat"
+    "listView": "Ro'yxat",
+    "map": {
+      "nearMe": "Yonimda",
+      "locating": "Aniqlanmoqda…",
+      "salaryFrom": "4 mln dan",
+      "schedule22": "Jadval 2/2",
+      "results": "{count} ta vakansiya",
+      "youAreHere": "Siz shu yerdasiz",
+      "apply": "Ariza · 2 klik",
+      "locationDenied": "Joylashuv aniqlanmadi — yaqin ishlarni ko'rish uchun ruxsat bering."
+    }
   },
   "auth": {
     "signIn": "Kirish",
