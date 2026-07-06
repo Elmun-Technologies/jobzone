@@ -1,15 +1,24 @@
-import { ChevronRight, Search, TrendingUp } from "lucide-react";
+import { ChevronRight, MapPin, Search, TrendingUp } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { CompanyCard } from "@/components/companies/company-card";
+import { EmployerCta } from "@/components/landing/employer-cta";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { ReputationTeaser } from "@/components/landing/reputation-teaser";
 import { JobCard } from "@/components/jobs/job-card";
+import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
 import { getCompanies } from "@/lib/data/companies";
-import { getCities, getJobCount, getRecentJobs } from "@/lib/data/jobs";
+import {
+  getCities,
+  getJobCount,
+  getOpenJobs,
+  getRecentJobs,
+} from "@/lib/data/jobs";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -24,9 +33,10 @@ export default async function HomePage({
   const t = await getTranslations("home");
   const tj = await getTranslations("jobs");
 
-  const [recent, categories, total, cities, savedIds, topCompanies] =
+  const [recent, mapJobs, categories, total, cities, savedIds, topCompanies] =
     await Promise.all([
       getRecentJobs(6),
+      getOpenJobs({ limit: 100 }),
       getCategoriesWithCounts(),
       getJobCount(),
       getCities(),
@@ -49,10 +59,16 @@ export default async function HomePage({
       {/* Hero */}
       <Container className="py-14 sm:py-20">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
-          <h1 className="text-foreground text-4xl font-bold tracking-tight sm:text-5xl">
+          <span className="border-border bg-muted text-muted-foreground inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-xs font-semibold tracking-wide uppercase">
+            <MapPin className="text-primary size-3.5" />
+            {t("heroBadge")}
+          </span>
+          <h1 className="text-foreground text-4xl font-bold tracking-tight text-balance sm:text-6xl">
             {t("heroTitle")}
           </h1>
-          <p className="text-muted-foreground text-lg">{t("heroSubtitle")}</p>
+          <p className="text-muted-foreground text-lg text-pretty">
+            {t("heroSubtitle")}
+          </p>
           {total > 0 ? (
             <p className="text-muted-foreground text-sm">
               {t("jobCount", { count: groupNumber(total) })}
@@ -102,9 +118,35 @@ export default async function HomePage({
         </div>
       </Container>
 
+      {/* Map — the centrepiece */}
+      <section id="map" className="scroll-mt-16">
+        <Container className="pb-16">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl">
+                {t("mapTitle")}
+              </h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {t("mapLead")}
+              </p>
+            </div>
+            <Link
+              href="/explore"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              {t("exploreCta")}
+            </Link>
+          </div>
+          <JobsMap jobs={mapJobs} height="64vh" />
+        </Container>
+      </section>
+
+      {/* How it works (shared with /about) */}
+      <HowItWorks />
+
       {/* Category grid */}
       {categories.length > 0 ? (
-        <Container className="pb-16">
+        <Container className="py-16">
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {categories.map((c) => (
               <li key={c.id}>
@@ -155,9 +197,33 @@ export default async function HomePage({
         </ul>
       </Container>
 
+      {/* Recent jobs */}
+      {recent.length > 0 ? (
+        <Container className="pb-16">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground text-xl font-bold">
+              {t("recentJobs")}
+            </h2>
+            <Link
+              href="/jobs"
+              className="text-primary text-sm font-semibold hover:underline"
+            >
+              {t("viewAll")}
+            </Link>
+          </div>
+          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {recent.map((job) => (
+              <li key={job.id}>
+                <JobCard job={job} saved={savedIds.has(job.id)} />
+              </li>
+            ))}
+          </ul>
+        </Container>
+      ) : null}
+
       {/* Top companies */}
       {topCompanies.length > 0 ? (
-        <Container className="pb-16">
+        <Container className="pb-20">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-foreground text-xl font-bold">
               {t("topCompanies")}
@@ -179,29 +245,11 @@ export default async function HomePage({
         </Container>
       ) : null}
 
-      {/* Recent jobs */}
-      {recent.length > 0 ? (
-        <Container className="pb-20">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-foreground text-xl font-bold">
-              {t("recentJobs")}
-            </h2>
-            <Link
-              href="/jobs"
-              className="text-primary text-sm font-semibold hover:underline"
-            >
-              {t("viewAll")}
-            </Link>
-          </div>
-          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {recent.map((job) => (
-              <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
-              </li>
-            ))}
-          </ul>
-        </Container>
-      ) : null}
+      {/* Reputation teaser (shared with /about) */}
+      <ReputationTeaser background="bg-muted/30" moreLabel={t("learnMore")} />
+
+      {/* Employer CTA (shared with /about) */}
+      <EmployerCta />
     </>
   );
 }

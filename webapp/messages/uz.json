@@ -334,7 +334,12 @@
     "recentJobs": "So'nggi ishlar",
     "viewAll": "Hammasi",
     "topCompanies": "Top kompaniyalar",
-    "popularSearches": "Ommabop qidiruvlar"
+    "popularSearches": "Ommabop qidiruvlar",
+    "heroBadge": "Yoningdagi ishlar · xaritada",
+    "mapTitle": "Yoningdagi ishlar — xaritada",
+    "mapLead": "Belgini bosing: maosh, jadval, masofa — va 2 klikda ariza.",
+    "exploreCta": "Xaritani to'liq ochish",
+    "learnMore": "Batafsil"
   },
   "jobs": {
     "title": "Ishlar",

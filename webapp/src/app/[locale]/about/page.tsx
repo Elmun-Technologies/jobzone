@@ -3,7 +3,6 @@ import {
   BadgeCheck,
   Building2,
   Check,
-  Filter,
   MapPin,
   Send,
   Sparkles,
@@ -11,6 +10,8 @@ import {
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { Eyebrow, RatingCard, SectionHead } from "@/components/landing/section";
 import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -161,40 +162,7 @@ export default async function AboutPage({
       </section>
 
       {/* ── How it works (3 steps) ───────────────────────────────────── */}
-      <section className="border-border bg-muted/30 border-y">
-        <Container className="py-16 sm:py-20">
-          <SectionHead eyebrow={t("how.eyebrow")} title={t("how.title")} />
-          <ol className="mt-10 grid gap-4 md:grid-cols-3">
-            {(
-              [
-                ["how.steps.open", MapPin],
-                ["how.steps.filter", Filter],
-                ["how.steps.apply", Send],
-              ] as const
-            ).map(([key, Icon], i) => (
-              <li
-                key={key}
-                className="border-border bg-card flex flex-col gap-3 rounded-2xl border p-6"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-full">
-                    <Icon className="size-5" />
-                  </span>
-                  <span className="text-muted-foreground/40 font-mono text-3xl font-bold">
-                    0{i + 1}
-                  </span>
-                </div>
-                <h3 className="text-foreground text-lg font-bold">
-                  {t(`${key}.title`)}
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  {t(`${key}.body`)}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </Container>
-      </section>
+      <HowItWorks />
 
       {/* ── Employers ────────────────────────────────────────────────── */}
       <section>
@@ -297,7 +265,10 @@ export default async function AboutPage({
       </section>
 
       {/* ── Reputation ("flowers and flies") ─────────────────────────── */}
-      <section className="border-border bg-muted/30 border-y">
+      <section
+        id="reputation"
+        className="border-border bg-muted/30 scroll-mt-16 border-y"
+      >
         <Container className="py-16 sm:py-20">
           <SectionHead
             eyebrow={t("reputation.eyebrow")}
@@ -354,7 +325,7 @@ export default async function AboutPage({
       </section>
 
       {/* ── Pricing ──────────────────────────────────────────────────── */}
-      <section>
+      <section id="pricing" className="scroll-mt-16">
         <Container className="py-16 sm:py-20">
           <SectionHead
             eyebrow={t("pricing.eyebrow")}
@@ -672,72 +643,6 @@ export default async function AboutPage({
 }
 
 /* ── Local presentational helpers (server components) ───────────────── */
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-primary font-mono text-xs font-semibold tracking-wider uppercase">
-      {children}
-    </span>
-  );
-}
-
-function SectionHead({
-  eyebrow,
-  title,
-  body,
-}: {
-  eyebrow: string;
-  title: string;
-  body?: string;
-}) {
-  return (
-    <div className="mx-auto max-w-2xl text-center">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 className="text-foreground mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-        {title}
-      </h2>
-      {body ? (
-        <p className="text-muted-foreground mt-4 text-pretty">{body}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function RatingCard({
-  name,
-  caption,
-  score,
-  marks,
-  good,
-}: {
-  name: string;
-  caption: string;
-  score: string;
-  marks: string;
-  good?: boolean;
-}) {
-  return (
-    <div className="border-border bg-card flex items-center gap-4 rounded-2xl border p-4">
-      <div
-        className={cn(
-          "flex size-12 shrink-0 items-center justify-center rounded-xl font-mono text-lg font-bold",
-          good
-            ? "bg-primary/15 text-foreground"
-            : "bg-muted text-muted-foreground",
-        )}
-      >
-        {score}
-      </div>
-      <div className="min-w-0">
-        <p className="text-foreground font-semibold">{name}</p>
-        <p className="text-muted-foreground text-xs">{caption}</p>
-      </div>
-      <span className="ml-auto text-lg" aria-hidden>
-        {marks}
-      </span>
-    </div>
-  );
-}
 
 function PriceCard({
   name,
