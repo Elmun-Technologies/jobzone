@@ -12,7 +12,7 @@ import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
-import { getCompanies } from "@/lib/data/companies";
+import { getCompanies, getCompanyRatings } from "@/lib/data/companies";
 import {
   getCities,
   getJobCount,
@@ -33,16 +33,25 @@ export default async function HomePage({
   const t = await getTranslations("home");
   const tj = await getTranslations("jobs");
 
-  const [recent, mapJobs, categories, total, cities, savedIds, topCompanies] =
-    await Promise.all([
-      getRecentJobs(6),
-      getOpenJobs({ limit: 100 }),
-      getCategoriesWithCounts(),
-      getJobCount(),
-      getCities(),
-      getBookmarkedJobIds(),
-      getCompanies({ limit: 8 }),
-    ]);
+  const [
+    recent,
+    mapJobs,
+    ratings,
+    categories,
+    total,
+    cities,
+    savedIds,
+    topCompanies,
+  ] = await Promise.all([
+    getRecentJobs(6),
+    getOpenJobs({ limit: 100 }),
+    getCompanyRatings(),
+    getCategoriesWithCounts(),
+    getJobCount(),
+    getCities(),
+    getBookmarkedJobIds(),
+    getCompanies({ limit: 8 }),
+  ]);
 
   // Popular-search shortcuts, reusing existing job-filter labels.
   const presets = [
@@ -137,7 +146,7 @@ export default async function HomePage({
               {t("exploreCta")}
             </Link>
           </div>
-          <JobsMap jobs={mapJobs} height="64vh" />
+          <JobsMap jobs={mapJobs} ratings={ratings} height="64vh" />
         </Container>
       </section>
 

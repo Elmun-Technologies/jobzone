@@ -29,7 +29,13 @@
       "results": "{count} ta vakansiya",
       "youAreHere": "Siz shu yerdasiz",
       "apply": "Ariza · 2 klik",
-      "locationDenied": "Joylashuv aniqlanmadi — yaqin ishlarni ko'rish uchun ruxsat bering."
+      "locationDenied": "Joylashuv aniqlanmadi — yaqin ishlarni ko'rish uchun ruxsat bering.",
+      "byCategory": "Soha",
+      "allCategories": "Barcha sohalar",
+      "byCompany": "Kompaniya",
+      "allCompanies": "Barcha kompaniyalar",
+      "topRated": "Yuqori reyting",
+      "hint": "Xaritadan ish toping — soha, kompaniya yoki reyting bo‘yicha filtrlang, belgini bosing."
     }
   },
   "auth": {
