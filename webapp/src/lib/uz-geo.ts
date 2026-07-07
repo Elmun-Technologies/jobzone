@@ -78,17 +78,57 @@ const ALIASES: Record<string, string> = {
   bekabad: "bekobod",
   zarafshan: "zarafshon",
   shakhrisabz: "shahrisabz",
+  // Tashkent city districts + nearby Tashkent-region towns → Tashkent.
+  chilonzor: "toshkent",
+  чиланзар: "toshkent",
+  yunusobod: "toshkent",
+  юнусабад: "toshkent",
+  mirzoulugbek: "toshkent",
+  yakkasaroy: "toshkent",
+  sergeli: "toshkent",
+  uchtepa: "toshkent",
+  shayxontohur: "toshkent",
+  olmazor: "toshkent",
+  bektemir: "toshkent",
+  yashnobod: "toshkent",
+  mirobod: "toshkent",
+  yangihayot: "toshkent",
+  nurafshon: "toshkent",
+  yangiyol: "toshkent",
 };
 
-/** Strip accents/apostrophes and lowercase so spellings collapse to one key. */
+// Admin-marker words dropped so "Toshkent shahri" / "г. Ташкент" / "Chilonzor
+// tumani" collapse to the bare place name (matched as whole words, so
+// "Shahrisabz" is never mangled).
+const ADMIN_WORDS = new Set([
+  "shahri",
+  "shahar",
+  "shahridagi",
+  "tumani",
+  "tuman",
+  "viloyati",
+  "viloyat",
+  "gorod",
+  "город",
+  "г",
+  "область",
+  "обл",
+  "район",
+  "rayon",
+  "region",
+]);
+
+/** Lowercase, drop accents/apostrophes + admin-marker words, keep letters. */
 function normalize(city: string): string {
-  return city
-    .trim()
+  const cleaned = city
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "") // combining accents
-    .replace(/['`ʻʼʹ‘’]/g, "") // apostrophes (o' g')
-    .replace(/[^a-zа-я]/g, ""); // keep latin + cyrillic letters
+    .replace(/['`ʻʼʹ‘’]/g, ""); // apostrophes (o' g')
+  return cleaned
+    .split(/[^a-zа-я]+/)
+    .filter((w) => w && !ADMIN_WORDS.has(w))
+    .join("");
 }
 
 /** Centroid for a city name (any common spelling), or null if unknown. */
@@ -119,16 +159,16 @@ function jitter(seed: string): { dLat: number; dLng: number } {
 }
 
 /**
- * The map coordinate for a job: its exact pin if set, otherwise its city
- * centroid (jittered by id), otherwise null. This is what lets a freshly
- * posted job appear on the map without the employer picking an exact spot.
+ * The map coordinate for a job: its exact pin if set, else its city centroid
+ * (jittered by id), else Tashkent. An open job is **never** dropped from the
+ * map — the worst case (unknown/blank city) lands at Tashkent, most of the
+ * market — so "a posted job is visible everywhere" always holds.
  */
-export function jobLatLng(job: Job): LatLng | null {
+export function jobLatLng(job: Job): LatLng {
   if (job.lat != null && job.lng != null) {
     return { lat: job.lat, lng: job.lng };
   }
-  const centroid = cityLatLng(job.city);
-  if (!centroid) return null;
+  const centroid = cityLatLng(job.city) ?? CENTROIDS.toshkent;
   const { dLat, dLng } = jitter(job.id);
   return { lat: centroid.lat + dLat, lng: centroid.lng + dLng };
 }
