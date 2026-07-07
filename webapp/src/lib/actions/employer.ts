@@ -60,7 +60,10 @@ export async function createCompany(
     website: optional(formData, "website"),
     headquarters: optional(formData, "headquarters"),
   });
-  if (error) return { error: "unknown" };
+  if (error) {
+    console.error("createCompany failed", error);
+    return { error: "unknown" };
+  }
 
   // Owning a company is what makes this account an employer — flip the role
   // regardless of how they signed up (defaulted to job_seeker, or via Google,
@@ -101,7 +104,10 @@ export async function updateCompany(
     })
     .eq("id", companyId)
     .eq("owner_id", user.id);
-  if (error) return { error: "unknown" };
+  if (error) {
+    console.error("updateCompany failed", error);
+    return { error: "unknown" };
+  }
 
   redirect(`/${locale}/employer`);
 }
@@ -168,6 +174,7 @@ export async function createJob(
         if (payError.message.includes("insufficient_funds")) {
           return { insufficientFunds: true, requiredUzs: price };
         }
+        console.error("createJob payment (adjust_wallet) failed", payError);
         return { error: "unknown" };
       }
       charged = true;
@@ -206,13 +213,23 @@ export async function createJob(
     status,
   });
   if (error) {
+    console.error("createJob insert failed", error);
     if (charged) {
-      await supabase.rpc("adjust_wallet", {
+      const { error: refundError } = await supabase.rpc("adjust_wallet", {
         p_company_id: companyId,
         p_amount_uzs: price,
         p_kind: "refund",
         p_description: `Qaytarish: ${title}`,
       });
+      if (refundError) {
+        console.error(
+          "createJob refund failed after a failed insert — company",
+          companyId,
+          "amount",
+          price,
+          refundError,
+        );
+      }
     }
     return { error: "unknown" };
   }
