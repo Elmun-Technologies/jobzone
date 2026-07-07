@@ -1,11 +1,13 @@
 "use client";
 
+import { Check as CheckIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { createJob, type JobFormState } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
+import { groupNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { ScreeningEditor, type StashedQuestion } from "./screening-editor";
@@ -189,11 +191,28 @@ function Check({
   );
 }
 
+interface PreviewData {
+  title: string;
+  category: string | null;
+  salary: string | null;
+  location: string | null;
+  employment: string[];
+  flags: string[];
+  description: string;
+  requirements: string;
+  responsibilities: string;
+  benefits: string;
+}
+
 /**
  * Guest-first: a visitor can fill this out without an account or a company.
  * Publishing/saving asks for what's missing at that point — sign-in
  * (`state.signedOut`) and/or company creation (`state.noCompany`) — and comes
  * back here with the draft restored, so nothing typed is lost.
+ *
+ * The form is a step-by-step wizard: the field sections all stay mounted (so
+ * FormData + the draft stash keep working) but only the active step is shown,
+ * ending in a live preview before Publish / Save draft.
  */
 export function PostJobForm({
   companyId,
@@ -213,6 +232,10 @@ export function PostJobForm({
   );
   const [restored, setRestored] = useState<JobDraft | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const stepAreaRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState(0);
+  const [titleError, setTitleError] = useState(false);
+  const [preview, setPreview] = useState<PreviewData | null>(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STASH_KEY);
@@ -247,7 +270,84 @@ export function PostJobForm({
     }
   }, [state.signedOut, state.noCompany, locale, router]);
 
+  // Re-trigger the step-fade animation on each step change without remounting
+  // the (uncontrolled) fields, which would wipe what the user typed.
+  useEffect(() => {
+    const el = stepAreaRef.current;
+    if (!el) return;
+    el.classList.remove("wizfade");
+    void el.offsetWidth; // force reflow so the animation restarts
+    el.classList.add("wizfade");
+  }, [step]);
+
   const d = restored;
+  const steps = [
+    tp("stepBasics"),
+    tp("stepDetails"),
+    tp("stepLocation"),
+    tp("stepSettings"),
+    tp("stepPreview"),
+  ];
+  const last = steps.length - 1;
+
+  function buildPreview(): PreviewData {
+    const fd = new FormData(formRef.current!);
+    const g = (k: string) => (fd.get(k) ?? "").toString().trim();
+    const catId = g("categoryId");
+    const min = g("salaryMin");
+    const max = g("salaryMax");
+    const cur = g("currency") || "UZS";
+    const per = g("salaryPeriod");
+    let salary: string | null = null;
+    if (min || max) {
+      const amounts = [min, max]
+        .filter(Boolean)
+        .map((n) => groupNumber(Number(n)))
+        .join(" – ");
+      const unit = cur === "UZS" ? "so'm" : cur;
+      salary = `${amounts} ${unit}${per ? ` / ${tp(`period.${per}`)}` : ""}`;
+    }
+    const employment = [
+      g("jobType") && tj(`type.${g("jobType")}`),
+      g("workingModel") && tj(`model.${g("workingModel")}`),
+      g("experienceLevel") && t(`exp.${g("experienceLevel")}`),
+      g("schedulePattern") && tp(`sched.${g("schedulePattern")}`),
+    ].filter(Boolean) as string[];
+    const flags = [
+      fd.get("nightShift") === "1" && tp("nightShift"),
+      fd.get("womenFriendly") === "1" && tp("womenFriendly"),
+      fd.get("disabilityFriendly") === "1" && tp("disabilityFriendly"),
+    ].filter(Boolean) as string[];
+    return {
+      title: g("title"),
+      category: categories.find((c) => c.id === catId)?.name ?? null,
+      salary,
+      location:
+        [g("city"), g("addressText")].filter(Boolean).join(", ") || null,
+      employment,
+      flags,
+      description: g("description"),
+      requirements: g("requirements"),
+      responsibilities: g("responsibilities"),
+      benefits: g("benefits"),
+    };
+  }
+
+  function goNext() {
+    if (step === 0) {
+      const el = formRef.current?.elements.namedItem(
+        "title",
+      ) as HTMLInputElement | null;
+      if (!el?.value.trim()) {
+        setTitleError(true);
+        el?.focus();
+        return;
+      }
+      setTitleError(false);
+    }
+    if (step === last - 1) setPreview(buildPreview());
+    setStep((s) => Math.min(s + 1, last));
+  }
 
   return (
     <form
@@ -257,251 +357,408 @@ export function PostJobForm({
       key={restored ? "restored" : "initial"}
       ref={formRef}
       action={action}
-      className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-start"
+      className="mx-auto max-w-2xl"
     >
       <input type="hidden" name="locale" value={locale} />
       {companyId ? (
         <input type="hidden" name="companyId" value={companyId} />
       ) : null}
 
-      <div className="space-y-6">
-        <Section title={tp("sectionBasic")} subtitle={tp("sectionBasicSub")}>
-          <Labeled label={t("jobTitle")} required>
-            <input
-              name="title"
-              required
-              defaultValue={d?.title}
-              placeholder={tp("titleHint")}
-              className={inputClass}
-            />
-          </Labeled>
-          <Labeled label={t("jobDescription")}>
-            <textarea
-              name="description"
-              rows={5}
-              defaultValue={d?.description}
-              className={areaClass}
-            />
-          </Labeled>
-          <Labeled label={tp("requirements")}>
-            <textarea
-              name="requirements"
-              rows={3}
-              defaultValue={d?.requirements}
-              className={areaClass}
-            />
-          </Labeled>
-          <Labeled label={tp("responsibilities")}>
-            <textarea
-              name="responsibilities"
-              rows={3}
-              defaultValue={d?.responsibilities}
-              className={areaClass}
-            />
-          </Labeled>
-          <Labeled label={tp("benefits")}>
-            <textarea
-              name="benefits"
-              rows={3}
-              defaultValue={d?.benefits}
-              className={areaClass}
-            />
-          </Labeled>
-          <Labeled label={t("category")}>
-            <select
-              name="categoryId"
-              defaultValue={d?.categoryId ?? ""}
-              className={inputClass}
-            >
-              <option value="">—</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </Labeled>
-        </Section>
+      {/* Stepper */}
+      <ol className="mb-6 flex items-center">
+        {steps.map((label, i) => (
+          <li
+            key={label}
+            className={cn("flex items-center", i < last && "flex-1")}
+          >
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors",
+                  i <= step
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {i < step ? <CheckIcon className="size-4" /> : i + 1}
+              </span>
+              <span
+                className={cn(
+                  "hidden text-sm font-medium sm:inline",
+                  i === step ? "text-foreground" : "text-muted-foreground",
+                )}
+              >
+                {label}
+              </span>
+            </div>
+            {i < last ? (
+              <span
+                className={cn(
+                  "mx-2 h-px flex-1 transition-colors",
+                  i < step ? "bg-primary" : "bg-border",
+                )}
+              />
+            ) : null}
+          </li>
+        ))}
+      </ol>
 
-        <Section title={tp("sectionSalary")}>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Labeled label={t("salaryMin")}>
+      {/* Step content — all mounted, inactive ones hidden so FormData survives. */}
+      <div ref={stepAreaRef} className="wizfade space-y-6">
+        <div className={cn(step !== 0 && "hidden")}>
+          <Section title={tp("sectionBasic")} subtitle={tp("sectionBasicSub")}>
+            <Labeled label={t("jobTitle")} required>
               <input
-                name="salaryMin"
-                type="number"
-                inputMode="numeric"
-                defaultValue={d?.salaryMin}
+                name="title"
+                defaultValue={d?.title}
+                placeholder={tp("titleHint")}
+                onChange={() => titleError && setTitleError(false)}
                 className={inputClass}
               />
             </Labeled>
-            <Labeled label={t("salaryMax")}>
-              <input
-                name="salaryMax"
-                type="number"
-                inputMode="numeric"
-                defaultValue={d?.salaryMax}
-                className={inputClass}
+            <Labeled label={t("jobDescription")}>
+              <textarea
+                name="description"
+                rows={5}
+                defaultValue={d?.description}
+                className={areaClass}
               />
             </Labeled>
-            <Labeled label={t("currency")}>
+            <Labeled label={tp("requirements")}>
+              <textarea
+                name="requirements"
+                rows={3}
+                defaultValue={d?.requirements}
+                className={areaClass}
+              />
+            </Labeled>
+            <Labeled label={tp("responsibilities")}>
+              <textarea
+                name="responsibilities"
+                rows={3}
+                defaultValue={d?.responsibilities}
+                className={areaClass}
+              />
+            </Labeled>
+            <Labeled label={tp("benefits")}>
+              <textarea
+                name="benefits"
+                rows={3}
+                defaultValue={d?.benefits}
+                className={areaClass}
+              />
+            </Labeled>
+            <Labeled label={t("category")}>
               <select
-                name="currency"
-                defaultValue={d?.currency ?? "UZS"}
+                name="categoryId"
+                defaultValue={d?.categoryId ?? ""}
                 className={inputClass}
               >
-                <option value="UZS">UZS</option>
-                <option value="USD">USD</option>
+                <option value="">—</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
             </Labeled>
-          </div>
-          <Labeled label={tp("salaryPeriod")}>
-            <select
-              name="salaryPeriod"
-              defaultValue={d?.salaryPeriod ?? "month"}
-              className={inputClass}
-            >
-              {PERIODS.map((p) => (
-                <option key={p} value={p}>
-                  {tp(`period.${p}`)}
-                </option>
-              ))}
-            </select>
-          </Labeled>
-        </Section>
+          </Section>
+        </div>
 
-        <Section
-          title={tp("sectionLocation")}
-          subtitle={tp("sectionLocationSub")}
-        >
-          <Labeled label={t("city")}>
-            <input name="city" defaultValue={d?.city} className={inputClass} />
-          </Labeled>
-          <Labeled label={tp("address")}>
-            <input
-              name="addressText"
-              defaultValue={d?.addressText}
-              placeholder={tp("addressHint")}
-              className={inputClass}
-            />
-          </Labeled>
-        </Section>
+        <div className={cn("space-y-6", step !== 1 && "hidden")}>
+          <Section title={tp("sectionSalary")}>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Labeled label={t("salaryMin")}>
+                <input
+                  name="salaryMin"
+                  type="number"
+                  inputMode="numeric"
+                  defaultValue={d?.salaryMin}
+                  className={inputClass}
+                />
+              </Labeled>
+              <Labeled label={t("salaryMax")}>
+                <input
+                  name="salaryMax"
+                  type="number"
+                  inputMode="numeric"
+                  defaultValue={d?.salaryMax}
+                  className={inputClass}
+                />
+              </Labeled>
+              <Labeled label={t("currency")}>
+                <select
+                  name="currency"
+                  defaultValue={d?.currency ?? "UZS"}
+                  className={inputClass}
+                >
+                  <option value="UZS">UZS</option>
+                  <option value="USD">USD</option>
+                </select>
+              </Labeled>
+            </div>
+            <Labeled label={tp("salaryPeriod")}>
+              <select
+                name="salaryPeriod"
+                defaultValue={d?.salaryPeriod ?? "month"}
+                className={inputClass}
+              >
+                {PERIODS.map((p) => (
+                  <option key={p} value={p}>
+                    {tp(`period.${p}`)}
+                  </option>
+                ))}
+              </select>
+            </Labeled>
+          </Section>
 
-        <Section
-          title={tp("sectionEmployment")}
-          subtitle={tp("sectionEmploymentSub")}
-        >
-          <Labeled label={tj("jobType")}>
-            <ChipRadio
-              name="jobType"
-              defaultValue={d?.jobType}
-              options={JOB_TYPES.map((v) => ({
-                value: v,
-                label: tj(`type.${v}`),
-              }))}
+          <Section
+            title={tp("sectionEmployment")}
+            subtitle={tp("sectionEmploymentSub")}
+          >
+            <Labeled label={tj("jobType")}>
+              <ChipRadio
+                name="jobType"
+                defaultValue={d?.jobType}
+                options={JOB_TYPES.map((v) => ({
+                  value: v,
+                  label: tj(`type.${v}`),
+                }))}
+              />
+            </Labeled>
+            <Labeled label={tj("workingModel")}>
+              <ChipRadio
+                name="workingModel"
+                defaultValue={d?.workingModel}
+                options={WORKING_MODELS.map((v) => ({
+                  value: v,
+                  label: tj(`model.${v}`),
+                }))}
+              />
+            </Labeled>
+            <Labeled label={t("experience")}>
+              <ChipRadio
+                name="experienceLevel"
+                defaultValue={d?.experienceLevel}
+                options={EXPERIENCE.map((v) => ({
+                  value: v,
+                  label: t(`exp.${v}`),
+                }))}
+              />
+            </Labeled>
+            <Labeled label={tp("schedule")}>
+              <ChipRadio
+                name="schedulePattern"
+                defaultValue={d?.schedulePattern}
+                options={SCHEDULES.map((v) => ({
+                  value: v,
+                  label: tp(`sched.${v}`),
+                }))}
+              />
+            </Labeled>
+            <Check
+              name="nightShift"
+              label={tp("nightShift")}
+              defaultChecked={d?.nightShift}
             />
-          </Labeled>
-          <Labeled label={tj("workingModel")}>
-            <ChipRadio
-              name="workingModel"
-              defaultValue={d?.workingModel}
-              options={WORKING_MODELS.map((v) => ({
-                value: v,
-                label: tj(`model.${v}`),
-              }))}
-            />
-          </Labeled>
-          <Labeled label={t("experience")}>
-            <ChipRadio
-              name="experienceLevel"
-              defaultValue={d?.experienceLevel}
-              options={EXPERIENCE.map((v) => ({
-                value: v,
-                label: t(`exp.${v}`),
-              }))}
-            />
-          </Labeled>
-          <Labeled label={tp("schedule")}>
-            <ChipRadio
-              name="schedulePattern"
-              defaultValue={d?.schedulePattern}
-              options={SCHEDULES.map((v) => ({
-                value: v,
-                label: tp(`sched.${v}`),
-              }))}
-            />
-          </Labeled>
-          <Check
-            name="nightShift"
-            label={tp("nightShift")}
-            defaultChecked={d?.nightShift}
-          />
-        </Section>
+          </Section>
+        </div>
 
-        <Section
-          title={tp("sectionContacts")}
-          subtitle={tp("sectionContactsSub")}
-        >
-          <Labeled label={tp("contactPhone")}>
-            <input
-              name="contactPhone"
-              type="tel"
-              defaultValue={d?.contactPhone}
-              placeholder="+998 90 123 45 67"
-              className={inputClass}
+        <div className={cn(step !== 2 && "hidden")}>
+          <Section
+            title={tp("sectionLocation")}
+            subtitle={tp("sectionLocationSub")}
+          >
+            <Labeled label={t("city")}>
+              <input
+                name="city"
+                defaultValue={d?.city}
+                className={inputClass}
+              />
+            </Labeled>
+            <Labeled label={tp("address")}>
+              <input
+                name="addressText"
+                defaultValue={d?.addressText}
+                placeholder={tp("addressHint")}
+                className={inputClass}
+              />
+            </Labeled>
+          </Section>
+        </div>
+
+        <div className={cn("space-y-6", step !== 3 && "hidden")}>
+          <Section
+            title={tp("sectionContacts")}
+            subtitle={tp("sectionContactsSub")}
+          >
+            <Labeled label={tp("contactPhone")}>
+              <input
+                name="contactPhone"
+                type="tel"
+                defaultValue={d?.contactPhone}
+                placeholder="+998 90 123 45 67"
+                className={inputClass}
+              />
+            </Labeled>
+            <Check
+              name="showPhone"
+              label={tp("showPhone")}
+              defaultChecked={d?.showPhone}
             />
-          </Labeled>
-          <Check
-            name="showPhone"
-            label={tp("showPhone")}
-            defaultChecked={d?.showPhone}
-          />
-          <Check
-            name="requireCoverLetter"
-            label={tp("requireCoverLetter")}
-            defaultChecked={d?.requireCoverLetter}
-          />
-          <Check
-            name="womenFriendly"
-            label={tp("womenFriendly")}
-            defaultChecked={d?.womenFriendly}
-          />
-          <Check
-            name="disabilityFriendly"
-            label={tp("disabilityFriendly")}
-            defaultChecked={d?.disabilityFriendly}
-          />
-        </Section>
+            <Check
+              name="requireCoverLetter"
+              label={tp("requireCoverLetter")}
+              defaultChecked={d?.requireCoverLetter}
+            />
+            <Check
+              name="womenFriendly"
+              label={tp("womenFriendly")}
+              defaultChecked={d?.womenFriendly}
+            />
+            <Check
+              name="disabilityFriendly"
+              label={tp("disabilityFriendly")}
+              defaultChecked={d?.disabilityFriendly}
+            />
+          </Section>
 
-        <ScreeningEditor initialQuestions={d?.screeningQuestions} />
+          <ScreeningEditor initialQuestions={d?.screeningQuestions} />
+        </div>
 
-        {state.error ? (
-          <p className="text-destructive text-sm">{t("errUnknown")}</p>
+        {step === last && preview ? (
+          <JobPreview
+            data={preview}
+            title={tp("previewTitle")}
+            sub={tp("previewSub")}
+            empty={tp("noDescription")}
+          />
         ) : null}
       </div>
 
-      {/* Actions */}
-      <aside className="border-border bg-card space-y-2 rounded-2xl border p-4 lg:sticky lg:top-20">
+      {titleError ? (
+        <p className="text-destructive mt-3 text-sm">{tp("titleRequired")}</p>
+      ) : null}
+      {state.error ? (
+        <p className="text-destructive mt-3 text-sm">{t("errUnknown")}</p>
+      ) : null}
+
+      {/* Footer nav */}
+      <div className="border-border mt-6 flex items-center justify-between gap-3 border-t pt-4">
         <button
-          type="submit"
-          name="status"
-          value="open"
-          disabled={pending}
-          className="bg-primary text-primary-foreground h-11 w-full rounded-lg text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
+          type="button"
+          onClick={() => setStep((s) => Math.max(s - 1, 0))}
+          disabled={step === 0}
+          className="border-border text-foreground hover:bg-muted h-11 rounded-lg border px-5 text-sm font-semibold transition-colors disabled:opacity-40"
         >
-          {t("publishJob")}
+          ← {tp("back")}
         </button>
-        <button
-          type="submit"
-          name="status"
-          value="draft"
-          disabled={pending}
-          className={cn(
-            "border-border text-foreground hover:bg-muted h-11 w-full rounded-lg border text-sm font-semibold transition-colors disabled:opacity-60",
-          )}
-        >
-          {tp("saveDraft")}
-        </button>
-      </aside>
+        <span className="text-muted-foreground text-sm">
+          {tp("stepOf", { n: step + 1, total: steps.length })}
+        </span>
+        {step < last ? (
+          <button
+            type="button"
+            onClick={goNext}
+            className="bg-primary text-primary-foreground h-11 rounded-lg px-6 text-sm font-bold transition-opacity hover:opacity-90"
+          >
+            {tp("next")} →
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              name="status"
+              value="draft"
+              disabled={pending}
+              className="border-border text-foreground hover:bg-muted h-11 rounded-lg border px-4 text-sm font-semibold transition-colors disabled:opacity-60"
+            >
+              {tp("saveDraft")}
+            </button>
+            <button
+              type="submit"
+              name="status"
+              value="open"
+              disabled={pending}
+              className="bg-primary text-primary-foreground h-11 rounded-lg px-6 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {t("publishJob")}
+            </button>
+          </div>
+        )}
+      </div>
     </form>
+  );
+}
+
+/** Read-only "how it will look" preview, built from the current form values. */
+function JobPreview({
+  data,
+  title,
+  sub,
+  empty,
+}: {
+  data: PreviewData;
+  title: string;
+  sub: string;
+  empty: string;
+}) {
+  const blocks = [
+    data.description,
+    data.responsibilities,
+    data.requirements,
+    data.benefits,
+  ].filter(Boolean);
+  return (
+    <div>
+      <p className="text-primary font-mono text-xs font-semibold tracking-wider uppercase">
+        {title}
+      </p>
+      <p className="text-muted-foreground mt-1 mb-4 text-sm">{sub}</p>
+
+      <article className="border-border bg-card rounded-2xl border p-6">
+        <h3 className="text-foreground text-xl font-bold">
+          {data.title || "—"}
+        </h3>
+        {data.salary ? (
+          <p className="text-foreground mt-1 font-mono text-sm font-semibold">
+            {data.salary}
+          </p>
+        ) : null}
+
+        {data.category ||
+        data.location ||
+        data.employment.length ||
+        data.flags.length ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[data.category, data.location, ...data.employment, ...data.flags]
+              .filter(Boolean)
+              .map((chip, i) => (
+                <span
+                  key={i}
+                  className="border-border bg-muted text-foreground rounded-full border px-3 py-1 text-xs font-medium"
+                >
+                  {chip}
+                </span>
+              ))}
+          </div>
+        ) : null}
+
+        {blocks.length ? (
+          <div className="mt-5 space-y-4">
+            {blocks.map((b, i) => (
+              <p
+                key={i}
+                className="text-foreground text-sm whitespace-pre-line"
+              >
+                {b}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground mt-5 text-sm">{empty}</p>
+        )}
+      </article>
+    </div>
   );
 }

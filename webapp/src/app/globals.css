@@ -83,3 +83,23 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* Wizard step transition — re-triggered per step change (see post-job-form). */
+@keyframes wizfade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.wizfade {
+  animation: wizfade 0.28s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wizfade {
+    animation: none;
+  }
+}

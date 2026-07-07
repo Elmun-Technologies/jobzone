@@ -281,7 +281,19 @@
       "addOption": "Добавить вариант",
       "addQuestion": "Добавить вопрос",
       "required": "Обязательный",
-      "remove": "Удалить"
+      "remove": "Удалить",
+      "stepBasics": "Основное",
+      "stepDetails": "Детали",
+      "stepLocation": "Адрес",
+      "stepSettings": "Настройки",
+      "stepPreview": "Просмотр",
+      "next": "Далее",
+      "back": "Назад",
+      "stepOf": "Шаг {n}/{total}",
+      "previewTitle": "Как будет выглядеть вакансия",
+      "previewSub": "Проверьте перед публикацией.",
+      "titleRequired": "Введите название должности",
+      "noDescription": "Описание не указано"
     }
   },
   "wallet": {

@@ -281,7 +281,19 @@
       "addOption": "Variant qo'shish",
       "addQuestion": "Savol qo'shish",
       "required": "Majburiy",
-      "remove": "O'chirish"
+      "remove": "O'chirish",
+      "stepBasics": "Asosiy",
+      "stepDetails": "Tafsilotlar",
+      "stepLocation": "Manzil",
+      "stepSettings": "Sozlamalar",
+      "stepPreview": "Ko‘rib chiqish",
+      "next": "Keyingi",
+      "back": "Orqaga",
+      "stepOf": "Qadam {n}/{total}",
+      "previewTitle": "Vakansiya qanday ko‘rinadi",
+      "previewSub": "Publish qilishdan oldin tekshiring.",
+      "titleRequired": "Lavozim nomini kiriting",
+      "noDescription": "Tavsif kiritilmagan"
     }
   },
   "wallet": {
