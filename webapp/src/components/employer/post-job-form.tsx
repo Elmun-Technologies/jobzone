@@ -48,6 +48,10 @@ const PERIODS = ["hour", "day", "week", "month", "year"];
 // brand-new employer creates their company — at publish-time.
 const STASH_KEY = "yolla-post-job-draft";
 
+function stashDraft(draft: JobDraft): void {
+  sessionStorage.setItem(STASH_KEY, JSON.stringify(draft));
+}
+
 interface JobDraft {
   title: string;
   aiNotes: string;
@@ -279,21 +283,30 @@ export function PostJobForm({
   const [cityText, setCityText] = useState("");
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(STASH_KEY);
-    if (!saved) return;
-    sessionStorage.removeItem(STASH_KEY);
     // Restoring client-only storage after mount is intentional here (a lazy
     // initializer would desync SSR hydration).
+    const saved = sessionStorage.getItem(STASH_KEY);
+    if (!saved) return;
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRestored(JSON.parse(saved) as JobDraft);
     } catch {
-      // Ignore a malformed stash.
+      return;
     }
+    // Delete only after this effect "sticks". Under React Strict Mode the
+    // mount effect runs twice (mount → unmount → remount); removing the stash
+    // synchronously would leave the second (real) mount with nothing. The
+    // Strict-Mode unmount fires this cleanup first and cancels the removal, so
+    // the final mount still restores; a genuine fresh visit has no stash.
+    const t = setTimeout(() => sessionStorage.removeItem(STASH_KEY), 0);
+    return () => clearTimeout(t);
   }, []);
 
   // The map pin and city hint are React-controlled (not uncontrolled DOM
   // fields), so a restored draft has to be mirrored into state explicitly.
+  // A restored draft means the visitor already filled everything and hit
+  // Publish/Save before a sign-in or company-creation detour — drop them
+  // straight on the preview so they finish in one click, not back at step 1.
   useEffect(() => {
     if (!restored) return;
     if (restored.lat != null && restored.lng != null) {
@@ -306,10 +319,7 @@ export function PostJobForm({
   useEffect(() => {
     if (!state.signedOut && !state.noCompany) return;
     if (!formRef.current) return;
-    sessionStorage.setItem(
-      STASH_KEY,
-      JSON.stringify(draftFromFormData(new FormData(formRef.current))),
-    );
+    stashDraft(draftFromFormData(new FormData(formRef.current)));
     const postJobPath = `/${locale}/employer/jobs/new`;
     if (state.signedOut) {
       router.push(
@@ -399,6 +409,17 @@ export function PostJobForm({
       screeningCount,
     };
   }
+
+  // Once a restored draft has landed in the (remounted) fields, jump to the
+  // preview so the returning visitor confirms and publishes in one click.
+  useEffect(() => {
+    if (!restored) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStep(last);
+    setPreview(buildPreview());
+    // Runs only when a draft is restored; buildPreview/last are render-scoped.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restored]);
 
   async function fillWithAi() {
     const form = formRef.current;

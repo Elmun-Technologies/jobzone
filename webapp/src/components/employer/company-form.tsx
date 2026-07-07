@@ -25,6 +25,7 @@ export function CompanyForm({
   initial,
   submitLabel,
   next,
+  showWebsite = true,
 }: {
   action: (
     prev: CompanyFormState,
@@ -35,6 +36,9 @@ export function CompanyForm({
   /** Where to land after creating the company (e.g. back on a post-vacancy
    * draft that was waiting on a company to exist). */
   next?: string;
+  /** The optional website field adds friction to the guest post-a-job detour,
+   * so it's hidden on onboarding and shown only on the full edit form. */
+  showWebsite?: boolean;
 }) {
   const t = useTranslations("employer");
   const locale = useLocale();
@@ -98,17 +102,23 @@ export function CompanyForm({
         </label>
       </div>
 
-      <label className="block">
-        <span className="text-foreground mb-1 block text-sm font-medium">
-          {t("website")}
-        </span>
-        <input
-          name="website"
-          type="url"
-          defaultValue={initial?.website ?? ""}
-          className={inputClass}
-        />
-      </label>
+      {showWebsite ? (
+        <label className="block">
+          <span className="text-foreground mb-1 block text-sm font-medium">
+            {t("website")}
+          </span>
+          {/* type="text", not "url": a bare domain ("acme.uz") must not fail
+              browser validation and silently block the whole form. */}
+          <input
+            name="website"
+            type="text"
+            inputMode="url"
+            defaultValue={initial?.website ?? ""}
+            placeholder="example.uz"
+            className={inputClass}
+          />
+        </label>
+      ) : null}
 
       {state.error ? (
         <p className="text-destructive text-sm font-medium">
