@@ -91,20 +91,17 @@ export default function JobsMapInner({
 
   const located = useMemo<Located[]>(
     () =>
-      jobs
-        // Resolve each job to a map point: its exact pin, else its city
-        // centroid (jittered). Jobs with neither drop off the map.
-        .map((j) => {
-          const pos = jobLatLng(j);
-          return pos ? { ...j, lat: pos.lat, lng: pos.lng } : null;
-        })
-        .filter((j): j is Job & { lat: number; lng: number } => j != null)
-        .map((j) => ({
+      // Every job resolves to a point (exact pin, city centroid, or Tashkent),
+      // so an open job is never dropped from the map.
+      jobs.map((j) => {
+        const pos = jobLatLng(j);
+        return {
           ...j,
-          distance: loc
-            ? haversineMeters(loc, { lat: j.lat, lng: j.lng })
-            : null,
-        })),
+          lat: pos.lat,
+          lng: pos.lng,
+          distance: loc ? haversineMeters(loc, pos) : null,
+        };
+      }),
     [jobs, loc],
   );
 

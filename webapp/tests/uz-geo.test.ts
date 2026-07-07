@@ -59,6 +59,15 @@ describe("cityLatLng", () => {
     expect(cityLatLng(null)).toBeNull();
     expect(cityLatLng("Atlantis")).toBeNull();
   });
+
+  it("strips admin markers (shahri / tumani / город)", () => {
+    const tk = cityLatLng("Toshkent");
+    expect(cityLatLng("Toshkent shahri")).toEqual(tk);
+    expect(cityLatLng("г. Ташкент")).toEqual(tk);
+    expect(cityLatLng("Chilonzor tumani")).toEqual(tk); // district → city
+    // a real name that merely contains a marker substring must survive
+    expect(cityLatLng("Shahrisabz")).not.toBeNull();
+  });
 });
 
 describe("jobLatLng", () => {
@@ -71,10 +80,9 @@ describe("jobLatLng", () => {
 
   it("falls back to the city centroid (jittered) when no pin", () => {
     const pos = jobLatLng(job({ city: "Toshkent" }));
-    expect(pos).not.toBeNull();
     // within the ±0.015° jitter window of the Tashkent centroid
-    expect(Math.abs(pos!.lat - 41.3111)).toBeLessThan(0.016);
-    expect(Math.abs(pos!.lng - 69.2797)).toBeLessThan(0.016);
+    expect(Math.abs(pos.lat - 41.3111)).toBeLessThan(0.016);
+    expect(Math.abs(pos.lng - 69.2797)).toBeLessThan(0.016);
   });
 
   it("is deterministic per job id and fans same-city jobs apart", () => {
@@ -85,8 +93,11 @@ describe("jobLatLng", () => {
     expect(a1).not.toEqual(b); // different ids don't overlap
   });
 
-  it("returns null when there is neither a pin nor a known city", () => {
-    expect(jobLatLng(job({ city: null }))).toBeNull();
-    expect(jobLatLng(job({ city: "Atlantis" }))).toBeNull();
+  it("defaults to Tashkent (never dropped) when city is blank or unknown", () => {
+    for (const city of [null, "Atlantis"]) {
+      const pos = jobLatLng(job({ id: `x-${city}`, city }));
+      expect(Math.abs(pos.lat - 41.3111)).toBeLessThan(0.016);
+      expect(Math.abs(pos.lng - 69.2797)).toBeLessThan(0.016);
+    }
   });
 });
