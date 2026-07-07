@@ -2,6 +2,9 @@
 
 import { redirect } from "next/navigation";
 
+import { getEmployerStats } from "@/lib/data/employer";
+import { getJobPostPrice } from "@/lib/data/pricing";
+import { willChargeForJobPost } from "@/lib/job-post-pricing";
 import { createClient } from "@/lib/supabase/server";
 
 export interface CompanyFormState {
@@ -11,6 +14,8 @@ export interface JobFormState {
   error?: string;
   signedOut?: boolean;
   noCompany?: boolean;
+  insufficientFunds?: boolean;
+  requiredUzs?: number;
 }
 
 function field(formData: FormData, name: string): string {
@@ -138,6 +143,31 @@ export async function createJob(
     screening = [];
   }
 
+  // The employer's first published vacancy is free; every one after that is
+  // charged from Hamyon before it goes live. Drafts are always free — they
+  // never reach the market, so they neither cost nor count toward "first".
+  let charged = false;
+  let price = 0;
+  if (status === "open") {
+    const stats = await getEmployerStats(companyId);
+    price = await getJobPostPrice();
+    if (willChargeForJobPost(stats.hasPublishedBefore, price)) {
+      const { error: payError } = await supabase.rpc("adjust_wallet", {
+        p_company_id: companyId,
+        p_amount_uzs: -price,
+        p_kind: "spend",
+        p_description: `Vakansiya: ${title}`,
+      });
+      if (payError) {
+        if (payError.message.includes("insufficient_funds")) {
+          return { insufficientFunds: true, requiredUzs: price };
+        }
+        return { error: "unknown" };
+      }
+      charged = true;
+    }
+  }
+
   const { error } = await supabase.from("jobs").insert({
     company_id: companyId,
     posted_by: user.id,
@@ -169,7 +199,17 @@ export async function createJob(
     screening_questions: Array.isArray(screening) ? screening : [],
     status,
   });
-  if (error) return { error: "unknown" };
+  if (error) {
+    if (charged) {
+      await supabase.rpc("adjust_wallet", {
+        p_company_id: companyId,
+        p_amount_uzs: price,
+        p_kind: "refund",
+        p_description: `Qaytarish: ${title}`,
+      });
+    }
+    return { error: "unknown" };
+  }
 
   redirect(`/${locale}/employer/jobs`);
 }
