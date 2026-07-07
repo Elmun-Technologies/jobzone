@@ -915,11 +915,9 @@ export function PostJobForm({
       {state.error ? (
         <div className="mt-3">
           <p className="text-destructive text-sm">{t("errUnknown")}</p>
-          {state.detail ? (
-            <p className="text-muted-foreground mt-1 font-mono text-xs break-words">
-              {state.detail}
-            </p>
-          ) : null}
+          <p className="text-muted-foreground mt-1 font-mono text-xs break-words">
+            {state.detail || "(no detail — server returned an empty error)"}
+          </p>
         </div>
       ) : null}
 
