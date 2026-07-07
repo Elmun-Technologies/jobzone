@@ -281,7 +281,19 @@
       "addOption": "Add option",
       "addQuestion": "Add question",
       "required": "Required",
-      "remove": "Remove"
+      "remove": "Remove",
+      "stepBasics": "Basics",
+      "stepDetails": "Details",
+      "stepLocation": "Location",
+      "stepSettings": "Settings",
+      "stepPreview": "Preview",
+      "next": "Next",
+      "back": "Back",
+      "stepOf": "Step {n}/{total}",
+      "previewTitle": "How your vacancy will look",
+      "previewSub": "Review it before you publish.",
+      "titleRequired": "Enter a job title",
+      "noDescription": "No description yet"
     }
   },
   "wallet": {
