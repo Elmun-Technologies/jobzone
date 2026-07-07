@@ -40,7 +40,9 @@
       "byCompany": "Kompaniya",
       "allCompanies": "Barcha kompaniyalar",
       "topRated": "Yuqori reyting",
-      "hint": "Xaritadan ish toping — soha, kompaniya yoki reyting bo‘yicha filtrlang, belgini bosing."
+      "hint": "Xaritadan ish toping — soha, kompaniya yoki reyting bo‘yicha filtrlang, belgini bosing.",
+      "emptyNoJobs": "Hali ochiq vakansiya yo‘q — tez orada shu yerda bo‘ladi.",
+      "emptyFiltered": "Filtrga mos ish topilmadi."
     }
   },
   "auth": {

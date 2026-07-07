@@ -276,6 +276,16 @@ export default function JobsMapInner({
           </MapContainer>
         )}
 
+        {shown.length === 0 ? (
+          <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center p-6">
+            <p className="bg-background/95 text-foreground max-w-xs rounded-xl px-4 py-3 text-center text-sm font-medium shadow">
+              {located.length === 0
+                ? t("map.emptyNoJobs")
+                : t("map.emptyFiltered")}
+            </p>
+          </div>
+        ) : null}
+
         {status === "denied" && nearMe ? (
           <div className="text-muted-foreground bg-background/95 absolute inset-x-0 bottom-0 z-[1000] m-3 rounded-lg px-3 py-2 text-center text-sm shadow">
             {t("map.locationDenied")}

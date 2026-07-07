@@ -40,7 +40,9 @@
       "byCompany": "Company",
       "allCompanies": "All companies",
       "topRated": "Top-rated",
-      "hint": "Find a job on the map — filter by field, company or rating, then tap a pin."
+      "hint": "Find a job on the map — filter by field, company or rating, then tap a pin.",
+      "emptyNoJobs": "No open vacancies yet — they'll appear here soon.",
+      "emptyFiltered": "No jobs match your filters."
     }
   },
   "auth": {
