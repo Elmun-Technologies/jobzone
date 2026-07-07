@@ -21,6 +21,16 @@ const inputClass =
 const areaClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
+/** Digits only, from a possibly-grouped money string ("5 000 000" -> "5000000"). */
+function moneyDigits(s: string | null | undefined): string {
+  return (s ?? "").replace(/\D/g, "");
+}
+/** Group digits with regular spaces as typed: "5000000" -> "5 000 000". */
+function groupMoney(s: string | null | undefined): string {
+  const d = moneyDigits(s);
+  return d ? d.replace(/\B(?=(\d{3})+(?!\d))/g, " ") : "";
+}
+
 const JOB_TYPES = [
   "full_time",
   "part_time",
@@ -40,6 +50,7 @@ const STASH_KEY = "yolla-post-job-draft";
 
 interface JobDraft {
   title: string;
+  aiNotes: string;
   description: string;
   requirements: string;
   responsibilities: string;
@@ -81,6 +92,7 @@ function draftFromFormData(data: FormData): JobDraft {
   }
   return {
     title: str("title"),
+    aiNotes: str("aiNotes"),
     description: str("description"),
     requirements: str("requirements"),
     responsibilities: str("responsibilities"),
@@ -206,14 +218,18 @@ function Check({
 interface PreviewData {
   title: string;
   category: string | null;
+  companyName: string | null;
   salary: string | null;
   location: string | null;
+  hasPin: boolean;
   employment: string[];
   flags: string[];
   description: string;
   requirements: string;
   responsibilities: string;
   benefits: string;
+  phone: string | null;
+  screeningCount: number;
 }
 
 /**
@@ -228,12 +244,14 @@ interface PreviewData {
  */
 export function PostJobForm({
   companyId,
+  companyName = null,
   categories,
   hasPublishedBefore,
   jobPostPriceUzs,
   walletBalanceUzs,
 }: {
   companyId: string | null;
+  companyName?: string | null;
   categories: JobCategory[];
   hasPublishedBefore: boolean;
   jobPostPriceUzs: number;
@@ -332,8 +350,8 @@ export function PostJobForm({
     const fd = new FormData(formRef.current!);
     const g = (k: string) => (fd.get(k) ?? "").toString().trim();
     const catId = g("categoryId");
-    const min = g("salaryMin");
-    const max = g("salaryMax");
+    const min = moneyDigits(g("salaryMin"));
+    const max = moneyDigits(g("salaryMax"));
     const cur = g("currency") || "UZS";
     const per = g("salaryPeriod");
     let salary: string | null = null;
@@ -355,20 +373,30 @@ export function PostJobForm({
       fd.get("nightShift") === "1" && tp("nightShift"),
       fd.get("womenFriendly") === "1" && tp("womenFriendly"),
       fd.get("disabilityFriendly") === "1" && tp("disabilityFriendly"),
-      g("lat") && g("lng") && tp("pinSet"),
     ].filter(Boolean) as string[];
+    let screeningCount = 0;
+    try {
+      const parsed = JSON.parse(g("screeningQuestions") || "[]");
+      if (Array.isArray(parsed)) screeningCount = parsed.length;
+    } catch {
+      screeningCount = 0;
+    }
     return {
       title: g("title"),
       category: categories.find((c) => c.id === catId)?.name ?? null,
+      companyName,
       salary,
       location:
         [g("city"), g("addressText")].filter(Boolean).join(", ") || null,
+      hasPin: !!(g("lat") && g("lng")),
       employment,
       flags,
       description: g("description"),
       requirements: g("requirements"),
       responsibilities: g("responsibilities"),
       benefits: g("benefits"),
+      phone: fd.get("showPhone") === "1" ? g("contactPhone") || null : null,
+      screeningCount,
     };
   }
 
@@ -389,15 +417,41 @@ export function PostJobForm({
         form.elements.namedItem("categoryId") as HTMLSelectElement | null
       )?.value;
       const category = categories.find((c) => c.id === catId)?.name ?? null;
-      const res = await generateJobContent({ title, category, locale });
-      const set = (name: string, val: string) => {
+      const notes = (
+        form.elements.namedItem("aiNotes") as HTMLTextAreaElement | null
+      )?.value;
+      const res = await generateJobContent({ title, category, notes, locale });
+      // Text blocks: always overwrite (the AI draft is the whole point).
+      const setText = (name: string, val: string) => {
         const el = form.elements.namedItem(name) as HTMLTextAreaElement | null;
         if (el && val) el.value = val;
       };
-      set("description", res.description);
-      set("responsibilities", res.responsibilities);
-      set("requirements", res.requirements);
-      set("benefits", res.benefits);
+      setText("description", res.description);
+      setText("responsibilities", res.responsibilities);
+      setText("requirements", res.requirements);
+      setText("benefits", res.benefits);
+      // Structured fields the model inferred: fill only what the employer
+      // hasn't chosen yet, so AI never clobbers a deliberate choice.
+      const setNumIfEmpty = (name: string, val: number | null | undefined) => {
+        const el = form.elements.namedItem(name) as HTMLInputElement | null;
+        if (el && !el.value && val != null) el.value = groupMoney(String(val));
+      };
+      setNumIfEmpty("salaryMin", res.salaryMin);
+      setNumIfEmpty("salaryMax", res.salaryMax);
+      const setRadioIfEmpty = (
+        name: string,
+        val: string | null | undefined,
+      ) => {
+        if (!val) return;
+        const group = form.elements.namedItem(name);
+        // A RadioNodeList exposes `.value`; empty means nothing is checked.
+        if (group && "value" in group && !(group as RadioNodeList).value) {
+          (group as RadioNodeList).value = val;
+        }
+      };
+      setRadioIfEmpty("jobType", res.jobType);
+      setRadioIfEmpty("experienceLevel", res.experienceLevel);
+      setRadioIfEmpty("schedulePattern", res.schedulePattern);
     } catch {
       setAiError(true);
     } finally {
@@ -506,23 +560,43 @@ export function PostJobForm({
                 ))}
               </datalist>
             </Labeled>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={fillWithAi}
-                disabled={aiPending}
-                className="border-primary/40 bg-accent text-accent-foreground hover:border-primary inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60"
-              >
-                <Sparkles
-                  className={cn("size-4", aiPending && "animate-spin")}
-                />
-                {aiPending ? tp("aiGenerating") : tp("aiGenerate")}
-              </button>
-              {aiError ? (
-                <span className="text-destructive text-sm">
-                  {tp("aiError")}
+            {/* AI assist: gather the employer's key points, then generate a
+                full professional posting from them. */}
+            <div className="border-primary/40 bg-accent rounded-xl border p-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="text-primary size-4" />
+                <span className="text-accent-foreground text-sm font-semibold">
+                  {tp("aiTitle")}
                 </span>
-              ) : null}
+              </div>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {tp("aiSub")}
+              </p>
+              <textarea
+                name="aiNotes"
+                rows={3}
+                defaultValue={d?.aiNotes}
+                placeholder={tp("aiNotesHint")}
+                className={cn(areaClass, "mt-3")}
+              />
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={fillWithAi}
+                  disabled={aiPending}
+                  className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
+                >
+                  <Sparkles
+                    className={cn("size-4", aiPending && "animate-spin")}
+                  />
+                  {aiPending ? tp("aiGenerating") : tp("aiGenerate")}
+                </button>
+                {aiError ? (
+                  <span className="text-destructive text-sm">
+                    {tp("aiError")}
+                  </span>
+                ) : null}
+              </div>
             </div>
             <Labeled label={t("jobDescription")}>
               <textarea
@@ -580,18 +654,24 @@ export function PostJobForm({
               <Labeled label={t("salaryMin")}>
                 <input
                   name="salaryMin"
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  defaultValue={d?.salaryMin}
+                  defaultValue={groupMoney(d?.salaryMin)}
+                  onChange={(e) => {
+                    e.target.value = groupMoney(e.target.value);
+                  }}
                   className={inputClass}
                 />
               </Labeled>
               <Labeled label={t("salaryMax")}>
                 <input
                   name="salaryMax"
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  defaultValue={d?.salaryMax}
+                  defaultValue={groupMoney(d?.salaryMax)}
+                  onChange={(e) => {
+                    e.target.value = groupMoney(e.target.value);
+                  }}
                   className={inputClass}
                 />
               </Labeled>
@@ -757,6 +837,17 @@ export function PostJobForm({
               title={tp("previewTitle")}
               sub={tp("previewSub")}
               empty={tp("noDescription")}
+              labels={{
+                description: t("jobDescription"),
+                responsibilities: tp("responsibilities"),
+                requirements: tp("requirements"),
+                benefits: tp("benefits"),
+                screening: tp("previewScreening", {
+                  n: preview.screeningCount,
+                }),
+                phone: tp("contactPhone"),
+                unnamed: tp("previewUntitled"),
+              }}
             />
             <PaymentPanel
               willCharge={willCharge}
@@ -824,24 +915,73 @@ export function PostJobForm({
   );
 }
 
-/** Read-only "how it will look" preview, built from the current form values. */
+interface PreviewLabels {
+  description: string;
+  responsibilities: string;
+  requirements: string;
+  benefits: string;
+  screening: string;
+  phone: string;
+  unnamed: string;
+}
+
+/** Render a newline-separated block as a bullet list, or a paragraph if it's
+ * a single line. Empty → nothing. */
+function PreviewBlock({ heading, body }: { heading: string; body: string }) {
+  const lines = body
+    .split("\n")
+    .map((l) => l.trim().replace(/^[-•*]\s*/, ""))
+    .filter(Boolean);
+  if (lines.length === 0) return null;
+  return (
+    <section>
+      <h4 className="text-foreground mb-2 text-sm font-bold tracking-wide uppercase">
+        {heading}
+      </h4>
+      {lines.length === 1 ? (
+        <p className="text-foreground/90 text-sm leading-relaxed">{lines[0]}</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {lines.map((l, i) => (
+            <li
+              key={i}
+              className="text-foreground/90 flex gap-2 text-sm leading-relaxed"
+            >
+              <span className="text-primary mt-1.5 size-1.5 shrink-0 rounded-full bg-current" />
+              <span>{l}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/** Read-only "how it will look" preview, built from the current form values —
+ * mirrors a real, professional job posting so the employer sees exactly what
+ * a candidate will. */
 function JobPreview({
   data,
   title,
   sub,
   empty,
+  labels,
 }: {
   data: PreviewData;
   title: string;
   sub: string;
   empty: string;
+  labels: PreviewLabels;
 }) {
-  const blocks = [
-    data.description,
-    data.responsibilities,
-    data.requirements,
-    data.benefits,
-  ].filter(Boolean);
+  const anyBody =
+    data.description ||
+    data.responsibilities ||
+    data.requirements ||
+    data.benefits;
+  const metaChips = [data.category, ...data.employment].filter(
+    Boolean,
+  ) as string[];
+
   return (
     <div>
       <p className="text-primary font-mono text-xs font-semibold tracking-wider uppercase">
@@ -849,48 +989,81 @@ function JobPreview({
       </p>
       <p className="text-muted-foreground mt-1 mb-4 text-sm">{sub}</p>
 
-      <article className="border-border bg-card rounded-2xl border p-6">
-        <h3 className="text-foreground text-xl font-bold">
-          {data.title || "—"}
-        </h3>
-        {data.salary ? (
-          <p className="text-foreground mt-1 font-mono text-sm font-semibold">
-            {data.salary}
-          </p>
-        ) : null}
-
-        {data.category ||
-        data.location ||
-        data.employment.length ||
-        data.flags.length ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {[data.category, data.location, ...data.employment, ...data.flags]
-              .filter(Boolean)
-              .map((chip, i) => (
+      <article className="border-border bg-card overflow-hidden rounded-2xl border">
+        {/* Header band */}
+        <header className="border-border border-b p-6">
+          <h3 className="text-foreground text-2xl font-bold">
+            {data.title || labels.unnamed}
+          </h3>
+          <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            {data.companyName ? (
+              <span className="text-foreground font-semibold">
+                {data.companyName}
+              </span>
+            ) : null}
+            {data.companyName && data.location ? <span>·</span> : null}
+            {data.location ? <span>📍 {data.location}</span> : null}
+          </div>
+          {data.salary ? (
+            <p className="text-foreground mt-3 font-mono text-lg font-bold">
+              {data.salary}
+            </p>
+          ) : null}
+          {metaChips.length || data.flags.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {metaChips.map((chip, i) => (
                 <span
-                  key={i}
+                  key={`m${i}`}
                   className="border-border bg-muted text-foreground rounded-full border px-3 py-1 text-xs font-medium"
                 >
                   {chip}
                 </span>
               ))}
-          </div>
-        ) : null}
+              {data.flags.map((chip, i) => (
+                <span
+                  key={`f${i}`}
+                  className="border-primary/40 bg-accent text-accent-foreground rounded-full border px-3 py-1 text-xs font-medium"
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </header>
 
-        {blocks.length ? (
-          <div className="mt-5 space-y-4">
-            {blocks.map((b, i) => (
-              <p
-                key={i}
-                className="text-foreground text-sm whitespace-pre-line"
-              >
-                {b}
-              </p>
-            ))}
+        {/* Body */}
+        {anyBody ? (
+          <div className="space-y-6 p-6">
+            <PreviewBlock
+              heading={labels.description}
+              body={data.description}
+            />
+            <PreviewBlock
+              heading={labels.responsibilities}
+              body={data.responsibilities}
+            />
+            <PreviewBlock
+              heading={labels.requirements}
+              body={data.requirements}
+            />
+            <PreviewBlock heading={labels.benefits} body={data.benefits} />
           </div>
         ) : (
-          <p className="text-muted-foreground mt-5 text-sm">{empty}</p>
+          <p className="text-muted-foreground p-6 text-sm">{empty}</p>
         )}
+
+        {/* Footer meta */}
+        {data.phone || data.screeningCount > 0 ? (
+          <footer className="border-border text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 border-t px-6 py-4 text-sm">
+            {data.phone ? (
+              <span>
+                {labels.phone}:{" "}
+                <span className="text-foreground">{data.phone}</span>
+              </span>
+            ) : null}
+            {data.screeningCount > 0 ? <span>{labels.screening}</span> : null}
+          </footer>
+        ) : null}
       </article>
     </div>
   );

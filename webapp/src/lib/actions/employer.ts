@@ -133,6 +133,12 @@ export async function createJob(
     const v = field(formData, name);
     return v ? Number(v) : null;
   };
+  // Salary fields are typed with thousands separators ("5 000 000"); strip
+  // any non-digit before parsing so the number survives.
+  const money = (name: string) => {
+    const v = field(formData, name).replace(/\D/g, "");
+    return v ? Number(v) : null;
+  };
   const bool = (name: string) => field(formData, name) === "1";
   const status = field(formData, "status") === "draft" ? "draft" : "open";
 
@@ -182,8 +188,8 @@ export async function createJob(
     lat: number("lat"),
     lng: number("lng"),
     country: "UZ",
-    salary_min: number("salaryMin"),
-    salary_max: number("salaryMax"),
+    salary_min: money("salaryMin"),
+    salary_max: money("salaryMax"),
     currency: optional(formData, "currency") ?? "UZS",
     salary_period: optional(formData, "salaryPeriod") ?? "month",
     job_type: optional(formData, "jobType"),
