@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { getCompanyRatings } from "@/lib/data/companies";
 import { getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,10 @@ export default async function ExplorePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("explore");
-  const jobs = await getOpenJobs({ limit: 100 });
+  const [jobs, ratings] = await Promise.all([
+    getOpenJobs({ limit: 100 }),
+    getCompanyRatings(),
+  ]);
 
   return (
     <Container className="py-8">
@@ -44,7 +48,7 @@ export default async function ExplorePage({
           {t("listView")}
         </Link>
       </div>
-      <JobsMap jobs={jobs} />
+      <JobsMap jobs={jobs} ratings={ratings} />
     </Container>
   );
 }

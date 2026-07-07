@@ -8,6 +8,40 @@ import { mockCompanies, mockJobs } from "./mock";
 import { hasSupabase } from "./supabase-env";
 import type { Company, CompanyReview, CompanyWithJobs, Job } from "./types";
 
+/** Average review rating + review count, keyed by company id. */
+export type CompanyRatings = Record<string, { avg: number; count: number }>;
+
+/**
+ * Public company reputation (from the `company_rating_summary` view) for the
+ * map's "by rating" facet. Anonymous-safe; degrades to `{}` on error.
+ */
+export async function getCompanyRatings(): Promise<CompanyRatings> {
+  if (!hasSupabase()) {
+    return {
+      "c-acme": { avg: 4.6, count: 12 },
+      "c-nimbus": { avg: 3.2, count: 5 },
+    };
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("company_rating_summary")
+      .select("company_id, avg_rating, review_count");
+    if (error) throw error;
+    const out: CompanyRatings = {};
+    for (const r of data ?? []) {
+      out[r.company_id as string] = {
+        avg: Number(r.avg_rating) || 0,
+        count: Number(r.review_count) || 0,
+      };
+    }
+    return out;
+  } catch (e) {
+    console.error("getCompanyRatings failed", e);
+    return {};
+  }
+}
+
 /**
  * Company directory — verified first, then alphabetical. Each carries its
  * open-job count (one bounded query scoped to the listed companies).

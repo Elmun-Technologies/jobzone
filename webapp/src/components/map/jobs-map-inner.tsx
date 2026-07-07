@@ -18,9 +18,13 @@ import { haversineMeters, useUserLocation, type LatLng } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 import { jobLatLng } from "@/lib/uz-geo";
 
+/** Average rating + review count per company id (map "by rating" facet). */
+export type MapRatings = Record<string, { avg: number; count: number }>;
+
 const TASHKENT: [number, number] = [41.3111, 69.2797];
 const NEAR_RADIUS_M = 10_000;
 const SALARY_FROM = 4_000_000; // "4 mln dan" chip
+const TOP_RATED_MIN = 4; // avg rating for the "gullar" / top-rated facet
 
 type Located = Job & { lat: number; lng: number; distance: number | null };
 
@@ -60,17 +64,24 @@ function Recenter({ to, zoom }: { to: LatLng | null; zoom: number }) {
 
 export default function JobsMapInner({
   jobs,
+  ratings,
   height = "70vh",
 }: {
   jobs: Job[];
+  ratings?: MapRatings;
   height?: string;
 }) {
   const locale = useLocale();
   const t = useTranslations("explore");
   const { loc, status, request } = useUserLocation();
   const [nearMe, setNearMe] = useState(false);
+  const [category, setCategory] = useState("");
+  const [company, setCompany] = useState("");
+  const [topRated, setTopRated] = useState(false);
   const [salaryOn, setSalaryOn] = useState(false);
   const [schedule22, setSchedule22] = useState(false);
+
+  const hasRatings = ratings != null && Object.keys(ratings).length > 0;
 
   const located = useMemo<Located[]>(
     () =>
@@ -91,10 +102,32 @@ export default function JobsMapInner({
     [jobs, loc],
   );
 
+  // Facet options derived from the jobs actually on the map.
+  const categories = useMemo(
+    () =>
+      [
+        ...new Set(located.map((j) => j.categoryName).filter(Boolean)),
+      ].sort() as string[],
+    [located],
+  );
+  const companies = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const j of located)
+      if (!seen.has(j.companyId)) seen.set(j.companyId, j.companyName);
+    return [...seen.entries()]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [located]);
+
   const shown = useMemo(
     () =>
       located.filter((j) => {
         if (nearMe && (j.distance == null || j.distance > NEAR_RADIUS_M)) {
+          return false;
+        }
+        if (category && j.categoryName !== category) return false;
+        if (company && j.companyId !== company) return false;
+        if (topRated && (ratings?.[j.companyId]?.avg ?? 0) < TOP_RATED_MIN) {
           return false;
         }
         if (salaryOn && (j.salaryMax ?? j.salaryMin ?? 0) < SALARY_FROM) {
@@ -103,7 +136,16 @@ export default function JobsMapInner({
         if (schedule22 && j.schedulePattern !== "2_2") return false;
         return true;
       }),
-    [located, nearMe, salaryOn, schedule22],
+    [
+      located,
+      nearMe,
+      category,
+      company,
+      topRated,
+      salaryOn,
+      schedule22,
+      ratings,
+    ],
   );
 
   function toggleNearMe() {
@@ -111,51 +153,55 @@ export default function JobsMapInner({
     setNearMe((v) => !v);
   }
 
+  const selectCls =
+    "border-border bg-background text-foreground h-9 rounded-full border px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
   return (
-    <div
-      className="border-border relative overflow-hidden rounded-2xl border"
-      style={{ height }}
-    >
-      <MapContainer
-        center={loc ? [loc.lat, loc.lng] : TASHKENT}
-        zoom={loc ? 13 : 11}
-        scrollWheelZoom
-        className="h-full w-full"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        />
-
-        {loc ? (
-          <>
-            <Recenter to={loc} zoom={13} />
-            <Marker position={[loc.lat, loc.lng]} icon={meIcon}>
-              <Popup>{t("map.youAreHere")}</Popup>
-            </Marker>
-          </>
-        ) : null}
-
-        {shown.map((j) => (
-          <Marker
-            key={j.id}
-            position={[j.lat, j.lng]}
-            icon={pinIcon(salaryPill(j), j.boostActive)}
-          >
-            <Popup>
-              <PinCard job={j} locale={locale} applyLabel={t("map.apply")} />
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-
-      {/* Filter chips + live count, floated above the map. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] flex flex-wrap items-center gap-2 p-3">
+    <div>
+      {/* Segmentation toolbar — find a job by area, field, company or rating. */}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <Chip
           active={nearMe}
           onClick={toggleNearMe}
           label={status === "locating" ? t("map.locating") : t("map.nearMe")}
         />
+        {categories.length > 0 ? (
+          <select
+            aria-label={t("map.byCategory")}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={cn(selectCls, category && "border-primary")}
+          >
+            <option value="">{t("map.allCategories")}</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {companies.length > 1 ? (
+          <select
+            aria-label={t("map.byCompany")}
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className={cn(selectCls, company && "border-primary")}
+          >
+            <option value="">{t("map.allCompanies")}</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {hasRatings ? (
+          <Chip
+            active={topRated}
+            onClick={() => setTopRated((v) => !v)}
+            label={`🌸 ${t("map.topRated")}`}
+          />
+        ) : null}
         <Chip
           active={salaryOn}
           onClick={() => setSalaryOn((v) => !v)}
@@ -166,16 +212,61 @@ export default function JobsMapInner({
           onClick={() => setSchedule22((v) => !v)}
           label={t("map.schedule22")}
         />
-        <span className="text-foreground bg-background/90 pointer-events-none ml-auto rounded-full px-3 py-1.5 text-sm font-semibold shadow-sm backdrop-blur">
+        <span className="text-foreground bg-muted ml-auto rounded-full px-3 py-1.5 text-sm font-semibold">
           {t("map.results", { count: shown.length })}
         </span>
       </div>
 
-      {status === "denied" && nearMe ? (
-        <div className="text-muted-foreground bg-background/95 absolute inset-x-0 bottom-0 z-[1000] m-3 rounded-lg px-3 py-2 text-center text-sm shadow">
-          {t("map.locationDenied")}
-        </div>
-      ) : null}
+      <p className="text-muted-foreground mb-3 text-xs">{t("map.hint")}</p>
+
+      <div
+        className="border-border relative overflow-hidden rounded-2xl border"
+        style={{ height }}
+      >
+        <MapContainer
+          center={loc ? [loc.lat, loc.lng] : TASHKENT}
+          zoom={loc ? 13 : 11}
+          scrollWheelZoom
+          className="h-full w-full"
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          />
+
+          {loc ? (
+            <>
+              <Recenter to={loc} zoom={13} />
+              <Marker position={[loc.lat, loc.lng]} icon={meIcon}>
+                <Popup>{t("map.youAreHere")}</Popup>
+              </Marker>
+            </>
+          ) : null}
+
+          {shown.map((j) => (
+            <Marker
+              key={j.id}
+              position={[j.lat, j.lng]}
+              icon={pinIcon(salaryPill(j), j.boostActive)}
+            >
+              <Popup>
+                <PinCard
+                  job={j}
+                  locale={locale}
+                  applyLabel={t("map.apply")}
+                  rating={ratings?.[j.companyId]}
+                />
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+
+        {status === "denied" && nearMe ? (
+          <div className="text-muted-foreground bg-background/95 absolute inset-x-0 bottom-0 z-[1000] m-3 rounded-lg px-3 py-2 text-center text-sm shadow">
+            {t("map.locationDenied")}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -195,7 +286,7 @@ function Chip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "pointer-events-auto rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm transition-colors",
+        "rounded-full border px-3 py-1.5 text-sm font-medium shadow-sm transition-colors",
         active
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-foreground hover:border-primary/40",
@@ -210,10 +301,12 @@ function PinCard({
   job,
   locale,
   applyLabel,
+  rating,
 }: {
   job: Located;
   locale: string;
   applyLabel: string;
+  rating?: { avg: number; count: number };
 }) {
   const meta = [
     job.categoryName,
@@ -232,7 +325,14 @@ function PinCard({
       >
         {job.title}
       </a>
-      <div className="text-muted-foreground text-sm">{job.companyName}</div>
+      <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+        {job.companyName}
+        {rating && rating.count > 0 ? (
+          <span className="text-foreground font-medium">
+            · ⭐ {rating.avg.toFixed(1)}
+          </span>
+        ) : null}
+      </div>
       {salary ? (
         <div className="text-foreground mt-0.5 font-mono text-sm font-semibold">
           {salary}

@@ -29,7 +29,13 @@
       "results": "{count} jobs",
       "youAreHere": "You are here",
       "apply": "Apply · 2 clicks",
-      "locationDenied": "Location unavailable — allow it to see jobs near you."
+      "locationDenied": "Location unavailable — allow it to see jobs near you.",
+      "byCategory": "Field",
+      "allCategories": "All fields",
+      "byCompany": "Company",
+      "allCompanies": "All companies",
+      "topRated": "Top-rated",
+      "hint": "Find a job on the map — filter by field, company or rating, then tap a pin."
     }
   },
   "auth": {

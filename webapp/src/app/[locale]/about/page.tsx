@@ -15,6 +15,7 @@ import { Eyebrow, RatingCard, SectionHead } from "@/components/landing/section";
 import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { getCompanyRatings } from "@/lib/data/companies";
 import { getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,10 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("landing");
-  const jobs = await getOpenJobs({ limit: 100 });
+  const [jobs, ratings] = await Promise.all([
+    getOpenJobs({ limit: 100 }),
+    getCompanyRatings(),
+  ]);
 
   return (
     <>
@@ -103,7 +107,7 @@ export default async function AboutPage({
             </p>
           </div>
 
-          <JobsMap jobs={jobs} height="72vh" />
+          <JobsMap jobs={jobs} ratings={ratings} height="72vh" />
 
           <p className="text-muted-foreground mt-3 text-center font-mono text-xs tracking-wide">
             {COORDS} · {t("map.hint")}
