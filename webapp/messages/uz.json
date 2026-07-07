@@ -85,7 +85,16 @@
     "messages": "Xabarlar",
     "signedInAs": "Tizimga kirgansiz:",
     "comingSoon": "CV tez orada shu yerda bo'ladi.",
-    "signOut": "Chiqish"
+    "signOut": "Chiqish",
+    "snapshot": {
+      "openJobs": "Ochiq vakansiyalar",
+      "applicants": "Nomzodlar",
+      "applications": "Arizalar",
+      "reviews": "{count} sharh",
+      "noCompanyYet": "Kompaniya hali yaratilmagan",
+      "createCompany": "Kompaniya yaratish",
+      "seekerFallback": "Ish izlovchi"
+    }
   },
   "chat": {
     "title": "Xabarlar",

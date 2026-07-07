@@ -1,4 +1,5 @@
 import {
+  BadgeCheck,
   Bell,
   BellRing,
   Bookmark,
@@ -17,9 +18,15 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { StatCard } from "@/components/ui/stat-card";
 import { signOutAction } from "@/lib/auth/actions";
 import { getCurrentUser } from "@/lib/auth/user";
-import { getMyRole } from "@/lib/data/employer";
+import { getMyApplications } from "@/lib/data/applications";
+import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
+import { getCompanyRating } from "@/lib/data/companies";
+import { getEmployerStats, getMyCompany, getMyRole } from "@/lib/data/employer";
+import { getMyProfileDetails } from "@/lib/data/profile";
+import { getWallet } from "@/lib/data/wallet";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +111,24 @@ export default async function AccountPage({
   ];
   const items = [...roleItems, ...sharedItems];
 
+  const ts = await getTranslations("account.snapshot");
+  const company = isEmployer ? await getMyCompany() : null;
+  const [stats, wallet, rating] = company
+    ? await Promise.all([
+        getEmployerStats(company.id),
+        getWallet(company.id),
+        getCompanyRating(company.id),
+      ])
+    : [null, null, null];
+  const [profile, applications, bookmarkIds] = !isEmployer
+    ? await Promise.all([
+        getMyProfileDetails(),
+        getMyApplications(),
+        getBookmarkedJobIds(),
+      ])
+    : [null, null, null];
+  const seekerName = profile?.fullName || ts("seekerFallback");
+
   return (
     <Container className="max-w-4xl py-12">
       <div className="flex flex-wrap items-center gap-3">
@@ -115,6 +140,95 @@ export default async function AccountPage({
       <p className="text-muted-foreground mt-2 text-sm">
         {t("signedInAs")} <span className="font-medium">{user?.email}</span>
       </p>
+
+      {/* At-a-glance snapshot: the employer's company + numbers, or the
+          seeker's identity + activity — role-specific, like everything else
+          on this page. */}
+      {isEmployer && company ? (
+        <div className="border-border bg-card mt-6 rounded-2xl border p-5">
+          <div className="flex items-center gap-3">
+            {company.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={company.logoUrl}
+                alt={company.name}
+                width={48}
+                height={48}
+                className="size-12 shrink-0 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg text-lg font-bold">
+                {company.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="text-foreground flex items-center gap-1 font-semibold">
+                <span className="truncate">{company.name}</span>
+                {company.isVerified ? (
+                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                ) : null}
+              </p>
+              {rating && rating.count > 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  ⭐ {rating.avg.toFixed(1)} ·{" "}
+                  {ts("reviews", { count: rating.count })}
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <StatCard label={ts("openJobs")} value={stats?.openJobs ?? 0} />
+            <StatCard
+              label={ts("applicants")}
+              value={stats?.totalApplicants ?? 0}
+            />
+            <StatCard
+              label={tw("balance")}
+              value={wallet?.balanceUzs ?? 0}
+              href="/employer/wallet"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {isEmployer && !company ? (
+        <div className="border-border bg-card mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-5">
+          <p className="text-muted-foreground text-sm">{ts("noCompanyYet")}</p>
+          <Link
+            href="/employer/onboarding"
+            className={cn(buttonVariants({ variant: "primary", size: "sm" }))}
+          >
+            {ts("createCompany")}
+          </Link>
+        </div>
+      ) : null}
+
+      {!isEmployer ? (
+        <div className="border-border bg-card mt-6 rounded-2xl border p-5">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg text-lg font-bold">
+              {seekerName.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-foreground truncate font-semibold">
+                {seekerName}
+              </p>
+              {profile?.headline ? (
+                <p className="text-muted-foreground truncate text-sm">
+                  {profile.headline}
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <StatCard
+              label={ts("applications")}
+              value={applications?.length ?? 0}
+            />
+            <StatCard label={t("savedJobs")} value={bookmarkIds?.size ?? 0} />
+          </div>
+        </div>
+      ) : null}
 
       <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {items.map(({ href, label, icon: Icon, featured }) => (

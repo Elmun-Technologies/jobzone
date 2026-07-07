@@ -42,6 +42,30 @@ export async function getCompanyRatings(): Promise<CompanyRatings> {
   }
 }
 
+/** One company's rating from `company_rating_summary`; zeroed if it has no reviews yet. */
+export async function getCompanyRating(
+  companyId: string,
+): Promise<{ avg: number; count: number }> {
+  const empty = { avg: 0, count: 0 };
+  if (!hasSupabase()) return empty;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("company_rating_summary")
+      .select("avg_rating, review_count")
+      .eq("company_id", companyId)
+      .maybeSingle();
+    if (!data) return empty;
+    return {
+      avg: Number(data.avg_rating) || 0,
+      count: Number(data.review_count) || 0,
+    };
+  } catch (e) {
+    console.error("getCompanyRating failed", e);
+    return empty;
+  }
+}
+
 /**
  * Company directory — verified first, then alphabetical. Each carries its
  * open-job count (one bounded query scoped to the listed companies).
