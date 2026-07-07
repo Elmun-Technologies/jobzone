@@ -295,7 +295,10 @@
       "previewTitle": "Как будет выглядеть вакансия",
       "previewSub": "Проверьте перед публикацией.",
       "titleRequired": "Введите название должности",
-      "noDescription": "Описание не указано"
+      "noDescription": "Описание не указано",
+      "aiGenerate": "Заполнить с ИИ",
+      "aiGenerating": "Генерация…",
+      "aiError": "Попробуйте ещё раз"
     }
   },
   "wallet": {
