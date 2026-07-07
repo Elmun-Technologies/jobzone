@@ -8,6 +8,15 @@ import '../../jobs/domain/job_language.dart';
 import '../../jobs/domain/screening_question.dart';
 import 'mock_employer.dart';
 
+/// Thrown when a job write is attempted before the employer has a company —
+/// `jobs.company_id` is NOT NULL. The UI catches this to steer the user into
+/// the create-company step instead of surfacing a raw DB error.
+class NoCompanyError implements Exception {
+  const NoCompanyError();
+  @override
+  String toString() => 'NoCompanyError';
+}
+
 /// Write-side jobs repository for employers: list, create, edit and open/close
 /// the jobs owned by the employer's company. Owner CRUD on `jobs` is permitted
 /// by the `is_job_owner` RLS helper. Falls back to an in-memory store (seeded
@@ -148,11 +157,16 @@ class EmployerJobsRepository {
     }
     final client = _ref.read(supabaseClientProvider);
     final company = await _ownedCompany();
+    // jobs.company_id is NOT NULL. Without a company we'd hit a raw 23502
+    // "null value in company_id" that surfaces as "Something went wrong";
+    // fail fast with a typed marker the UI localizes into "create your
+    // company first".
+    if (company == null) throw const NoCompanyError();
     final uid = client.auth.currentUser?.id;
     final row = await client
         .from('jobs')
         .insert({
-          'company_id': company?['id'],
+          'company_id': company['id'],
           'posted_by': uid,
           'title': title,
           'status': status,
