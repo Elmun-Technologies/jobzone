@@ -18,6 +18,31 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Yolla — find your next job.">
 
+  <!--
+    The production Yolla site is the Next.js webapp on Vercel; this Flutter
+    web build is only a preview/offline demo of the mobile app. Any real user
+    who lands here (an old bookmark, a stale search result) is redirected to
+    the webapp so employer sign-up etc. lands on the right surface. Pass
+    ?keep=flutter or #keep=flutter to bypass and use the Flutter build
+    directly. Noindex keeps Google from surfacing this preview.
+  -->
+  <meta name="robots" content="noindex, nofollow">
+  <script>
+    (function () {
+      try {
+        var here = new URL(window.location.href);
+        var q = here.searchParams.get("keep");
+        var h = (here.hash || "").indexOf("keep=flutter") !== -1;
+        if (q === "flutter" || h) return;
+        var target = new URL("https://jobzone-virid.vercel.app/");
+        // Carry the visitor's path/query onward so /jobs/123 still works.
+        var rel = here.pathname.replace(/^\/jobzone\/?/, "/") + here.search;
+        target.pathname = rel.startsWith("/") ? rel : "/" + rel;
+        window.location.replace(target.toString());
+      } catch (_) {}
+    })();
+  </script>
+
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
