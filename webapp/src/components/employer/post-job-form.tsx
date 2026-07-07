@@ -8,6 +8,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { createJob, type JobFormState } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
+import { PROFESSIONS, suggestCategorySlug } from "@/lib/professions";
 import { cn } from "@/lib/utils";
 
 import { ScreeningEditor, type StashedQuestion } from "./screening-editor";
@@ -232,6 +233,7 @@ export function PostJobForm({
   );
   const [restored, setRestored] = useState<JobDraft | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
   const stepAreaRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const [titleError, setTitleError] = useState(false);
@@ -412,9 +414,27 @@ export function PostJobForm({
                 name="title"
                 defaultValue={d?.title}
                 placeholder={tp("titleHint")}
-                onChange={() => titleError && setTitleError(false)}
+                list="pro-titles"
+                autoComplete="off"
+                onChange={(e) => {
+                  if (titleError) setTitleError(false);
+                  // Auto-pick the category from the title, unless one is
+                  // already chosen (or restored from a draft).
+                  const sel = categoryRef.current;
+                  if (!sel || sel.value) return;
+                  const slug = suggestCategorySlug(e.target.value);
+                  const cat = slug
+                    ? categories.find((c) => c.slug === slug)
+                    : null;
+                  if (cat) sel.value = cat.id;
+                }}
                 className={inputClass}
               />
+              <datalist id="pro-titles">
+                {PROFESSIONS.map((p) => (
+                  <option key={p.label} value={p.label} />
+                ))}
+              </datalist>
             </Labeled>
             <Labeled label={t("jobDescription")}>
               <textarea
@@ -450,6 +470,7 @@ export function PostJobForm({
             </Labeled>
             <Labeled label={t("category")}>
               <select
+                ref={categoryRef}
                 name="categoryId"
                 defaultValue={d?.categoryId ?? ""}
                 className={inputClass}
