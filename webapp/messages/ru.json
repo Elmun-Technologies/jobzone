@@ -85,7 +85,16 @@
     "messages": "Сообщения",
     "signedInAs": "Вы вошли как:",
     "comingSoon": "Резюме скоро появится здесь.",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "snapshot": {
+      "openJobs": "Открытые вакансии",
+      "applicants": "Кандидаты",
+      "applications": "Заявки",
+      "reviews": "{count} отзывов",
+      "noCompanyYet": "Компания ещё не создана",
+      "createCompany": "Создать компанию",
+      "seekerFallback": "Соискатель"
+    }
   },
   "chat": {
     "title": "Сообщения",

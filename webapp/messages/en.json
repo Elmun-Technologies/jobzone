@@ -85,7 +85,16 @@
     "messages": "Messages",
     "signedInAs": "Signed in as:",
     "comingSoon": "Your CV will appear here soon.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "snapshot": {
+      "openJobs": "Open vacancies",
+      "applicants": "Candidates",
+      "applications": "Applications",
+      "reviews": "{count} reviews",
+      "noCompanyYet": "No company yet",
+      "createCompany": "Create a company",
+      "seekerFallback": "Job seeker"
+    }
   },
   "chat": {
     "title": "Messages",
