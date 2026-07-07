@@ -15,7 +15,12 @@
     "signIn": "Kirish",
     "account": "Hisob",
     "notifications": "Bildirishnomalar",
-    "about": "Loyiha"
+    "about": "Loyiha",
+    "dashboard": "Panel",
+    "vacancies": "Vakansiyalar",
+    "company": "Kompaniya",
+    "candidates": "Nomzodlar",
+    "postVacancy": "Vakansiya joylash"
   },
   "explore": {
     "title": "Ishlar xaritasi",

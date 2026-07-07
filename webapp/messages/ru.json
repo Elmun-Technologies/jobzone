@@ -15,7 +15,12 @@
     "signIn": "Войти",
     "account": "Аккаунт",
     "notifications": "Уведомления",
-    "about": "О проекте"
+    "about": "О проекте",
+    "dashboard": "Панель",
+    "vacancies": "Вакансии",
+    "company": "Компания",
+    "candidates": "Кандидаты",
+    "postVacancy": "Разместить вакансию"
   },
   "explore": {
     "title": "Карта вакансий",

@@ -10,8 +10,17 @@ const segment =
 const active = "bg-background text-foreground shadow-sm";
 const inactive = "text-muted-foreground hover:text-foreground";
 
-/** Seeker ⇄ Employer audience switch (mirrors the mobile role split). */
-export function RoleToggle() {
+/**
+ * Seeker ⇄ Employer audience switch — the master mode boundary (mirrors the
+ * mobile role split). `employerHref` is resolved by the server header so a
+ * guest lands on the guest-first post-a-vacancy page instead of the gated
+ * employer dashboard.
+ */
+export function RoleToggle({
+  employerHref = "/employer",
+}: {
+  employerHref?: string;
+}) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const isEmployer = pathname.startsWith("/employer");
@@ -22,7 +31,7 @@ export function RoleToggle() {
         {t("seeker")}
       </Link>
       <Link
-        href="/employer"
+        href={employerHref}
         className={cn(segment, isEmployer ? active : inactive)}
       >
         {t("employer")}

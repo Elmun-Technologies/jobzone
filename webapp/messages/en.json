@@ -15,7 +15,12 @@
     "signIn": "Sign in",
     "account": "Account",
     "notifications": "Notifications",
-    "about": "About"
+    "about": "About",
+    "dashboard": "Dashboard",
+    "vacancies": "Vacancies",
+    "company": "Company",
+    "candidates": "Candidates",
+    "postVacancy": "Post a vacancy"
   },
   "explore": {
     "title": "Jobs map",

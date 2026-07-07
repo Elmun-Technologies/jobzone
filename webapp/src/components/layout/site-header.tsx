@@ -1,26 +1,32 @@
-import { Bell, CircleUser, FilePlus2 } from "lucide-react";
+import { Bell, CircleUser } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { getCurrentUser } from "@/lib/auth/user";
+import { getMyRole } from "@/lib/data/employer";
 import { getUnreadNotificationCount } from "@/lib/data/notifications";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+import { HeaderNav } from "./header-nav";
 import { LocaleSwitcher } from "./locale-switcher";
 import { RoleToggle } from "./role-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { YollaLogo } from "./yolla-logo";
 
-const navLink =
-  "text-foreground hover:text-primary text-sm font-medium transition-colors";
-
-/** Top navigation: brand + audience toggle, primary links, resume CTA, auth. */
+/** Top navigation: brand + audience toggle, mode-aware links + CTA, auth. */
 export async function SiteHeader() {
   const t = await getTranslations("nav");
   const user = await getCurrentUser();
-  const unread = user ? await getUnreadNotificationCount() : 0;
+  const [unread, role] = user
+    ? await Promise.all([getUnreadNotificationCount(), getMyRole()])
+    : [0, null];
+  const isEmployerAccount = role === "employer";
+  // A guest sliding to "Employer" should land on the guest-first post page —
+  // the dashboard is gated, so it would otherwise bounce to sign-in.
+  const employerHref =
+    user && isEmployerAccount ? "/employer" : "/employer/jobs/new";
 
   return (
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
@@ -30,39 +36,12 @@ export async function SiteHeader() {
             <YollaLogo />
           </Link>
           <div className="hidden sm:block">
-            <RoleToggle />
+            <RoleToggle employerHref={employerHref} />
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <nav className="hidden items-center gap-5 lg:flex">
-            <Link href="/" className={navLink}>
-              {t("home")}
-            </Link>
-            <Link href="/jobs" className={navLink}>
-              {t("jobs")}
-            </Link>
-            <Link href="/companies" className={navLink}>
-              {t("companies")}
-            </Link>
-            <Link href="/about" className={navLink}>
-              {t("about")}
-            </Link>
-            <Link href="/account/bookmarks" className={navLink}>
-              {t("saved")}
-            </Link>
-          </nav>
-
-          <Link
-            href="/resumes/new"
-            className={cn(
-              buttonVariants({ variant: "primary", size: "sm" }),
-              "hidden gap-1.5 sm:inline-flex",
-            )}
-          >
-            <FilePlus2 className="size-4" />
-            {t("createResume")}
-          </Link>
+          <HeaderNav signedIn={!!user} isEmployerAccount={isEmployerAccount} />
 
           <LocaleSwitcher />
           <ThemeToggle />
