@@ -12,6 +12,7 @@ import { groupNumber } from "@/lib/format";
 import { PROFESSIONS, suggestCategorySlug } from "@/lib/professions";
 import { cn } from "@/lib/utils";
 
+import { LocationPicker } from "../map/location-picker";
 import { ScreeningEditor, type StashedQuestion } from "./screening-editor";
 
 const inputClass =
@@ -49,6 +50,8 @@ interface JobDraft {
   salaryPeriod: string;
   city: string;
   addressText: string;
+  lat: number | null;
+  lng: number | null;
   jobType: string;
   workingModel: string;
   experienceLevel: string;
@@ -65,6 +68,10 @@ interface JobDraft {
 function draftFromFormData(data: FormData): JobDraft {
   const str = (k: string) => (data.get(k) ?? "").toString();
   const bool = (k: string) => data.get(k) === "1";
+  const num = (k: string) => {
+    const v = str(k);
+    return v ? Number(v) : null;
+  };
   let screeningQuestions: StashedQuestion[] = [];
   try {
     screeningQuestions = JSON.parse(str("screeningQuestions") || "[]");
@@ -84,6 +91,8 @@ function draftFromFormData(data: FormData): JobDraft {
     salaryPeriod: str("salaryPeriod") || "month",
     city: str("city"),
     addressText: str("addressText"),
+    lat: num("lat"),
+    lng: num("lng"),
     jobType: str("jobType"),
     workingModel: str("workingModel"),
     experienceLevel: str("experienceLevel"),
@@ -241,6 +250,8 @@ export function PostJobForm({
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState(false);
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+  const [cityText, setCityText] = useState("");
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STASH_KEY);
@@ -255,6 +266,17 @@ export function PostJobForm({
       // Ignore a malformed stash.
     }
   }, []);
+
+  // The map pin and city hint are React-controlled (not uncontrolled DOM
+  // fields), so a restored draft has to be mirrored into state explicitly.
+  useEffect(() => {
+    if (!restored) return;
+    if (restored.lat != null && restored.lng != null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPin({ lat: restored.lat, lng: restored.lng });
+    }
+    if (restored.city) setCityText(restored.city);
+  }, [restored]);
 
   useEffect(() => {
     if (!state.signedOut && !state.noCompany) return;
@@ -322,6 +344,7 @@ export function PostJobForm({
       fd.get("nightShift") === "1" && tp("nightShift"),
       fd.get("womenFriendly") === "1" && tp("womenFriendly"),
       fd.get("disabilityFriendly") === "1" && tp("disabilityFriendly"),
+      g("lat") && g("lng") && tp("pinSet"),
     ].filter(Boolean) as string[];
     return {
       title: g("title"),
@@ -648,6 +671,7 @@ export function PostJobForm({
               <input
                 name="city"
                 defaultValue={d?.city}
+                onChange={(e) => setCityText(e.target.value)}
                 className={inputClass}
               />
             </Labeled>
@@ -659,6 +683,20 @@ export function PostJobForm({
                 className={inputClass}
               />
             </Labeled>
+            <input type="hidden" name="lat" value={pin?.lat ?? ""} readOnly />
+            <input type="hidden" name="lng" value={pin?.lng ?? ""} readOnly />
+            <div>
+              <span className="text-foreground mb-1.5 block text-sm font-medium">
+                {tp("locationMapHint")}
+              </span>
+              <LocationPicker
+                lat={pin?.lat ?? null}
+                lng={pin?.lng ?? null}
+                onChange={setPin}
+                cityHint={cityText || d?.city || null}
+                locale={locale}
+              />
+            </div>
           </Section>
         </div>
 

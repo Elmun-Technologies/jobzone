@@ -149,6 +149,8 @@ export async function createJob(
     category_id: optional(formData, "categoryId"),
     city: optional(formData, "city"),
     address_text: optional(formData, "addressText"),
+    lat: number("lat"),
+    lng: number("lng"),
     country: "UZ",
     salary_min: number("salaryMin"),
     salary_max: number("salaryMax"),
