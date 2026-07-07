@@ -91,6 +91,9 @@ export interface EmployerStats {
   totalJobs: number;
   openJobs: number;
   totalApplicants: number;
+  /** Has this company ever published a vacancy (any non-draft status)? Used
+   * to gate the first-vacancy-free pricing rule — a draft never counts. */
+  hasPublishedBefore: boolean;
 }
 
 export async function getEmployerStats(
@@ -101,5 +104,6 @@ export async function getEmployerStats(
     totalJobs: jobs.length,
     openJobs: jobs.filter((j) => j.status === "open").length,
     totalApplicants: jobs.reduce((sum, j) => sum + j.applicantsCount, 0),
+    hasPublishedBefore: jobs.some((j) => j.status !== "draft"),
   };
 }

@@ -304,7 +304,13 @@
       "noDescription": "Описание не указано",
       "aiGenerate": "Заполнить с ИИ",
       "aiGenerating": "Генерация…",
-      "aiError": "Попробуйте ещё раз"
+      "aiError": "Попробуйте ещё раз",
+      "paymentFree": "🎉 Ваша первая вакансия — бесплатно!",
+      "paymentDue": "За эту вакансию будет списано {price} с Hamyon",
+      "paymentBalance": "Текущий баланс: {balance}",
+      "paymentInsufficientTitle": "Недостаточно средств в Hamyon",
+      "paymentInsufficientHint": "Для публикации нужно {price}. Пополните Hamyon.",
+      "paymentTopUp": "Перейти в Hamyon"
     }
   },
   "wallet": {

@@ -9,6 +9,7 @@ import { generateJobContent } from "@/lib/actions/ai-content";
 import { createJob, type JobFormState } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
+import { canAffordJobPost, willChargeForJobPost } from "@/lib/job-post-pricing";
 import { PROFESSIONS, suggestCategorySlug } from "@/lib/professions";
 import { cn } from "@/lib/utils";
 
@@ -228,9 +229,15 @@ interface PreviewData {
 export function PostJobForm({
   companyId,
   categories,
+  hasPublishedBefore,
+  jobPostPriceUzs,
+  walletBalanceUzs,
 }: {
   companyId: string | null;
   categories: JobCategory[];
+  hasPublishedBefore: boolean;
+  jobPostPriceUzs: number;
+  walletBalanceUzs: number;
 }) {
   const t = useTranslations("employer");
   const tp = useTranslations("employer.post");
@@ -316,6 +323,10 @@ export function PostJobForm({
     tp("stepPreview"),
   ];
   const last = steps.length - 1;
+  const willCharge = willChargeForJobPost(hasPublishedBefore, jobPostPriceUzs);
+  const canAfford = canAffordJobPost(walletBalanceUzs, jobPostPriceUzs);
+  const blockedByFunds =
+    (willCharge && !canAfford) || !!state.insufficientFunds;
 
   function buildPreview(): PreviewData {
     const fd = new FormData(formRef.current!);
@@ -740,12 +751,21 @@ export function PostJobForm({
         </div>
 
         {step === last && preview ? (
-          <JobPreview
-            data={preview}
-            title={tp("previewTitle")}
-            sub={tp("previewSub")}
-            empty={tp("noDescription")}
-          />
+          <>
+            <JobPreview
+              data={preview}
+              title={tp("previewTitle")}
+              sub={tp("previewSub")}
+              empty={tp("noDescription")}
+            />
+            <PaymentPanel
+              willCharge={willCharge}
+              blockedByFunds={blockedByFunds}
+              priceUzs={jobPostPriceUzs}
+              balanceUzs={walletBalanceUzs}
+              locale={locale}
+            />
+          </>
         ) : null}
       </div>
 
@@ -792,7 +812,7 @@ export function PostJobForm({
               type="submit"
               name="status"
               value="open"
-              disabled={pending}
+              disabled={pending || blockedByFunds}
               className="bg-primary text-primary-foreground h-11 rounded-lg px-6 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {t("publishJob")}
@@ -872,6 +892,68 @@ function JobPreview({
           <p className="text-muted-foreground mt-5 text-sm">{empty}</p>
         )}
       </article>
+    </div>
+  );
+}
+
+/** The "before Publish" payment step: free-first-job note, or the Hamyon
+ * price + balance — with a top-up link when the balance won't cover it. */
+function PaymentPanel({
+  willCharge,
+  blockedByFunds,
+  priceUzs,
+  balanceUzs,
+  locale,
+}: {
+  willCharge: boolean;
+  blockedByFunds: boolean;
+  priceUzs: number;
+  balanceUzs: number;
+  locale: string;
+}) {
+  const tp = useTranslations("employer.post");
+
+  if (!willCharge) {
+    return (
+      <div className="border-primary/40 bg-accent mt-4 rounded-2xl border p-4 text-sm font-medium">
+        {tp("paymentFree")}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "mt-4 rounded-2xl border p-4 text-sm",
+        blockedByFunds
+          ? "border-destructive/40 bg-destructive/5"
+          : "border-border bg-card",
+      )}
+    >
+      <p className="text-foreground font-medium">
+        {tp("paymentDue", { price: `${groupNumber(priceUzs)} so'm` })}
+      </p>
+      <p className="text-muted-foreground mt-1">
+        {tp("paymentBalance", { balance: `${groupNumber(balanceUzs)} so'm` })}
+      </p>
+      {blockedByFunds ? (
+        <div className="mt-3">
+          <p className="text-destructive font-medium">
+            {tp("paymentInsufficientTitle")}
+          </p>
+          <p className="text-muted-foreground mt-0.5">
+            {tp("paymentInsufficientHint", {
+              price: `${groupNumber(priceUzs)} so'm`,
+            })}
+          </p>
+          <a
+            href={`/${locale}/employer/wallet`}
+            className="bg-primary text-primary-foreground mt-2 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold hover:opacity-90"
+          >
+            {tp("paymentTopUp")}
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 }

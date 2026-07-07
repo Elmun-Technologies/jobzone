@@ -304,7 +304,13 @@
       "noDescription": "Tavsif kiritilmagan",
       "aiGenerate": "AI bilan to‘ldirish",
       "aiGenerating": "Yozilmoqda…",
-      "aiError": "Qayta urinib ko‘ring"
+      "aiError": "Qayta urinib ko‘ring",
+      "paymentFree": "🎉 Birinchi vakansiyangiz — bepul!",
+      "paymentDue": "Ushbu vakansiya uchun {price} Hamyondan yechiladi",
+      "paymentBalance": "Joriy balans: {balance}",
+      "paymentInsufficientTitle": "Hamyoningizda mablag' yetarli emas",
+      "paymentInsufficientHint": "Nashr qilish uchun {price} kerak. Hamyonni to'ldiring.",
+      "paymentTopUp": "Hamyonga o'tish"
     }
   },
   "wallet": {

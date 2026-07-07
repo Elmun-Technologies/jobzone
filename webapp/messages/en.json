@@ -304,7 +304,13 @@
       "noDescription": "No description yet",
       "aiGenerate": "Fill with AI",
       "aiGenerating": "Generating…",
-      "aiError": "Try again"
+      "aiError": "Try again",
+      "paymentFree": "🎉 Your first vacancy is free!",
+      "paymentDue": "{price} will be charged from your Hamyon balance for this vacancy",
+      "paymentBalance": "Current balance: {balance}",
+      "paymentInsufficientTitle": "Not enough balance in Hamyon",
+      "paymentInsufficientHint": "Publishing needs {price}. Top up your Hamyon balance.",
+      "paymentTopUp": "Go to Hamyon"
     }
   },
   "wallet": {

@@ -4,7 +4,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PostJobForm } from "@/components/employer/post-job-form";
 import { Container } from "@/components/ui/container";
 import { getCategories } from "@/lib/data/categories";
-import { getMyCompany } from "@/lib/data/employer";
+import { getEmployerStats, getMyCompany } from "@/lib/data/employer";
+import { getJobPostPrice } from "@/lib/data/pricing";
+import { getWallet } from "@/lib/data/wallet";
 
 export async function generateMetadata({
   params,
@@ -36,14 +38,34 @@ export default async function PostJobPage({
 
   const company = await getMyCompany();
   const t = await getTranslations("employer");
-  const categories = await getCategories();
+  const [categories, jobPostPriceUzs, stats, wallet] = await Promise.all([
+    getCategories(),
+    getJobPostPrice(),
+    company
+      ? getEmployerStats(company.id)
+      : Promise.resolve({
+          totalJobs: 0,
+          openJobs: 0,
+          totalApplicants: 0,
+          hasPublishedBefore: false,
+        }),
+    company
+      ? getWallet(company.id)
+      : Promise.resolve({ balanceUzs: 0, transactions: [] }),
+  ]);
 
   return (
     <Container className="py-10">
       <h1 className="text-foreground mb-6 text-2xl font-bold">
         {t("postJob")}
       </h1>
-      <PostJobForm companyId={company?.id ?? null} categories={categories} />
+      <PostJobForm
+        companyId={company?.id ?? null}
+        categories={categories}
+        hasPublishedBefore={stats.hasPublishedBefore}
+        jobPostPriceUzs={jobPostPriceUzs}
+        walletBalanceUzs={wallet.balanceUzs}
+      />
     </Container>
   );
 }
