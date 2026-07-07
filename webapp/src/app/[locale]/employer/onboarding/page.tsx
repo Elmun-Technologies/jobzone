@@ -54,6 +54,7 @@ export default async function EmployerOnboardingPage({
         action={createCompany}
         submitLabel={t("createCompany")}
         next={next}
+        showWebsite={false}
       />
     </Container>
   );
