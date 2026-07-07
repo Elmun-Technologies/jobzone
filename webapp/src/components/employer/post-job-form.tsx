@@ -279,6 +279,9 @@ export function PostJobForm({
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState(false);
+  // Set when a GLM key was configured but the call fell back to the template,
+  // so the employer knows the output is generic and can fix the key/URL.
+  const [aiFellBack, setAiFellBack] = useState<string | null>(null);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
   const [cityText, setCityText] = useState("");
   const [addressText, setAddressText] = useState("");
@@ -435,6 +438,7 @@ export function PostJobForm({
     }
     setAiPending(true);
     setAiError(false);
+    setAiFellBack(null);
     try {
       const catId = (
         form.elements.namedItem("categoryId") as HTMLSelectElement | null
@@ -444,6 +448,7 @@ export function PostJobForm({
         form.elements.namedItem("aiNotes") as HTMLTextAreaElement | null
       )?.value;
       const res = await generateJobContent({ title, category, notes, locale });
+      if (res.fellBack) setAiFellBack(res.debug ?? "");
       // Text blocks: always overwrite (the AI draft is the whole point).
       const setText = (name: string, val: string) => {
         const el = form.elements.namedItem(name) as HTMLTextAreaElement | null;
@@ -620,6 +625,14 @@ export function PostJobForm({
                   </span>
                 ) : null}
               </div>
+              {aiFellBack !== null ? (
+                <p className="text-muted-foreground mt-2 text-xs">
+                  {tp("aiFellBack")}
+                  {aiFellBack ? (
+                    <span className="font-mono"> ({aiFellBack})</span>
+                  ) : null}
+                </p>
+              ) : null}
             </div>
             <Labeled label={t("jobDescription")}>
               <textarea
@@ -881,6 +894,8 @@ export function PostJobForm({
                 }),
                 phone: tp("contactPhone"),
                 unnamed: tp("previewUntitled"),
+                showFull: tp("previewShowFull"),
+                showLess: tp("previewShowLess"),
               }}
             />
             <PaymentPanel
@@ -898,7 +913,14 @@ export function PostJobForm({
         <p className="text-destructive mt-3 text-sm">{tp("titleRequired")}</p>
       ) : null}
       {state.error ? (
-        <p className="text-destructive mt-3 text-sm">{t("errUnknown")}</p>
+        <div className="mt-3">
+          <p className="text-destructive text-sm">{t("errUnknown")}</p>
+          {state.detail ? (
+            <p className="text-muted-foreground mt-1 font-mono text-xs break-words">
+              {state.detail}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {/* Footer nav */}
@@ -957,6 +979,8 @@ interface PreviewLabels {
   screening: string;
   phone: string;
   unnamed: string;
+  showFull: string;
+  showLess: string;
 }
 
 /** Render a newline-separated block as a bullet list, or a paragraph if it's
@@ -1015,6 +1039,16 @@ function JobPreview({
   const metaChips = [data.category, ...data.employment].filter(
     Boolean,
   ) as string[];
+  // Long postings are collapsed to a teaser with a fade + "show full" toggle,
+  // so the preview reads like the real (candidate-facing) truncated card.
+  const bodyLen =
+    (data.description?.length ?? 0) +
+    (data.responsibilities?.length ?? 0) +
+    (data.requirements?.length ?? 0) +
+    (data.benefits?.length ?? 0);
+  const collapsible = bodyLen > 320;
+  const [expanded, setExpanded] = useState(false);
+  const showFade = collapsible && !expanded;
 
   return (
     <div>
@@ -1065,22 +1099,46 @@ function JobPreview({
           ) : null}
         </header>
 
-        {/* Body */}
+        {/* Body — collapsed to a teaser with a fade until "show full". */}
         {anyBody ? (
-          <div className="space-y-6 p-6">
-            <PreviewBlock
-              heading={labels.description}
-              body={data.description}
-            />
-            <PreviewBlock
-              heading={labels.responsibilities}
-              body={data.responsibilities}
-            />
-            <PreviewBlock
-              heading={labels.requirements}
-              body={data.requirements}
-            />
-            <PreviewBlock heading={labels.benefits} body={data.benefits} />
+          <div className="relative">
+            <div
+              className={cn(
+                "space-y-6 p-6",
+                showFade && "max-h-72 overflow-hidden",
+              )}
+            >
+              <PreviewBlock
+                heading={labels.description}
+                body={data.description}
+              />
+              <PreviewBlock
+                heading={labels.responsibilities}
+                body={data.responsibilities}
+              />
+              <PreviewBlock
+                heading={labels.requirements}
+                body={data.requirements}
+              />
+              <PreviewBlock heading={labels.benefits} body={data.benefits} />
+            </div>
+            {collapsible ? (
+              <div
+                className={cn(
+                  "flex justify-center pb-4",
+                  showFade &&
+                    "from-card absolute inset-x-0 bottom-0 items-end bg-gradient-to-t to-transparent pt-16",
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => setExpanded((v) => !v)}
+                  className="border-border bg-background text-foreground hover:border-primary rounded-full border px-4 py-1.5 text-sm font-semibold shadow-sm transition-colors"
+                >
+                  {expanded ? labels.showLess : labels.showFull}
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : (
           <p className="text-muted-foreground p-6 text-sm">{empty}</p>

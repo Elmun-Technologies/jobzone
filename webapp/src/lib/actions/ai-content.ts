@@ -11,6 +11,12 @@
 export interface JobDraftContent {
   ok: boolean;
   source: "glm" | "template";
+  /** True when a key WAS configured but every GLM attempt failed — the client
+   * shows a "used template, check the key/URL" note (vs. the silent no-key
+   * path, where this stays false). */
+  fellBack?: boolean;
+  /** Short reason for the fallback (e.g. "GLM 401"), surfaced to the employer. */
+  debug?: string;
   description: string;
   responsibilities: string;
   requirements: string;
@@ -23,6 +29,15 @@ export interface JobDraftContent {
   experienceLevel?: string | null;
   schedulePattern?: string | null;
 }
+
+// Z.ai exposes two OpenAI-compatible bases: the general one and a separate
+// Coding-Plan one. A key issued for one base 401/404s on the other, so we try
+// the configured base first (if any), then both defaults — this makes a
+// Coding-Plan key work without the employer having to set GLM_BASE_URL.
+const GLM_BASES = [
+  "https://api.z.ai/api/paas/v4",
+  "https://api.z.ai/api/coding/paas/v4",
+];
 
 const LANG: Record<string, string> = {
   uz: "Uzbek (Latin script)",
@@ -112,9 +127,11 @@ export async function generateJobContent(input: {
     return { ok: true, source: "template", ...tmpl };
   }
 
-  const base = (
-    process.env.GLM_BASE_URL ?? "https://api.z.ai/api/paas/v4"
-  ).replace(/\/$/, "");
+  // Try the configured base (if any) first, then both known defaults — de-duped.
+  const configured = process.env.GLM_BASE_URL?.replace(/\/$/, "");
+  const bases = [
+    ...new Set([configured, ...GLM_BASES].filter(Boolean)),
+  ] as string[];
   const model = process.env.GLM_MODEL ?? "glm-4.5-flash";
   const lang = LANG[locale] ?? LANG.uz;
 
@@ -136,66 +153,89 @@ Return ONLY a JSON object with exactly these keys: description, responsibilities
 Category: ${category || "—"}
 Employer's key requirements / notes: ${notes?.trim() || "(none given — infer sensible defaults for this role)"}`;
 
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 30_000);
-    const res = await fetch(`${base}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.7,
-        max_tokens: 2200,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error(`GLM ${res.status}`);
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) throw new Error("empty");
-    const j = parseJson(content);
+  const body = JSON.stringify({
+    model,
+    temperature: 0.7,
+    max_tokens: 2200,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+  });
 
-    const str = (k: string, fb: string) =>
-      typeof j[k] === "string" && (j[k] as string).trim()
-        ? (j[k] as string).trim()
-        : fb;
-    const num = (k: string): number | null => {
-      const v = j[k];
-      const n = typeof v === "string" ? Number(v.replace(/\s+/g, "")) : v;
-      return typeof n === "number" && Number.isFinite(n) && n > 0
-        ? Math.round(n)
-        : null;
-    };
-    const enumOf = (k: string, allowed: string[]): string | null => {
-      const v = j[k];
-      return typeof v === "string" && allowed.includes(v) ? v : null;
-    };
+  let lastReason = "unknown";
+  for (const base of bases) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30_000);
+      const res = await fetch(`${base}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        // 401/403 = wrong key for this base; 404 = wrong base → try the next.
+        lastReason = `GLM ${res.status}`;
+        continue;
+      }
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) {
+        lastReason = "empty response";
+        continue;
+      }
+      const j = parseJson(content);
 
-    return {
-      ok: true,
-      source: "glm",
-      description: str("description", tmpl.description),
-      responsibilities: str("responsibilities", tmpl.responsibilities),
-      requirements: str("requirements", tmpl.requirements),
-      benefits: str("benefits", tmpl.benefits),
-      salaryMin: num("salaryMin"),
-      salaryMax: num("salaryMax"),
-      jobType: enumOf("jobType", JOB_TYPES),
-      experienceLevel: enumOf("experienceLevel", EXPERIENCE),
-      schedulePattern: enumOf("schedulePattern", SCHEDULES),
-    };
-  } catch (e) {
-    console.error("generateJobContent (GLM) failed, using template", e);
-    return { ok: true, source: "template", ...tmpl };
+      const str = (k: string, fb: string) =>
+        typeof j[k] === "string" && (j[k] as string).trim()
+          ? (j[k] as string).trim()
+          : fb;
+      const num = (k: string): number | null => {
+        const v = j[k];
+        const n = typeof v === "string" ? Number(v.replace(/\s+/g, "")) : v;
+        return typeof n === "number" && Number.isFinite(n) && n > 0
+          ? Math.round(n)
+          : null;
+      };
+      const enumOf = (k: string, allowed: string[]): string | null => {
+        const v = j[k];
+        return typeof v === "string" && allowed.includes(v) ? v : null;
+      };
+
+      return {
+        ok: true,
+        source: "glm",
+        description: str("description", tmpl.description),
+        responsibilities: str("responsibilities", tmpl.responsibilities),
+        requirements: str("requirements", tmpl.requirements),
+        benefits: str("benefits", tmpl.benefits),
+        salaryMin: num("salaryMin"),
+        salaryMax: num("salaryMax"),
+        jobType: enumOf("jobType", JOB_TYPES),
+        experienceLevel: enumOf("experienceLevel", EXPERIENCE),
+        schedulePattern: enumOf("schedulePattern", SCHEDULES),
+      };
+    } catch (e) {
+      lastReason = e instanceof Error ? e.message : "network error";
+    }
   }
+
+  console.error(
+    "generateJobContent (GLM) failed on all bases, using template —",
+    lastReason,
+  );
+  return {
+    ok: true,
+    source: "template",
+    fellBack: true,
+    debug: lastReason,
+    ...tmpl,
+  };
 }

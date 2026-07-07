@@ -12,10 +12,21 @@ export interface CompanyFormState {
 }
 export interface JobFormState {
   error?: string;
+  /** Raw DB/RPC failure detail, surfaced so a stuck employer can report the
+   * exact cause (e.g. a missing migration column) instead of a blank "error". */
+  detail?: string;
   signedOut?: boolean;
   noCompany?: boolean;
   insufficientFunds?: boolean;
   requiredUzs?: number;
+}
+
+/** A short, safe one-liner from a Supabase error for surfacing to the employer
+ * (their own action) so a stuck publish can be diagnosed from a screenshot. */
+function dbDetail(error: { message?: string; code?: string } | null): string {
+  if (!error) return "";
+  const code = error.code ? `[${error.code}] ` : "";
+  return `${code}${error.message ?? ""}`.slice(0, 300);
 }
 
 function field(formData: FormData, name: string): string {
@@ -175,7 +186,7 @@ export async function createJob(
           return { insufficientFunds: true, requiredUzs: price };
         }
         console.error("createJob payment (adjust_wallet) failed", payError);
-        return { error: "unknown" };
+        return { error: "unknown", detail: dbDetail(payError) };
       }
       charged = true;
     }
@@ -231,7 +242,7 @@ export async function createJob(
         );
       }
     }
-    return { error: "unknown" };
+    return { error: "unknown", detail: dbDetail(error) };
   }
 
   redirect(`/${locale}/employer/jobs`);

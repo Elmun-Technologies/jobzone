@@ -114,10 +114,26 @@ export function YandexLocationPicker({
       placemark.current = null;
     }
     if (!coords) return;
+    // A branded volt/ink teardrop instead of Yandex's default red preset.
+    const Layout = ymaps.templateLayoutFactory.createClass(
+      `<div style="position:relative;transform:translate(-50%,-100%)">
+        <div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+          background:#C7FB00;border:2px solid #0A0A0A;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>
+        <div style="position:absolute;top:7px;left:7px;width:10px;height:10px;border-radius:9999px;background:#0A0A0A"></div>
+      </div>`,
+    );
     const mark = new ymaps.Placemark(
       coords,
       {},
-      { preset: "islands#redDotIcon", draggable: true },
+      {
+        iconLayout: Layout,
+        iconShape: {
+          type: "Circle",
+          coordinates: [0, -13],
+          radius: 14,
+        },
+        draggable: true,
+      },
     );
     mark.events.add("dragend", () => {
       const c = mark.geometry.getCoordinates();
