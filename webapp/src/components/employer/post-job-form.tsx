@@ -281,6 +281,7 @@ export function PostJobForm({
   const [aiError, setAiError] = useState(false);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
   const [cityText, setCityText] = useState("");
+  const [addressText, setAddressText] = useState("");
 
   useEffect(() => {
     // Restoring client-only storage after mount is intentional here (a lazy
@@ -314,6 +315,7 @@ export function PostJobForm({
       setPin({ lat: restored.lat, lng: restored.lng });
     }
     if (restored.city) setCityText(restored.city);
+    if (restored.addressText) setAddressText(restored.addressText);
   }, [restored]);
 
   useEffect(() => {
@@ -779,10 +781,13 @@ export function PostJobForm({
             title={tp("sectionLocation")}
             subtitle={tp("sectionLocationSub")}
           >
+            {/* City + address are React-controlled so the map can fill them
+                (reverse-geocode on pick) and read them (forward-geocode on
+                type). They still post with the form via their `name`. */}
             <Labeled label={t("city")}>
               <input
                 name="city"
-                defaultValue={d?.city}
+                value={cityText}
                 onChange={(e) => setCityText(e.target.value)}
                 className={inputClass}
               />
@@ -790,7 +795,8 @@ export function PostJobForm({
             <Labeled label={tp("address")}>
               <input
                 name="addressText"
-                defaultValue={d?.addressText}
+                value={addressText}
+                onChange={(e) => setAddressText(e.target.value)}
                 placeholder={tp("addressHint")}
                 className={inputClass}
               />
@@ -805,7 +811,14 @@ export function PostJobForm({
                 lat={pin?.lat ?? null}
                 lng={pin?.lng ?? null}
                 onChange={setPin}
-                cityHint={cityText || d?.city || null}
+                cityHint={cityText || null}
+                addressQuery={[cityText, addressText]
+                  .filter(Boolean)
+                  .join(", ")}
+                onResolveAddress={({ city, address }) => {
+                  if (city) setCityText(city);
+                  if (address) setAddressText(address);
+                }}
                 locale={locale}
               />
             </div>
