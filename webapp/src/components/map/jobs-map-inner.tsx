@@ -18,6 +18,8 @@ import { haversineMeters, useUserLocation, type LatLng } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 import { jobLatLng } from "@/lib/uz-geo";
 
+import { YandexMap } from "./yandex-map";
+
 /** Average rating + review count per company id (map "by rating" facet). */
 export type MapRatings = Record<string, { avg: number; count: number }>;
 
@@ -25,6 +27,8 @@ const TASHKENT: [number, number] = [41.3111, 69.2797];
 const NEAR_RADIUS_M = 10_000;
 const SALARY_FROM = 4_000_000; // "4 mln dan" chip
 const TOP_RATED_MIN = 4; // avg rating for the "gullar" / top-rated facet
+// A *JavaScript API* key switches the engine to Yandex; empty → OSM/Leaflet.
+const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 type Located = Job & { lat: number; lng: number; distance: number | null };
 
@@ -80,6 +84,8 @@ export default function JobsMapInner({
   const [topRated, setTopRated] = useState(false);
   const [salaryOn, setSalaryOn] = useState(false);
   const [schedule22, setSchedule22] = useState(false);
+  const [yandexFailed, setYandexFailed] = useState(false);
+  const useYandex = !!YANDEX_KEY && !yandexFailed;
 
   const hasRatings = ratings != null && Object.keys(ratings).length > 0;
 
@@ -223,43 +229,55 @@ export default function JobsMapInner({
         className="border-border relative overflow-hidden rounded-2xl border"
         style={{ height }}
       >
-        <MapContainer
-          center={loc ? [loc.lat, loc.lng] : TASHKENT}
-          zoom={loc ? 13 : 11}
-          scrollWheelZoom
-          className="h-full w-full"
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        {useYandex ? (
+          <YandexMap
+            jobs={shown}
+            loc={loc}
+            locale={locale}
+            applyLabel={t("map.apply")}
+            youAreHere={t("map.youAreHere")}
+            ratings={ratings}
+            onError={() => setYandexFailed(true)}
           />
+        ) : (
+          <MapContainer
+            center={loc ? [loc.lat, loc.lng] : TASHKENT}
+            zoom={loc ? 13 : 11}
+            scrollWheelZoom
+            className="h-full w-full"
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            />
 
-          {loc ? (
-            <>
-              <Recenter to={loc} zoom={13} />
-              <Marker position={[loc.lat, loc.lng]} icon={meIcon}>
-                <Popup>{t("map.youAreHere")}</Popup>
+            {loc ? (
+              <>
+                <Recenter to={loc} zoom={13} />
+                <Marker position={[loc.lat, loc.lng]} icon={meIcon}>
+                  <Popup>{t("map.youAreHere")}</Popup>
+                </Marker>
+              </>
+            ) : null}
+
+            {shown.map((j) => (
+              <Marker
+                key={j.id}
+                position={[j.lat, j.lng]}
+                icon={pinIcon(salaryPill(j), j.boostActive)}
+              >
+                <Popup>
+                  <PinCard
+                    job={j}
+                    locale={locale}
+                    applyLabel={t("map.apply")}
+                    rating={ratings?.[j.companyId]}
+                  />
+                </Popup>
               </Marker>
-            </>
-          ) : null}
-
-          {shown.map((j) => (
-            <Marker
-              key={j.id}
-              position={[j.lat, j.lng]}
-              icon={pinIcon(salaryPill(j), j.boostActive)}
-            >
-              <Popup>
-                <PinCard
-                  job={j}
-                  locale={locale}
-                  applyLabel={t("map.apply")}
-                  rating={ratings?.[j.companyId]}
-                />
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+            ))}
+          </MapContainer>
+        )}
 
         {status === "denied" && nearMe ? (
           <div className="text-muted-foreground bg-background/95 absolute inset-x-0 bottom-0 z-[1000] m-3 rounded-lg px-3 py-2 text-center text-sm shadow">
