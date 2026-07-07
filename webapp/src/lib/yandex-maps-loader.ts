@@ -7,6 +7,17 @@ const KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 /** Minimal typed surface of the bits of the Yandex JS API (v2.1) we touch. */
 export type YmapsEvent = { get: (k: string) => unknown };
+export type YmapsGeoObject = {
+  geometry: { getCoordinates: () => [number, number] } | null;
+  getLocalities?: () => string[];
+  getAdministrativeAreas?: () => string[];
+  getThoroughfare?: () => string;
+  getPremiseNumber?: () => string;
+  getAddressLine?: () => string;
+};
+export type YmapsGeocodeResult = {
+  geoObjects: { get: (i: number) => YmapsGeoObject | null };
+};
 export type YmapsObject = {
   events: { add: (t: string, f: (e: YmapsEvent) => void) => void };
   geometry: { getCoordinates: () => [number, number] };
@@ -33,6 +44,10 @@ export type YmapsApi = {
     props: Record<string, unknown>,
     opts?: Record<string, unknown>,
   ) => YmapsObject;
+  geocode: (
+    request: string | [number, number],
+    opts?: Record<string, unknown>,
+  ) => Promise<YmapsGeocodeResult>;
   templateLayoutFactory: { createClass: (tpl: string) => unknown };
 };
 

@@ -20,6 +20,8 @@ export function LocationPicker(props: {
   lng: number | null;
   onChange: (v: { lat: number; lng: number } | null) => void;
   cityHint?: string | null;
+  addressQuery?: string;
+  onResolveAddress?: (a: { city: string; address: string }) => void;
   locale: string;
 }) {
   return <Inner {...props} />;

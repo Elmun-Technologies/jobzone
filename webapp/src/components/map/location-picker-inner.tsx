@@ -70,12 +70,18 @@ export default function LocationPickerInner({
   lng,
   onChange,
   cityHint,
+  addressQuery,
+  onResolveAddress,
   locale,
 }: {
   lat: number | null;
   lng: number | null;
   onChange: (v: { lat: number; lng: number } | null) => void;
   cityHint?: string | null;
+  /** "city, address" typed above — forward-geocoded onto the map (Yandex). */
+  addressQuery?: string;
+  /** Reverse-geocode result from a picked point, to fill the fields above. */
+  onResolveAddress?: (a: { city: string; address: string }) => void;
   locale: string;
 }) {
   const t = useTranslations("employer.post");
@@ -108,8 +114,10 @@ export default function LocationPickerInner({
           <YandexLocationPicker
             center={center}
             pin={pin}
+            addressQuery={addressQuery}
             locale={locale}
             onPick={pick}
+            onResolveAddress={onResolveAddress}
             onError={() => setYandexFailed(true)}
           />
         ) : (
