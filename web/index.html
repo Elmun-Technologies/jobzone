@@ -31,14 +31,25 @@
     (function () {
       try {
         var here = new URL(window.location.href);
-        var q = here.searchParams.get("keep");
-        var h = (here.hash || "").indexOf("keep=flutter") !== -1;
-        if (q === "flutter" || h) return;
-        var target = new URL("https://jobzone-virid.vercel.app/");
-        // Carry the visitor's path/query onward so /jobs/123 still works.
-        var rel = here.pathname.replace(/^\/jobzone\/?/, "/") + here.search;
-        target.pathname = rel.startsWith("/") ? rel : "/" + rel;
-        window.location.replace(target.toString());
+        if (
+          here.searchParams.get("keep") === "flutter" ||
+          (here.hash || "").indexOf("keep=flutter") !== -1
+        ) {
+          return;
+        }
+        var WEBAPP = "https://jobzone-virid.vercel.app";
+        // Supabase can land an OAuth / magic-link code here (its Site URL
+        // still points at this build). Hand the code to the webapp's
+        // /auth/callback so the session actually completes there — and drop
+        // Flutter's #/... hash route. NOTE: build the URL as string
+        // concatenation, never target.pathname += search, or the "?" gets
+        // percent-encoded into the path (%3Fcode=...) and 404s.
+        if (here.searchParams.get("code") || here.searchParams.get("error")) {
+          window.location.replace(WEBAPP + "/auth/callback" + here.search);
+          return;
+        }
+        var path = here.pathname.replace(/^\/jobzone\/?/, "/");
+        window.location.replace(WEBAPP + path + here.search);
       } catch (_) {}
     })();
   </script>
