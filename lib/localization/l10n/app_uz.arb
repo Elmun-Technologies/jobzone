@@ -658,6 +658,7 @@
   "resumeRequired": "Iltimos, CV / rezyumeni biriktiring",
   "alreadyExists": "Bu allaqachon mavjud",
   "notAllowed": "Buni bajarishga ruxsatingiz yo'q",
+  "errNoCompany": "Avval kompaniya profilini yarating, keyin vakansiya joylang.",
   "perHour": "/soat",
   "perDay": "/kun",
   "perWeek": "/hafta",

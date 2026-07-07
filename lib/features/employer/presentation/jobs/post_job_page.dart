@@ -8,6 +8,7 @@ import '../../../../core/utils/uzbekistan_regions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../app/router/routes.dart';
 import '../../../../shared/enums/enums.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/data/categories_repository.dart';
@@ -414,7 +415,11 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       }
       if (mounted) context.pop();
     } catch (e) {
-      if (mounted) showErrorSnack(context, localizedError(context, e));
+      if (!mounted) return;
+      showErrorSnack(context, localizedError(context, e));
+      // No company yet → send them straight to create one so they can
+      // publish next; without this the user hits the same wall on retry.
+      if (e is NoCompanyError) context.push(Routes.employerOnboard);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

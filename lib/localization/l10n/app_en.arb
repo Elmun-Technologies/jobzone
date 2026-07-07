@@ -679,6 +679,7 @@
   "resumeRequired": "Please attach your CV / resume",
   "alreadyExists": "This already exists",
   "notAllowed": "You don't have permission to do that",
+  "errNoCompany": "Create your company profile first, then post a job.",
   "perHour": "/hr",
   "perDay": "/day",
   "perWeek": "/wk",
