@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { JobStatusPill } from "@/components/employer/job-status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
@@ -20,13 +21,6 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "employer" });
   return { title: t("myJobs"), robots: { index: false } };
 }
-
-const STATUS_CLASS: Record<string, string> = {
-  open: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-  draft: "bg-muted text-muted-foreground",
-  closed: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-  blocked: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-};
 
 // Auth-gated, per-employer page (reads the session via requireEmployer). Render
 // per request — getCurrentUser()'s try/catch swallows the cookies() dynamic
@@ -82,13 +76,12 @@ export default async function MyJobsPage({
                       {job.postedAt ? ` · ${formatDate(job.postedAt)}` : ""}
                     </p>
                   </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      STATUS_CLASS[status] ?? STATUS_CLASS.draft
-                    }`}
-                  >
-                    {t.has(`status.${status}`) ? t(`status.${status}`) : status}
-                  </span>
+                  <JobStatusPill
+                    status={status}
+                    label={
+                      t.has(`status.${status}`) ? t(`status.${status}`) : status
+                    }
+                  />
                 </Link>
               </li>
             );
