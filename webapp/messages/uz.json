@@ -295,7 +295,10 @@
       "previewTitle": "Vakansiya qanday ko‘rinadi",
       "previewSub": "Publish qilishdan oldin tekshiring.",
       "titleRequired": "Lavozim nomini kiriting",
-      "noDescription": "Tavsif kiritilmagan"
+      "noDescription": "Tavsif kiritilmagan",
+      "aiGenerate": "AI bilan to‘ldirish",
+      "aiGenerating": "Yozilmoqda…",
+      "aiError": "Qayta urinib ko‘ring"
     }
   },
   "wallet": {

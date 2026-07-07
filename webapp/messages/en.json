@@ -295,7 +295,10 @@
       "previewTitle": "How your vacancy will look",
       "previewSub": "Review it before you publish.",
       "titleRequired": "Enter a job title",
-      "noDescription": "No description yet"
+      "noDescription": "No description yet",
+      "aiGenerate": "Fill with AI",
+      "aiGenerating": "Generating…",
+      "aiError": "Try again"
     }
   },
   "wallet": {

@@ -1,10 +1,11 @@
 "use client";
 
-import { Check as CheckIcon } from "lucide-react";
+import { Check as CheckIcon, Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
+import { generateJobContent } from "@/lib/actions/ai-content";
 import { createJob, type JobFormState } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
@@ -238,6 +239,8 @@ export function PostJobForm({
   const [step, setStep] = useState(0);
   const [titleError, setTitleError] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
+  const [aiPending, setAiPending] = useState(false);
+  const [aiError, setAiError] = useState(false);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STASH_KEY);
@@ -333,6 +336,39 @@ export function PostJobForm({
       responsibilities: g("responsibilities"),
       benefits: g("benefits"),
     };
+  }
+
+  async function fillWithAi() {
+    const form = formRef.current;
+    if (!form) return;
+    const title = (
+      form.elements.namedItem("title") as HTMLInputElement | null
+    )?.value.trim();
+    if (!title) {
+      setTitleError(true);
+      return;
+    }
+    setAiPending(true);
+    setAiError(false);
+    try {
+      const catId = (
+        form.elements.namedItem("categoryId") as HTMLSelectElement | null
+      )?.value;
+      const category = categories.find((c) => c.id === catId)?.name ?? null;
+      const res = await generateJobContent({ title, category, locale });
+      const set = (name: string, val: string) => {
+        const el = form.elements.namedItem(name) as HTMLTextAreaElement | null;
+        if (el && val) el.value = val;
+      };
+      set("description", res.description);
+      set("responsibilities", res.responsibilities);
+      set("requirements", res.requirements);
+      set("benefits", res.benefits);
+    } catch {
+      setAiError(true);
+    } finally {
+      setAiPending(false);
+    }
   }
 
   function goNext() {
@@ -436,6 +472,24 @@ export function PostJobForm({
                 ))}
               </datalist>
             </Labeled>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={fillWithAi}
+                disabled={aiPending}
+                className="border-primary/40 bg-accent text-accent-foreground hover:border-primary inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60"
+              >
+                <Sparkles
+                  className={cn("size-4", aiPending && "animate-spin")}
+                />
+                {aiPending ? tp("aiGenerating") : tp("aiGenerate")}
+              </button>
+              {aiError ? (
+                <span className="text-destructive text-sm">
+                  {tp("aiError")}
+                </span>
+              ) : null}
+            </div>
             <Labeled label={t("jobDescription")}>
               <textarea
                 name="description"
