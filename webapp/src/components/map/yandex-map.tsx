@@ -5,65 +5,11 @@ import { useEffect, useRef } from "react";
 import type { Job } from "@/lib/data/types";
 import type { LatLng } from "@/lib/geo";
 import { salaryPill, salaryText, schedulePatternLabel } from "@/lib/format";
+import { loadYmaps, type YmapsMap } from "@/lib/yandex-maps-loader";
 
 import type { MapRatings } from "./jobs-map-inner";
 
-/** JS-API key. A *JavaScript API* key (not the mobile MapKit key). */
-const KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 const TASHKENT: [number, number] = [41.3111, 69.2797];
-
-/** Minimal typed surface of the bits of the Yandex JS API (v2.1) we touch. */
-type YmapsObject = { events: { add: (t: string, f: () => void) => void } };
-type YmapsMap = {
-  geoObjects: { add: (o: YmapsObject) => void; removeAll: () => void };
-  setCenter: (c: [number, number], zoom?: number) => void;
-  destroy: () => void;
-};
-type YmapsApi = {
-  ready: (cb: () => void) => void;
-  Map: new (
-    el: HTMLElement,
-    state: Record<string, unknown>,
-    opts?: Record<string, unknown>,
-  ) => YmapsMap;
-  Placemark: new (
-    coords: [number, number],
-    props: Record<string, unknown>,
-    opts?: Record<string, unknown>,
-  ) => YmapsObject;
-  templateLayoutFactory: { createClass: (tpl: string) => unknown };
-};
-
-declare global {
-  interface Window {
-    ymaps?: YmapsApi;
-  }
-}
-
-let loader: Promise<YmapsApi> | null = null;
-
-/** Load the Yandex JS API once; reject (→ OSM fallback) on failure/timeout. */
-function loadYmaps(lang: string): Promise<YmapsApi> {
-  if (typeof window === "undefined") {
-    return Promise.reject(new Error("no window"));
-  }
-  if (window.ymaps) return Promise.resolve(window.ymaps);
-  if (!loader) {
-    loader = new Promise<YmapsApi>((resolve, reject) => {
-      const s = document.createElement("script");
-      s.src = `https://api-maps.yandex.ru/2.1/?apikey=${KEY}&lang=${lang}`;
-      s.async = true;
-      s.onerror = () => reject(new Error("yandex script error"));
-      s.onload = () => {
-        if (window.ymaps) window.ymaps.ready(() => resolve(window.ymaps!));
-        else reject(new Error("ymaps missing"));
-      };
-      document.head.appendChild(s);
-      setTimeout(() => reject(new Error("yandex timeout")), 10_000);
-    });
-  }
-  return loader;
-}
 
 type Located = Job & { lat: number; lng: number };
 
