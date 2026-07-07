@@ -3,6 +3,10 @@
 // AI draft for the post-a-job wizard. Uses the employer's GLM (Z.ai) key over
 // its OpenAI-compatible chat endpoint; with no key (or on any error) it falls
 // back to a localized template so "Fill with AI" never breaks the flow.
+//
+// Defaults to a FREE model (glm-4.5-flash) so a free-tier / coding-plan key
+// works out of the box — a paid-only model would 400 on those keys and quietly
+// drop everyone to the shallow template. Override with GLM_MODEL if desired.
 
 export interface JobDraftContent {
   ok: boolean;
@@ -11,6 +15,13 @@ export interface JobDraftContent {
   responsibilities: string;
   requirements: string;
   benefits: string;
+  // Structured fields the model may infer from the notes — applied to the
+  // form only when the employer hasn't set them, and only if valid.
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  jobType?: string | null;
+  experienceLevel?: string | null;
+  schedulePattern?: string | null;
 }
 
 const LANG: Record<string, string> = {
@@ -18,6 +29,17 @@ const LANG: Record<string, string> = {
   ru: "Russian",
   en: "English",
 };
+
+const JOB_TYPES = [
+  "full_time",
+  "part_time",
+  "contract",
+  "temporary",
+  "internship",
+  "rotational",
+];
+const EXPERIENCE = ["entry", "mid", "senior", "lead"];
+const SCHEDULES = ["5_2", "6_1", "4_4", "2_2", "custom"];
 
 function templateDraft(locale: string): Omit<JobDraftContent, "ok" | "source"> {
   if (locale === "ru") {
@@ -53,22 +75,36 @@ function templateDraft(locale: string): Omit<JobDraftContent, "ok" | "source"> {
   };
 }
 
-/** Strip ```json fences some models wrap around JSON, then parse. */
+/** Pull the first {...} JSON object out of a model reply, tolerating ```json
+ * fences and any prose the model wraps around it. */
 function parseJson(text: string): Record<string, unknown> {
   const cleaned = text
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/```\s*$/, "")
     .trim();
-  return JSON.parse(cleaned) as Record<string, unknown>;
+  try {
+    return JSON.parse(cleaned) as Record<string, unknown>;
+  } catch {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start !== -1 && end > start) {
+      return JSON.parse(cleaned.slice(start, end + 1)) as Record<
+        string,
+        unknown
+      >;
+    }
+    throw new Error("no json");
+  }
 }
 
 export async function generateJobContent(input: {
   title: string;
   category?: string | null;
+  notes?: string | null;
   locale: string;
 }): Promise<JobDraftContent> {
-  const { title, category, locale } = input;
+  const { title, category, notes, locale } = input;
   const key = process.env.GLM_API_KEY;
   const tmpl = templateDraft(locale);
 
@@ -79,15 +115,30 @@ export async function generateJobContent(input: {
   const base = (
     process.env.GLM_BASE_URL ?? "https://api.z.ai/api/paas/v4"
   ).replace(/\/$/, "");
-  const model = process.env.GLM_MODEL ?? "glm-4.6";
+  const model = process.env.GLM_MODEL ?? "glm-4.5-flash";
   const lang = LANG[locale] ?? LANG.uz;
 
-  const system = `You write concise, honest job postings for a blue-collar / mass-hiring job marketplace in Uzbekistan. Write in ${lang}. From the job title and category, produce: a short "description" (2-4 sentences), "responsibilities", "requirements" and "benefits" (each a few short newline-separated lines). Do NOT invent salary, phone numbers, company names, or any discriminatory requirement (gender, age, nationality, religion). Keep it realistic and welcoming. Return ONLY a JSON object with keys description, responsibilities, requirements, benefits.`;
-  const user = `Title: ${title}\nCategory: ${category || "—"}`;
+  const system = `You are an expert HR copywriter for Yolla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write a complete, professional, and specific job posting in ${lang}.
+
+Rules:
+- Be concrete and realistic for THIS exact role — no filler, no vague "responsible employee" clichés. Mention real day-to-day tasks, tools, and expectations a candidate for this job would actually see.
+- "description": 3–5 full sentences that sell the role and the workplace warmly and honestly.
+- "responsibilities", "requirements", "benefits": each 4–6 specific, concrete lines, one per line (newline-separated, no bullet characters).
+- Weave in the employer's notes below when given; expand shorthand into full professional wording.
+- If the notes (or the role) clearly imply a salary range, employment type, experience level, or schedule, fill the matching structured field; otherwise leave it null. Never guess wildly.
+- Do NOT invent company names, phone numbers, or any discriminatory requirement (gender, age, nationality, religion).
+
+Allowed values — jobType: ${JOB_TYPES.join(", ")}; experienceLevel: ${EXPERIENCE.join(", ")}; schedulePattern: ${SCHEDULES.join(", ")}. salaryMin/salaryMax are monthly UZS integers (no separators) or null.
+
+Return ONLY a JSON object with exactly these keys: description, responsibilities, requirements, benefits, salaryMin, salaryMax, jobType, experienceLevel, schedulePattern.`;
+
+  const user = `Job title: ${title}
+Category: ${category || "—"}
+Employer's key requirements / notes: ${notes?.trim() || "(none given — infer sensible defaults for this role)"}`;
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 20_000);
+    const timer = setTimeout(() => controller.abort(), 30_000);
     const res = await fetch(`${base}/chat/completions`, {
       method: "POST",
       headers: {
@@ -96,8 +147,8 @@ export async function generateJobContent(input: {
       },
       body: JSON.stringify({
         model,
-        temperature: 0.6,
-        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 2200,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -113,10 +164,23 @@ export async function generateJobContent(input: {
     const content = data.choices?.[0]?.message?.content;
     if (!content) throw new Error("empty");
     const j = parseJson(content);
+
     const str = (k: string, fb: string) =>
       typeof j[k] === "string" && (j[k] as string).trim()
         ? (j[k] as string).trim()
         : fb;
+    const num = (k: string): number | null => {
+      const v = j[k];
+      const n = typeof v === "string" ? Number(v.replace(/\s+/g, "")) : v;
+      return typeof n === "number" && Number.isFinite(n) && n > 0
+        ? Math.round(n)
+        : null;
+    };
+    const enumOf = (k: string, allowed: string[]): string | null => {
+      const v = j[k];
+      return typeof v === "string" && allowed.includes(v) ? v : null;
+    };
+
     return {
       ok: true,
       source: "glm",
@@ -124,6 +188,11 @@ export async function generateJobContent(input: {
       responsibilities: str("responsibilities", tmpl.responsibilities),
       requirements: str("requirements", tmpl.requirements),
       benefits: str("benefits", tmpl.benefits),
+      salaryMin: num("salaryMin"),
+      salaryMax: num("salaryMax"),
+      jobType: enumOf("jobType", JOB_TYPES),
+      experienceLevel: enumOf("experienceLevel", EXPERIENCE),
+      schedulePattern: enumOf("schedulePattern", SCHEDULES),
     };
   } catch (e) {
     console.error("generateJobContent (GLM) failed, using template", e);

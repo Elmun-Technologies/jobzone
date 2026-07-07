@@ -61,6 +61,7 @@ export default async function PostJobPage({
       </h1>
       <PostJobForm
         companyId={company?.id ?? null}
+        companyName={company?.name ?? null}
         categories={categories}
         hasPublishedBefore={stats.hasPublishedBefore}
         jobPostPriceUzs={jobPostPriceUzs}
