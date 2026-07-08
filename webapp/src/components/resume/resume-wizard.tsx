@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import {
+  Check,
+  Loader2,
+  Plus,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
@@ -134,7 +141,12 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
         notes: draft.summary || null,
         locale,
       });
-      set("summary", res.summary);
+      // Mark it as the untouched AI draft; a manual edit (below) clears this.
+      setDraft((d) => ({
+        ...d,
+        summary: res.summary,
+        summaryAiGenerated: true,
+      }));
       if (res.source === "template" && res.fellBack) setAiFellBack(true);
     } finally {
       setAiPending(false);
@@ -345,7 +357,15 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
                 )}
                 placeholder={t("summaryHint")}
                 value={draft.summary}
-                onChange={(e) => set("summary", e.target.value)}
+                // A manual edit makes it the seeker's own words → clear the AI
+                // flag (they've taken ownership).
+                onChange={(e) =>
+                  setDraft((d) => ({
+                    ...d,
+                    summary: e.target.value,
+                    summaryAiGenerated: false,
+                  }))
+                }
               />
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <button
@@ -367,6 +387,13 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
                   {t("aiHint")}
                 </span>
               </div>
+              {/* Keep it honest — the AI is a helper, not a fabricator. */}
+              <p className="text-muted-foreground mt-2 flex items-start gap-1.5 text-xs">
+                <ShieldCheck className="text-primary mt-px size-3.5 shrink-0" />
+                {draft.summaryAiGenerated
+                  ? t("aiRealityCheckOn")
+                  : t("aiRealityCheck")}
+              </p>
               {aiFellBack ? (
                 <p className="text-muted-foreground mt-1.5 text-xs">
                   {t("aiFellBack")}

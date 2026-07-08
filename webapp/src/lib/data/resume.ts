@@ -29,6 +29,9 @@ export interface ResumeDraft {
   /** Free-text professional summary ("About me"), AI-assisted (profiles.summary,
    * 0044). Read/written separately so a DB behind on that migration still works. */
   summary: string;
+  /** True while the summary is the untouched AI draft (profiles.summary_ai_generated,
+   * 0046) — set by "Write with AI", cleared when the seeker edits the text. */
+  summaryAiGenerated: boolean;
   /** language code -> level ("none"|"a1_a2"|"b1_b2"|"c1_c2"|"native"). */
   languages: Record<string, string>;
   educations: EducationEntry[];
@@ -47,6 +50,7 @@ export const EMPTY_RESUME: ResumeDraft = {
   phone: "",
   email: "",
   summary: "",
+  summaryAiGenerated: false,
   languages: {},
   educations: [],
 };
@@ -97,16 +101,29 @@ export async function getMyResume(): Promise<ResumeDraft> {
         ? (r.languages as Record<string, string>)
         : {};
 
-    // summary lives on a late column (0044); read it separately so a DB that
-    // hasn't migrated still returns the rest of the résumé (error → empty).
+    // summary (0044) + summary_ai_generated (0046) are late columns; read them
+    // separately — and fall back to just summary if the flag column isn't there
+    // yet — so a DB behind on either migration still returns the rest.
     let summary = "";
-    const { data: sumRow } = await supabase
+    let summaryAiGenerated = false;
+    let sumRes = await supabase
       .from("profiles")
-      .select("summary")
+      .select("summary, summary_ai_generated")
       .eq("id", user.id)
       .maybeSingle();
-    const sumVal = (sumRow as { summary?: unknown } | null)?.summary;
-    if (typeof sumVal === "string") summary = sumVal;
+    if (sumRes.error) {
+      sumRes = await supabase
+        .from("profiles")
+        .select("summary")
+        .eq("id", user.id)
+        .maybeSingle();
+    }
+    const sr = (sumRes.data ?? {}) as {
+      summary?: unknown;
+      summary_ai_generated?: unknown;
+    };
+    if (typeof sr.summary === "string") summary = sr.summary;
+    if (sr.summary_ai_generated === true) summaryAiGenerated = true;
 
     return {
       position: str(r.headline),
@@ -122,6 +139,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
       phone: str(r.phone),
       email: str(r.email) || (user.email ?? ""),
       summary,
+      summaryAiGenerated,
       languages: langs,
       educations,
     };
