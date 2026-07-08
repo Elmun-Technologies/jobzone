@@ -447,6 +447,8 @@
   "applications": {
     "title": "My applications",
     "empty": "You haven't applied yet",
+    "emptyHint": "Find matching jobs and apply in one tap.",
+    "browseJobs": "Browse jobs",
     "status": {
       "submitted": "Submitted",
       "viewed": "Viewed",
