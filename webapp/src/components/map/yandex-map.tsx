@@ -99,22 +99,24 @@ export function YandexMap({
           map.current.setCenter([loc.lat, loc.lng], 13);
         }
 
-        // Joyme-style salary price-tag: a bubble with a pointer at the point.
+        // Joyme-style salary price-tag: a volt bubble with a pointer at the
+        // point. Always volt (#C7FB00) on ink — high-contrast on Yandex's light
+        // tiles, where a white tag washes out; a boosted job is prefixed ★.
         const PinLayout = ymaps.templateLayoutFactory.createClass(
           `<div style="position:relative;transform:translate(-50%,-100%)">
-            <div style="background:$[properties.bg];color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 11px;font:800 13px/1 monospace;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.32)">$[properties.label]</div>
+            <div style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 11px;font:800 13px/1 monospace;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35)">$[properties.label]</div>
             <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
           </div>`,
         );
 
         map.current.geoObjects.removeAll();
         for (const job of jobs) {
+          const pill = salaryPill(job) ?? "•";
           map.current.geoObjects.add(
             new ymaps.Placemark(
               [job.lat, job.lng],
               {
-                label: salaryPill(job) ?? "•",
-                bg: job.boostActive ? "#C7FB00" : "#FFFFFF",
+                label: job.boostActive ? `★ ${pill}` : pill,
                 balloonContent: balloonHtml(
                   job,
                   locale,
