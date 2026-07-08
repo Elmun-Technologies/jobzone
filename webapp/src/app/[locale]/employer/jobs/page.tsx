@@ -62,13 +62,39 @@ export default async function MyJobsPage({
         : posted === "open"
           ? t("jobPosted")
           : null;
+  // Right after a job goes LIVE (not a scheduled draft), nudge toward the
+  // revenue surface — jobs are ordered newest-first, so jobs[0] is the one
+  // that was just published.
+  const justPublishedJobId = posted === "open" ? jobs[0]?.id : undefined;
 
   return (
     <Container className="max-w-3xl py-10">
       {banner ? (
-        <div className="border-primary/40 bg-accent text-accent-foreground mb-5 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium">
-          <span aria-hidden>🎉</span>
-          {banner}
+        <div className="border-primary/40 bg-accent mb-5 rounded-xl border px-4 py-3">
+          <p className="text-accent-foreground flex items-center gap-2 text-sm font-medium">
+            <span aria-hidden>🎉</span>
+            {banner}
+          </p>
+          {justPublishedJobId ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link
+                href={`/employer/jobs/${justPublishedJobId}/promote`}
+                className={cn(
+                  buttonVariants({ variant: "primary", size: "sm" }),
+                )}
+              >
+                {t("promoteThisJob")}
+              </Link>
+              <Link
+                href={`/jobs/${justPublishedJobId}`}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
+              >
+                {t("viewPublicListing")}
+              </Link>
+            </div>
+          ) : null}
         </div>
       ) : null}
 

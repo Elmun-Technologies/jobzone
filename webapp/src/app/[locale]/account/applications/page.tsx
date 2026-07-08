@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -40,17 +41,31 @@ const STATUS_CLASS: Record<string, string> = {
 
 export default async function MyApplicationsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ applied?: string }>;
 }) {
   const { locale } = await params;
+  const { applied } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("applications");
   const apps = await getMyApplications();
+  // The full apply form (apply.ts:applyToJob) redirects here with ?applied=1 —
+  // the seeker just typed a cover letter / answered screening questions and
+  // deserves a clear "it worked", not a silent landing on a generic list.
+  const justApplied = applied === "1" && apps.length > 0;
 
   return (
     <Container className="max-w-2xl py-12">
       <h1 className="text-foreground mb-6 text-2xl font-bold">{t("title")}</h1>
+
+      {justApplied ? (
+        <div className="border-primary/40 bg-accent text-accent-foreground mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium">
+          <CheckCircle2 className="text-primary size-5 shrink-0" />
+          {t("appliedBanner")}
+        </div>
+      ) : null}
 
       {apps.length === 0 ? (
         <EmptyState

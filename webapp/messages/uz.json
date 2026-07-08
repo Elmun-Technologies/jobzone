@@ -239,6 +239,7 @@
     "reopenJob": "Qayta ochish",
     "viewApplicants": "Nomzodlar",
     "jobPosted": "Vakansiya joylandi va e'lonlar ro'yxatida ko'rinadi.",
+    "promoteThisJob": "Vakansiyani ilgari surish",
     "draftSaved": "Qoralama saqlandi. Tayyor bo'lganda uni nashr qiling.",
     "jobUpdated": "O'zgarishlar saqlandi.",
     "editJob": "Vakansiyani tahrirlash",
@@ -450,6 +451,7 @@
     "emptyHint": "Mos ishlarni toping va bir zumda ariza bering.",
     "browseJobs": "Ishlarni ko'rish",
     "positionClosed": "Vakansiya yopilgan",
+    "appliedBanner": "Ariza muvaffaqiyatli yuborildi! Ish beruvchi tez orada javob beradi.",
     "status": {
       "submitted": "Yuborilgan",
       "viewed": "Ko'rilgan",
