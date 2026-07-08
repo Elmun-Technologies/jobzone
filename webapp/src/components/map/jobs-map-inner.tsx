@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 
+import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import type { Job } from "@/lib/data/types";
 import {
   formatDistanceMeters,
@@ -228,7 +229,6 @@ export default function JobsMapInner({
                 <PinCard
                   job={j}
                   locale={locale}
-                  applyLabel={t("map.apply")}
                   rating={ratings?.[j.companyId]}
                 />
               </Popup>
@@ -370,12 +370,10 @@ function Chip({
 function PinCard({
   job,
   locale,
-  applyLabel,
   rating,
 }: {
   job: Located;
   locale: string;
-  applyLabel: string;
   rating?: { avg: number; count: number };
 }) {
   const meta = [
@@ -411,12 +409,13 @@ function PinCard({
       {meta ? (
         <div className="text-muted-foreground text-xs">{meta}</div>
       ) : null}
-      <a
-        href={`/${locale}/jobs/${job.id}/apply`}
-        className="bg-primary text-primary-foreground mt-2 inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold hover:opacity-90"
-      >
-        {applyLabel}
-      </a>
+      {/* One-tap apply straight from the pin — the map's core promise. Falls
+          back to the full form for a job with required screening. */}
+      <QuickApplyButton
+        jobId={job.id}
+        needsForm={job.screeningQuestions.some((q) => q.required)}
+        className="mt-2 px-3 py-1.5 text-sm"
+      />
     </div>
   );
 }
