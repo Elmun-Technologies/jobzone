@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/widgets/snackbars.dart';
 import '../application/chat_providers.dart';
 import '../data/chat_repository.dart';
 import '../domain/chat_models.dart';
@@ -44,9 +45,16 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
     final text = _input.text.trim();
     if (text.isEmpty) return;
     _input.clear();
-    await ref
-        .read(chatRepositoryProvider)
-        .sendMessage(conversationId: widget.conversationId, content: text);
+    try {
+      await ref
+          .read(chatRepositoryProvider)
+          .sendMessage(conversationId: widget.conversationId, content: text);
+    } catch (e) {
+      if (!mounted) return;
+      // Restore the text so a failed send never silently loses the message.
+      _input.text = text;
+      showErrorSnack(context, localizedError(context, e));
+    }
   }
 
   void _scrollToBottom() {
