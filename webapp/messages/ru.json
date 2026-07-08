@@ -208,6 +208,10 @@
     "noJobs": "Вы ещё не размещали вакансии",
     "recentJobs": "Последние вакансии",
     "viewAll": "Смотреть все",
+    "publishDraft": "Опубликовать",
+    "closeJob": "Закрыть",
+    "reopenJob": "Открыть снова",
+    "viewApplicants": "Кандидаты",
     "candidates": {
       "title": "Кандидаты",
       "empty": "Пока нет кандидатов",

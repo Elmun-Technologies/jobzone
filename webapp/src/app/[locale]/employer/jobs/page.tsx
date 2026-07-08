@@ -6,11 +6,15 @@ import { JobStatusPill } from "@/components/employer/job-status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
+import { updateJobStatus } from "@/lib/actions/employer";
 import { getMyCompany, getMyJobs } from "@/lib/data/employer";
 import { requireEmployer } from "@/lib/auth/require-employer";
 import { formatDate } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+
+const actionBtn =
+  "text-sm font-medium rounded-lg border border-border px-3 py-1.5 transition-colors hover:bg-muted";
 
 export async function generateMetadata({
   params,
@@ -61,33 +65,110 @@ export default async function MyJobsPage({
           {jobs.map((job) => {
             // An admin takedown (blocked_at, 0038) trumps the row's own status.
             const status = job.blockedAt ? "blocked" : job.status;
+            // Owners can't act on an admin-blocked job.
+            const canAct = !job.blockedAt;
             return (
-              <li key={job.id}>
-                <Link
-                  href={`/employer/jobs/${job.id}/applicants`}
-                  className="border-border bg-card hover:border-primary/40 flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors"
-                >
-                  <div className="min-w-0">
-                    <p className="text-foreground truncate font-semibold">
+              <li
+                key={job.id}
+                className="border-border bg-card rounded-xl border p-4"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <Link
+                    href={`/employer/jobs/${job.id}/applicants`}
+                    className="min-w-0 flex-1"
+                  >
+                    <p className="text-foreground hover:text-primary truncate font-semibold transition-colors">
                       {job.title}
                     </p>
                     <p className="text-muted-foreground text-sm">
                       {t("applicantsCount", { count: job.applicantsCount })}
                       {job.postedAt ? ` · ${formatDate(job.postedAt)}` : ""}
                     </p>
-                  </div>
+                  </Link>
                   <JobStatusPill
                     status={status}
                     label={
                       t.has(`status.${status}`) ? t(`status.${status}`) : status
                     }
                   />
-                </Link>
+                </div>
+                {canAct &&
+                (job.status === "draft" ||
+                  job.status === "open" ||
+                  job.status === "closed") ? (
+                  <div className="border-border mt-3 flex flex-wrap gap-2 border-t pt-3">
+                    {job.status === "draft" ? (
+                      <StatusForm
+                        locale={locale}
+                        jobId={job.id}
+                        action="publish"
+                        label={t("publishDraft")}
+                        primary
+                      />
+                    ) : null}
+                    {job.status === "open" ? (
+                      <StatusForm
+                        locale={locale}
+                        jobId={job.id}
+                        action="close"
+                        label={t("closeJob")}
+                      />
+                    ) : null}
+                    {job.status === "closed" ? (
+                      <StatusForm
+                        locale={locale}
+                        jobId={job.id}
+                        action="reopen"
+                        label={t("reopenJob")}
+                      />
+                    ) : null}
+                    <Link
+                      href={`/employer/jobs/${job.id}/applicants`}
+                      className={cn(actionBtn, "text-foreground")}
+                    >
+                      {t("viewApplicants")}
+                    </Link>
+                  </div>
+                ) : null}
               </li>
             );
           })}
         </ul>
       )}
     </Container>
+  );
+}
+
+/** A one-button form that posts a status transition to updateJobStatus. */
+function StatusForm({
+  locale,
+  jobId,
+  action,
+  label,
+  primary,
+}: {
+  locale: string;
+  jobId: string;
+  action: "publish" | "close" | "reopen";
+  label: string;
+  primary?: boolean;
+}) {
+  return (
+    <form action={updateJobStatus}>
+      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="jobId" value={jobId} />
+      <input type="hidden" name="action" value={action} />
+      <button
+        type="submit"
+        className={cn(
+          actionBtn,
+          primary
+            ? "border-primary bg-primary text-primary-foreground hover:opacity-90"
+            : "text-foreground",
+        )}
+      >
+        {label}
+      </button>
+    </form>
   );
 }

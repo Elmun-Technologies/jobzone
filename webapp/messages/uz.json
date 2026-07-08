@@ -208,6 +208,10 @@
     "noJobs": "Hali ish e'lon qilmadingiz",
     "recentJobs": "So'nggi vakansiyalar",
     "viewAll": "Hammasini ko'rish",
+    "publishDraft": "Nashr qilish",
+    "closeJob": "Yopish",
+    "reopenJob": "Qayta ochish",
+    "viewApplicants": "Nomzodlar",
     "candidates": {
       "title": "Nomzodlar",
       "empty": "Hali nomzodlar yo'q",

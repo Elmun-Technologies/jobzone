@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { safeNext } from "@/lib/auth/safe-next";
@@ -253,4 +254,67 @@ export async function createJob(
   }
 
   redirect(`/${locale}/employer/jobs`);
+}
+
+/**
+ * Vacancy lifecycle from the "My jobs" list: publish a draft, close an open
+ * job, or reopen a closed one. Ownership is verified here (RLS also enforces
+ * it). Publishing a draft runs the SAME charge gate as a fresh open post — so
+ * "save draft then publish" can't bypass the first-free / then-paid rule.
+ */
+export async function updateJobStatus(formData: FormData): Promise<void> {
+  const locale = field(formData, "locale") || "uz";
+  const jobId = field(formData, "jobId");
+  const action = field(formData, "action"); // publish | close | reopen
+  const jobsPath = `/${locale}/employer/jobs`;
+  if (!jobId) redirect(jobsPath);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/${locale}/sign-in`);
+
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("status, company_id, title")
+    .eq("id", jobId)
+    .maybeSingle();
+  if (!job) redirect(jobsPath);
+  const j = job as { status: string; company_id: string; title: string };
+
+  const { data: owned } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", j.company_id)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (!owned) redirect(jobsPath);
+
+  let newStatus: string | null = null;
+  if (action === "close" && j.status === "open") newStatus = "closed";
+  else if (action === "reopen" && j.status === "closed") newStatus = "open";
+  else if (action === "publish" && j.status === "draft") {
+    // A draft becoming live is a new market entry — charge like createJob.
+    const stats = await getEmployerStats(j.company_id);
+    const price = await getJobPostPrice();
+    if (willChargeForJobPost(stats.hasPublishedBefore, price)) {
+      const { error: payError } = await supabase.rpc("adjust_wallet", {
+        p_company_id: j.company_id,
+        p_amount_uzs: -price,
+        p_kind: "spend",
+        p_description: `Vakansiya: ${j.title}`,
+      });
+      if (payError) {
+        // Not enough balance → send them to top up; the draft stays a draft.
+        redirect(`/${locale}/employer/wallet`);
+      }
+    }
+    newStatus = "open";
+  }
+
+  if (!newStatus) redirect(jobsPath);
+  await supabase.from("jobs").update({ status: newStatus }).eq("id", jobId);
+  revalidatePath(jobsPath);
+  redirect(jobsPath);
 }

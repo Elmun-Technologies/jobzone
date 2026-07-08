@@ -208,6 +208,10 @@
     "noJobs": "You haven't posted any jobs yet",
     "recentJobs": "Recent jobs",
     "viewAll": "View all",
+    "publishDraft": "Publish",
+    "closeJob": "Close",
+    "reopenJob": "Reopen",
+    "viewApplicants": "Candidates",
     "candidates": {
       "title": "Candidates",
       "empty": "No candidates yet",
