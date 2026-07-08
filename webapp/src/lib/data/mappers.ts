@@ -63,6 +63,7 @@ export function toJob(r: Row): Job {
     postedAt: str(r.posted_at),
     expiresAt: str(r.expires_at),
     boostActive: bool(r.boost_active),
+    applicantsCount: num(r.applicants_count) ?? 0,
     screeningQuestions: toScreeningQuestions(r.screening_questions),
   };
 }

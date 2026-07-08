@@ -71,6 +71,7 @@ function job(p: Partial<Job> & Pick<Job, "id" | "title" | "companyId">): Job {
     postedAt: "2026-06-20T09:00:00Z",
     expiresAt: null,
     boostActive: false,
+    applicantsCount: 0,
     screeningQuestions: [],
     ...p,
   };
