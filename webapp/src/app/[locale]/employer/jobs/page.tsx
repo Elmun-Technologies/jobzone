@@ -33,10 +33,13 @@ export const dynamic = "force-dynamic";
 
 export default async function MyJobsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ posted?: string }>;
 }) {
   const { locale } = await params;
+  const { posted } = await searchParams;
   setRequestLocale(locale);
   await requireEmployer(locale);
 
@@ -48,6 +51,13 @@ export default async function MyJobsPage({
 
   return (
     <Container className="max-w-3xl py-10">
+      {posted === "open" || posted === "draft" ? (
+        <div className="border-primary/40 bg-accent text-accent-foreground mb-5 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium">
+          <span aria-hidden>🎉</span>
+          {posted === "draft" ? t("draftSaved") : t("jobPosted")}
+        </div>
+      ) : null}
+
       <div className="mb-6 flex items-center justify-between gap-3">
         <h1 className="text-foreground text-2xl font-bold">{t("myJobs")}</h1>
         <Link

@@ -212,6 +212,8 @@
     "closeJob": "Yopish",
     "reopenJob": "Qayta ochish",
     "viewApplicants": "Nomzodlar",
+    "jobPosted": "Vakansiya joylandi va e'lonlar ro'yxatida ko'rinadi.",
+    "draftSaved": "Qoralama saqlandi. Tayyor bo'lganda uni nashr qiling.",
     "candidates": {
       "title": "Nomzodlar",
       "empty": "Hali nomzodlar yo'q",

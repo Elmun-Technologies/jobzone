@@ -312,7 +312,8 @@ export async function createJob(
     }
   }
 
-  redirect(`/${locale}/employer/jobs`);
+  // ?posted signals the "My jobs" page to confirm the post (draft vs open).
+  redirect(`/${locale}/employer/jobs?posted=${status}`);
 }
 
 /**

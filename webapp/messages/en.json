@@ -212,6 +212,8 @@
     "closeJob": "Close",
     "reopenJob": "Reopen",
     "viewApplicants": "Candidates",
+    "jobPosted": "Vacancy published — it's now visible in the job listings.",
+    "draftSaved": "Draft saved. Publish it when you're ready.",
     "candidates": {
       "title": "Candidates",
       "empty": "No candidates yet",
