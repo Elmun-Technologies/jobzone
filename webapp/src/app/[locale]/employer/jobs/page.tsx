@@ -36,10 +36,14 @@ export default async function MyJobsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ posted?: string }>;
+  searchParams: Promise<{
+    posted?: string;
+    updated?: string;
+    promoted?: string;
+  }>;
 }) {
   const { locale } = await params;
-  const { posted } = await searchParams;
+  const { posted, updated, promoted } = await searchParams;
   setRequestLocale(locale);
   await requireEmployer(locale);
 
@@ -49,12 +53,22 @@ export default async function MyJobsPage({
   const t = await getTranslations("employer");
   const jobs = await getMyJobs(company.id);
 
+  const banner = promoted
+    ? t("jobPromoted")
+    : updated
+      ? t("jobUpdated")
+      : posted === "draft"
+        ? t("draftSaved")
+        : posted === "open"
+          ? t("jobPosted")
+          : null;
+
   return (
     <Container className="max-w-3xl py-10">
-      {posted === "open" || posted === "draft" ? (
+      {banner ? (
         <div className="border-primary/40 bg-accent text-accent-foreground mb-5 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium">
           <span aria-hidden>🎉</span>
-          {posted === "draft" ? t("draftSaved") : t("jobPosted")}
+          {banner}
         </div>
       ) : null}
 
@@ -131,6 +145,20 @@ export default async function MyJobsPage({
                         action="reopen"
                         label={t("reopenJob")}
                       />
+                    ) : null}
+                    <Link
+                      href={`/employer/jobs/${job.id}/edit`}
+                      className={cn(actionBtn, "text-foreground")}
+                    >
+                      {t("edit")}
+                    </Link>
+                    {job.status === "open" ? (
+                      <Link
+                        href={`/employer/jobs/${job.id}/promote`}
+                        className={cn(actionBtn, "text-foreground")}
+                      >
+                        {t("promote")}
+                      </Link>
                     ) : null}
                     <Link
                       href={`/employer/jobs/${job.id}/applicants`}

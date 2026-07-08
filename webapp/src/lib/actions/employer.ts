@@ -378,3 +378,170 @@ export async function updateJobStatus(formData: FormData): Promise<void> {
   revalidatePath(jobsPath);
   redirect(jobsPath);
 }
+
+/** The editable content columns of a job, parsed from the wizard's FormData
+ * (everything except company_id / posted_by / status, which edit never sets). */
+function jobContentFields(formData: FormData): Record<string, unknown> {
+  const number = (name: string) => {
+    const v = field(formData, name);
+    return v ? Number(v) : null;
+  };
+  const money = (name: string) => {
+    const v = field(formData, name).replace(/\D/g, "");
+    return v ? Number(v) : null;
+  };
+  const bool = (name: string) => field(formData, name) === "1";
+  let screening: unknown = [];
+  try {
+    screening = JSON.parse(field(formData, "screeningQuestions") || "[]");
+  } catch {
+    screening = [];
+  }
+  return {
+    title: field(formData, "title"),
+    description: optional(formData, "description"),
+    responsibilities: optional(formData, "responsibilities"),
+    requirements: optional(formData, "requirements"),
+    benefits: optional(formData, "benefits"),
+    category_id: optional(formData, "categoryId"),
+    city: optional(formData, "city"),
+    address_text: optional(formData, "addressText"),
+    lat: number("lat"),
+    lng: number("lng"),
+    salary_min: money("salaryMin"),
+    salary_max: money("salaryMax"),
+    currency: optional(formData, "currency") ?? "UZS",
+    salary_period: optional(formData, "salaryPeriod") ?? "month",
+    job_type: optional(formData, "jobType"),
+    experience_level: optional(formData, "experienceLevel"),
+    working_model: optional(formData, "workingModel"),
+    schedule_pattern: optional(formData, "schedulePattern"),
+    night_shift: bool("nightShift"),
+    contact_phone: optional(formData, "contactPhone"),
+    show_phone_on_listing: bool("showPhone"),
+    require_cover_letter: bool("requireCoverLetter"),
+    women_friendly: bool("womenFriendly"),
+    disability_friendly: bool("disabilityFriendly"),
+    screening_questions: Array.isArray(screening) ? screening : [],
+  };
+}
+
+/** UPDATE variant of insertJobResilient — drops unknown columns and retries. */
+async function updateJobResilient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  jobId: string,
+  payload: Record<string, unknown>,
+): Promise<{
+  error: { message?: string; code?: string } | null;
+  dropped: string[];
+}> {
+  const attempt: Record<string, unknown> = { ...payload };
+  const dropped: string[] = [];
+  for (let i = 0; i < 12; i++) {
+    const { error } = await supabase
+      .from("jobs")
+      .update(attempt)
+      .eq("id", jobId);
+    if (!error) return { error: null, dropped };
+    const col = error?.message?.match(
+      /Could not find the '([^']+)' column/,
+    )?.[1];
+    if (col && col in attempt) {
+      delete attempt[col];
+      dropped.push(col);
+      continue;
+    }
+    return { error, dropped };
+  }
+  return { error: { message: "too many unknown columns" }, dropped };
+}
+
+/**
+ * Edits an existing vacancy (content only — status and attribution are
+ * unchanged). Free; ownership-checked (RLS also confines the write). Reuses
+ * the same wizard FormData as createJob.
+ */
+export async function updateJob(
+  _prev: JobFormState,
+  formData: FormData,
+): Promise<JobFormState> {
+  const title = field(formData, "title");
+  const jobId = field(formData, "jobId");
+  if (!title || !jobId) return { error: "missing" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { signedOut: true };
+
+  const locale = field(formData, "locale") || "uz";
+
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("company_id")
+    .eq("id", jobId)
+    .maybeSingle();
+  if (!job) return { error: "unknown" };
+  const { data: owned } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", (job as { company_id: string }).company_id)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (!owned) return { error: "unknown" };
+
+  const { error, dropped } = await updateJobResilient(
+    supabase,
+    jobId,
+    jobContentFields(formData),
+  );
+  if (error) {
+    console.error("updateJob failed", error);
+    return { error: "unknown", detail: dbDetail(error) };
+  }
+  if (dropped.length) {
+    console.warn(
+      `updateJob: saved without unknown columns [${dropped.join(", ")}] — the jobs table / PostgREST schema cache is behind the app`,
+    );
+  }
+
+  redirect(`/${locale}/employer/jobs?updated=1`);
+}
+
+/**
+ * Buys a visibility boost (reklama) for one of the employer's live vacancies,
+ * spending the Hamyon balance. All the real work — ownership + live-status
+ * check, balance guard, debit, boost, order record — happens atomically in the
+ * buy_promotion() RPC; this action just relays the outcome. Not-enough-balance
+ * surfaces as `insufficientFunds` so the page can point them at top-up.
+ */
+export async function promoteJob(
+  _prev: JobFormState,
+  formData: FormData,
+): Promise<JobFormState> {
+  const locale = field(formData, "locale") || "uz";
+  const jobId = field(formData, "jobId");
+  const productCode = field(formData, "productCode");
+  if (!jobId || !productCode) return { error: "missing" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { signedOut: true };
+
+  const { error } = await supabase.rpc("buy_promotion", {
+    p_job_id: jobId,
+    p_product_code: productCode,
+  });
+  if (error) {
+    if (error.message.includes("insufficient_funds")) {
+      return { insufficientFunds: true };
+    }
+    console.error("promoteJob failed", error);
+    return { error: "unknown", detail: dbDetail(error) };
+  }
+
+  redirect(`/${locale}/employer/jobs?promoted=1`);
+}

@@ -214,6 +214,10 @@
     "viewApplicants": "Nomzodlar",
     "jobPosted": "Vakansiya joylandi va e'lonlar ro'yxatida ko'rinadi.",
     "draftSaved": "Qoralama saqlandi. Tayyor bo'lganda uni nashr qiling.",
+    "jobUpdated": "O'zgarishlar saqlandi.",
+    "editJob": "Vakansiyani tahrirlash",
+    "edit": "Tahrirlash",
+    "promote": "Reklama",
     "candidates": {
       "title": "Nomzodlar",
       "empty": "Hali nomzodlar yo'q",
@@ -345,7 +349,8 @@
       "paymentInsufficientTitle": "Hamyoningizda mablag' yetarli emas",
       "paymentInsufficientHint": "Nashr qilish uchun {price} kerak. Hamyonni to'ldiring.",
       "paymentTopUp": "Hamyonga o'tish"
-    }
+    },
+    "jobPromoted": "Reklama yoqildi! Vakansiyangiz ajratib ko'rsatiladi."
   },
   "wallet": {
     "title": "Hamyon",
@@ -500,7 +505,11 @@
     "requiredLanguages": "Talab qilinadigan tillar",
     "driverLicense": "Haydovchilik guvohnomasi",
     "contactPhone": "Telefon",
-    "langNames": { "uz": "O'zbek", "ru": "Rus", "en": "Ingliz" },
+    "langNames": {
+      "uz": "O'zbek",
+      "ru": "Rus",
+      "en": "Ingliz"
+    },
     "langLevelNative": "ona tili"
   },
   "company": {
@@ -781,5 +790,22 @@
       "ctaWrite": "Muallifga yozish",
       "author": "Jamshid Fayziyev · Toshkent"
     }
+  },
+  "promote": {
+    "title": "Vakansiyani reklama qilish",
+    "subtitle": "Vakansiyangizni ro'yxat tepasida va kategoriyada ajratib ko'rsating.",
+    "forJob": "Vakansiya: {title}",
+    "balance": "Hamyon balansi",
+    "duration": "{days} kun",
+    "activeUntil": "Reklama {date} gacha faol.",
+    "buyFor": "{price} — sotib olish",
+    "buying": "Amalga oshirilmoqda…",
+    "insufficientTitle": "Hamyonda mablag' yetarli emas",
+    "insufficientHint": "Reklama uchun mablag' yetarli emas. Hamyonni to'ldiring.",
+    "topUp": "Hamyonni to'ldirish",
+    "errUnknown": "Xatolik yuz berdi",
+    "notOpenTitle": "Avval e'lonni nashr qiling",
+    "notOpenHint": "Faqat ochiq (nashr qilingan) vakansiyani reklama qilish mumkin.",
+    "back": "Vakansiyalarga qaytish"
   }
 }
