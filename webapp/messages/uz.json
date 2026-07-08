@@ -20,7 +20,9 @@
     "vacancies": "Vakansiyalar",
     "company": "Kompaniya",
     "candidates": "Nomzodlar",
-    "postVacancy": "Vakansiya joylash"
+    "postVacancy": "Vakansiya joylash",
+    "openMenu": "Menyuni ochish",
+    "closeMenu": "Menyuni yopish"
   },
   "explore": {
     "title": "Ishlar xaritasi",

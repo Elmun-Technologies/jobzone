@@ -20,7 +20,9 @@
     "vacancies": "Вакансии",
     "company": "Компания",
     "candidates": "Кандидаты",
-    "postVacancy": "Разместить вакансию"
+    "postVacancy": "Разместить вакансию",
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть меню"
   },
   "explore": {
     "title": "Карта вакансий",

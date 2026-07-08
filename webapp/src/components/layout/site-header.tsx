@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 import { HeaderNav } from "./header-nav";
 import { LocaleSwitcher } from "./locale-switcher";
+import { MobileMenu } from "./mobile-menu";
 import { RoleToggle } from "./role-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { YollaLogo } from "./yolla-logo";
@@ -82,6 +83,12 @@ export async function SiteHeader() {
               {t("signIn")}
             </Link>
           )}
+
+          <MobileMenu
+            signedIn={!!user}
+            isEmployerAccount={isEmployerAccount}
+            employerHref={employerHref}
+          />
         </div>
       </Container>
     </header>

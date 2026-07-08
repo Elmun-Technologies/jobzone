@@ -20,7 +20,9 @@
     "vacancies": "Vacancies",
     "company": "Company",
     "candidates": "Candidates",
-    "postVacancy": "Post a vacancy"
+    "postVacancy": "Post a vacancy",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "explore": {
     "title": "Jobs map",
