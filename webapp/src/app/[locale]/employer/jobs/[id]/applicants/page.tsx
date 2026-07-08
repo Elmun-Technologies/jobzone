@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { StatusSelect } from "@/components/employer/status-select";
 import { MessageButton } from "@/components/chat/message-button";
+import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { getMyCompany } from "@/lib/data/employer";
@@ -14,6 +15,7 @@ import {
 import { requireEmployer } from "@/lib/auth/require-employer";
 import { formatDate } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -42,14 +44,44 @@ export default async function JobApplicantsPage({
 
   const t = await getTranslations("employer");
   const applicants = await getJobApplicants(id);
+  const newCount = applicants.filter((a) => a.status === "submitted").length;
 
   return (
     <Container className="max-w-3xl py-10">
       <p className="text-muted-foreground text-sm">{t("applicants")}</p>
-      <h1 className="text-foreground mb-6 text-2xl font-bold">{job.title}</h1>
+      <h1 className="text-foreground mb-2 text-2xl font-bold">{job.title}</h1>
+      {applicants.length > 0 ? (
+        <p className="text-muted-foreground mb-6 text-sm">
+          {t("applicantsCount", { count: applicants.length })}
+          {newCount > 0 ? ` · ${t("newApplicants", { count: newCount })}` : ""}
+        </p>
+      ) : null}
 
       {applicants.length === 0 ? (
-        <EmptyState title={t("noApplicants")} />
+        <EmptyState
+          title={t("noApplicants")}
+          description={t("noApplicantsHint")}
+          action={
+            <div className="flex flex-wrap justify-center gap-2">
+              <Link
+                href={`/employer/jobs/${id}/promote`}
+                className={cn(
+                  buttonVariants({ variant: "primary", size: "sm" }),
+                )}
+              >
+                {t("promote")}
+              </Link>
+              <Link
+                href={`/jobs/${id}`}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
+              >
+                {t("viewPublicListing")}
+              </Link>
+            </div>
+          }
+        />
       ) : (
         <ul className="space-y-4">
           {applicants.map((a) => (

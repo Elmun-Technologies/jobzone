@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { getMyApplications } from "@/lib/data/applications";
 import { formatDate } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -51,7 +53,18 @@ export default async function MyApplicationsPage({
       <h1 className="text-foreground mb-6 text-2xl font-bold">{t("title")}</h1>
 
       {apps.length === 0 ? (
-        <EmptyState title={t("empty")} />
+        <EmptyState
+          title={t("empty")}
+          description={t("emptyHint")}
+          action={
+            <Link
+              href="/jobs"
+              className={cn(buttonVariants({ variant: "primary", size: "sm" }))}
+            >
+              {t("browseJobs")}
+            </Link>
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {apps.map((a) => (

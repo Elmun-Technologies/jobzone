@@ -283,6 +283,9 @@
     "statJobs": "Total jobs",
     "applicants": "Applicants",
     "noApplicants": "No applicants yet",
+    "noApplicantsHint": "No applications yet. Promote the vacancy or share its link to reach more candidates.",
+    "newApplicants": "{count} new",
+    "viewPublicListing": "View listing",
     "applicantsCount": "{count} applicants",
     "errUnknown": "Something went wrong",
     "status": {
@@ -454,6 +457,8 @@
   "applications": {
     "title": "My applications",
     "empty": "You haven't applied yet",
+    "emptyHint": "Find matching jobs and apply in one tap.",
+    "browseJobs": "Browse jobs",
     "status": {
       "submitted": "Submitted",
       "viewed": "Viewed",

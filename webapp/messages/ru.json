@@ -283,6 +283,9 @@
     "statJobs": "Всего вакансий",
     "applicants": "Кандидаты",
     "noApplicants": "Пока нет кандидатов",
+    "noApplicantsHint": "Пока откликов нет. Продвиньте вакансию или поделитесь ссылкой — её увидит больше кандидатов.",
+    "newApplicants": "{count} новых",
+    "viewPublicListing": "Открыть вакансию",
     "applicantsCount": "{count} кандидатов",
     "errUnknown": "Произошла ошибка",
     "status": {
@@ -454,6 +457,8 @@
   "applications": {
     "title": "Мои отклики",
     "empty": "Вы ещё не откликались",
+    "emptyHint": "Найдите подходящие вакансии и откликнитесь в один клик.",
+    "browseJobs": "Смотреть вакансии",
     "status": {
       "submitted": "Отправлено",
       "viewed": "Просмотрено",
