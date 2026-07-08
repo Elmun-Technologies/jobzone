@@ -156,7 +156,7 @@ final List<Job> mockJobs = [
     skills: const ['Mehmonlarni kutib olish', 'Jamoada ishlash'],
     description: 'Restoran zalida mehmonlarga xizmat ko\'rsatish.',
     applicantsCount: 9,
-    categoryName: 'HoReCa',
+    categoryName: 'Restaurants & Hospitality',
     postedAt: DateTime(2026, 6, 12),
   ),
   Job(
@@ -183,7 +183,7 @@ final List<Job> mockJobs = [
     skills: const ['Kassa apparati', 'Mijozlar bilan muloqot'],
     description: 'Do\'konda xaridorlarga xizmat va kassada hisob-kitob.',
     applicantsCount: 21,
-    categoryName: 'Savdo',
+    categoryName: 'Retail & Sales',
     postedAt: DateTime(2026, 6, 12),
   ),
   Job(
@@ -208,7 +208,7 @@ final List<Job> mockJobs = [
     skills: const ['Hushyorlik', 'Video kuzatuv'],
     description: 'Obyektni tungi vaqtda qo\'riqlash va nazorat qilish.',
     applicantsCount: 7,
-    categoryName: 'Qo\'riqlash',
+    categoryName: 'Security',
     postedAt: DateTime(2026, 6, 11),
   ),
   Job(
@@ -235,7 +235,7 @@ final List<Job> mockJobs = [
     description:
         'Vahta usulida qurilish ob\'ektlarida ishlash. Yotoqxona bilan.',
     applicantsCount: 33,
-    categoryName: 'Qurilish',
+    categoryName: 'Construction',
     postedAt: DateTime(2026, 6, 11),
   ),
   Job(
@@ -259,7 +259,7 @@ final List<Job> mockJobs = [
     description:
         'Buyurtmalarni mijozlarga yetkazib berish. Moslashuvchan grafik.',
     applicantsCount: 48,
-    categoryName: 'Yetkazib berish',
+    categoryName: 'Logistics & Delivery',
     postedAt: DateTime(2026, 6, 10),
   ),
   Job(
@@ -284,7 +284,7 @@ final List<Job> mockJobs = [
     skills: const ['Mijozlarni qabul qilish', 'Jadval yuritish'],
     description: 'Go\'zallik salonida qabul, yozuv va mijozlar bilan ishlash.',
     applicantsCount: 26,
-    categoryName: 'Go\'zallik',
+    categoryName: 'Beauty & Salon',
     postedAt: DateTime(2026, 6, 10),
   ),
 ];
