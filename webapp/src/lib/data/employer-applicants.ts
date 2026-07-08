@@ -96,21 +96,37 @@ export async function getCompanyCandidates(
   }
 }
 
-/** A job's title + owning company (so the page can confirm ownership), or null. */
-export async function getJobTitleAndCompany(
-  jobId: string,
-): Promise<{ title: string; companyId: string } | null> {
+/** A job's title + owning company (so the page can confirm ownership) plus its
+ *  screening questions as an id→label map (to caption applicant answers). */
+export async function getJobTitleAndCompany(jobId: string): Promise<{
+  title: string;
+  companyId: string;
+  questionLabels: Record<string, string>;
+} | null> {
   if (!hasSupabase()) return null;
   try {
     const supabase = await createClient();
     const { data } = await supabase
       .from("jobs")
-      .select("title, company_id")
+      .select("title, company_id, screening_questions")
       .eq("id", jobId)
       .maybeSingle();
     if (!data) return null;
     const r = data as Record<string, unknown>;
-    return { title: String(r.title ?? ""), companyId: String(r.company_id) };
+    const questionLabels: Record<string, string> = {};
+    if (Array.isArray(r.screening_questions)) {
+      for (const raw of r.screening_questions) {
+        if (raw && typeof raw === "object") {
+          const q = raw as Record<string, unknown>;
+          if (q.id && q.label) questionLabels[String(q.id)] = String(q.label);
+        }
+      }
+    }
+    return {
+      title: String(r.title ?? ""),
+      companyId: String(r.company_id),
+      questionLabels,
+    };
   } catch {
     return null;
   }
