@@ -340,6 +340,17 @@ export function PostJobForm({
   useEffect(() => {
     if (!state.signedOut && !state.noCompany) return;
     if (!formRef.current) return;
+    // Edit mode: the edit page reloads the job from the DB on return, so DON'T
+    // stash a post-a-job draft — restoring it on /jobs/new would publish a
+    // duplicate and leave the original unchanged. Just re-auth and come back to
+    // the same edit page (noCompany can't occur here — the job has a company).
+    if (isEdit && editJob) {
+      const editPath = `/${locale}/employer/jobs/${editJob.id}/edit`;
+      router.push(
+        `/sign-in?next=${encodeURIComponent(editPath)}&role=employer`,
+      );
+      return;
+    }
     stashDraft(draftFromFormData(new FormData(formRef.current)));
     const postJobPath = `/${locale}/employer/jobs/new`;
     if (state.signedOut) {
@@ -351,7 +362,7 @@ export function PostJobForm({
         `/employer/onboarding?next=${encodeURIComponent(postJobPath)}`,
       );
     }
-  }, [state.signedOut, state.noCompany, locale, router]);
+  }, [state.signedOut, state.noCompany, locale, router, isEdit, editJob]);
 
   // Re-trigger the step-fade animation on each step change without remounting
   // the (uncontrolled) fields, which would wipe what the user typed.
@@ -433,14 +444,27 @@ export function PostJobForm({
 
   // Once a restored draft has landed in the (remounted) fields, jump to the
   // preview so the returning visitor confirms and publishes in one click.
+  // Edit mode is different: it seeds `restored` from the job itself, but the
+  // employer came to CHANGE fields — so it must open at step 0 with the inputs
+  // visible, not on the read-only preview (which hides every input).
   useEffect(() => {
-    if (!restored) return;
+    if (!restored || isEdit) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStep(last);
-    setPreview(buildPreview());
+    // buildPreview() reads the controlled location inputs (city/address/lat/
+    // lng); their state (cityText/pin) is set by the sibling [restored] effect
+    // and hasn't flushed to the DOM in this same commit — so take the location
+    // straight from `restored` (else the confirm card omits what they entered).
+    setPreview({
+      ...buildPreview(),
+      location:
+        [restored.city, restored.addressText].filter(Boolean).join(", ") ||
+        null,
+      hasPin: restored.lat != null && restored.lng != null,
+    });
     // Runs only when a draft is restored; buildPreview/last are render-scoped.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restored]);
+  }, [restored, isEdit]);
 
   async function fillWithAi() {
     const form = formRef.current;

@@ -8,6 +8,9 @@ import { cn } from "@/lib/utils";
 
 type QType = "text" | "choice" | "yesno";
 interface Q {
+  /** Preserved across edits so applicants' stored answers (keyed by this id in
+   * applications.answers) keep matching their question. New rows have none. */
+  id?: string;
   label: string;
   type: QType;
   required: boolean;
@@ -46,6 +49,7 @@ export function ScreeningEditor({
   const t = useTranslations("employer.post");
   const [qs, setQs] = useState<Q[]>(() =>
     initialQuestions.map((q) => ({
+      id: q.id,
       label: q.label,
       type: q.type,
       required: q.required,
@@ -59,7 +63,9 @@ export function ScreeningEditor({
   const payload = qs
     .filter((q) => q.label.trim() !== "")
     .map((q, i) => ({
-      id: `q${i + 1}`,
+      // Keep an existing question's id (so already-submitted answers stay
+      // matched); only mint qN for a newly added one.
+      id: q.id ?? `q${i + 1}`,
       label: q.label.trim(),
       type: q.type,
       required: q.required,
