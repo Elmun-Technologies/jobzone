@@ -98,8 +98,61 @@ body {
 .wizfade {
   animation: wizfade 0.28s ease;
 }
+
+/* Sales surfaces (promote page): staggered entrance, a shimmer for the
+   "best value" ribbon, and a breathing ring on the primary CTA. */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise-in {
+  animation: riseIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -150% 0;
+  }
+  100% {
+    background-position: 250% 0;
+  }
+}
+.shimmer-ribbon {
+  background-image: linear-gradient(
+    110deg,
+    transparent 20%,
+    color-mix(in srgb, white 55%, transparent) 45%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 2.8s linear infinite;
+}
+
+@keyframes ctaPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+}
+.cta-pulse {
+  animation: ctaPulse 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .wizfade {
+  .wizfade,
+  .rise-in,
+  .shimmer-ribbon,
+  .cta-pulse {
     animation: none;
   }
 }

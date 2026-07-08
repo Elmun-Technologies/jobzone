@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Megaphone } from "lucide-react";
+import { ArrowUpToLine, Eye, Megaphone, Sparkles } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -49,16 +49,34 @@ export default async function PromoteJobPage({
   // getEmployerJobBoost already confirmed ownership; null → not theirs / gone.
   if (!job) notFound();
 
+  const benefits = [
+    { Icon: ArrowUpToLine, label: t("benefitTop") },
+    { Icon: Eye, label: t("benefitViews") },
+    { Icon: Sparkles, label: t("benefitFeatured") },
+  ];
+
   return (
     <Container className="max-w-2xl py-10">
-      <div className="mb-2 flex items-center gap-2">
-        <Megaphone className="text-primary size-6" />
-        <h1 className="text-foreground text-2xl font-bold">{t("title")}</h1>
+      {/* Hero — a compelling pitch, not a bare form header. */}
+      <div className="rise-in border-primary/30 from-accent to-card relative mb-6 overflow-hidden rounded-3xl border bg-gradient-to-br p-6 sm:p-8">
+        <div className="bg-primary/15 absolute -top-10 -right-10 size-36 rounded-full blur-2xl" />
+        <div className="relative">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-2xl">
+              <Megaphone className="size-5" />
+            </span>
+            <span className="text-muted-foreground truncate text-sm font-medium">
+              {t("forJob", { title: job.title })}
+            </span>
+          </div>
+          <h1 className="text-foreground text-2xl font-bold sm:text-3xl">
+            {t("heroTitle")}
+          </h1>
+          <p className="text-muted-foreground mt-2 max-w-lg text-sm sm:text-base">
+            {t("heroSubtitle")}
+          </p>
+        </div>
       </div>
-      <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
-      <p className="text-foreground mt-1 mb-6 font-medium">
-        {t("forJob", { title: job.title })}
-      </p>
 
       {job.status !== "open" ? (
         <>
@@ -77,6 +95,22 @@ export default async function PromoteJobPage({
         </>
       ) : (
         <>
+          {/* Value props */}
+          <div className="mb-6 grid gap-3 sm:grid-cols-3">
+            {benefits.map((b, i) => (
+              <div
+                key={b.label}
+                className="rise-in border-border bg-card flex items-center gap-3 rounded-2xl border p-4"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <b.Icon className="text-primary size-5 shrink-0" />
+                <span className="text-foreground text-sm font-medium">
+                  {b.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
           {job.boostActive ? (
             <div className="border-primary/40 bg-accent text-accent-foreground mb-6 rounded-xl border px-4 py-3 text-sm font-medium">
               {t("activeUntil", { date: formatDate(job.boostedUntil) })}
@@ -85,6 +119,7 @@ export default async function PromoteJobPage({
 
           <PromotePicker
             jobId={job.id}
+            jobTitle={job.title}
             locale={locale}
             products={products}
             balanceUzs={wallet.balanceUzs}

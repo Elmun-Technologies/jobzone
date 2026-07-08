@@ -806,6 +806,16 @@
     "errUnknown": "Something went wrong",
     "notOpenTitle": "Publish the vacancy first",
     "notOpenHint": "Only an open (published) vacancy can be promoted.",
-    "back": "Back to vacancies"
+    "back": "Back to vacancies",
+    "heroTitle": "Lift your vacancy to the top",
+    "heroSubtitle": "TOP listings get 3× more views and fill faster. Feature yours for a few days.",
+    "benefitTop": "First in the list",
+    "benefitViews": "3× more views",
+    "benefitFeatured": "Highlighted in its category",
+    "bestValue": "Best value",
+    "perDay": "≈{price}/day",
+    "previewLabel": "After promotion",
+    "previewOther": "Other vacancies",
+    "topUpFor": "Top up Hamyon — {price}"
   }
 }

@@ -18,10 +18,18 @@ function group(n: number): string {
  * pending top-up request (payments are record-only for now), so on success we
  * show a "pending" note rather than a paid confirmation.
  */
-export function TopUpForm({ companyId }: { companyId: string }) {
+export function TopUpForm({
+  companyId,
+  initialAmount = "",
+}: {
+  companyId: string;
+  /** Pre-fills the amount (digits only), e.g. carried from the promote page's
+   * "top up" CTA so the sum the boost needs is already entered. */
+  initialAmount?: string;
+}) {
   const t = useTranslations("wallet");
   const locale = useLocale();
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(initialAmount);
   const [state, action, pending] = useActionState<TopUpState, FormData>(
     requestTopUp,
     {},
