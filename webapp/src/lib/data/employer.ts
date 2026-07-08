@@ -64,9 +64,13 @@ export async function getMyJobs(companyId: string): Promise<EmployerJob[]> {
   if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
+    // select("*") (not an explicit column list) so a DB that's behind on
+    // migrations — e.g. missing blocked_at (0038) — doesn't make the whole
+    // read fail with PGRST204 and hide the employer's real jobs. Fields are
+    // read defensively below, so an absent column is simply null.
     const { data, error } = await supabase
       .from("jobs")
-      .select("id, title, status, applicants_count, posted_at, blocked_at")
+      .select("*")
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
     if (error) throw error;
