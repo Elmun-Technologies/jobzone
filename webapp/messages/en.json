@@ -214,6 +214,10 @@
     "viewApplicants": "Candidates",
     "jobPosted": "Vacancy published — it's now visible in the job listings.",
     "draftSaved": "Draft saved. Publish it when you're ready.",
+    "jobUpdated": "Changes saved.",
+    "editJob": "Edit vacancy",
+    "edit": "Edit",
+    "promote": "Promote",
     "candidates": {
       "title": "Candidates",
       "empty": "No candidates yet",
@@ -345,7 +349,8 @@
       "paymentInsufficientTitle": "Not enough balance in Hamyon",
       "paymentInsufficientHint": "Publishing needs {price}. Top up your Hamyon balance.",
       "paymentTopUp": "Go to Hamyon"
-    }
+    },
+    "jobPromoted": "Promotion enabled! Your vacancy will be highlighted."
   },
   "wallet": {
     "title": "Wallet",
@@ -500,7 +505,11 @@
     "requiredLanguages": "Required languages",
     "driverLicense": "Driver's license",
     "contactPhone": "Phone",
-    "langNames": { "uz": "Uzbek", "ru": "Russian", "en": "English" },
+    "langNames": {
+      "uz": "Uzbek",
+      "ru": "Russian",
+      "en": "English"
+    },
     "langLevelNative": "native"
   },
   "company": {
@@ -781,5 +790,22 @@
       "ctaWrite": "Write to the author",
       "author": "Jamshid Fayziyev · Tashkent"
     }
+  },
+  "promote": {
+    "title": "Promote vacancy",
+    "subtitle": "Push your vacancy to the top of the list and highlight it in its category.",
+    "forJob": "Vacancy: {title}",
+    "balance": "Hamyon balance",
+    "duration": "{days} days",
+    "activeUntil": "Promotion active until {date}.",
+    "buyFor": "Buy for {price}",
+    "buying": "Processing…",
+    "insufficientTitle": "Not enough balance in Hamyon",
+    "insufficientHint": "Not enough funds to promote. Top up your Hamyon.",
+    "topUp": "Top up Hamyon",
+    "errUnknown": "Something went wrong",
+    "notOpenTitle": "Publish the vacancy first",
+    "notOpenHint": "Only an open (published) vacancy can be promoted.",
+    "back": "Back to vacancies"
   }
 }

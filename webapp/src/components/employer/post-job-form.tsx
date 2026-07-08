@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { generateJobContent } from "@/lib/actions/ai-content";
-import { createJob, type JobFormState } from "@/lib/actions/employer";
+import {
+  createJob,
+  updateJob,
+  type JobFormState,
+} from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
 import { canAffordJobPost, willChargeForJobPost } from "@/lib/job-post-pricing";
@@ -52,7 +56,7 @@ function stashDraft(draft: JobDraft): void {
   sessionStorage.setItem(STASH_KEY, JSON.stringify(draft));
 }
 
-interface JobDraft {
+export interface JobDraft {
   title: string;
   aiNotes: string;
   description: string;
@@ -253,6 +257,7 @@ export function PostJobForm({
   hasPublishedBefore,
   jobPostPriceUzs,
   walletBalanceUzs,
+  editJob = null,
 }: {
   companyId: string | null;
   companyName?: string | null;
@@ -260,17 +265,23 @@ export function PostJobForm({
   hasPublishedBefore: boolean;
   jobPostPriceUzs: number;
   walletBalanceUzs: number;
+  /** Edit mode: the job's id + its current values to pre-fill; submits to
+   * updateJob (free, keeps status) instead of createJob. */
+  editJob?: { id: string; draft: JobDraft } | null;
 }) {
   const t = useTranslations("employer");
   const tp = useTranslations("employer.post");
   const tj = useTranslations("jobs");
   const locale = useLocale();
   const router = useRouter();
+  const isEdit = editJob != null;
   const [state, action, pending] = useActionState<JobFormState, FormData>(
-    createJob,
+    isEdit ? updateJob : createJob,
     {},
   );
-  const [restored, setRestored] = useState<JobDraft | null>(null);
+  const [restored, setRestored] = useState<JobDraft | null>(
+    editJob?.draft ?? null,
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const categoryRef = useRef<HTMLSelectElement>(null);
   const stepAreaRef = useRef<HTMLDivElement>(null);
@@ -287,6 +298,9 @@ export function PostJobForm({
   const [addressText, setAddressText] = useState("");
 
   useEffect(() => {
+    // In edit mode the draft is seeded from the job itself — never overwrite
+    // it with a leftover "post a job" stash.
+    if (isEdit) return;
     // Restoring client-only storage after mount is intentional here (a lazy
     // initializer would desync SSR hydration).
     const saved = sessionStorage.getItem(STASH_KEY);
@@ -304,7 +318,9 @@ export function PostJobForm({
     // the final mount still restores; a genuine fresh visit has no stash.
     const t = setTimeout(() => sessionStorage.removeItem(STASH_KEY), 0);
     return () => clearTimeout(t);
-  }, []);
+    // isEdit is derived from a prop and stable for the form's lifetime, so this
+    // still runs once on mount (the guard just skips the stash in edit mode).
+  }, [isEdit]);
 
   // The map pin and city hint are React-controlled (not uncontrolled DOM
   // fields), so a restored draft has to be mirrored into state explicitly.
@@ -517,6 +533,7 @@ export function PostJobForm({
       {companyId ? (
         <input type="hidden" name="companyId" value={companyId} />
       ) : null}
+      {editJob ? <input type="hidden" name="jobId" value={editJob.id} /> : null}
 
       {/* Stepper */}
       <ol className="mb-6 flex items-center">
@@ -898,13 +915,15 @@ export function PostJobForm({
                 showLess: tp("previewShowLess"),
               }}
             />
-            <PaymentPanel
-              willCharge={willCharge}
-              blockedByFunds={blockedByFunds}
-              priceUzs={jobPostPriceUzs}
-              balanceUzs={walletBalanceUzs}
-              locale={locale}
-            />
+            {isEdit ? null : (
+              <PaymentPanel
+                willCharge={willCharge}
+                blockedByFunds={blockedByFunds}
+                priceUzs={jobPostPriceUzs}
+                balanceUzs={walletBalanceUzs}
+                locale={locale}
+              />
+            )}
           </>
         ) : null}
       </div>
@@ -941,6 +960,14 @@ export function PostJobForm({
             className="bg-primary text-primary-foreground h-11 rounded-lg px-6 text-sm font-bold transition-opacity hover:opacity-90"
           >
             {tp("next")} →
+          </button>
+        ) : isEdit ? (
+          <button
+            type="submit"
+            disabled={pending}
+            className="bg-primary text-primary-foreground h-11 rounded-lg px-6 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {t("saveChanges")}
           </button>
         ) : (
           <div className="flex gap-2">

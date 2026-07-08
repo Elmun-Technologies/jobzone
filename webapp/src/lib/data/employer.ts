@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { JobDraft } from "@/components/employer/post-job-form";
 import { createClient } from "@/lib/supabase/server";
 
 import { toCompany } from "./mappers";
@@ -88,6 +89,137 @@ export async function getMyJobs(companyId: string): Promise<EmployerJob[]> {
   } catch (e) {
     console.error("getMyJobs failed", e);
     return [];
+  }
+}
+
+/**
+ * A job's current values as the post-a-job wizard's draft shape, for editing.
+ * Reads the raw row (RLS lets the owner see their own job at any status) and
+ * confirms company ownership; returns null if not found / not owned.
+ */
+export async function getEmployerJobDraft(
+  jobId: string,
+): Promise<JobDraft | null> {
+  if (!hasSupabase()) return null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("id", jobId)
+      .maybeSingle();
+    if (!data) return null;
+    const r = data as Record<string, unknown>;
+
+    const owns = await supabase
+      .from("companies")
+      .select("id")
+      .eq("id", String(r.company_id))
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    if (!owns.data) return null;
+
+    const str = (v: unknown) => (v == null ? "" : String(v));
+    const numStr = (v: unknown) =>
+      typeof v === "number" ? String(v) : v ? String(v) : "";
+    return {
+      title: str(r.title),
+      aiNotes: "",
+      description: str(r.description),
+      requirements: str(r.requirements),
+      responsibilities: str(r.responsibilities),
+      benefits: str(r.benefits),
+      categoryId: str(r.category_id),
+      salaryMin: numStr(r.salary_min),
+      salaryMax: numStr(r.salary_max),
+      currency: str(r.currency) || "UZS",
+      salaryPeriod: str(r.salary_period) || "month",
+      city: str(r.city),
+      addressText: str(r.address_text),
+      lat: typeof r.lat === "number" ? r.lat : null,
+      lng: typeof r.lng === "number" ? r.lng : null,
+      jobType: str(r.job_type),
+      workingModel: str(r.working_model),
+      experienceLevel: str(r.experience_level),
+      schedulePattern: str(r.schedule_pattern),
+      nightShift: r.night_shift === true,
+      contactPhone: str(r.contact_phone),
+      showPhone: r.show_phone_on_listing === true,
+      requireCoverLetter: r.require_cover_letter === true,
+      womenFriendly: r.women_friendly === true,
+      disabilityFriendly: r.disability_friendly === true,
+      screeningQuestions: Array.isArray(r.screening_questions)
+        ? (r.screening_questions as JobDraft["screeningQuestions"])
+        : [],
+    };
+  } catch (e) {
+    console.error("getEmployerJobDraft failed", e);
+    return null;
+  }
+}
+
+export interface EmployerJobBoost {
+  id: string;
+  title: string;
+  status: string;
+  /** Boost end (0011). Non-null + future = a promotion is live. */
+  boostedUntil: string | null;
+  boostKind: string | null;
+  /** boostedUntil is in the future — a promotion is live right now. Computed
+   * here (server-only) rather than in the page, so the render stays pure. */
+  boostActive: boolean;
+}
+
+/**
+ * A job's title + current boost state, for the promote (reklama) page. Reads
+ * the raw row (owner sees any status via RLS) and confirms company ownership;
+ * returns null if not found / not owned. select("*") so a DB behind on the
+ * boost migration (0011) doesn't fail the whole read.
+ */
+export async function getEmployerJobBoost(
+  jobId: string,
+): Promise<EmployerJobBoost | null> {
+  if (!hasSupabase()) return null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+    const { data } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("id", jobId)
+      .maybeSingle();
+    if (!data) return null;
+    const r = data as Record<string, unknown>;
+
+    const owns = await supabase
+      .from("companies")
+      .select("id")
+      .eq("id", String(r.company_id))
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    if (!owns.data) return null;
+
+    const boostedUntil =
+      typeof r.boosted_until === "string" ? r.boosted_until : null;
+    return {
+      id: String(r.id),
+      title: String(r.title ?? ""),
+      status: String(r.status ?? "open"),
+      boostedUntil,
+      boostKind: typeof r.boost_kind === "string" ? r.boost_kind : null,
+      boostActive:
+        boostedUntil != null && new Date(boostedUntil).getTime() > Date.now(),
+    };
+  } catch (e) {
+    console.error("getEmployerJobBoost failed", e);
+    return null;
   }
 }
 
