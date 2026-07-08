@@ -180,7 +180,7 @@
     "summaryHint": "A few lines about you, your experience and strengths",
     "aiWrite": "Write with AI",
     "aiWriting": "Writing…",
-    "aiHint": "Drafts a professional summary from your role and experience",
+    "aiHint": "Drafts a template — fill the [ ] with your real details",
     "aiFellBack": "AI didn't connect — a starter was inserted. You can edit it.",
     "aiRealityCheck": "Keep it real — the AI only helps.",
     "aiRealityCheckOn": "This text was written with AI. Make it your own — employers may see that it was AI-assisted.",
@@ -193,7 +193,17 @@
     "company": "Company",
     "currentlyWorking": "I work here now",
     "jobDutiesHint": "Duties and achievements (optional)",
-    "addJob": "Add job"
+    "addJob": "Add job",
+    "certificates": "Certificates & courses",
+    "certificate": "Certificate",
+    "certName": "Certificate / course name",
+    "issuer": "Issued by",
+    "issuedYear": "Issued year",
+    "expiryYear": "Expires (year)",
+    "expiryHint": "Leave blank if it never expires",
+    "addCertificate": "Add certificate",
+    "addLanguage": "Add",
+    "addLanguageHint": "Another language (e.g. Arabic)"
   },
   "bookmarks": {
     "title": "Saved jobs",

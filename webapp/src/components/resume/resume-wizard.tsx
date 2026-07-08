@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
@@ -16,6 +17,7 @@ import { useRouter } from "@/i18n/navigation";
 import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
 import type {
+  CertificateEntry,
   EducationEntry,
   ExperienceEntry,
   ResumeDraft,
@@ -49,6 +51,13 @@ const EMPTY_EXP: ExperienceEntry = {
   endYear: "",
   isCurrent: false,
   description: "",
+};
+
+const EMPTY_CERT: CertificateEntry = {
+  name: "",
+  issuer: "",
+  issuedYear: "",
+  expiryYear: "",
 };
 
 function Field({
@@ -286,6 +295,46 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
         j === i ? { ...e, [key]: value } : e,
       ),
     }));
+
+  const addCert = () =>
+    setDraft((d) => ({
+      ...d,
+      certificates: [...d.certificates, { ...EMPTY_CERT }],
+    }));
+  const removeCert = (i: number) =>
+    setDraft((d) => ({
+      ...d,
+      certificates: d.certificates.filter((_, j) => j !== i),
+    }));
+  const setCert = <K extends keyof CertificateEntry>(
+    i: number,
+    key: K,
+    value: CertificateEntry[K],
+  ) =>
+    setDraft((d) => ({
+      ...d,
+      certificates: d.certificates.map((c, j) =>
+        j === i ? { ...c, [key]: value } : c,
+      ),
+    }));
+
+  // Custom languages: add any language beyond the fixed set (stored by name).
+  const [newLang, setNewLang] = useState("");
+  const addLang = () => {
+    const name = newLang.trim();
+    if (!name) return;
+    setDraft((d) => ({
+      ...d,
+      languages: { ...d.languages, [name]: d.languages[name] ?? "a1_a2" },
+    }));
+    setNewLang("");
+  };
+  const removeLang = (code: string) =>
+    setDraft((d) => {
+      const next = { ...d.languages };
+      delete next[code];
+      return { ...d, languages: next };
+    });
 
   const steps = [
     t("stepPersonal"),
@@ -680,6 +729,77 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
               <Plus className="size-4" /> {t("addEducation")}
             </button>
 
+            {/* Certificates & courses (with / without expiry) — certifications. */}
+            <div>
+              <p className="text-foreground mb-2 text-sm font-medium">
+                {t("certificates")}
+              </p>
+              {draft.certificates.map((cert, i) => (
+                <div
+                  key={i}
+                  className="border-border mb-3 rounded-xl border p-4"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-foreground text-sm font-semibold">
+                      {t("certificate")} #{i + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeCert(i)}
+                      aria-label={t("remove")}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    <input
+                      className={inputClass}
+                      placeholder={t("certName")}
+                      value={cert.name}
+                      onChange={(e) => setCert(i, "name", e.target.value)}
+                    />
+                    <input
+                      className={inputClass}
+                      placeholder={t("issuer")}
+                      value={cert.issuer}
+                      onChange={(e) => setCert(i, "issuer", e.target.value)}
+                    />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <input
+                        className={inputClass}
+                        inputMode="numeric"
+                        placeholder={t("issuedYear")}
+                        value={cert.issuedYear}
+                        onChange={(e) =>
+                          setCert(i, "issuedYear", e.target.value)
+                        }
+                      />
+                      <input
+                        className={inputClass}
+                        inputMode="numeric"
+                        placeholder={t("expiryYear")}
+                        value={cert.expiryYear}
+                        onChange={(e) =>
+                          setCert(i, "expiryYear", e.target.value)
+                        }
+                      />
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      {t("expiryHint")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addCert}
+                className="border-border text-foreground hover:border-primary/40 inline-flex items-center gap-2 rounded-lg border border-dashed px-4 py-2 text-sm font-medium"
+              >
+                <Plus className="size-4" /> {t("addCertificate")}
+              </button>
+            </div>
+
             <div>
               <p className="text-foreground mb-3 text-sm font-medium">
                 {t("languages")}
@@ -715,6 +835,69 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
                     </div>
                   </div>
                 ))}
+                {/* Languages the seeker added themselves (stored by name). */}
+                {Object.keys(draft.languages)
+                  .filter((k) => !LANGS.includes(k as (typeof LANGS)[number]))
+                  .map((code) => (
+                    <div
+                      key={code}
+                      className="flex flex-col gap-2 sm:flex-row sm:items-center"
+                    >
+                      <span className="text-foreground flex w-24 shrink-0 items-center gap-1 text-sm">
+                        {code}
+                        <button
+                          type="button"
+                          onClick={() => removeLang(code)}
+                          aria-label={t("remove")}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {LEVELS.filter((l) => l !== "none").map((lvl) => {
+                          const on = draft.languages[code] === lvl;
+                          return (
+                            <button
+                              key={lvl}
+                              type="button"
+                              onClick={() => setLang(code, lvl)}
+                              className={cn(
+                                "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                                on
+                                  ? "border-primary bg-primary text-primary-foreground"
+                                  : "border-border bg-background text-muted-foreground hover:border-primary/40",
+                              )}
+                            >
+                              {t(`level.${lvl}`)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+              {/* Add any other language */}
+              <div className="mt-3 flex gap-2">
+                <input
+                  className={inputClass}
+                  placeholder={t("addLanguageHint")}
+                  value={newLang}
+                  onChange={(e) => setNewLang(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addLang();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={addLang}
+                  className="border-border text-foreground hover:border-primary/40 inline-flex shrink-0 items-center gap-1 rounded-lg border px-3 text-sm font-medium"
+                >
+                  <Plus className="size-4" /> {t("addLanguage")}
+                </button>
               </div>
             </div>
           </>

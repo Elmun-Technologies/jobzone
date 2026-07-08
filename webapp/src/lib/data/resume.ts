@@ -23,6 +23,15 @@ export interface ExperienceEntry {
   description: string;
 }
 
+/** A certificate / course (the `certifications` table). */
+export interface CertificateEntry {
+  name: string;
+  issuer: string;
+  issuedYear: string;
+  /** "" = no expiry (lifetime). */
+  expiryYear: string;
+}
+
 /** The fields the /resumes/new wizard collects. */
 export interface ResumeDraft {
   position: string; // headline
@@ -46,6 +55,7 @@ export interface ResumeDraft {
   languages: Record<string, string>;
   experiences: ExperienceEntry[];
   educations: EducationEntry[];
+  certificates: CertificateEntry[];
 }
 
 export const EMPTY_RESUME: ResumeDraft = {
@@ -65,6 +75,7 @@ export const EMPTY_RESUME: ResumeDraft = {
   languages: {},
   experiences: [],
   educations: [],
+  certificates: [],
 };
 
 function yearOf(v: unknown): string {
@@ -127,6 +138,21 @@ export async function getMyResume(): Promise<ResumeDraft> {
       };
     });
 
+    const { data: certRows } = await supabase
+      .from("certifications")
+      .select("name, issuer, issued_date, expiry_date")
+      .eq("profile_id", user.id)
+      .order("issued_date", { ascending: false, nullsFirst: false });
+    const certificates: CertificateEntry[] = (certRows ?? []).map((c) => {
+      const row = c as Record<string, unknown>;
+      return {
+        name: str(row.name),
+        issuer: str(row.issuer),
+        issuedYear: yearOf(row.issued_date),
+        expiryYear: yearOf(row.expiry_date),
+      };
+    });
+
     const langs =
       r.languages && typeof r.languages === "object"
         ? (r.languages as Record<string, string>)
@@ -174,6 +200,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
       languages: langs,
       experiences,
       educations,
+      certificates,
     };
   } catch {
     return EMPTY_RESUME;
