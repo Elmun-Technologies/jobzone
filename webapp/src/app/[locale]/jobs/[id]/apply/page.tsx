@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ApplyForm } from "@/components/jobs/apply-form";
+import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { hasApplied } from "@/lib/data/applications";
@@ -35,6 +36,10 @@ export default async function ApplyPage({
 
   const t = await getTranslations("apply");
   const applied = await hasApplied(id);
+  // One-tap "apply with my résumé" is offered unless the job needs answers a
+  // form must collect (required screening question). The button itself handles
+  // sign-in / missing-résumé by routing there and back.
+  const needsForm = job.screeningQuestions.some((q) => q.required);
 
   return (
     <Container className="max-w-2xl py-8">
@@ -56,7 +61,28 @@ export default async function ApplyPage({
           </Link>
         </div>
       ) : (
-        <ApplyForm jobId={id} questions={job.screeningQuestions} />
+        <>
+          {!needsForm ? (
+            <div className="mb-6">
+              <QuickApplyButton
+                jobId={id}
+                needsForm={false}
+                className="h-12 w-full text-base"
+              />
+              <p className="text-muted-foreground mt-2 text-center text-sm">
+                {t("quickApplyHint")}
+              </p>
+              <div className="my-5 flex items-center gap-3">
+                <span className="bg-border h-px flex-1" />
+                <span className="text-muted-foreground text-xs">
+                  {t("orAddLetter")}
+                </span>
+                <span className="bg-border h-px flex-1" />
+              </div>
+            </div>
+          ) : null}
+          <ApplyForm jobId={id} questions={job.screeningQuestions} />
+        </>
       )}
     </Container>
   );

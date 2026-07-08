@@ -386,7 +386,11 @@
     "alreadyApplied": "You've already applied to this job",
     "viewApplications": "View applications",
     "errDuplicate": "You've already applied to this job",
-    "errUnknown": "Something went wrong"
+    "errUnknown": "Something went wrong",
+    "quickApply": "Apply in 1 tap",
+    "quickApplied": "Application sent ✓",
+    "quickApplyHint": "Sent instantly with your résumé.",
+    "orAddLetter": "or add a cover letter"
   },
   "applications": {
     "title": "My applications",

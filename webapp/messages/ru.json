@@ -386,7 +386,11 @@
     "alreadyApplied": "Вы уже откликнулись на эту вакансию",
     "viewApplications": "Мои отклики",
     "errDuplicate": "Вы уже откликнулись на эту вакансию",
-    "errUnknown": "Произошла ошибка"
+    "errUnknown": "Произошла ошибка",
+    "quickApply": "Отклик в 1 клик",
+    "quickApplied": "Отклик отправлен ✓",
+    "quickApplyHint": "Отправится сразу с вашим резюме.",
+    "orAddLetter": "или добавьте сопроводительное письмо"
   },
   "applications": {
     "title": "Мои отклики",

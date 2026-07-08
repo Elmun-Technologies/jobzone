@@ -386,7 +386,11 @@
     "alreadyApplied": "Siz bu ishga allaqachon ariza topshirgansiz",
     "viewApplications": "Arizalarni ko'rish",
     "errDuplicate": "Siz bu ishga allaqachon ariza topshirgansiz",
-    "errUnknown": "Xatolik yuz berdi"
+    "errUnknown": "Xatolik yuz berdi",
+    "quickApply": "1-klik ariza",
+    "quickApplied": "Ariza yuborildi ✓",
+    "quickApplyHint": "Rezyumeingiz bilan darhol yuboriladi.",
+    "orAddLetter": "yoki motivatsion xat qo'shing"
   },
   "applications": {
     "title": "Mening arizalarim",

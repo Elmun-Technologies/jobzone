@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JsonLd } from "@/components/seo/json-ld";
-import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
+import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { hasApplied } from "@/lib/data/applications";
 import { isBookmarked } from "@/lib/data/bookmarks";
 import { getJobById } from "@/lib/data/jobs";
@@ -18,7 +18,6 @@ import {
   schedulePatternLabel,
 } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 import { jobPostingJsonLd, siteUrl } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -133,9 +132,10 @@ export default async function JobDetailsPage({
     user ? hasApplied(job.id) : Promise.resolve(false),
     user ? isBookmarked(job.id) : Promise.resolve(false),
   ]);
-  // Guest-first: the apply page itself asks for auth at submit-time, so the
-  // link always goes there directly rather than pre-routing to sign-in.
-  const applyHref = `/jobs/${id}/apply`;
+  // A job needs the full apply form only when it has a required screening
+  // question (the sidebar CTA one-taps otherwise). Guest-first throughout:
+  // QuickApplyButton routes an unauthenticated tap to sign-in and back.
+  const needsForm = job.screeningQuestions.some((q) => q.required);
 
   return (
     <Container className="py-8">
@@ -259,15 +259,11 @@ export default async function JobDetailsPage({
                 {t("applied")}
               </p>
             ) : (
-              <Link
-                href={applyHref}
-                className={cn(
-                  buttonVariants({ variant: "primary", size: "lg" }),
-                  "mt-4 w-full",
-                )}
-              >
-                {t("apply")}
-              </Link>
+              <QuickApplyButton
+                jobId={id}
+                needsForm={needsForm}
+                className="mt-4 h-12 w-full text-base"
+              />
             )}
             <BookmarkButton
               jobId={id}
