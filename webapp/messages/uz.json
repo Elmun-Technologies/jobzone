@@ -87,7 +87,6 @@
     "editProfile": "Profilni tahrirlash",
     "messages": "Xabarlar",
     "signedInAs": "Tizimga kirgansiz:",
-    "comingSoon": "CV tez orada shu yerda bo'ladi.",
     "signOut": "Chiqish",
     "snapshot": {
       "openJobs": "Ochiq vakansiyalar",
@@ -97,6 +96,14 @@
       "noCompanyYet": "Kompaniya hali yaratilmagan",
       "createCompany": "Kompaniya yaratish",
       "seekerFallback": "Ish izlovchi"
+    },
+    "resumeCard": {
+      "title": "Rezyumeingiz",
+      "ready": "{pct}% to'ldirilgan",
+      "sections": "{done}/{total} bo'lim to'ldirilgan",
+      "build": "Rezyumeni to'ldirish",
+      "edit": "Rezyumeni tahrirlash",
+      "seen": "Ish beruvchilar rezyumengizni ko'radi"
     }
   },
   "chat": {

@@ -87,7 +87,6 @@
     "editProfile": "Edit profile",
     "messages": "Messages",
     "signedInAs": "Signed in as:",
-    "comingSoon": "Your CV will appear here soon.",
     "signOut": "Sign out",
     "snapshot": {
       "openJobs": "Open vacancies",
@@ -97,6 +96,14 @@
       "noCompanyYet": "No company yet",
       "createCompany": "Create a company",
       "seekerFallback": "Job seeker"
+    },
+    "resumeCard": {
+      "title": "Your résumé",
+      "ready": "{pct}% complete",
+      "sections": "{done}/{total} sections filled",
+      "build": "Complete résumé",
+      "edit": "Edit résumé",
+      "seen": "Employers can see your résumé"
     }
   },
   "chat": {

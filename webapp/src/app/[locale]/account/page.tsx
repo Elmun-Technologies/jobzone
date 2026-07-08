@@ -26,6 +26,7 @@ import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCompanyRating } from "@/lib/data/companies";
 import { getEmployerStats, getMyCompany, getMyRole } from "@/lib/data/employer";
 import { getMyProfileDetails } from "@/lib/data/profile";
+import { getMyResume, type ResumeDraft } from "@/lib/data/resume";
 import { getWallet } from "@/lib/data/wallet";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,27 @@ type Item = {
   icon: LucideIcon;
   featured?: boolean;
 };
+
+// How "complete" the seeker's résumé is — the same signals an employer now sees
+// on the applicant page. Drives the progress bar + CTA on the résumé card.
+function resumeReadiness(r: ResumeDraft): {
+  done: number;
+  total: number;
+  pct: number;
+} {
+  const checks = [
+    Boolean(r.fullName && r.position && r.city),
+    Boolean(r.summary),
+    r.experiences.length > 0 || Boolean(r.experienceLevel),
+    r.educations.length > 0,
+    Object.keys(r.languages).length > 0,
+    Boolean(r.expectedSalary),
+    Boolean(r.phone),
+  ];
+  const total = checks.length;
+  const done = checks.filter(Boolean).length;
+  return { done, total, pct: Math.round((done / total) * 100) };
+}
 
 export default async function AccountPage({
   params,
@@ -120,14 +142,17 @@ export default async function AccountPage({
         getCompanyRating(company.id),
       ])
     : [null, null, null];
-  const [profile, applications, bookmarkIds] = !isEmployer
+  const [profile, applications, bookmarkIds, resume] = !isEmployer
     ? await Promise.all([
         getMyProfileDetails(),
         getMyApplications(),
         getBookmarkedJobIds(),
+        getMyResume(),
       ])
-    : [null, null, null];
+    : [null, null, null, null];
   const seekerName = profile?.fullName || ts("seekerFallback");
+  const readiness = resume ? resumeReadiness(resume) : null;
+  const trc = await getTranslations("account.resumeCard");
 
   return (
     <Container className="max-w-4xl py-12">
@@ -227,6 +252,52 @@ export default async function AccountPage({
             />
             <StatCard label={t("savedJobs")} value={bookmarkIds?.size ?? 0} />
           </div>
+        </div>
+      ) : null}
+
+      {/* Résumé readiness — the account page never surfaced the CV builder, so a
+          seeker who filled it in couldn't get back to edit it. Now employers can
+          see the résumé (applicant page), so nudge the seeker to complete it. */}
+      {!isEmployer && readiness ? (
+        <div className="border-border bg-card mt-4 rounded-2xl border p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-foreground font-semibold">{trc("title")}</p>
+              <p className="text-muted-foreground text-sm">
+                {trc("ready", { pct: readiness.pct })}
+              </p>
+            </div>
+            <Link
+              href="/resumes/new"
+              className={cn(
+                buttonVariants({
+                  variant: readiness.pct >= 100 ? "outline" : "primary",
+                  size: "sm",
+                }),
+              )}
+            >
+              {readiness.pct >= 100 ? trc("edit") : trc("build")}
+            </Link>
+          </div>
+          <div
+            className="bg-muted mt-3 h-2 overflow-hidden rounded-full"
+            role="progressbar"
+            aria-valuenow={readiness.pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div
+              className="bg-primary h-full rounded-full transition-all"
+              style={{ width: `${readiness.pct}%` }}
+            />
+          </div>
+          <p className="text-muted-foreground mt-2 text-xs">
+            {trc("sections", {
+              done: readiness.done,
+              total: readiness.total,
+            })}{" "}
+            · {trc("seen")}
+          </p>
         </div>
       ) : null}
 
