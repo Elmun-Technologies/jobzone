@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { safeNext } from "@/lib/auth/safe-next";
 import { createClient } from "@/lib/supabase/server";
 
 export interface AuthFormState {
@@ -30,8 +31,7 @@ export async function signInAction(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "invalid" };
 
-  const next = field(formData, "next");
-  redirect(next || localePath(formData, "/account"));
+  redirect(safeNext(field(formData, "next"), localePath(formData, "/account")));
 }
 
 /** Email/password sign-up with a chosen role (job_seeker | employer). */
@@ -54,8 +54,7 @@ export async function signUpAction(
     return { error: error.message.includes("already") ? "inUse" : "unknown" };
 
   // With email confirmations disabled the user is signed in immediately.
-  const next = field(formData, "next");
-  redirect(next || localePath(formData, "/account"));
+  redirect(safeNext(field(formData, "next"), localePath(formData, "/account")));
 }
 
 /** Sign out and return to the welcome/landing page. */

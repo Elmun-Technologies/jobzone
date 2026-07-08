@@ -65,9 +65,15 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
       ),
     );
     if (picked == null || picked == _applicant.status) return;
-    await ref
-        .read(applicantsRepositoryProvider)
-        .updateStatus(_applicant.id, picked);
+    try {
+      await ref
+          .read(applicantsRepositoryProvider)
+          .updateStatus(_applicant.id, picked);
+    } catch (e) {
+      // Don't optimistically flip the UI if the write failed — show why.
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+      return;
+    }
     ref.invalidate(allApplicantsProvider);
     ref.invalidate(jobApplicantsProvider(_applicant.jobId));
     if (!mounted) return;
@@ -158,19 +164,23 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
       ),
     );
     if (saved == true) {
-      await ref
-          .read(workerReviewsRepositoryProvider)
-          .submit(
-            WorkerReview(
-              workerId: _applicant.workerId,
-              jobId: _applicant.jobId,
-              rating: rating,
-              reliability: reliability,
-              body: note.text.trim().isEmpty ? null : note.text.trim(),
-            ),
-          );
-      ref.invalidate(workerReputationProvider(_applicant.workerId));
-      if (mounted) showInfoSnack(context, l.reviewThanks);
+      try {
+        await ref
+            .read(workerReviewsRepositoryProvider)
+            .submit(
+              WorkerReview(
+                workerId: _applicant.workerId,
+                jobId: _applicant.jobId,
+                rating: rating,
+                reliability: reliability,
+                body: note.text.trim().isEmpty ? null : note.text.trim(),
+              ),
+            );
+        ref.invalidate(workerReputationProvider(_applicant.workerId));
+        if (mounted) showInfoSnack(context, l.reviewThanks);
+      } catch (e) {
+        if (mounted) showErrorSnack(context, localizedError(context, e));
+      }
     }
     note.dispose();
   }

@@ -3,6 +3,7 @@ import type {
   CompanyReview,
   Job,
   JobCategory,
+  JobLanguage,
   ScreeningQuestion,
 } from "./types";
 
@@ -41,14 +42,44 @@ export function toJob(r: Row): Job {
     salaryMax: num(r.salary_max),
     currency: String(r.currency ?? "UZS"),
     salaryPeriod: String(r.salary_period ?? "month"),
+    salaryGross: r.salary_gross !== false,
     skills: Array.isArray(r.skills_required)
       ? (r.skills_required as unknown[]).map(String)
       : [],
+    nightShift: bool(r.night_shift),
+    womenFriendly: bool(r.women_friendly),
+    disabilityFriendly: bool(r.disability_friendly),
+    formalization:
+      str(r.formalization) === "none" ? null : str(r.formalization),
+    educationRequired:
+      str(r.education_required) === "none" ? null : str(r.education_required),
+    workHours: str(r.work_hours),
+    driverLicenses: Array.isArray(r.driver_licenses)
+      ? (r.driver_licenses as unknown[]).map(String)
+      : [],
+    languages: toJobLanguages(r.languages),
+    contactPhone: bool(r.show_phone_on_listing) ? str(r.contact_phone) : null,
+    showPhoneOnListing: bool(r.show_phone_on_listing),
     postedAt: str(r.posted_at),
     expiresAt: str(r.expires_at),
     boostActive: bool(r.boost_active),
     screeningQuestions: toScreeningQuestions(r.screening_questions),
   };
+}
+
+function toJobLanguages(v: unknown): JobLanguage[] {
+  if (!Array.isArray(v)) return [];
+  return v.flatMap((raw) => {
+    if (!raw || typeof raw !== "object") return [];
+    const l = raw as Record<string, unknown>;
+    if (!l.code) return [];
+    return [
+      {
+        code: String(l.code),
+        level: typeof l.level === "string" ? l.level : "",
+      },
+    ];
+  });
 }
 
 function toScreeningQuestions(v: unknown): ScreeningQuestion[] {
@@ -63,6 +94,9 @@ function toScreeningQuestions(v: unknown): ScreeningQuestion[] {
         label: String(q.label),
         type: typeof q.type === "string" ? q.type : "text",
         required: q.required === true,
+        options: Array.isArray(q.options)
+          ? (q.options as unknown[]).map(String)
+          : undefined,
       },
     ];
   });

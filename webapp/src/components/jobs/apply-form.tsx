@@ -131,10 +131,26 @@ export function ApplyForm({
               <option value="yes">{t("yes")}</option>
               <option value="no">{t("no")}</option>
             </select>
+          ) : q.type === "choice" && q.options && q.options.length > 0 ? (
+            <select
+              name={`answer:${q.id}`}
+              required={q.required}
+              defaultValue={restored?.answers[q.id] ?? ""}
+              className={cn(fieldClass, "h-11")}
+            >
+              <option value="" disabled>
+                —
+              </option>
+              {q.options.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
           ) : (
             <input
               name={`answer:${q.id}`}
-              type={q.type === "number" ? "number" : "text"}
+              type="text"
               required={q.required}
               defaultValue={restored?.answers[q.id]}
               className={cn(fieldClass, "h-11")}

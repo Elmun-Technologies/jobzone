@@ -20,7 +20,9 @@
     "vacancies": "Vacancies",
     "company": "Company",
     "candidates": "Candidates",
-    "postVacancy": "Post a vacancy"
+    "postVacancy": "Post a vacancy",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "explore": {
     "title": "Jobs map",
@@ -204,6 +206,19 @@
     "editCompany": "Edit company",
     "saveChanges": "Save changes",
     "noJobs": "You haven't posted any jobs yet",
+    "recentJobs": "Recent jobs",
+    "viewAll": "View all",
+    "publishDraft": "Publish",
+    "closeJob": "Close",
+    "reopenJob": "Reopen",
+    "viewApplicants": "Candidates",
+    "candidates": {
+      "title": "Candidates",
+      "empty": "No candidates yet",
+      "emptyHint": "Candidates will show up here once people apply to your vacancies.",
+      "appliedTo": "Applied to {job}",
+      "myJobs": "My jobs"
+    },
     "onboardingTitle": "Create your company",
     "onboardingSubtitle": "Set up your company profile before posting jobs.",
     "companyName": "Company name",
@@ -456,7 +471,35 @@
       "onsite": "On-site",
       "remote": "Remote",
       "hybrid": "Hybrid"
-    }
+    },
+    "schedule": "Schedule",
+    "scheduleCustom": "Negotiable",
+    "nightShift": "Night shift",
+    "womenFriendly": "Women-friendly",
+    "disabilityFriendly": "Disability-friendly",
+    "conditions": "Conditions",
+    "formalization": "Employment type",
+    "formValues": {
+      "employment_contract": "Employment contract",
+      "gph": "Civil-law contract",
+      "self_employed": "Self-employed",
+      "none": "No formalization"
+    },
+    "education": "Education",
+    "eduValues": {
+      "secondary": "Secondary",
+      "specialized_secondary": "Vocational secondary",
+      "higher": "Higher"
+    },
+    "workHours": "Working hours",
+    "payType": "Pay type",
+    "gross": "Gross (before tax)",
+    "net": "Net (take-home)",
+    "requiredLanguages": "Required languages",
+    "driverLicense": "Driver's license",
+    "contactPhone": "Phone",
+    "langNames": { "uz": "Uzbek", "ru": "Russian", "en": "English" },
+    "langLevelNative": "native"
   },
   "company": {
     "about": "About",

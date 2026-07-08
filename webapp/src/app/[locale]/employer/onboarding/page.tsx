@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/container";
 import { createCompany } from "@/lib/actions/employer";
 import { getMyCompany } from "@/lib/data/employer";
 import { getCurrentUser } from "@/lib/auth/user";
+import { safeNext } from "@/lib/auth/safe-next";
 
 export async function generateMetadata({
   params,
@@ -38,7 +39,7 @@ export default async function EmployerOnboardingPage({
   }
 
   const company = await getMyCompany();
-  if (company) redirect(next || `/${locale}/employer`);
+  if (company) redirect(safeNext(next, `/${locale}/employer`));
 
   const t = await getTranslations("employer");
 

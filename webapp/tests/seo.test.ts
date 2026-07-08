@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import type { Job } from "@/lib/data/types";
 import { jobPostingJsonLd } from "@/lib/seo";
 
-const job: Job = {
+import { makeJob } from "./fixtures";
+
+const job = makeJob({
   id: "mock-1",
   title: "Senior Flutter Engineer",
   description: "Build cross-platform apps.",
   responsibilities: "Ship features.",
   requirements: "5y experience.",
-  benefits: null,
   companyId: "c-acme",
   companyName: "Acme",
   companyLogoUrl: "https://example.com/logo.png",
@@ -20,20 +20,16 @@ const job: Job = {
   workingModel: "remote",
   schedulePattern: "5_2",
   city: "Tashkent",
-  country: "UZ",
-  location: null,
   lat: 41.3111,
   lng: 69.2797,
   salaryMin: 2500,
   salaryMax: 4000,
   currency: "USD",
-  salaryPeriod: "month",
   skills: ["Dart", "Flutter"],
   postedAt: "2026-06-20T09:00:00Z",
   expiresAt: "2026-08-20T09:00:00Z",
   boostActive: true,
-  screeningQuestions: [],
-};
+});
 
 describe("jobPostingJsonLd", () => {
   const ld = jobPostingJsonLd(job);

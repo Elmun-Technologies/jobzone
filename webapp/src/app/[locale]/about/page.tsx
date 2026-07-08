@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 /** Guest-first post-vacancy route (carved out of the employer gate). */
 const POST_HREF = "/employer/jobs/new";
 /** Placeholder author contact — swap for a real Telegram/email before launch. */
-const WRITE_HREF = "mailto:info@yollla.uz";
+const WRITE_HREF = "mailto:info@yolla.uz";
 const COORDS = "41.2995°N 69.2401°E · TOSHKENT";
 
 export async function generateMetadata({
@@ -635,7 +635,7 @@ export default async function AboutPage({
             </a>
           </div>
           <p className="text-primary-foreground/70 mt-10 font-mono text-xs tracking-wide">
-            yollla.uz · {COORDS}
+            yolla.uz · {COORDS}
           </p>
           <p className="text-primary-foreground/70 mt-1 text-xs">
             © 2026 · {t("contact.author")}

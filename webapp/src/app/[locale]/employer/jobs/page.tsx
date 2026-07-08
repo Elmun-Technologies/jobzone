@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { JobStatusPill } from "@/components/employer/job-status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
+import { updateJobStatus } from "@/lib/actions/employer";
 import { getMyCompany, getMyJobs } from "@/lib/data/employer";
 import { requireEmployer } from "@/lib/auth/require-employer";
 import { formatDate } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+
+const actionBtn =
+  "text-sm font-medium rounded-lg border border-border px-3 py-1.5 transition-colors hover:bg-muted";
 
 export async function generateMetadata({
   params,
@@ -20,13 +25,6 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "employer" });
   return { title: t("myJobs"), robots: { index: false } };
 }
-
-const STATUS_CLASS: Record<string, string> = {
-  open: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-  draft: "bg-muted text-muted-foreground",
-  closed: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-  blocked: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-};
 
 // Auth-gated, per-employer page (reads the session via requireEmployer). Render
 // per request — getCurrentUser()'s try/catch swallows the cookies() dynamic
@@ -67,34 +65,110 @@ export default async function MyJobsPage({
           {jobs.map((job) => {
             // An admin takedown (blocked_at, 0038) trumps the row's own status.
             const status = job.blockedAt ? "blocked" : job.status;
+            // Owners can't act on an admin-blocked job.
+            const canAct = !job.blockedAt;
             return (
-              <li key={job.id}>
-                <Link
-                  href={`/employer/jobs/${job.id}/applicants`}
-                  className="border-border bg-card hover:border-primary/40 flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors"
-                >
-                  <div className="min-w-0">
-                    <p className="text-foreground truncate font-semibold">
+              <li
+                key={job.id}
+                className="border-border bg-card rounded-xl border p-4"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <Link
+                    href={`/employer/jobs/${job.id}/applicants`}
+                    className="min-w-0 flex-1"
+                  >
+                    <p className="text-foreground hover:text-primary truncate font-semibold transition-colors">
                       {job.title}
                     </p>
                     <p className="text-muted-foreground text-sm">
                       {t("applicantsCount", { count: job.applicantsCount })}
                       {job.postedAt ? ` · ${formatDate(job.postedAt)}` : ""}
                     </p>
+                  </Link>
+                  <JobStatusPill
+                    status={status}
+                    label={
+                      t.has(`status.${status}`) ? t(`status.${status}`) : status
+                    }
+                  />
+                </div>
+                {canAct &&
+                (job.status === "draft" ||
+                  job.status === "open" ||
+                  job.status === "closed") ? (
+                  <div className="border-border mt-3 flex flex-wrap gap-2 border-t pt-3">
+                    {job.status === "draft" ? (
+                      <StatusForm
+                        locale={locale}
+                        jobId={job.id}
+                        action="publish"
+                        label={t("publishDraft")}
+                        primary
+                      />
+                    ) : null}
+                    {job.status === "open" ? (
+                      <StatusForm
+                        locale={locale}
+                        jobId={job.id}
+                        action="close"
+                        label={t("closeJob")}
+                      />
+                    ) : null}
+                    {job.status === "closed" ? (
+                      <StatusForm
+                        locale={locale}
+                        jobId={job.id}
+                        action="reopen"
+                        label={t("reopenJob")}
+                      />
+                    ) : null}
+                    <Link
+                      href={`/employer/jobs/${job.id}/applicants`}
+                      className={cn(actionBtn, "text-foreground")}
+                    >
+                      {t("viewApplicants")}
+                    </Link>
                   </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      STATUS_CLASS[status] ?? STATUS_CLASS.draft
-                    }`}
-                  >
-                    {t.has(`status.${status}`) ? t(`status.${status}`) : status}
-                  </span>
-                </Link>
+                ) : null}
               </li>
             );
           })}
         </ul>
       )}
     </Container>
+  );
+}
+
+/** A one-button form that posts a status transition to updateJobStatus. */
+function StatusForm({
+  locale,
+  jobId,
+  action,
+  label,
+  primary,
+}: {
+  locale: string;
+  jobId: string;
+  action: "publish" | "close" | "reopen";
+  label: string;
+  primary?: boolean;
+}) {
+  return (
+    <form action={updateJobStatus}>
+      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="jobId" value={jobId} />
+      <input type="hidden" name="action" value={action} />
+      <button
+        type="submit"
+        className={cn(
+          actionBtn,
+          primary
+            ? "border-primary bg-primary text-primary-foreground hover:opacity-90"
+            : "text-foreground",
+        )}
+      >
+        {label}
+      </button>
+    </form>
   );
 }

@@ -13,7 +13,18 @@ const TASHKENT: [number, number] = [41.3111, 69.2797];
 
 type Located = Job & { lat: number; lng: number };
 
-/** Balloon (popup) HTML for a job pin — mirrors the Leaflet PinCard. */
+/** Escape a value before interpolating it into the balloon's HTML string. */
+function esc(v: string): string {
+  return v
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Balloon (popup) HTML for a job pin — mirrors the Leaflet PinCard. Yandex
+ * renders this string as HTML, so every interpolated value (raw employer text:
+ * job title, company name) must be escaped or it's stored XSS. */
 function balloonHtml(
   job: Located,
   locale: string,
@@ -27,11 +38,11 @@ function balloonHtml(
   const stars =
     rating && rating.count > 0 ? ` · ⭐ ${rating.avg.toFixed(1)}` : "";
   return `<div style="min-width:190px;font-family:inherit">
-    <a href="/${locale}/jobs/${job.id}" style="display:block;font-weight:700;color:#0A0A0A">${job.title}</a>
-    <div style="color:#666;font-size:13px">${job.companyName}${stars}</div>
-    ${salary ? `<div style="font-weight:600;font-size:13px;margin-top:2px">${salary}</div>` : ""}
-    ${meta ? `<div style="color:#666;font-size:12px">${meta}</div>` : ""}
-    <a href="/${locale}/jobs/${job.id}/apply" style="display:inline-block;margin-top:8px;background:#C7FB00;color:#0A0A0A;border-radius:9999px;padding:6px 12px;font-size:13px;font-weight:600;text-decoration:none">${applyLabel}</a>
+    <a href="/${locale}/jobs/${esc(job.id)}" style="display:block;font-weight:700;color:#0A0A0A">${esc(job.title)}</a>
+    <div style="color:#666;font-size:13px">${esc(job.companyName)}${esc(stars)}</div>
+    ${salary ? `<div style="font-weight:600;font-size:13px;margin-top:2px">${esc(salary)}</div>` : ""}
+    ${meta ? `<div style="color:#666;font-size:12px">${esc(meta)}</div>` : ""}
+    <a href="/${locale}/jobs/${esc(job.id)}/apply" style="display:inline-block;margin-top:8px;background:#C7FB00;color:#0A0A0A;border-radius:9999px;padding:6px 12px;font-size:13px;font-weight:600;text-decoration:none">${esc(applyLabel)}</a>
   </div>`;
 }
 

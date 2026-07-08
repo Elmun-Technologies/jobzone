@@ -1,4 +1,4 @@
-import { BadgeCheck, MapPin } from "lucide-react";
+import { BadgeCheck, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -11,7 +11,12 @@ import { hasApplied } from "@/lib/data/applications";
 import { isBookmarked } from "@/lib/data/bookmarks";
 import { getJobById } from "@/lib/data/jobs";
 import { getCurrentUser } from "@/lib/auth/user";
-import { formatDate, locationText, salaryText } from "@/lib/format";
+import {
+  formatDate,
+  locationText,
+  salaryText,
+  schedulePatternLabel,
+} from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { jobPostingJsonLd, siteUrl } from "@/lib/seo";
@@ -64,6 +69,64 @@ export default async function JobDetailsPage({
   const t = await getTranslations("jobs");
   const salary = salaryText(job);
   const loc = locationText(job);
+
+  // Employment "at a glance" chips (neutral) — most are already on the Job.
+  // t.has guards against any legacy enum value the CHECK constraints wouldn't
+  // normally allow, so a stray value degrades to "hidden" not a thrown key.
+  const label = (ns: string, v: string | null) =>
+    v && t.has(`${ns}.${v}`) ? t(`${ns}.${v}`) : null;
+  const metaChips = [
+    job.categoryName,
+    label("type", job.jobType),
+    label("model", job.workingModel),
+    label("exp", job.experienceLevel),
+    job.schedulePattern &&
+      (schedulePatternLabel(job.schedulePattern) ?? t("scheduleCustom")),
+  ].filter(Boolean) as string[];
+  // Positive accessibility/shift flags — highlighted (volt-tinted).
+  const flagChips = [
+    job.nightShift && t("nightShift"),
+    job.womenFriendly && t("womenFriendly"),
+    job.disabilityFriendly && t("disabilityFriendly"),
+  ].filter(Boolean) as string[];
+  // "Conditions" fact rows (label → value).
+  const facts: { label: string; value: string }[] = [];
+  if (job.formalization)
+    facts.push({
+      label: t("formalization"),
+      value: t(`formValues.${job.formalization}`),
+    });
+  if (job.educationRequired)
+    facts.push({
+      label: t("education"),
+      value: t(`eduValues.${job.educationRequired}`),
+    });
+  if (job.workHours)
+    facts.push({ label: t("workHours"), value: job.workHours });
+  if (job.salaryMin != null || job.salaryMax != null)
+    facts.push({
+      label: t("payType"),
+      value: job.salaryGross ? t("gross") : t("net"),
+    });
+  if (job.driverLicenses.length)
+    facts.push({
+      label: t("driverLicense"),
+      value: job.driverLicenses.join(", "),
+    });
+  if (job.languages.length)
+    facts.push({
+      label: t("requiredLanguages"),
+      value: job.languages
+        .map((l) => {
+          const name = t.has(`langNames.${l.code}`)
+            ? t(`langNames.${l.code}`)
+            : l.code.toUpperCase();
+          const lvl =
+            l.level === "native" ? t("langLevelNative") : l.level.toUpperCase();
+          return lvl ? `${name} · ${lvl}` : name;
+        })
+        .join(", "),
+    });
 
   const user = await getCurrentUser();
   const [applied, bookmarked] = await Promise.all([
@@ -118,6 +181,27 @@ export default async function JobDetailsPage({
             </div>
           </div>
 
+          {metaChips.length || flagChips.length ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {metaChips.map((c) => (
+                <span
+                  key={c}
+                  className="border-border bg-muted text-foreground rounded-full border px-3 py-1 text-sm font-medium"
+                >
+                  {c}
+                </span>
+              ))}
+              {flagChips.map((c) => (
+                <span
+                  key={c}
+                  className="border-primary/40 bg-accent text-accent-foreground rounded-full border px-3 py-1 text-sm font-medium"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
           <Section title={t("aboutRole")} body={job.description} />
           <Section title={t("responsibilities")} body={job.responsibilities} />
           <Section title={t("requirements")} body={job.requirements} />
@@ -138,6 +222,27 @@ export default async function JobDetailsPage({
                   </span>
                 ))}
               </div>
+            </section>
+          ) : null}
+
+          {facts.length > 0 ? (
+            <section className="mt-6">
+              <h2 className="text-foreground mb-2 text-lg font-semibold">
+                {t("conditions")}
+              </h2>
+              <dl className="border-border bg-card divide-border divide-y rounded-xl border">
+                {facts.map((f) => (
+                  <div
+                    key={f.label}
+                    className="flex items-start justify-between gap-4 px-4 py-3"
+                  >
+                    <dt className="text-muted-foreground text-sm">{f.label}</dt>
+                    <dd className="text-foreground text-right text-sm font-medium">
+                      {f.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </section>
           ) : null}
         </div>
@@ -169,6 +274,15 @@ export default async function JobDetailsPage({
               initial={bookmarked}
               className="mt-2 w-full justify-center"
             />
+            {job.contactPhone ? (
+              <a
+                href={`tel:${job.contactPhone.replace(/\s+/g, "")}`}
+                className="border-border text-foreground hover:border-primary/40 mt-3 flex items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-semibold transition-colors"
+              >
+                <Phone className="size-4" />
+                {job.contactPhone}
+              </a>
+            ) : null}
             {job.postedAt ? (
               <p className="text-muted-foreground mt-3 text-center text-xs">
                 {t("postedOn")} {formatDate(job.postedAt)}

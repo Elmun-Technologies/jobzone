@@ -104,10 +104,15 @@ export default async function JobApplicantsPage({
               ) : null}
 
               {Object.keys(a.answers).length > 0 ? (
-                <ul className="border-border mt-3 space-y-1 border-t pt-3 text-sm">
+                <ul className="border-border mt-3 space-y-2 border-t pt-3 text-sm">
                   {Object.entries(a.answers).map(([key, value]) => (
-                    <li key={key} className="text-muted-foreground">
-                      {String(value)}
+                    <li key={key}>
+                      {job.questionLabels[key] ? (
+                        <p className="text-muted-foreground text-xs">
+                          {job.questionLabels[key]}
+                        </p>
+                      ) : null}
+                      <p className="text-foreground">{String(value)}</p>
                     </li>
                   ))}
                 </ul>

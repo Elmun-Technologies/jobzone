@@ -1,39 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import type { Job } from "@/lib/data/types";
 import { formatDate, salaryText } from "@/lib/format";
 
-const base: Job = {
-  id: "1",
-  title: "Role",
-  description: null,
-  responsibilities: null,
-  requirements: null,
-  benefits: null,
-  companyId: "c",
-  companyName: "Co",
-  companyLogoUrl: null,
-  companyVerified: false,
-  categoryName: null,
-  jobType: null,
-  experienceLevel: null,
-  workingModel: null,
-  schedulePattern: null,
-  city: null,
-  country: null,
-  location: null,
-  lat: null,
-  lng: null,
-  salaryMin: null,
-  salaryMax: null,
-  currency: "UZS",
-  salaryPeriod: "month",
-  skills: [],
-  postedAt: null,
-  expiresAt: null,
-  boostActive: false,
-  screeningQuestions: [],
-};
+import { makeJob } from "./fixtures";
+
+const base = makeJob();
 
 describe("salaryText", () => {
   it("returns null when no salary is set", () => {

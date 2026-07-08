@@ -16,7 +16,9 @@ import "../globals.css";
 // intentionally not used on localized text.
 const archivo = Archivo({
   variable: "--font-archivo",
-  subsets: ["latin"],
+  // uz Latin + latin-ext (ʻ/accents). Archivo has no Cyrillic subset, so ru
+  // text renders in the Cyrillic-capable system fallback below.
+  subsets: ["latin", "latin-ext"],
   fallback: ["system-ui", "sans-serif"],
 });
 const spaceMono = Space_Mono({

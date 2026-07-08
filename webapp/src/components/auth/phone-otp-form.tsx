@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { safeNext } from "@/lib/auth/safe-next";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -83,7 +84,7 @@ export function PhoneOtpForm({ next }: { next?: string }) {
       );
       return;
     }
-    router.push(next || "/account");
+    router.push(safeNext(next, "/account"));
     router.refresh();
   }
 

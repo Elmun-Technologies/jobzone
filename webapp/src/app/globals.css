@@ -103,3 +103,21 @@ body {
     animation: none;
   }
 }
+
+/* Leaflet popups (the OSM map pin cards) default to a white wrapper, which
+   makes our themed content invisible in dark mode. Bind them to the tokens. */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+.leaflet-popup-content-wrapper {
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--muted-foreground);
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--foreground);
+}

@@ -14,6 +14,17 @@ function salaryTop(j: Job): number | null {
   return j.salaryMax ?? j.salaryMin;
 }
 
+/**
+ * Neutralize PostgREST filter-grammar metacharacters before interpolating a
+ * user search term into an `.or(...)` string. Commas separate conditions and
+ * parens group them, so a raw term could otherwise inject extra filter
+ * conditions; `*`/`%` are ilike wildcards and `\` an escape. RLS + the ANDed
+ * status='open' already bound the blast radius — this closes the vector.
+ */
+function ilikeTerm(q: string): string {
+  return q.replace(/[,()*%\\:]/g, " ").trim();
+}
+
 function filterMock(query: JobQuery): Job[] {
   const q = query.q?.toLowerCase().trim();
   const nowMs = Date.now();
@@ -82,7 +93,9 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
     }
 
     if (query.q) {
-      req = req.or(`title.ilike.%${query.q}%,company_name.ilike.%${query.q}%`);
+      const term = ilikeTerm(query.q);
+      if (term)
+        req = req.or(`title.ilike.%${term}%,company_name.ilike.%${term}%`);
     }
     if (query.city) req = req.eq("city", query.city);
     if (query.category) req = req.eq("category_name", query.category);
@@ -123,7 +136,9 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
       .eq("status", "open");
 
     if (query.q) {
-      req = req.or(`title.ilike.%${query.q}%,company_name.ilike.%${query.q}%`);
+      const term = ilikeTerm(query.q);
+      if (term)
+        req = req.or(`title.ilike.%${term}%,company_name.ilike.%${term}%`);
     }
     if (query.city) req = req.eq("city", query.city);
     if (query.category) req = req.eq("category_name", query.category);
