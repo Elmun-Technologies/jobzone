@@ -13,6 +13,16 @@ export interface EducationEntry {
   isCurrent: boolean;
 }
 
+/** One job in the seeker's work history (the `experiences` table). */
+export interface ExperienceEntry {
+  title: string; // position held
+  companyName: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
+  description: string;
+}
+
 /** The fields the /resumes/new wizard collects. */
 export interface ResumeDraft {
   position: string; // headline
@@ -34,6 +44,7 @@ export interface ResumeDraft {
   summaryAiGenerated: boolean;
   /** language code -> level ("none"|"a1_a2"|"b1_b2"|"c1_c2"|"native"). */
   languages: Record<string, string>;
+  experiences: ExperienceEntry[];
   educations: EducationEntry[];
 }
 
@@ -52,6 +63,7 @@ export const EMPTY_RESUME: ResumeDraft = {
   summary: "",
   summaryAiGenerated: false,
   languages: {},
+  experiences: [],
   educations: [],
 };
 
@@ -93,6 +105,25 @@ export async function getMyResume(): Promise<ResumeDraft> {
         startYear: yearOf(row.start_date),
         endYear: yearOf(row.end_date),
         isCurrent: row.is_current === true,
+      };
+    });
+
+    const { data: expRows } = await supabase
+      .from("experiences")
+      .select(
+        "title, company_name, start_date, end_date, is_current, description",
+      )
+      .eq("profile_id", user.id)
+      .order("end_date", { ascending: false, nullsFirst: false });
+    const experiences: ExperienceEntry[] = (expRows ?? []).map((e) => {
+      const row = e as Record<string, unknown>;
+      return {
+        title: str(row.title),
+        companyName: str(row.company_name),
+        startYear: yearOf(row.start_date),
+        endYear: yearOf(row.end_date),
+        isCurrent: row.is_current === true,
+        description: str(row.description),
       };
     });
 
@@ -141,6 +172,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
       summary,
       summaryAiGenerated,
       languages: langs,
+      experiences,
       educations,
     };
   } catch {
