@@ -610,11 +610,6 @@
   "pickDateTime": "Pick date & time",
   "jobScheduledToast": "Job scheduled",
   "checkoutTitle": "Checkout",
-  "paymentMethod": "Payment method",
-  "payMethodCard": "Bank card",
-  "payMethodCardHint": "Funds arrive within ~15 minutes",
-  "payMethodInvoice": "Issue invoice",
-  "payMethodInvoiceHint": "Funds arrive within 2 business days",
   "payCta": "Pay",
   "offerNote": "By paying you accept the offer agreement.",
   "orderPendingToast": "Order created — awaiting payment",
@@ -625,6 +620,31 @@
     "placeholders": {
       "days": {
         "type": "int"
+      }
+    }
+  },
+  "walletTitle": "Wallet",
+  "walletBalanceLabel": "Balance",
+  "walletBalanceHint": "Funds available in your account",
+  "walletTopUp": "Top up",
+  "walletTopUpSub": "Choose or enter an amount",
+  "walletAmountHint": "Amount",
+  "walletErrAmount": "Enter an amount of at least 1,000",
+  "walletTopUpPending": "Top-up request received — the balance updates once payment is confirmed",
+  "walletHistory": "Transactions",
+  "walletHistoryEmpty": "No transactions yet",
+  "walletKindTopup": "Top-up",
+  "walletKindSpend": "Promotion",
+  "walletKindRefund": "Refund",
+  "walletKindBonus": "Bonus",
+  "walletStatusPending": "Pending",
+  "topUpWalletCta": "Top up Hamyon",
+  "insufficientFundsTitle": "Not enough balance in Hamyon",
+  "insufficientFundsHint": "This promotion needs {needed}. Top up your Hamyon.",
+  "@insufficientFundsHint": {
+    "placeholders": {
+      "needed": {
+        "type": "String"
       }
     }
   },

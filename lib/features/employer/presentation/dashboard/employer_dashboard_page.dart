@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../monetization/domain/promotion.dart' show formatUzs;
 import '../../data/applicants_repository.dart';
 import '../../data/company_admin_repository.dart';
 import '../../data/employer_stats_provider.dart';
+import '../../data/wallet_repository.dart';
 import '../../domain/employer_stats.dart';
 import '../applicants/widgets/applicant_card.dart';
 
@@ -21,6 +23,7 @@ class EmployerDashboardPage extends ConsumerWidget {
     final company = ref.watch(myCompanyProvider).value;
     final stats = ref.watch(employerStatsProvider);
     final recent = ref.watch(allApplicantsProvider);
+    final wallet = ref.watch(walletProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -28,25 +31,34 @@ class EmployerDashboardPage extends ConsumerWidget {
           onRefresh: () async {
             ref.invalidate(employerStatsProvider);
             ref.invalidate(allApplicantsProvider);
+            ref.invalidate(walletProvider);
           },
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              Column(
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l.dashboardGreeting,
-                    style: context.text.bodyMedium?.copyWith(
-                      color: context.colors.textSecondary,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.dashboardGreeting,
+                          style: context.text.bodyMedium?.copyWith(
+                            color: context.colors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          company?.name ?? l.navDashboard,
+                          style: context.text.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    company?.name ?? l.navDashboard,
-                    style: context.text.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                  _WalletChip(balanceUzs: wallet.value?.balanceUzs),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -123,6 +135,50 @@ class EmployerDashboardPage extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A tappable balance pill (mirrors the web header's Hamyon link) — keeps the
+/// revenue path visible from the screen employers land on most.
+class _WalletChip extends StatelessWidget {
+  const _WalletChip({required this.balanceUzs});
+  final num? balanceUzs;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: () => context.push(Routes.employerWallet),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.chipBackground,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: colors.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 16,
+              color: colors.primary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              balanceUzs == null ? '···' : formatUzs(balanceUzs!),
+              style: context.text.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );

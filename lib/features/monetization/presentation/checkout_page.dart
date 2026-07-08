@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../employer/data/employer_jobs_repository.dart';
+import '../../employer/data/wallet_repository.dart';
 import '../data/monetization_repository.dart';
 import '../domain/promotion.dart';
 
-/// hh-style checkout for a promotion tariff: an order summary + payment-method
-/// choice, then creates the order. Offline the boost is applied immediately;
-/// live the order is created `pending` until the Click/Payme webhook
-/// (`payment-webhook` edge fn) flips it to paid. The gateway redirect plugs in
-/// here once merchant credentials exist.
+/// Self-serve checkout for a promotion tariff, paid from the employer's
+/// Hamyon balance: an order summary + the current balance, then either
+/// "Confirm & pay" (enough funds — spends immediately, both offline and live)
+/// or "Top up Hamyon" (not enough — sends them to add funds first, same as
+/// the web promote page).
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({
     super.key,
@@ -29,7 +31,6 @@ class CheckoutPage extends ConsumerStatefulWidget {
 }
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
-  String _method = 'card';
   bool _paying = false;
 
   Future<void> _pay() async {
@@ -40,6 +41,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           .purchase(jobId: widget.jobId, productCode: widget.productCode);
       ref.invalidate(myJobsProvider);
       ref.invalidate(myOrdersProvider);
+      ref.invalidate(walletProvider);
       if (!mounted) return;
       showInfoSnack(
         context,
@@ -59,11 +61,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
-    final async = ref.watch(promotionProductsProvider);
+    final productsAsync = ref.watch(promotionProductsProvider);
+    final walletAsync = ref.watch(walletProvider);
 
     return Scaffold(
       body: SafeArea(
-        child: async.when(
+        child: productsAsync.when(
           loading: () => const JzLoader(),
           error: (_, _) => JzErrorState(
             title: l.errorTitle,
@@ -72,10 +75,20 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             onRetry: () => ref.invalidate(promotionProductsProvider),
           ),
           data: (products) {
-            final product = products.firstWhere(
-              (p) => p.code == widget.productCode,
-              orElse: () => products.first,
-            );
+            final product = products
+                .where((p) => p.code == widget.productCode)
+                .firstOrNull;
+            if (product == null) {
+              return JzErrorState(
+                title: l.errorTitle,
+                message: l.errUnknown,
+                retryLabel: l.retry,
+                onRetry: () => context.pop(),
+              );
+            }
+            final balance = walletAsync.value?.balanceUzs;
+            final affordable = balance != null && balance >= product.priceUzs;
+
             return Column(
               children: [
                 Padding(
@@ -93,23 +106,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     children: [
                       _SummaryCard(product: product),
                       const SizedBox(height: AppSpacing.lg),
-                      Text(l.paymentMethod, style: context.text.labelLarge),
-                      const SizedBox(height: AppSpacing.sm),
-                      _MethodTile(
-                        icon: Icons.credit_card_rounded,
-                        title: l.payMethodCard,
-                        subtitle: l.payMethodCardHint,
-                        selected: _method == 'card',
-                        onTap: () => setState(() => _method = 'card'),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      _MethodTile(
-                        icon: Icons.receipt_long_rounded,
-                        title: l.payMethodInvoice,
-                        subtitle: l.payMethodInvoiceHint,
-                        selected: _method == 'invoice',
-                        onTap: () => setState(() => _method = 'invoice'),
-                      ),
+                      _BalanceRow(balanceUzs: balance),
+                      if (balance != null && !affordable) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        _InsufficientFundsNotice(needed: product.priceUzs),
+                      ],
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         l.offerNote,
@@ -147,11 +148,17 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: JzPrimaryButton(
-                            label: l.payCta,
-                            loading: _paying,
-                            onPressed: _pay,
-                          ),
+                          child: affordable
+                              ? JzPrimaryButton(
+                                  label: l.payCta,
+                                  loading: _paying,
+                                  onPressed: _pay,
+                                )
+                              : JzPrimaryButton(
+                                  label: l.topUpWalletCta,
+                                  onPressed: () =>
+                                      context.push(Routes.employerWallet),
+                                ),
                         ),
                       ],
                     ),
@@ -161,6 +168,93 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _BalanceRow extends StatelessWidget {
+  const _BalanceRow({required this.balanceUzs});
+  final num? balanceUzs;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.border),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            l.walletBalanceLabel,
+            style: context.text.bodyMedium?.copyWith(
+              color: colors.textSecondary,
+            ),
+          ),
+          balanceUzs == null
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(
+                  formatUzs(balanceUzs!),
+                  style: context.text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsufficientFundsNotice extends StatelessWidget {
+  const _InsufficientFundsNotice({required this.needed});
+  final num needed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.gold.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.gold.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, size: 18, color: colors.gold),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.insufficientFundsTitle,
+                  style: context.text.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  l.insufficientFundsHint(formatUzs(needed)),
+                  style: context.text.bodySmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -243,67 +337,6 @@ class _Line extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _MethodTile extends StatelessWidget {
-  const _MethodTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: selected ? colors.primary : colors.border,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: colors.primary),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: context.text.bodySmall?.copyWith(
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            JzRadio(selected: selected),
-          ],
-        ),
       ),
     );
   }
