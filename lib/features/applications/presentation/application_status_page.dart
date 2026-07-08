@@ -50,7 +50,7 @@ class ApplicationStatusPage extends ConsumerWidget {
               ),
             ),
           ),
-          error: (_, __) => _view(context, ref, null),
+          error: (_, _) => _view(context, ref, null),
         );
   }
 
