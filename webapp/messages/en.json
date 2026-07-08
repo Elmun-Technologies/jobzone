@@ -458,7 +458,35 @@
       "onsite": "On-site",
       "remote": "Remote",
       "hybrid": "Hybrid"
-    }
+    },
+    "schedule": "Schedule",
+    "scheduleCustom": "Negotiable",
+    "nightShift": "Night shift",
+    "womenFriendly": "Women-friendly",
+    "disabilityFriendly": "Disability-friendly",
+    "conditions": "Conditions",
+    "formalization": "Employment type",
+    "formValues": {
+      "employment_contract": "Employment contract",
+      "gph": "Civil-law contract",
+      "self_employed": "Self-employed",
+      "none": "No formalization"
+    },
+    "education": "Education",
+    "eduValues": {
+      "secondary": "Secondary",
+      "specialized_secondary": "Vocational secondary",
+      "higher": "Higher"
+    },
+    "workHours": "Working hours",
+    "payType": "Pay type",
+    "gross": "Gross (before tax)",
+    "net": "Net (take-home)",
+    "requiredLanguages": "Required languages",
+    "driverLicense": "Driver's license",
+    "contactPhone": "Phone",
+    "langNames": { "uz": "Uzbek", "ru": "Russian", "en": "English" },
+    "langLevelNative": "native"
   },
   "company": {
     "about": "About",

@@ -3,40 +3,9 @@ import { describe, expect, it } from "vitest";
 import type { Job } from "@/lib/data/types";
 import { cityLatLng, jobLatLng } from "@/lib/uz-geo";
 
-function job(overrides: Partial<Job>): Job {
-  return {
-    id: "j1",
-    title: "Sotuvchi",
-    description: null,
-    responsibilities: null,
-    requirements: null,
-    benefits: null,
-    companyId: "c1",
-    companyName: "Co",
-    companyLogoUrl: null,
-    companyVerified: false,
-    categoryName: null,
-    jobType: null,
-    experienceLevel: null,
-    workingModel: null,
-    schedulePattern: null,
-    city: null,
-    country: "UZ",
-    location: null,
-    lat: null,
-    lng: null,
-    salaryMin: null,
-    salaryMax: null,
-    currency: "UZS",
-    salaryPeriod: "month",
-    skills: [],
-    postedAt: null,
-    expiresAt: null,
-    boostActive: false,
-    screeningQuestions: [],
-    ...overrides,
-  };
-}
+import { makeJob } from "./fixtures";
+
+const job = (overrides: Partial<Job>): Job => makeJob(overrides);
 
 describe("cityLatLng", () => {
   it("resolves the canonical uz spelling", () => {

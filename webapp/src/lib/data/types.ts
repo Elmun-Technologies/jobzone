@@ -9,6 +9,12 @@ export interface ScreeningQuestion {
   required: boolean;
 }
 
+/** A language requirement on a job: code ("uz"|"ru"|"en"|…) + CEFR level. */
+export interface JobLanguage {
+  code: string;
+  level: string; // "a1"…"c2" | "native"
+}
+
 export interface Job {
   id: string;
   title: string;
@@ -35,7 +41,23 @@ export interface Job {
   salaryMax: number | null;
   currency: string;
   salaryPeriod: string;
+  /** Whether the stated pay is gross (before tax) rather than net (take-home). */
+  salaryGross: boolean;
   skills: string[];
+  // Blue-collar posting depth (already flows through job_feed's j.*).
+  nightShift: boolean;
+  womenFriendly: boolean;
+  disabilityFriendly: boolean;
+  /** "employment_contract" | "gph" | "self_employed" | "none" | null. */
+  formalization: string | null;
+  /** "secondary" | "specialized_secondary" | "higher" | null ("none" → null). */
+  educationRequired: string | null;
+  /** Free-text work hours, e.g. "9:00–18:00". */
+  workHours: string | null;
+  driverLicenses: string[];
+  languages: JobLanguage[];
+  contactPhone: string | null;
+  showPhoneOnListing: boolean;
   postedAt: string | null;
   expiresAt: string | null;
   boostActive: boolean;

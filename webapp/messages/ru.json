@@ -458,7 +458,35 @@
       "onsite": "В офисе",
       "remote": "Удалённо",
       "hybrid": "Гибрид"
-    }
+    },
+    "schedule": "График",
+    "scheduleCustom": "По договорённости",
+    "nightShift": "Ночная смена",
+    "womenFriendly": "Удобно для женщин",
+    "disabilityFriendly": "Доступно для людей с инвалидностью",
+    "conditions": "Условия",
+    "formalization": "Оформление",
+    "formValues": {
+      "employment_contract": "Трудовой договор",
+      "gph": "Договор ГПХ",
+      "self_employed": "Самозанятость",
+      "none": "Без оформления"
+    },
+    "education": "Образование",
+    "eduValues": {
+      "secondary": "Среднее",
+      "specialized_secondary": "Среднее специальное",
+      "higher": "Высшее"
+    },
+    "workHours": "Рабочее время",
+    "payType": "Тип оплаты",
+    "gross": "Гросс (до налогов)",
+    "net": "Нетто (на руки)",
+    "requiredLanguages": "Требуемые языки",
+    "driverLicense": "Водительские права",
+    "contactPhone": "Телефон",
+    "langNames": { "uz": "Узбекский", "ru": "Русский", "en": "Английский" },
+    "langLevelNative": "родной"
   },
   "company": {
     "about": "О компании",

@@ -458,7 +458,35 @@
       "onsite": "Ofisda",
       "remote": "Masofadan",
       "hybrid": "Gibrid"
-    }
+    },
+    "schedule": "Grafik",
+    "scheduleCustom": "Kelishiladi",
+    "nightShift": "Tungi smena",
+    "womenFriendly": "Ayollar uchun qulay",
+    "disabilityFriendly": "Nogironlar uchun qulay",
+    "conditions": "Shartlar",
+    "formalization": "Rasmiylashtirish",
+    "formValues": {
+      "employment_contract": "Mehnat shartnomasi",
+      "gph": "Fuqarolik-huquqiy shartnoma",
+      "self_employed": "O'zini o'zi band qilgan",
+      "none": "Rasmiylashtirilmaydi"
+    },
+    "education": "Ma'lumot",
+    "eduValues": {
+      "secondary": "O'rta",
+      "specialized_secondary": "O'rta maxsus",
+      "higher": "Oliy"
+    },
+    "workHours": "Ish vaqti",
+    "payType": "To'lov turi",
+    "gross": "Gross (soliqqacha)",
+    "net": "Net (qo'lga tegadigan)",
+    "requiredLanguages": "Talab qilinadigan tillar",
+    "driverLicense": "Haydovchilik guvohnomasi",
+    "contactPhone": "Telefon",
+    "langNames": { "uz": "O'zbek", "ru": "Rus", "en": "Ingliz" },
+    "langLevelNative": "ona tili"
   },
   "company": {
     "about": "Kompaniya haqida",
