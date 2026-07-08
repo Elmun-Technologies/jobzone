@@ -422,6 +422,7 @@
   },
   "apply": {
     "applyTo": "Отклик на вакансию",
+    "apply": "Откликнуться",
     "coverLetter": "Сопроводительное письмо",
     "coverLetterPlaceholder": "Почему вы подходите?",
     "optional": "необязательно",

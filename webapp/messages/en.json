@@ -422,6 +422,7 @@
   },
   "apply": {
     "applyTo": "Apply for a job",
+    "apply": "Apply",
     "coverLetter": "Cover letter",
     "coverLetterPlaceholder": "Why are you a great fit?",
     "optional": "optional",

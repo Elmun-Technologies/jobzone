@@ -9,6 +9,11 @@ import { getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+// The map reads the live open-job feed; a static prerender would freeze the pins
+// at build time — new postings must show immediately (invariant #3) — and bake a
+// logged-out header for signed-in users. Render per request.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
