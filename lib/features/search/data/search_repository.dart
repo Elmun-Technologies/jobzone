@@ -86,6 +86,17 @@ class SearchRepository {
         );
       }
     }
+    // Job-title facet (chosen in the filter sheet): a job matches if its title
+    // contains any selected title. Live search skipped this — only the mock
+    // applied it — so the facet did nothing against Supabase.
+    if (f.titles.isNotEmpty) {
+      final clauses = f.titles
+          .map((t) => t.replaceAll(RegExp(r'[,%()]'), ' ').trim())
+          .where((t) => t.isNotEmpty)
+          .map((t) => 'title.ilike.%$t%')
+          .toList();
+      if (clauses.isNotEmpty) q = q.or(clauses.join(','));
+    }
     if (f.jobTypes.isNotEmpty) q = q.inFilter('job_type', f.jobTypes.toList());
     if (f.experienceLevels.isNotEmpty) {
       q = q.inFilter('experience_level', f.experienceLevels.toList());

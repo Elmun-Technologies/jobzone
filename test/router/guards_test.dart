@@ -297,6 +297,21 @@ void main() {
       );
     });
 
+    test('password reset is reachable during recovery even with an '
+        'incomplete profile (e.g. straight after sign-out)', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          profileComplete: false,
+          roleChosen: false,
+          location: Routes.newPassword,
+        ),
+        isNull,
+      );
+    });
+
     test('offline mode never redirects regardless of role', () {
       expect(
         resolveRedirect(
