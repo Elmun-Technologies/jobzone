@@ -33,25 +33,26 @@ const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 type Located = Job & { lat: number; lng: number; distance: number | null };
 
 /** A Joyme-style salary price-tag pin (bubble + pointer), or a dot when the
- * job has no salary. Boosted jobs wear volt; the rest white — both on ink. */
+ * job has no salary. Every pin is volt on ink — high-contrast on any tile
+ * (white pins washed out on light Yandex tiles); a boosted job gets a ★. */
 function pinIcon(label: string | null, boosted: boolean): L.DivIcon {
-  const bg = boosted ? "#C7FB00" : "#FFFFFF";
   if (!label) {
     return L.divIcon({
       className: "",
-      html: `<span style="display:block;width:14px;height:14px;border-radius:9999px;
-        transform:translate(-50%,-50%);background:${bg};border:2px solid #0A0A0A;
-        box-shadow:0 2px 6px rgba(0,0,0,.3)"></span>`,
+      html: `<span style="display:block;width:15px;height:15px;border-radius:9999px;
+        transform:translate(-50%,-50%);background:#C7FB00;border:2px solid #0A0A0A;
+        box-shadow:0 2px 7px rgba(0,0,0,.4)"></span>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0],
     });
   }
+  const text = boosted ? `★ ${label}` : label;
   return L.divIcon({
     className: "",
     html: `<div style="position:relative;transform:translate(-50%,-100%)">
-      <div style="background:${bg};color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
+      <div style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
         padding:5px 11px;font:800 13px/1 var(--font-mono,ui-monospace,monospace);
-        white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.32)">${label}</div>
+        white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35)">${text}</div>
       <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
         border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
     </div>`,
