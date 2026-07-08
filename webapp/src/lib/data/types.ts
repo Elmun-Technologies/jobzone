@@ -5,8 +5,10 @@
 export interface ScreeningQuestion {
   id: string;
   label: string;
-  type: string; // "text" | "yesno" | "number"
+  type: string; // "text" | "yesno" | "choice"
   required: boolean;
+  /** Present for `choice` questions — the options the applicant picks from. */
+  options?: string[];
 }
 
 /** A language requirement on a job: code ("uz"|"ru"|"en"|…) + CEFR level. */

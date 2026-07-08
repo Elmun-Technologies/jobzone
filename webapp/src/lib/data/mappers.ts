@@ -94,6 +94,9 @@ function toScreeningQuestions(v: unknown): ScreeningQuestion[] {
         label: String(q.label),
         type: typeof q.type === "string" ? q.type : "text",
         required: q.required === true,
+        options: Array.isArray(q.options)
+          ? (q.options as unknown[]).map(String)
+          : undefined,
       },
     ];
   });
