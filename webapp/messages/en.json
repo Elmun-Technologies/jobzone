@@ -369,7 +369,26 @@
       "paymentInsufficientHint": "Publishing needs {price}. Top up your Hamyon balance.",
       "paymentTopUp": "Go to Hamyon"
     },
-    "jobPromoted": "Promotion enabled! Your vacancy will be highlighted."
+    "jobPromoted": "Promotion enabled! Your vacancy will be highlighted.",
+    "viewResume": "View résumé",
+    "applicantResume": "Applicant résumé",
+    "appliedOn": "Applied",
+    "coverLetter": "Cover letter",
+    "screeningAnswers": "Screening answers",
+    "aboutMe": "About",
+    "aiAssisted": "AI-assisted",
+    "expLevel": "Experience level",
+    "expectedSalary": "Expected salary",
+    "workExperience": "Work experience",
+    "educationTitle": "Education",
+    "certificates": "Certificates & courses",
+    "languages": "Languages",
+    "skills": "Skills",
+    "present": "Present",
+    "issued": "Issued",
+    "expires": "Expires",
+    "backToApplicants": "All applicants",
+    "noResumeYet": "This candidate hasn't filled in a detailed résumé yet."
   },
   "wallet": {
     "title": "Wallet",

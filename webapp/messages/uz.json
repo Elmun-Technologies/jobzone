@@ -369,7 +369,26 @@
       "paymentInsufficientHint": "Nashr qilish uchun {price} kerak. Hamyonni to'ldiring.",
       "paymentTopUp": "Hamyonga o'tish"
     },
-    "jobPromoted": "Reklama yoqildi! Vakansiyangiz ajratib ko'rsatiladi."
+    "jobPromoted": "Reklama yoqildi! Vakansiyangiz ajratib ko'rsatiladi.",
+    "viewResume": "Rezyumeni ko'rish",
+    "applicantResume": "Nomzod rezyumesi",
+    "appliedOn": "Ariza topshirilgan",
+    "coverLetter": "Motivatsion xat",
+    "screeningAnswers": "Savollarga javoblar",
+    "aboutMe": "O'zi haqida",
+    "aiAssisted": "AI yordamida yozilgan",
+    "expLevel": "Umumiy tajriba",
+    "expectedSalary": "Kutilayotgan maosh",
+    "workExperience": "Ish tajribasi",
+    "educationTitle": "Ta'lim",
+    "certificates": "Sertifikatlar va kurslar",
+    "languages": "Tillar",
+    "skills": "Ko'nikmalar",
+    "present": "Hozirgacha",
+    "issued": "Berilgan",
+    "expires": "Amal qiladi",
+    "backToApplicants": "Barcha nomzodlar",
+    "noResumeYet": "Bu nomzod hali batafsil rezyume to'ldirmagan."
   },
   "wallet": {
     "title": "Hamyon",

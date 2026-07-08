@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/employer-applicants";
 import { requireEmployer } from "@/lib/auth/require-employer";
 import { formatDate } from "@/lib/format";
+import { Link } from "@/i18n/navigation";
 
 export async function generateMetadata({
   params,
@@ -73,9 +74,12 @@ export default async function JobApplicantsPage({
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-foreground truncate font-semibold">
+                    <Link
+                      href={`/employer/jobs/${id}/applicants/${a.applicationId}`}
+                      className="text-foreground hover:text-primary block truncate font-semibold hover:underline"
+                    >
                       {a.name}
-                    </p>
+                    </Link>
                     {a.headline ? (
                       <p className="text-muted-foreground truncate text-sm">
                         {a.headline}
@@ -117,6 +121,15 @@ export default async function JobApplicantsPage({
                   ))}
                 </ul>
               ) : null}
+
+              <div className="mt-3">
+                <Link
+                  href={`/employer/jobs/${id}/applicants/${a.applicationId}`}
+                  className="text-primary text-sm font-medium hover:underline"
+                >
+                  {t("viewResume")} →
+                </Link>
+              </div>
             </li>
           ))}
         </ul>

@@ -28,6 +28,20 @@ export interface CompanyCandidate {
   avatarUrl: string | null;
 }
 
+export interface ApplicantDetail {
+  applicationId: string;
+  applicantId: string;
+  status: string;
+  appliedAt: string | null;
+  coverLetter: string | null;
+  answers: Record<string, string>;
+  name: string;
+  headline: string | null;
+  avatarUrl: string | null;
+  city: string | null;
+  workerVerified: boolean;
+}
+
 /**
  * Recent applicants across ALL of a company's jobs (the "Nomzodlar" hub).
  * RLS on `applications` already restricts reads to the job owner; scoping the
@@ -182,5 +196,59 @@ export async function getJobApplicants(jobId: string): Promise<Applicant[]> {
   } catch (e) {
     console.error("getJobApplicants failed", e);
     return [];
+  }
+}
+
+/**
+ * One application for a job + the applicant's column-safe public profile.
+ * Scoped to `job_id` so the applications RLS (job owner only) confirms the
+ * caller owns it; returns null if it isn't found / isn't the owner's. Backs the
+ * per-applicant résumé page.
+ */
+export async function getApplicantForJob(
+  jobId: string,
+  applicationId: string,
+): Promise<ApplicantDetail | null> {
+  if (!hasSupabase()) return null;
+  try {
+    const supabase = await createClient();
+    const { data: app } = await supabase
+      .from("applications")
+      .select(
+        "id, current_status, applied_at, cover_letter, answers, applicant_id",
+      )
+      .eq("id", applicationId)
+      .eq("job_id", jobId)
+      .maybeSingle();
+    if (!app) return null;
+    const r = app as Record<string, unknown>;
+    const applicantId = String(r.applicant_id);
+
+    const { data: prof } = await supabase
+      .from("profiles_public")
+      .select("full_name, headline, avatar_url, city, worker_verified")
+      .eq("id", applicantId)
+      .maybeSingle();
+    const p = (prof ?? {}) as Record<string, unknown>;
+
+    return {
+      applicationId: String(r.id),
+      applicantId,
+      status: String(r.current_status ?? "submitted"),
+      appliedAt: typeof r.applied_at === "string" ? r.applied_at : null,
+      coverLetter: typeof r.cover_letter === "string" ? r.cover_letter : null,
+      answers:
+        r.answers && typeof r.answers === "object"
+          ? (r.answers as Record<string, string>)
+          : {},
+      name: p.full_name ? String(p.full_name) : "—",
+      headline: p.headline ? String(p.headline) : null,
+      avatarUrl: p.avatar_url ? String(p.avatar_url) : null,
+      city: p.city ? String(p.city) : null,
+      workerVerified: p.worker_verified === true,
+    };
+  } catch (e) {
+    console.error("getApplicantForJob failed", e);
+    return null;
   }
 }

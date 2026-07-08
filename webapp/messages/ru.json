@@ -369,7 +369,26 @@
       "paymentInsufficientHint": "Для публикации нужно {price}. Пополните Hamyon.",
       "paymentTopUp": "Перейти в Hamyon"
     },
-    "jobPromoted": "Продвижение включено! Вакансия будет выделена."
+    "jobPromoted": "Продвижение включено! Вакансия будет выделена.",
+    "viewResume": "Посмотреть резюме",
+    "applicantResume": "Резюме кандидата",
+    "appliedOn": "Отклик отправлен",
+    "coverLetter": "Сопроводительное письмо",
+    "screeningAnswers": "Ответы на вопросы",
+    "aboutMe": "О себе",
+    "aiAssisted": "Написано с помощью AI",
+    "expLevel": "Общий опыт",
+    "expectedSalary": "Ожидаемая зарплата",
+    "workExperience": "Опыт работы",
+    "educationTitle": "Образование",
+    "certificates": "Сертификаты и курсы",
+    "languages": "Языки",
+    "skills": "Навыки",
+    "present": "По наст. время",
+    "issued": "Выдан",
+    "expires": "Действует до",
+    "backToApplicants": "Все кандидаты",
+    "noResumeYet": "Кандидат ещё не заполнил подробное резюме."
   },
   "wallet": {
     "title": "Кошелёк",
