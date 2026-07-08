@@ -38,6 +38,7 @@ export async function saveResume(
       desired_pay_min: Number.isFinite(pay) && pay > 0 ? pay : null,
       desired_pay_currency: draft.currency === "USD" ? "USD" : "UZS",
       phone: clean(draft.phone),
+      email: clean(draft.email),
       languages: draft.languages ?? {},
       onboarding_complete: true,
     })

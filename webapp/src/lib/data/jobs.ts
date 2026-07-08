@@ -29,7 +29,12 @@ function filterMock(query: JobQuery): Job[] {
   const q = query.q?.toLowerCase().trim();
   const nowMs = Date.now();
   const rows = mockJobs.filter((j) => {
-    if (q && !`${j.title} ${j.companyName}`.toLowerCase().includes(q)) {
+    if (
+      q &&
+      !`${j.title} ${j.companyName} ${j.categoryName ?? ""}`
+        .toLowerCase()
+        .includes(q)
+    ) {
       return false;
     }
     if (query.city && j.city !== query.city) return false;
@@ -94,8 +99,13 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
 
     if (query.q) {
       const term = ilikeTerm(query.q);
+      // Match title, company, AND category — mirrors the saved-search alert
+      // matcher (0036), so a saved category search (stored as its keyword and
+      // re-run as ?q=) finds its jobs instead of returning empty.
       if (term)
-        req = req.or(`title.ilike.%${term}%,company_name.ilike.%${term}%`);
+        req = req.or(
+          `title.ilike.%${term}%,company_name.ilike.%${term}%,category_name.ilike.%${term}%`,
+        );
     }
     if (query.city) req = req.eq("city", query.city);
     if (query.category) req = req.eq("category_name", query.category);
@@ -137,8 +147,12 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
 
     if (query.q) {
       const term = ilikeTerm(query.q);
+      // Same title/company/category match as getOpenJobs, so the live count
+      // stays consistent with the results a query returns.
       if (term)
-        req = req.or(`title.ilike.%${term}%,company_name.ilike.%${term}%`);
+        req = req.or(
+          `title.ilike.%${term}%,company_name.ilike.%${term}%,category_name.ilike.%${term}%`,
+        );
     }
     if (query.city) req = req.eq("city", query.city);
     if (query.category) req = req.eq("category_name", query.category);
