@@ -183,7 +183,10 @@
     "aiHint": "Lavozim va tajribangiz asosida professional matn yozadi",
     "aiFellBack": "AI ulanmadi — namuna matn qo'yildi. Uni tahrirlashingiz mumkin.",
     "aiRealityCheck": "Ma'lumotlar haqiqiy bo'lsin — AI faqat yordam beradi.",
-    "aiRealityCheckOn": "Bu matn AI yordamida yozildi. Uni o'zingizga moslang — ish beruvchilar AI yordamida yozilganini ko'rishlari mumkin."
+    "aiRealityCheckOn": "Bu matn AI yordamida yozildi. Uni o'zingizga moslang — ish beruvchilar AI yordamida yozilganini ko'rishlari mumkin.",
+    "dobDay": "Kun",
+    "dobMonth": "Oy",
+    "dobYear": "Yil"
   },
   "bookmarks": {
     "title": "Saqlangan ishlar",
