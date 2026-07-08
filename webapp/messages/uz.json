@@ -806,6 +806,16 @@
     "errUnknown": "Xatolik yuz berdi",
     "notOpenTitle": "Avval e'lonni nashr qiling",
     "notOpenHint": "Faqat ochiq (nashr qilingan) vakansiyani reklama qilish mumkin.",
-    "back": "Vakansiyalarga qaytish"
+    "back": "Vakansiyalarga qaytish",
+    "heroTitle": "Vakansiyangizni yuqoriga ko'taring",
+    "heroSubtitle": "TOP e'lonlar 3 barobar ko'p ko'riladi va nomzodni tezroq topadi. Bir necha kunga ajratib ko'rsating.",
+    "benefitTop": "Ro'yxat tepasida birinchi",
+    "benefitViews": "3x ko'proq ko'rish",
+    "benefitFeatured": "Kategoriyada ajratilgan",
+    "bestValue": "Eng foydali",
+    "perDay": "≈{price} so'm/kun",
+    "previewLabel": "Reklamadan keyin",
+    "previewOther": "Boshqa vakansiyalar",
+    "topUpFor": "Hamyonni to'ldirish — {price}"
   }
 }

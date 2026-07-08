@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowUp, Check, Sparkles, TrendingUp } from "lucide-react";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -13,24 +13,38 @@ import { cn } from "@/lib/utils";
 
 /**
  * Package picker for boosting (reklama) one live vacancy from the Hamyon
- * balance. Cards are single-select; the chosen product's code rides a hidden
- * field to the promoteJob action. When the balance can't cover the pick, the
- * submit is swapped for a top-up link (and the RPC is the backstop if a race
- * slips through — surfaced as `insufficientFunds`).
+ * balance — designed to sell: the best per-day value is badged and pre-picked,
+ * every card shows a per-day price, and a mini "after promotion" preview makes
+ * the payoff concrete. Cards are single-select; the chosen product's code rides
+ * a hidden field to the promoteJob action. When the balance can't cover the
+ * pick, the CTA becomes a top-up link that carries the exact amount needed (so
+ * the wallet page opens pre-filled); the RPC is the backstop if a race slips
+ * through (surfaced as `insufficientFunds`).
  */
 export function PromotePicker({
   jobId,
+  jobTitle,
   locale,
   products,
   balanceUzs,
 }: {
   jobId: string;
+  jobTitle: string;
   locale: string;
   products: PromotionProduct[];
   balanceUzs: number;
 }) {
   const t = useTranslations("promote");
-  const [selected, setSelected] = useState<string>(products[0]?.code ?? "");
+  const perDay = (p: PromotionProduct) =>
+    p.priceUzs / Math.max(p.durationDays, 1);
+  // Best value = lowest cost per day. Badge it and pre-select it (a gentle
+  // nudge toward the package that gives the most visibility per so'm).
+  const bestCode = products.length
+    ? products.reduce((a, b) => (perDay(b) < perDay(a) ? b : a)).code
+    : "";
+  const [selected, setSelected] = useState<string>(
+    bestCode || products[0]?.code || "",
+  );
   const [state, action, pending] = useActionState<JobFormState, FormData>(
     promoteJob,
     {},
@@ -38,37 +52,52 @@ export function PromotePicker({
 
   const active = products.find((p) => p.code === selected) ?? products[0];
   const affordable = active ? balanceUzs >= active.priceUzs : false;
+  const activePriceLabel = `${groupNumber(active?.priceUzs ?? 0)} so'm`;
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="space-y-5">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="jobId" value={jobId} />
       <input type="hidden" name="productCode" value={selected} />
 
       <ul className="grid gap-3 sm:grid-cols-2">
-        {products.map((p) => {
+        {products.map((p, i) => {
           const isSel = p.code === selected;
+          const isBest = p.code === bestCode;
           const Icon = p.kind === "featured" ? Sparkles : TrendingUp;
           return (
-            <li key={p.code}>
+            <li
+              key={p.code}
+              className="rise-in"
+              style={{ animationDelay: `${i * 70}ms` }}
+            >
               <button
                 type="button"
                 onClick={() => setSelected(p.code)}
                 aria-pressed={isSel}
                 className={cn(
-                  "flex w-full flex-col gap-1 rounded-2xl border p-4 text-left transition-colors",
+                  "relative flex w-full flex-col gap-1 overflow-hidden rounded-2xl border p-4 text-left transition-all duration-200",
                   isSel
-                    ? "border-primary ring-primary/40 bg-accent ring-2"
-                    : "border-border bg-card hover:border-primary/40",
+                    ? "border-primary ring-primary/30 bg-accent scale-[1.02] shadow-lg ring-2"
+                    : "border-border bg-card hover:border-primary/50 hover:shadow-md",
                 )}
               >
+                {isBest ? (
+                  <span className="bg-primary text-primary-foreground absolute top-0 right-0 overflow-hidden rounded-bl-xl px-2.5 py-0.5 text-[11px] font-bold tracking-wide uppercase">
+                    {t("bestValue")}
+                    <span
+                      className="shimmer-ribbon pointer-events-none absolute inset-0"
+                      aria-hidden
+                    />
+                  </span>
+                ) : null}
                 <span className="flex items-center gap-2">
-                  <Icon className="text-primary size-4" />
+                  <Icon className="text-primary size-4 shrink-0" />
                   <span className="text-foreground font-semibold">
                     {p.name}
                   </span>
                   {isSel ? (
-                    <Check className="text-primary ml-auto size-4" />
+                    <Check className="text-primary ml-auto size-5 shrink-0" />
                   ) : null}
                 </span>
                 {p.description ? (
@@ -76,15 +105,16 @@ export function PromotePicker({
                     {p.description}
                   </span>
                 ) : null}
-                <span className="mt-1 flex items-baseline justify-between gap-2">
-                  <span className="text-foreground font-mono text-lg font-bold tabular-nums">
-                    {groupNumber(p.priceUzs)}{" "}
-                    <span className="text-muted-foreground text-sm">
-                      so&apos;m
-                    </span>
+                <span className="text-foreground mt-1 font-mono text-2xl font-bold tabular-nums">
+                  {groupNumber(p.priceUzs)}
+                  <span className="text-muted-foreground ml-1 text-sm font-semibold">
+                    so&apos;m
                   </span>
-                  <span className="text-muted-foreground text-xs">
-                    {t("duration", { days: p.durationDays })}
+                </span>
+                <span className="text-muted-foreground flex items-center justify-between text-xs">
+                  <span>{t("duration", { days: p.durationDays })}</span>
+                  <span className="font-medium">
+                    {t("perDay", { price: groupNumber(Math.round(perDay(p))) })}
                   </span>
                 </span>
               </button>
@@ -93,9 +123,37 @@ export function PromotePicker({
         })}
       </ul>
 
+      {/* Concrete payoff: your vacancy jumps to the top with a TOP badge. */}
+      <div className="border-border bg-muted/40 rounded-2xl border border-dashed p-4">
+        <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+          {t("previewLabel")}
+        </p>
+        <div className="space-y-2">
+          <div className="border-primary bg-card flex items-center gap-2 rounded-xl border-2 p-3 shadow-sm">
+            <ArrowUp className="text-primary size-4 shrink-0" />
+            <span className="text-foreground truncate text-sm font-semibold">
+              {jobTitle}
+            </span>
+            <span className="bg-primary text-primary-foreground ml-auto shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold">
+              TOP
+            </span>
+          </div>
+          <div className="border-border bg-card/50 flex items-center gap-2 rounded-xl border p-3 opacity-55">
+            <span className="text-muted-foreground truncate text-sm">
+              {t("previewOther")}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="border-border bg-card flex items-center justify-between rounded-xl border px-4 py-3 text-sm">
         <span className="text-muted-foreground">{t("balance")}</span>
-        <span className="text-foreground font-mono font-semibold tabular-nums">
+        <span
+          className={cn(
+            "font-mono font-semibold tabular-nums",
+            affordable ? "text-foreground" : "text-muted-foreground",
+          )}
+        >
           {groupNumber(balanceUzs)} so&apos;m
         </span>
       </div>
@@ -126,20 +184,22 @@ export function PromotePicker({
         <button
           type="submit"
           disabled={pending || !active}
-          className={cn(buttonVariants({ variant: "primary" }), "w-full")}
+          className={cn(
+            buttonVariants({ variant: "primary", size: "lg" }),
+            "cta-pulse w-full text-base",
+          )}
         >
-          {pending
-            ? t("buying")
-            : t("buyFor", {
-                price: `${groupNumber(active?.priceUzs ?? 0)} so'm`,
-              })}
+          {pending ? t("buying") : t("buyFor", { price: activePriceLabel })}
         </button>
       ) : (
         <Link
-          href="/employer/wallet"
-          className={cn(buttonVariants({ variant: "primary" }), "w-full")}
+          href={`/employer/wallet?amount=${active?.priceUzs ?? ""}`}
+          className={cn(
+            buttonVariants({ variant: "primary", size: "lg" }),
+            "w-full text-base",
+          )}
         >
-          {t("topUp")}
+          {t("topUpFor", { price: activePriceLabel })}
         </Link>
       )}
     </form>

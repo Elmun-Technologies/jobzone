@@ -71,10 +71,16 @@ export const dynamic = "force-dynamic";
 
 export default async function WalletPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ amount?: string }>;
 }) {
   const { locale } = await params;
+  // ?amount rides over from the promote page's "top up" CTA so the form opens
+  // pre-filled with exactly what the chosen boost needs. Digits only, bounded.
+  const { amount } = await searchParams;
+  const presetAmount = (amount ?? "").replace(/\D/g, "").slice(0, 12);
   setRequestLocale(locale);
   await requireEmployer(locale);
 
@@ -107,7 +113,7 @@ export default async function WalletPage({
       <section className="border-border bg-card mt-6 rounded-2xl border p-6">
         <h2 className="text-foreground mb-1 text-lg font-bold">{t("topUp")}</h2>
         <p className="text-muted-foreground mb-4 text-sm">{t("topUpSub")}</p>
-        <TopUpForm companyId={company.id} />
+        <TopUpForm companyId={company.id} initialAmount={presetAmount} />
       </section>
 
       {/* History */}
