@@ -397,7 +397,10 @@
     "quickApply": "Apply in 1 tap",
     "quickApplied": "Application sent ✓",
     "quickApplyHint": "Sent instantly with your résumé.",
-    "orAddLetter": "or add a cover letter"
+    "orAddLetter": "or add a cover letter",
+    "socialProof": "{count} already applied to this job",
+    "socialProofNudge": "Don't miss out",
+    "beFirst": "Be among the first — no one has applied yet."
   },
   "applications": {
     "title": "My applications",

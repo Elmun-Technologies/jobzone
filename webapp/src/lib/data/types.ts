@@ -63,6 +63,9 @@ export interface Job {
   postedAt: string | null;
   expiresAt: string | null;
   boostActive: boolean;
+  /** How many seekers have applied (bumped by the applications trigger). Powers
+   * the apply page's "N already applied" social proof. */
+  applicantsCount: number;
   screeningQuestions: ScreeningQuestion[];
 }
 
