@@ -508,8 +508,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/account/my-applications/:id',
-        builder: (c, s) =>
-            ApplicationStatusPage(application: s.extra as Application?),
+        builder: (c, s) => ApplicationStatusPage(
+          application: s.extra as Application?,
+          applicationId: s.pathParameters['id'],
+        ),
       ),
       GoRoute(
         path: Routes.accountSeekingStatus,

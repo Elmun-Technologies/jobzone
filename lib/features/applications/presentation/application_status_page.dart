@@ -6,15 +6,55 @@ import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../jobs/presentation/util/job_labels.dart';
+import '../data/applications_repository.dart';
 import '../domain/application.dart';
 import 'util/status_label.dart';
 
 class ApplicationStatusPage extends ConsumerWidget {
-  const ApplicationStatusPage({super.key, required this.application});
+  const ApplicationStatusPage({
+    super.key,
+    this.application,
+    this.applicationId,
+  });
+
+  /// The application when we already have it (tapped from the list).
   final Application? application;
+
+  /// Its id when we don't — a deep-link from an "application update"
+  /// notification carries only the id, so the page loads it then instead of
+  /// showing the empty state.
+  final String? applicationId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final direct = application;
+    if (direct != null) return _view(context, ref, direct);
+    final id = applicationId;
+    if (id == null) return _view(context, ref, null);
+    return ref
+        .watch(applicationByIdProvider(id))
+        .when(
+          data: (loaded) => _view(context, ref, loaded),
+          loading: () => Scaffold(
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: JzTopBar(title: context.l10n.applicationStatusTitle),
+                  ),
+                  const Expanded(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          error: (_, __) => _view(context, ref, null),
+        );
+  }
+
+  Widget _view(BuildContext context, WidgetRef ref, Application? application) {
     final l = context.l10n;
     final colors = context.colors;
     final app = application;
