@@ -46,13 +46,23 @@ export async function saveResume(
 
   if (error) return { error: true };
 
-  // Summary rides a separate best-effort write: profiles.summary is a late
-  // column (0044), so a DB that hasn't run it still saves everything else (the
-  // returned error is simply ignored rather than failing the whole résumé).
-  await supabase
+  // Summary (+ its AI flag) ride a separate best-effort write: profiles.summary
+  // (0044) and summary_ai_generated (0046) are late columns, so a DB behind on
+  // either still saves the rest. Fall back to summary-only if the flag column
+  // isn't there yet; the error is ignored rather than failing the whole résumé.
+  const sumUpdate = await supabase
     .from("profiles")
-    .update({ summary: clean(draft.summary) })
+    .update({
+      summary: clean(draft.summary),
+      summary_ai_generated: draft.summaryAiGenerated === true,
+    })
     .eq("id", user.id);
+  if (sumUpdate.error) {
+    await supabase
+      .from("profiles")
+      .update({ summary: clean(draft.summary) })
+      .eq("id", user.id);
+  }
 
   // Replace the user's education entries with the wizard's set.
   const year = (y: string) => (/^\d{4}$/.test(y) ? `${y}-01-01` : null);
