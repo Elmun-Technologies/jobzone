@@ -29,6 +29,7 @@ export function navModel(
         { href: "/employer", labelKey: "dashboard" },
         { href: "/employer/jobs", labelKey: "vacancies" },
         { href: "/employer/company/edit", labelKey: "company" },
+        { href: "/pricing", labelKey: "pricing" },
       ],
       cta:
         signedIn && isEmployerAccount

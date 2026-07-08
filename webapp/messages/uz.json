@@ -22,7 +22,8 @@
     "candidates": "Nomzodlar",
     "postVacancy": "Vakansiya joylash",
     "openMenu": "Menyuni ochish",
-    "closeMenu": "Menyuni yopish"
+    "closeMenu": "Menyuni yopish",
+    "pricing": "Narxlar"
   },
   "explore": {
     "title": "Ishlar xaritasi",
@@ -827,5 +828,29 @@
     "previewLabel": "Reklamadan keyin",
     "previewOther": "Boshqa vakansiyalar",
     "topUpFor": "Hamyonni to'ldirish — {price}"
+  },
+  "pricing": {
+    "title": "Narxlar",
+    "heroTitle": "Ishga eng tez va arzon yo'l",
+    "heroSubtitle": "Minglab ishchi Yolla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
+    "firstPost": "Birinchi vakansiya",
+    "free": "Bepul",
+    "firstPostHint": "To'lovsiz, darhol e'lon qilinadi va ikkala ilovada ko'rinadi.",
+    "nextPosts": "Keyingi vakansiyalar",
+    "nextPostsHint": "Har bir qo'shimcha vakansiya uchun — Hamyondan yechiladi.",
+    "promoTitle": "Reklama paketlari",
+    "promoSubtitle": "Vakansiyangizni ro'yxat tepasiga chiqaring — 3 barobar ko'proq nomzod.",
+    "bestValue": "Eng foydali",
+    "duration": "{days} kun",
+    "perDay": "≈{price} so'm/kun",
+    "benefit1Title": "Tez",
+    "benefit1Desc": "Bir necha daqiqada e'lon — AI yordamida to'ldiring.",
+    "benefit2Title": "Maqsadli",
+    "benefit2Desc": "Ishchi kasblar bo'yicha minglab faol nomzod.",
+    "benefit3Title": "Shaffof",
+    "benefit3Desc": "Yashirin to'lovlar yo'q — nima to'lasangiz, shuni ko'rasiz.",
+    "ctaTitle": "Bugun boshlang",
+    "ctaText": "Birinchi vakansiya bepul — bir necha daqiqada e'lon qiling.",
+    "ctaButton": "Vakansiya joylash"
   }
 }
