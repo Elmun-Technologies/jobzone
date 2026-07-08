@@ -827,7 +827,8 @@
     "perDay": "≈{price}/day",
     "previewLabel": "After promotion",
     "previewOther": "Other vacancies",
-    "topUpFor": "Top up Hamyon — {price}"
+    "topUpFor": "Top up Hamyon — {price}",
+    "cheaper": "{pct}% cheaper"
   },
   "pricing": {
     "title": "Pricing",
@@ -851,6 +852,7 @@
     "benefit3Desc": "No hidden fees — you pay for what you see.",
     "ctaTitle": "Start today",
     "ctaText": "First vacancy is free — post it in a couple of minutes.",
-    "ctaButton": "Post a vacancy"
+    "ctaButton": "Post a vacancy",
+    "cheaper": "{pct}% cheaper"
   }
 }

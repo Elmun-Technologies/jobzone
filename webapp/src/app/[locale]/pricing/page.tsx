@@ -46,6 +46,15 @@ export default async function PricingPage({
   const bestCode = products.length
     ? products.reduce((a, b) => (perDay(b) < perDay(a) ? b : a)).code
     : "";
+  // Per-day discount of each TOP tier vs the priciest TOP tier — the longer,
+  // the cheaper (featured is a different benefit, excluded).
+  const maxTopPerDay = products
+    .filter((p) => p.kind === "top")
+    .reduce((m, p) => Math.max(m, perDay(p)), 0);
+  const savingsOf = (p: (typeof products)[number]) =>
+    p.kind === "top" && maxTopPerDay > 0
+      ? Math.round((1 - perDay(p) / maxTopPerDay) * 100)
+      : 0;
 
   const benefits = [
     { Icon: Zap, title: t("benefit1Title"), desc: t("benefit1Desc") },
@@ -145,7 +154,14 @@ export default async function PricingPage({
                   </span>
                 </span>
                 <span className="text-muted-foreground flex items-center justify-between text-xs">
-                  <span>{t("duration", { days: p.durationDays })}</span>
+                  <span className="flex items-center gap-1.5">
+                    {t("duration", { days: p.durationDays })}
+                    {savingsOf(p) > 0 ? (
+                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                        {t("cheaper", { pct: savingsOf(p) })}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="font-medium">
                     {t("perDay", { price: groupNumber(Math.round(perDay(p))) })}
                   </span>
