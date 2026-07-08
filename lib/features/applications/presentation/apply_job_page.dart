@@ -24,8 +24,6 @@ class ApplyJobPage extends ConsumerStatefulWidget {
 }
 
 class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
-  final _name = TextEditingController();
-  final _email = TextEditingController();
   final _text = TextEditingController();
   final Map<String, dynamic> _answers = {};
   PlatformFile? _cvFile;
@@ -33,8 +31,6 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
 
   @override
   void dispose() {
-    _name.dispose();
-    _email.dispose();
     _text.dispose();
     super.dispose();
   }
@@ -154,19 +150,10 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
                           AppSpacing.lg,
                         ),
                         children: [
-                          JzTextField(
-                            label: l.fullName,
-                            hint: 'John Doe',
-                            controller: _name,
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          JzTextField(
-                            label: l.email,
-                            hint: 'example@gmail.com',
-                            controller: _email,
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
+                          // Name + email aren't re-collected here: the applicant
+                          // is signed in, so the employer already gets their
+                          // profile (and the attached CV) via applicant_id. The
+                          // old fields were discarded on submit anyway.
                           Text(
                             l.uploadCvResume,
                             style: context.text.labelLarge,

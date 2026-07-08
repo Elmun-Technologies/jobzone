@@ -59,6 +59,44 @@ class ApplicationsRepository {
         .toList();
   }
 
+  /// A single application by id, for the deep-link from an "application update"
+  /// notification (which carries only the id, no in-memory object). Mirrors
+  /// [myApplications]; scoped to the signed-in applicant (RLS also enforces it).
+  Future<Application?> byId(String applicationId) async {
+    if (!_live) {
+      _seedOffline();
+      for (final a in _offlineStore) {
+        if (a.id == applicationId) return a;
+      }
+      return null;
+    }
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) return null;
+
+    final row = await _client
+        .from('applications')
+        .select('id, cover_letter, current_status, applied_at, job_id')
+        .eq('id', applicationId)
+        .eq('applicant_id', uid)
+        .maybeSingle();
+    if (row == null) return null;
+
+    final jobs = await _ref.read(jobsRepositoryProvider).byIds([
+      row['job_id'] as String,
+    ]);
+    if (jobs.isEmpty) return null;
+
+    return Application(
+      id: row['id'] as String,
+      job: jobs.first,
+      status:
+          ApplicationStatus.fromWire(row['current_status'] as String?) ??
+          ApplicationStatus.submitted,
+      appliedAt: DateTime.tryParse('${row['applied_at']}') ?? DateTime.now(),
+      coverLetter: row['cover_letter'] as String?,
+    );
+  }
+
   Future<void> apply({
     required Job job,
     String? coverLetter,
@@ -153,4 +191,10 @@ class ApplicationsRepository {
 
 final applicationsRepositoryProvider = Provider<ApplicationsRepository>(
   (ref) => ApplicationsRepository(ref),
+);
+
+/// Loads one application by id — backs the notification deep-link into the
+/// status page when no in-memory application was passed.
+final applicationByIdProvider = FutureProvider.family<Application?, String>(
+  (ref, id) => ref.read(applicationsRepositoryProvider).byId(id),
 );
