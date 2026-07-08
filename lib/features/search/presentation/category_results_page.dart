@@ -6,6 +6,7 @@ import '../../../localization/l10n_extension.dart';
 import '../../jobs/data/categories_repository.dart';
 import '../../jobs/data/jobs_repository_impl.dart';
 import '../../jobs/domain/job.dart';
+import '../../jobs/presentation/category_label.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 
 /// Open vacancies grouped by category, with counts and emoji — powers the Home
@@ -58,7 +59,7 @@ class CategoryResultsPage extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: JzTopBar(title: category),
+              child: JzTopBar(title: localizedCategory(l, name: category)),
             ),
             Expanded(
               child: jobsAsync.when(

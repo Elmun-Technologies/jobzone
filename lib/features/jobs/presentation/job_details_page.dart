@@ -14,6 +14,7 @@ import '../../reviews/presentation/widgets/company_reviews_view.dart';
 import '../application/bookmarks_controller.dart';
 import '../application/jobs_providers.dart';
 import '../domain/job.dart';
+import 'category_label.dart';
 import 'util/job_labels.dart';
 
 class JobDetailsPage extends ConsumerWidget {
@@ -422,7 +423,10 @@ class _AboutTab extends StatelessWidget {
           child: Column(
             children: [
               if (job.categoryName != null)
-                _SummaryRow(label: l.jobCategory, value: job.categoryName!),
+                _SummaryRow(
+                  label: l.jobCategory,
+                  value: localizedCategory(l, name: job.categoryName),
+                ),
               if (job.salaryText != null)
                 _SummaryRow(
                   label: l.payBasisLabel,

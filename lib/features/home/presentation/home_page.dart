@@ -7,6 +7,7 @@ import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
+import '../../jobs/presentation/category_label.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 import '../../notifications/application/notifications_providers.dart';
 import '../../search/presentation/category_results_page.dart';
@@ -316,7 +317,7 @@ class _RecentSectionState extends State<_RecentSection> {
               ),
               for (final c in categories)
                 _CategoryChip(
-                  label: c,
+                  label: localizedCategory(l, name: c),
                   selected: _selected == c,
                   onTap: () => setState(() => _selected = c),
                 ),
@@ -403,7 +404,7 @@ class _CategoryCountCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  localizedCategory(context.l10n, name: name),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.text.bodySmall?.copyWith(
