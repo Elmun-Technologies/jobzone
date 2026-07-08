@@ -35,21 +35,17 @@ const EXP_LABEL: Record<string, string> = {
   "5_plus": "5+ years of experience",
 };
 
+// A fill-in-the-[brackets] starter (used when GLM is off) — the seeker replaces
+// the [placeholders] with their real facts, which keeps the résumé honest.
 function templateSummary(locale: string, position: string): string {
   const role = position.trim();
   if (locale === "ru") {
-    return role
-      ? `Ответственный специалист по направлению «${role}». Работаю аккуратно и честно, довожу задачи до результата, легко нахожу общий язык с командой. Готов(а) учиться и приступить к работе в ближайшее время.`
-      : "Ответственный и исполнительный сотрудник. Работаю аккуратно, довожу задачи до результата и готов(а) быстро приступить к работе.";
+    return `Ответственный ${role || "[должность]"} с опытом [сколько лет] лет. Владею навыками [ключевые навыки], имею опыт [где работал / что делал] и достиг [ваше достижение]. Работаю честно, довожу задачи до результата и готов(а) приступить [когда].`;
   }
   if (locale === "en") {
-    return role
-      ? `Reliable ${role} who works carefully and honestly, sees tasks through, and gets on well with a team. Eager to learn and ready to start soon.`
-      : "Reliable, diligent worker — careful with tasks, sees them through, and ready to start soon.";
+    return `Reliable ${role || "[position]"} with [how many] years of experience. Skilled in [key skills], experienced at [where you worked / what you did], and achieved [your achievement]. I work honestly, see tasks through, and can start [when].`;
   }
-  return role
-    ? `«${role}» yo'nalishi bo'yicha mas'uliyatli mutaxassisman. Ishni halol va tartibli bajaraman, vazifalarni oxiriga yetkazaman, jamoada yaxshi ishlayman. O'rganishga tayyorman va tez orada ishga kirisha olaman.`
-    : "Mas'uliyatli va tartibli xodimman. Ishni halol bajaraman, vazifalarni oxiriga yetkazaman va tez orada ishga kirisha olaman.";
+  return `[Necha] yillik tajribaga ega mas'uliyatli ${role || "[lavozim]"}man. [Asosiy ko'nikmalar] bo'yicha ishlayman, [oldingi ish joyi / nima qilganim]da tajriba orttirganman va [yutug'im]ga erishganman. Halol ishlayman, vazifalarni oxiriga yetkazaman va [qachon] ishga kirisha olaman.`;
 }
 
 export async function generateResumeSummary(input: {
@@ -85,14 +81,15 @@ export async function generateResumeSummary(input: {
   const model = process.env.GLM_MODEL ?? "glm-4.5-flash";
   const lang = LANG[locale] ?? LANG.uz;
 
-  const system = `You are an expert career coach writing the "About me" summary for a candidate on Yolla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write in ${lang}, in the FIRST PERSON, warm but professional.
+  const system = `You are an expert career coach writing an "About me" TEMPLATE for a candidate on Yolla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write in ${lang}, first person, warm but professional.
 
-Rules:
-- 2–4 sentences, concrete and realistic for THIS role — no vague clichés, no invented employers, certificates, or numbers not given.
-- Highlight reliability, relevant skills, and readiness to start — the things a blue-collar employer actually cares about.
-- Weave in the candidate's notes when given; expand shorthand into natural wording.
-- Never mention gender, age, nationality, or religion. Do not invent contact details.
-- Return ONLY the summary text — no preamble, no quotes, no JSON, no markdown.`;
+This is a FILL-IN-THE-BLANK template the candidate personalizes with their REAL facts — that's the whole point (it prevents fake AI résumés). So:
+- Write 2–4 natural sentences, but leave 3–6 of the SPECIFIC personal details as [bracketed placeholders] written in ${lang} — e.g. the years of experience, the key skills, a notable achievement, a previous workplace. Use square brackets [ ].
+- The connecting prose must be complete and read well; only the personal specifics are bracketed.
+- Never invent employers, certificates, or numbers — that is exactly what the [brackets] are for.
+- When the candidate gave notes, use them to FILL some brackets with real content instead of leaving them blank.
+- Never mention gender, age, nationality, or religion. No contact details.
+- Return ONLY the template text — no preamble, no quotes, no JSON, no markdown.`;
 
   const user = `Desired role / position: ${position}
 Experience: ${exp ?? "(not specified)"}

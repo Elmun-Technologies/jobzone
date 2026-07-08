@@ -95,5 +95,19 @@ export async function saveResume(
   await supabase.from("experiences").delete().eq("profile_id", user.id);
   if (expRows.length > 0) await supabase.from("experiences").insert(expRows);
 
+  // Replace the user's certificates/courses with the wizard's set.
+  const certRows = (draft.certificates ?? [])
+    .filter((c) => c.name.trim() !== "")
+    .map((c) => ({
+      profile_id: user.id,
+      name: c.name.trim(),
+      issuer: clean(c.issuer),
+      issued_date: year(c.issuedYear),
+      expiry_date: year(c.expiryYear),
+    }));
+  await supabase.from("certifications").delete().eq("profile_id", user.id);
+  if (certRows.length > 0)
+    await supabase.from("certifications").insert(certRows);
+
   return { ok: true };
 }
