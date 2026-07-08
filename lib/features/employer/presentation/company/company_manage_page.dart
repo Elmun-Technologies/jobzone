@@ -246,6 +246,11 @@ class _CompanyView extends StatelessWidget {
           onTap: () => context.push(Routes.employerCompanyGallery),
         ),
         _ManageRow(
+          icon: Icons.account_balance_wallet_outlined,
+          label: l.walletTitle,
+          onTap: () => context.push(Routes.employerWallet),
+        ),
+        _ManageRow(
           icon: Icons.bolt_outlined,
           label: l.promotionsTitle,
           onTap: () => context.push(Routes.employerPromotions),

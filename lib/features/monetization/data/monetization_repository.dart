@@ -3,13 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../employer/data/mock_employer.dart';
+import '../../employer/data/wallet_repository.dart';
 import '../domain/promotion.dart';
 
-/// Promotion catalog + per-job purchases. Offline it serves the seeded catalog
-/// and, on "purchase", applies the boost to the in-memory job immediately so
-/// the effect is visible without a backend. Live, it creates a `pending` order
-/// (a backend admin / payment webhook flips it to `paid`, which applies the
-/// boost via the DB trigger — the client never boosts a job directly).
+/// Thrown when [MonetizationRepository.purchase] can't find [productCode] in
+/// the live catalog (a stale client vs. a since-deactivated/renamed product).
+class UnknownProductError implements Exception {
+  const UnknownProductError(this.code);
+  final String code;
+  @override
+  String toString() => 'UnknownProductError($code)';
+}
+
+/// Promotion catalog + per-job purchases, self-serve from the Hamyon wallet.
+/// Offline it serves the seeded catalog and, on "purchase", applies the boost
+/// to the in-memory job and debits the demo wallet immediately, so the effect
+/// is visible without a backend. Live, it calls the `buy_promotion` RPC —
+/// security-definer, ownership + balance checked, atomic: debits the wallet,
+/// applies the boost, and records a `paid` order server-side in one
+/// transaction (the client never writes the boost columns directly).
 class MonetizationRepository {
   MonetizationRepository(this._ref);
 
@@ -42,13 +54,17 @@ class MonetizationRepository {
         .toList();
   }
 
-  /// Buys [productCode] for [jobId]. Offline applies the boost and returns a
-  /// paid order; live inserts a pending order.
+  /// Buys [productCode] for [jobId] from the employer's Hamyon balance.
+  /// Callers should check the wallet balance before calling this (the UI
+  /// gates the button on it) — this still enforces it server-side / in the
+  /// offline demo, so a race or a stale UI can't overspend.
   Future<PromotionOrder> purchase({
     required String jobId,
     required String productCode,
   }) async {
-    final product = (await products()).firstWhere((p) => p.code == productCode);
+    final catalog = await products();
+    final product = catalog.where((p) => p.code == productCode).firstOrNull;
+    if (product == null) throw UnknownProductError(productCode);
 
     if (!_live) {
       final now = DateTime.now();
@@ -63,6 +79,9 @@ class MonetizationRepository {
             boostKind: product.kind,
           );
         }
+        _ref
+            .read(walletRepositoryProvider)
+            .debitOffline(product.priceUzs, 'Reklama: ${product.name}');
       }
       final order = PromotionOrder(
         id: 'ord-${now.microsecondsSinceEpoch}',
@@ -78,25 +97,24 @@ class MonetizationRepository {
     }
 
     final client = _ref.read(supabaseClientProvider);
-    final uid = client.auth.currentUser?.id;
-    final company = await client
-        .from('companies')
-        .select('id')
-        .eq('owner_id', uid as Object)
-        .maybeSingle();
-    final row = await client
-        .from('promotion_orders')
-        .insert({
-          'company_id': company?['id'],
-          'job_id': jobId,
-          'product_code': productCode,
-          'amount_uzs': product.priceUzs,
-          'created_by': uid,
-          'status': 'pending',
-        })
-        .select()
-        .single();
-    return PromotionOrder.fromMap(row);
+    // The RPC is atomic (debit + boost + paid order, one transaction) and
+    // returns the job's new boosted_until — the client doesn't need it since
+    // myJobsProvider/myOrdersProvider are invalidated right after to re-fetch
+    // the authoritative rows.
+    await client.rpc(
+      'buy_promotion',
+      params: {'p_job_id': jobId, 'p_product_code': productCode},
+    );
+    final now = DateTime.now();
+    return PromotionOrder(
+      id: 'live-${now.microsecondsSinceEpoch}',
+      jobId: jobId,
+      productCode: productCode,
+      amountUzs: product.priceUzs,
+      status: 'paid',
+      createdAt: now,
+      paidAt: now,
+    );
   }
 }
 
