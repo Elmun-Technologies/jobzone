@@ -174,7 +174,13 @@
       "c1_c2": "Yuqori",
       "native": "Ona tili"
     },
-    "errSave": "Saqlashda xatolik yuz berdi"
+    "errSave": "Saqlashda xatolik yuz berdi",
+    "summaryLabel": "Men haqimda",
+    "summaryHint": "O'zingiz, tajribangiz va kuchli tomonlaringiz haqida qisqacha yozing",
+    "aiWrite": "AI bilan yozish",
+    "aiWriting": "Yozilmoqda…",
+    "aiHint": "Lavozim va tajribangiz asosida professional matn yozadi",
+    "aiFellBack": "AI ulanmadi — namuna matn qo'yildi. Uni tahrirlashingiz mumkin."
   },
   "bookmarks": {
     "title": "Saqlangan ishlar",

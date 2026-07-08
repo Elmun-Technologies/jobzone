@@ -26,6 +26,9 @@ export interface ResumeDraft {
   currency: string; // "UZS" | "USD"
   phone: string;
   email: string;
+  /** Free-text professional summary ("About me"), AI-assisted (profiles.summary,
+   * 0044). Read/written separately so a DB behind on that migration still works. */
+  summary: string;
   /** language code -> level ("none"|"a1_a2"|"b1_b2"|"c1_c2"|"native"). */
   languages: Record<string, string>;
   educations: EducationEntry[];
@@ -43,6 +46,7 @@ export const EMPTY_RESUME: ResumeDraft = {
   currency: "UZS",
   phone: "",
   email: "",
+  summary: "",
   languages: {},
   educations: [],
 };
@@ -93,6 +97,17 @@ export async function getMyResume(): Promise<ResumeDraft> {
         ? (r.languages as Record<string, string>)
         : {};
 
+    // summary lives on a late column (0044); read it separately so a DB that
+    // hasn't migrated still returns the rest of the résumé (error → empty).
+    let summary = "";
+    const { data: sumRow } = await supabase
+      .from("profiles")
+      .select("summary")
+      .eq("id", user.id)
+      .maybeSingle();
+    const sumVal = (sumRow as { summary?: unknown } | null)?.summary;
+    if (typeof sumVal === "string") summary = sumVal;
+
     return {
       position: str(r.headline),
       fullName: str(r.full_name),
@@ -106,6 +121,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
       currency: str(r.desired_pay_currency) || "UZS",
       phone: str(r.phone),
       email: str(r.email) || (user.email ?? ""),
+      summary,
       languages: langs,
       educations,
     };
