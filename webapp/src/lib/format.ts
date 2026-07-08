@@ -36,11 +36,18 @@ export function salaryText(job: Job): string | null {
   return isUsd ? amount : `${amount} ${cur}`;
 }
 
-/** ISO date -> "20.06.2026" (stable across server/client, locale-independent). */
+/**
+ * ISO date -> "20.06.2026" as the Tashkent (UTC+5) calendar day. Shifts by the
+ * fixed offset before reading UTC parts — matches tashkentClock/tashkentDay so
+ * a date never disagrees with the time or the "Bugun/Kecha" label shown beside
+ * it (a raw-UTC read is a day behind for 19:00–23:59 UTC). Deterministic on
+ * server and client (no runtime timezone → no hydration mismatch).
+ */
 export function formatDate(iso: string | null): string {
   if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return "";
+  const d = new Date(t + TASHKENT_OFFSET_MS);
   const dd = String(d.getUTCDate()).padStart(2, "0");
   const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
   return `${dd}.${mm}.${d.getUTCFullYear()}`;

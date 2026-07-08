@@ -32,7 +32,9 @@ export function BookmarkButton({
       const result = await toggleBookmark(jobId);
       if (result.signedOut) {
         setSaved(initial);
-        window.location.href = `/${locale}/sign-in`;
+        // Return them here after sign-in instead of dropping them on /account.
+        const next = encodeURIComponent(window.location.pathname);
+        window.location.href = `/${locale}/sign-in?next=${next}`;
         return;
       }
       setSaved(result.saved);
