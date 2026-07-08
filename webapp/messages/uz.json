@@ -208,6 +208,13 @@
     "noJobs": "Hali ish e'lon qilmadingiz",
     "recentJobs": "So'nggi vakansiyalar",
     "viewAll": "Hammasini ko'rish",
+    "candidates": {
+      "title": "Nomzodlar",
+      "empty": "Hali nomzodlar yo'q",
+      "emptyHint": "Vakansiyalaringizga ariza kelganda nomzodlar shu yerda ko'rinadi.",
+      "appliedTo": "{job} uchun ariza berdi",
+      "myJobs": "Vakansiyalarim"
+    },
     "onboardingTitle": "Kompaniyangizni yarating",
     "onboardingSubtitle": "Ish e'lon qilishdan oldin kompaniya profilini to'ldiring.",
     "companyName": "Kompaniya nomi",

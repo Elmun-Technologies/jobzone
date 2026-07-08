@@ -32,7 +32,11 @@ export function navModel(
       ],
       cta:
         signedIn && isEmployerAccount
-          ? { href: "/employer", labelKey: "candidates", Icon: Users }
+          ? {
+              href: "/employer/candidates",
+              labelKey: "candidates",
+              Icon: Users,
+            }
           : {
               href: "/employer/jobs/new",
               labelKey: "postVacancy",

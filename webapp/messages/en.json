@@ -208,6 +208,13 @@
     "noJobs": "You haven't posted any jobs yet",
     "recentJobs": "Recent jobs",
     "viewAll": "View all",
+    "candidates": {
+      "title": "Candidates",
+      "empty": "No candidates yet",
+      "emptyHint": "Candidates will show up here once people apply to your vacancies.",
+      "appliedTo": "Applied to {job}",
+      "myJobs": "My jobs"
+    },
     "onboardingTitle": "Create your company",
     "onboardingSubtitle": "Set up your company profile before posting jobs.",
     "companyName": "Company name",
