@@ -31,6 +31,54 @@ function dbDetail(error: { message?: string; code?: string } | null): string {
   return `${code}${error.message ?? ""}`.slice(0, 300);
 }
 
+/** Columns the insert can never drop (a job is meaningless without them). */
+const REQUIRED_JOB_COLUMNS = new Set([
+  "company_id",
+  "posted_by",
+  "title",
+  "status",
+]);
+
+/**
+ * Insert a job, tolerating a DB that's behind on migrations. If PostgREST
+ * reports an unknown column (PGRST204 "Could not find the 'X' column of 'jobs'
+ * in the schema cache"), drop that optional column and retry — so a stale
+ * schema cache or an unapplied migration degrades to "posted without field X"
+ * (logged) instead of a hard failure. Bounded retries; core columns are never
+ * dropped.
+ */
+async function insertJobResilient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  payload: Record<string, unknown>,
+): Promise<{
+  id: string | null;
+  error: { message?: string; code?: string } | null;
+  dropped: string[];
+}> {
+  const attempt: Record<string, unknown> = { ...payload };
+  const dropped: string[] = [];
+  for (let i = 0; i < 12; i++) {
+    const { data, error } = await supabase
+      .from("jobs")
+      .insert(attempt)
+      .select("id")
+      .single();
+    if (!error && data) {
+      return { id: String((data as { id: unknown }).id), error: null, dropped };
+    }
+    const col = error?.message?.match(
+      /Could not find the '([^']+)' column/,
+    )?.[1];
+    if (col && col in attempt && !REQUIRED_JOB_COLUMNS.has(col)) {
+      delete attempt[col];
+      dropped.push(col);
+      continue;
+    }
+    return { id: null, error: error ?? null, dropped };
+  }
+  return { id: null, error: { message: "too many unknown columns" }, dropped };
+}
+
 function field(formData: FormData, name: string): string {
   return (formData.get(name) ?? "").toString().trim();
 }
@@ -194,45 +242,56 @@ export async function createJob(
     willCharge = willChargeForJobPost(stats.hasPublishedBefore, price);
   }
 
-  const { data: inserted, error } = await supabase
-    .from("jobs")
-    .insert({
-      company_id: companyId,
-      posted_by: user.id,
-      title,
-      description: optional(formData, "description"),
-      responsibilities: optional(formData, "responsibilities"),
-      requirements: optional(formData, "requirements"),
-      benefits: optional(formData, "benefits"),
-      category_id: optional(formData, "categoryId"),
-      city: optional(formData, "city"),
-      address_text: optional(formData, "addressText"),
-      lat: number("lat"),
-      lng: number("lng"),
-      country: "UZ",
-      salary_min: money("salaryMin"),
-      salary_max: money("salaryMax"),
-      currency: optional(formData, "currency") ?? "UZS",
-      salary_period: optional(formData, "salaryPeriod") ?? "month",
-      job_type: optional(formData, "jobType"),
-      experience_level: optional(formData, "experienceLevel"),
-      working_model: optional(formData, "workingModel"),
-      schedule_pattern: optional(formData, "schedulePattern"),
-      night_shift: bool("nightShift"),
-      contact_phone: optional(formData, "contactPhone"),
-      show_phone_on_listing: bool("showPhone"),
-      require_cover_letter: bool("requireCoverLetter"),
-      women_friendly: bool("womenFriendly"),
-      disability_friendly: bool("disabilityFriendly"),
-      screening_questions: Array.isArray(screening) ? screening : [],
-      status,
-    })
-    .select("id")
-    .single();
-  if (error || !inserted) {
+  const payload: Record<string, unknown> = {
+    company_id: companyId,
+    posted_by: user.id,
+    title,
+    description: optional(formData, "description"),
+    responsibilities: optional(formData, "responsibilities"),
+    requirements: optional(formData, "requirements"),
+    benefits: optional(formData, "benefits"),
+    category_id: optional(formData, "categoryId"),
+    city: optional(formData, "city"),
+    address_text: optional(formData, "addressText"),
+    lat: number("lat"),
+    lng: number("lng"),
+    country: "UZ",
+    salary_min: money("salaryMin"),
+    salary_max: money("salaryMax"),
+    currency: optional(formData, "currency") ?? "UZS",
+    salary_period: optional(formData, "salaryPeriod") ?? "month",
+    job_type: optional(formData, "jobType"),
+    experience_level: optional(formData, "experienceLevel"),
+    working_model: optional(formData, "workingModel"),
+    schedule_pattern: optional(formData, "schedulePattern"),
+    night_shift: bool("nightShift"),
+    contact_phone: optional(formData, "contactPhone"),
+    show_phone_on_listing: bool("showPhone"),
+    require_cover_letter: bool("requireCoverLetter"),
+    women_friendly: bool("womenFriendly"),
+    disability_friendly: bool("disabilityFriendly"),
+    screening_questions: Array.isArray(screening) ? screening : [],
+    status,
+  };
+
+  const {
+    id: insertedId,
+    error,
+    dropped,
+  } = await insertJobResilient(supabase, payload);
+  if (error || !insertedId) {
     console.error("createJob insert failed", error);
     return { error: "unknown", detail: dbDetail(error) };
   }
+  if (dropped.length) {
+    // The DB is behind on migrations (or PostgREST's schema cache is stale):
+    // the job posted, minus these optional columns. Fix on the DB side with
+    // `supabase db push` + `NOTIFY pgrst, 'reload schema';`.
+    console.warn(
+      `createJob: posted without unknown columns [${dropped.join(", ")}] — the jobs table / PostgREST schema cache is behind the app`,
+    );
+  }
+  const inserted = { id: insertedId };
 
   if (willCharge) {
     const { error: payError } = await supabase.rpc("adjust_wallet", {
