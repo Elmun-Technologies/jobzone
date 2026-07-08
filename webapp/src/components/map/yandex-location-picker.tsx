@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
+import { forwardGeocode, reverseGeocode } from "@/lib/actions/geocode";
 import {
   loadYmaps,
   type YmapsApi,
@@ -12,42 +13,6 @@ import {
 export interface ResolvedAddress {
   city: string;
   address: string;
-}
-
-/** Reverse-geocode a point → { city, address }, defensively (any failure → null). */
-async function reverseGeocode(
-  ymaps: YmapsApi,
-  coords: [number, number],
-): Promise<ResolvedAddress | null> {
-  try {
-    const res = await ymaps.geocode(coords, { results: 1 });
-    const obj = res.geoObjects.get(0);
-    if (!obj) return null;
-    const city =
-      obj.getLocalities?.()?.[0] || obj.getAdministrativeAreas?.()?.[0] || "";
-    const street = obj.getThoroughfare?.() || "";
-    const house = obj.getPremiseNumber?.() || "";
-    const address =
-      [street, house].filter(Boolean).join(" ") || obj.getAddressLine?.() || "";
-    return { city, address };
-  } catch {
-    return null;
-  }
-}
-
-/** Forward-geocode an address string → coords, defensively (any failure → null). */
-async function forwardGeocode(
-  ymaps: YmapsApi,
-  query: string,
-): Promise<[number, number] | null> {
-  try {
-    const res = await ymaps.geocode(query, { results: 1 });
-    const obj = res.geoObjects.get(0);
-    const coords = obj?.geometry?.getCoordinates();
-    return coords ?? null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -102,6 +67,12 @@ export function YandexLocationPicker({
   useEffect(() => {
     onErrorRef.current = onError;
   }, [onError]);
+  // Read the latest locale from a ref so the geocode effects don't list it as
+  // a dependency (it's stable during posting; a change shouldn't re-run them).
+  const localeRef = useRef(locale);
+  useEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
   const lang = locale === "en" ? "en_US" : "ru_RU";
 
   /** Create/move/remove the single pin marker to match a coordinate. */
@@ -145,9 +116,8 @@ export function YandexLocationPicker({
 
   /** Reverse-geocode a picked point and push it up into the address fields. */
   async function resolve(coords: [number, number]) {
-    const ymaps = api.current;
-    if (!ymaps || !onResolveRef.current) return;
-    const a = await reverseGeocode(ymaps, coords);
+    if (!onResolveRef.current) return;
+    const a = await reverseGeocode(coords[0], coords[1], localeRef.current);
     if (a && (a.city || a.address)) {
       suppressForward.current = true;
       onResolveRef.current(a);
@@ -218,12 +188,10 @@ export function YandexLocationPicker({
     }
     if (q.length < 4) return;
     const t = setTimeout(async () => {
-      const ymaps = api.current;
-      if (!ymaps) return;
-      const coords = await forwardGeocode(ymaps, q);
+      const coords = await forwardGeocode(q, localeRef.current);
       if (coords) {
         fromForward.current = true;
-        onPickRef.current(coords[0], coords[1]);
+        onPickRef.current(coords.lat, coords.lng);
       }
     }, 900);
     return () => clearTimeout(t);
