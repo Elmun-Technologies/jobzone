@@ -92,6 +92,80 @@ function ChipGroup({
   );
 }
 
+/** Groups a digit string for display: "15000000" -> "15 000 000". */
+const groupDigits = (s: string) => s.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+/** Day / month / year dropdowns for a birth date — far clearer than the native
+ * date picker's endless year scroll. Value + onChange are "YYYY-MM-DD" (or ""
+ * while incomplete). Month names are localized via Intl (no extra strings). */
+function BirthDatePicker({
+  value,
+  onChange,
+  locale,
+  labels,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  locale: string;
+  labels: { day: string; month: string; year: string };
+}) {
+  const [yy = "", mm = "", dd = ""] = value ? value.split("-") : [];
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: 66 }, (_, i) => String(thisYear - 14 - i));
+  const months = Array.from({ length: 12 }, (_, i) => ({
+    value: String(i + 1).padStart(2, "0"),
+    label: new Intl.DateTimeFormat(locale, { month: "long" }).format(
+      new Date(2000, i, 1),
+    ),
+  }));
+  const days = Array.from({ length: 31 }, (_, i) =>
+    String(i + 1).padStart(2, "0"),
+  );
+  const emit = (y: string, m: string, d: string) =>
+    onChange(y && m && d ? `${y}-${m}-${d}` : "");
+  const cls = cn(inputClass, "bg-background");
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <select
+        className={cls}
+        value={dd}
+        onChange={(e) => emit(yy, mm, e.target.value)}
+      >
+        <option value="">{labels.day}</option>
+        {days.map((d) => (
+          <option key={d} value={d}>
+            {Number(d)}
+          </option>
+        ))}
+      </select>
+      <select
+        className={cls}
+        value={mm}
+        onChange={(e) => emit(yy, e.target.value, dd)}
+      >
+        <option value="">{labels.month}</option>
+        {months.map((m) => (
+          <option key={m.value} value={m.value}>
+            {m.label}
+          </option>
+        ))}
+      </select>
+      <select
+        className={cls}
+        value={yy}
+        onChange={(e) => emit(e.target.value, mm, dd)}
+      >
+        <option value="">{labels.year}</option>
+        {years.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
   const t = useTranslations("resume");
   const router = useRouter();
@@ -274,11 +348,15 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field label={t("birthDate")}>
-                <input
-                  type="date"
-                  className={inputClass}
+                <BirthDatePicker
                   value={draft.birthDate}
-                  onChange={(e) => set("birthDate", e.target.value)}
+                  onChange={(v) => set("birthDate", v)}
+                  locale={locale}
+                  labels={{
+                    day: t("dobDay"),
+                    month: t("dobMonth"),
+                    year: t("dobYear"),
+                  }}
                 />
               </Field>
               <Field label={t("gender")}>
@@ -321,13 +399,21 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
             <Field label={t("expectedSalary")}>
               <div className="flex gap-2">
                 <input
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  min={0}
                   className={inputClass}
                   placeholder={t("salaryHint")}
-                  value={draft.expectedSalary}
-                  onChange={(e) => set("expectedSalary", e.target.value)}
+                  value={
+                    draft.expectedSalary
+                      ? groupDigits(draft.expectedSalary)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    set(
+                      "expectedSalary",
+                      e.target.value.replace(/\D/g, "").slice(0, 12),
+                    )
+                  }
                 />
                 <div className="bg-muted inline-flex shrink-0 items-center rounded-lg p-0.5 text-sm font-semibold">
                   {["UZS", "USD"].map((c) => (

@@ -183,7 +183,10 @@
     "aiHint": "Drafts a professional summary from your role and experience",
     "aiFellBack": "AI didn't connect — a starter was inserted. You can edit it.",
     "aiRealityCheck": "Keep it real — the AI only helps.",
-    "aiRealityCheckOn": "This text was written with AI. Make it your own — employers may see that it was AI-assisted."
+    "aiRealityCheckOn": "This text was written with AI. Make it your own — employers may see that it was AI-assisted.",
+    "dobDay": "Day",
+    "dobMonth": "Month",
+    "dobYear": "Year"
   },
   "bookmarks": {
     "title": "Saved jobs",
