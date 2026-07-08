@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { safeNext } from "@/lib/auth/safe-next";
 import { getEmployerStats } from "@/lib/data/employer";
 import { getJobPostPrice } from "@/lib/data/pricing";
 import { willChargeForJobPost } from "@/lib/job-post-pricing";
@@ -84,8 +85,7 @@ export async function createCompany(
     .update({ role: "employer" })
     .eq("id", user.id);
 
-  const next = field(formData, "next");
-  redirect(next || `/${locale}/employer`);
+  redirect(safeNext(field(formData, "next"), `/${locale}/employer`));
 }
 
 /** Updates the employer's company (RLS confines the write to the owner). */
@@ -145,6 +145,18 @@ export async function createJob(
   const companyId = field(formData, "companyId");
   if (!companyId) return { noCompany: true };
 
+  // Attribution guard: a job may only be posted under a company the caller
+  // owns. RLS's INSERT check also enforces this, but verifying here gives a
+  // clean error instead of a policy violation, and blocks brand-spoofing at
+  // the action layer (posting under someone else's verified company).
+  const { data: ownedCompany } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("id", companyId)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (!ownedCompany) return { noCompany: true };
+
   const locale = field(formData, "locale") || "uz";
   const number = (name: string) => {
     const v = field(formData, name);
@@ -167,82 +179,77 @@ export async function createJob(
   }
 
   // The employer's first published vacancy is free; every one after that is
-  // charged from Hamyon before it goes live. Drafts are always free — they
-  // never reach the market, so they neither cost nor count toward "first".
-  let charged = false;
+  // charged from Hamyon. Drafts are always free — they never reach the market,
+  // so they neither cost nor count toward "first". Decide whether to charge
+  // BEFORE inserting (so the new row doesn't skew the "has published before"
+  // count), but charge AFTER — insert-then-charge means the only wallet call
+  // is a debit, so `adjust_wallet` can be locked to spend-only (a client can't
+  // mint a credit via the refund path).
+  let willCharge = false;
   let price = 0;
   if (status === "open") {
     const stats = await getEmployerStats(companyId);
     price = await getJobPostPrice();
-    if (willChargeForJobPost(stats.hasPublishedBefore, price)) {
-      const { error: payError } = await supabase.rpc("adjust_wallet", {
-        p_company_id: companyId,
-        p_amount_uzs: -price,
-        p_kind: "spend",
-        p_description: `Vakansiya: ${title}`,
-      });
-      if (payError) {
-        if (payError.message.includes("insufficient_funds")) {
-          return { insufficientFunds: true, requiredUzs: price };
-        }
-        console.error("createJob payment (adjust_wallet) failed", payError);
-        return { error: "unknown", detail: dbDetail(payError) };
-      }
-      charged = true;
-    }
+    willCharge = willChargeForJobPost(stats.hasPublishedBefore, price);
   }
 
-  const { error } = await supabase.from("jobs").insert({
-    company_id: companyId,
-    posted_by: user.id,
-    title,
-    description: optional(formData, "description"),
-    responsibilities: optional(formData, "responsibilities"),
-    requirements: optional(formData, "requirements"),
-    benefits: optional(formData, "benefits"),
-    category_id: optional(formData, "categoryId"),
-    city: optional(formData, "city"),
-    address_text: optional(formData, "addressText"),
-    lat: number("lat"),
-    lng: number("lng"),
-    country: "UZ",
-    salary_min: money("salaryMin"),
-    salary_max: money("salaryMax"),
-    currency: optional(formData, "currency") ?? "UZS",
-    salary_period: optional(formData, "salaryPeriod") ?? "month",
-    job_type: optional(formData, "jobType"),
-    experience_level: optional(formData, "experienceLevel"),
-    working_model: optional(formData, "workingModel"),
-    schedule_pattern: optional(formData, "schedulePattern"),
-    night_shift: bool("nightShift"),
-    contact_phone: optional(formData, "contactPhone"),
-    show_phone_on_listing: bool("showPhone"),
-    require_cover_letter: bool("requireCoverLetter"),
-    women_friendly: bool("womenFriendly"),
-    disability_friendly: bool("disabilityFriendly"),
-    screening_questions: Array.isArray(screening) ? screening : [],
-    status,
-  });
-  if (error) {
+  const { data: inserted, error } = await supabase
+    .from("jobs")
+    .insert({
+      company_id: companyId,
+      posted_by: user.id,
+      title,
+      description: optional(formData, "description"),
+      responsibilities: optional(formData, "responsibilities"),
+      requirements: optional(formData, "requirements"),
+      benefits: optional(formData, "benefits"),
+      category_id: optional(formData, "categoryId"),
+      city: optional(formData, "city"),
+      address_text: optional(formData, "addressText"),
+      lat: number("lat"),
+      lng: number("lng"),
+      country: "UZ",
+      salary_min: money("salaryMin"),
+      salary_max: money("salaryMax"),
+      currency: optional(formData, "currency") ?? "UZS",
+      salary_period: optional(formData, "salaryPeriod") ?? "month",
+      job_type: optional(formData, "jobType"),
+      experience_level: optional(formData, "experienceLevel"),
+      working_model: optional(formData, "workingModel"),
+      schedule_pattern: optional(formData, "schedulePattern"),
+      night_shift: bool("nightShift"),
+      contact_phone: optional(formData, "contactPhone"),
+      show_phone_on_listing: bool("showPhone"),
+      require_cover_letter: bool("requireCoverLetter"),
+      women_friendly: bool("womenFriendly"),
+      disability_friendly: bool("disabilityFriendly"),
+      screening_questions: Array.isArray(screening) ? screening : [],
+      status,
+    })
+    .select("id")
+    .single();
+  if (error || !inserted) {
     console.error("createJob insert failed", error);
-    if (charged) {
-      const { error: refundError } = await supabase.rpc("adjust_wallet", {
-        p_company_id: companyId,
-        p_amount_uzs: price,
-        p_kind: "refund",
-        p_description: `Qaytarish: ${title}`,
-      });
-      if (refundError) {
-        console.error(
-          "createJob refund failed after a failed insert — company",
-          companyId,
-          "amount",
-          price,
-          refundError,
-        );
-      }
-    }
     return { error: "unknown", detail: dbDetail(error) };
+  }
+
+  if (willCharge) {
+    const { error: payError } = await supabase.rpc("adjust_wallet", {
+      p_company_id: companyId,
+      p_amount_uzs: -price,
+      p_kind: "spend",
+      p_description: `Vakansiya: ${title}`,
+    });
+    if (payError) {
+      // Roll the job back so an unpaid vacancy never stays live (the owner
+      // can delete their own row under RLS).
+      await supabase.from("jobs").delete().eq("id", inserted.id);
+      if (payError.message.includes("insufficient_funds")) {
+        return { insufficientFunds: true, requiredUzs: price };
+      }
+      console.error("createJob payment (adjust_wallet) failed", payError);
+      return { error: "unknown", detail: dbDetail(payError) };
+    }
   }
 
   redirect(`/${locale}/employer/jobs`);
