@@ -22,7 +22,8 @@
     "candidates": "Candidates",
     "postVacancy": "Post a vacancy",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "pricing": "Pricing"
   },
   "explore": {
     "title": "Jobs map",
@@ -827,5 +828,29 @@
     "previewLabel": "After promotion",
     "previewOther": "Other vacancies",
     "topUpFor": "Top up Hamyon — {price}"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "heroTitle": "The fastest, cheapest way to hire",
+    "heroSubtitle": "Thousands of workers search on Yolla. Your first vacancy is free.",
+    "firstPost": "First vacancy",
+    "free": "Free",
+    "firstPostHint": "No charge, published instantly and shown in both apps.",
+    "nextPosts": "Further vacancies",
+    "nextPostsHint": "Each additional vacancy is charged from your Hamyon wallet.",
+    "promoTitle": "Promotion packages",
+    "promoSubtitle": "Push your vacancy to the top — 3× more candidates.",
+    "bestValue": "Best value",
+    "duration": "{days} days",
+    "perDay": "≈{price}/day",
+    "benefit1Title": "Fast",
+    "benefit1Desc": "Post in minutes — fill it in with AI.",
+    "benefit2Title": "Targeted",
+    "benefit2Desc": "Thousands of active blue-collar candidates.",
+    "benefit3Title": "Transparent",
+    "benefit3Desc": "No hidden fees — you pay for what you see.",
+    "ctaTitle": "Start today",
+    "ctaText": "First vacancy is free — post it in a couple of minutes.",
+    "ctaButton": "Post a vacancy"
   }
 }
