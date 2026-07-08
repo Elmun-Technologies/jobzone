@@ -53,7 +53,10 @@ String? resolveRedirect({
 
   if (!onboardingSeen) return inOnboarding ? null : Routes.onboarding;
   if (!signedIn) return inAuth ? null : Routes.signIn;
-  if (!profileComplete) {
+  // Password reset rides a recovery session whose profile may look incomplete
+  // (e.g. straight after a sign-out). Let the new-password screen through the
+  // setup gate too, or the reset is unreachable — it bounces to role-choice.
+  if (!profileComplete && location != Routes.newPassword) {
     // New accounts must pick a role first. The guard enforces this (not just
     // per-screen navigation) so Google OAuth — which has no explicit
     // post-signup hop — also lands on the role-choice screen.

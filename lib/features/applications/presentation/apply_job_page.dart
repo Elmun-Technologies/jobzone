@@ -304,6 +304,23 @@ class _ScreeningAnswerField extends StatelessWidget {
               ),
             ],
           )
+        // A single-choice question — render the employer's options as chips.
+        // Accept both type strings: mobile posts 'multiple_choice', web 'choice'.
+        else if ((question.type == 'multiple_choice' ||
+                question.type == 'choice') &&
+            question.options.isNotEmpty)
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final opt in question.options)
+                ChoiceChip(
+                  label: Text(opt),
+                  selected: value == opt,
+                  onSelected: (_) => onChanged(opt),
+                ),
+            ],
+          )
         else
           TextFormField(
             initialValue: value is String ? value as String : null,
