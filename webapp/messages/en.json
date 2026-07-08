@@ -174,7 +174,13 @@
       "c1_c2": "Advanced",
       "native": "Native"
     },
-    "errSave": "Couldn't save"
+    "errSave": "Couldn't save",
+    "summaryLabel": "About me",
+    "summaryHint": "A few lines about you, your experience and strengths",
+    "aiWrite": "Write with AI",
+    "aiWriting": "Writing…",
+    "aiHint": "Drafts a professional summary from your role and experience",
+    "aiFellBack": "AI didn't connect — a starter was inserted. You can edit it."
   },
   "bookmarks": {
     "title": "Saved jobs",

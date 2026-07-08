@@ -46,6 +46,14 @@ export async function saveResume(
 
   if (error) return { error: true };
 
+  // Summary rides a separate best-effort write: profiles.summary is a late
+  // column (0044), so a DB that hasn't run it still saves everything else (the
+  // returned error is simply ignored rather than failing the whole résumé).
+  await supabase
+    .from("profiles")
+    .update({ summary: clean(draft.summary) })
+    .eq("id", user.id);
+
   // Replace the user's education entries with the wizard's set.
   const year = (y: string) => (/^\d{4}$/.test(y) ? `${y}-01-01` : null);
   const rows = (draft.educations ?? [])

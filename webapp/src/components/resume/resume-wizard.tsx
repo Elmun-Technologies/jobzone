@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
+import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
 import type { EducationEntry, ResumeDraft } from "@/lib/data/resume";
 import { cn } from "@/lib/utils";
@@ -113,6 +114,32 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
 
   const set = <K extends keyof ResumeDraft>(key: K, value: ResumeDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
+
+  const [aiPending, setAiPending] = useState(false);
+  const [aiFellBack, setAiFellBack] = useState(false);
+
+  // "Write with AI": turn the seeker's role + experience + a few notes into a
+  // professional summary. Never blocks — GLM off/erroring returns a localized
+  // starter (fellBack) the seeker edits. Overwrites the summary field (that's
+  // the point); anything else typed stays.
+  async function writeSummaryWithAi() {
+    if (aiPending) return;
+    setAiPending(true);
+    setAiFellBack(false);
+    try {
+      const res = await generateResumeSummary({
+        position: draft.position,
+        experienceLevel: draft.experienceLevel || null,
+        city: draft.city || null,
+        notes: draft.summary || null,
+        locale,
+      });
+      set("summary", res.summary);
+      if (res.source === "template" && res.fellBack) setAiFellBack(true);
+    } finally {
+      setAiPending(false);
+    }
+  }
 
   const setLang = (code: string, level: string) =>
     setDraft((d) => ({ ...d, languages: { ...d.languages, [code]: level } }));
@@ -308,6 +335,43 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
                   ))}
                 </div>
               </div>
+            </Field>
+            <Field label={t("summaryLabel")}>
+              <textarea
+                rows={5}
+                className={cn(
+                  inputClass,
+                  "h-auto min-h-[7rem] py-2.5 leading-relaxed",
+                )}
+                placeholder={t("summaryHint")}
+                value={draft.summary}
+                onChange={(e) => set("summary", e.target.value)}
+              />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={writeSummaryWithAi}
+                  disabled={aiPending}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                  )}
+                >
+                  {aiPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-4" />
+                  )}
+                  {aiPending ? t("aiWriting") : t("aiWrite")}
+                </button>
+                <span className="text-muted-foreground text-xs">
+                  {t("aiHint")}
+                </span>
+              </div>
+              {aiFellBack ? (
+                <p className="text-muted-foreground mt-1.5 text-xs">
+                  {t("aiFellBack")}
+                </p>
+              ) : null}
             </Field>
           </>
         ) : null}
