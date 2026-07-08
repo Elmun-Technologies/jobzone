@@ -11,15 +11,14 @@ export interface MyApplication {
   jobId: string;
   jobTitle: string;
   companyName: string;
+  /** "open" | "closed" | "draft" | "" (unknown — job row itself is gone). */
+  jobStatus: string;
 }
 
-function pickOne(v: unknown): Record<string, unknown> | null {
-  if (Array.isArray(v)) return (v[0] as Record<string, unknown>) ?? null;
-  if (v && typeof v === "object") return v as Record<string, unknown>;
-  return null;
-}
-
-/** The signed-in user's applications, newest first. */
+/** The signed-in user's applications, newest first. A closed job still shows
+ *  (e.g. the applicant was hired for the now-filled position) via the
+ *  `my_applied_jobs` definer view (0048), scoped to the caller's own
+ *  applications — not general `jobs` read access. */
 export async function getMyApplications(): Promise<MyApplication[]> {
   if (!hasSupabase()) return [];
   try {
@@ -29,35 +28,41 @@ export async function getMyApplications(): Promise<MyApplication[]> {
     } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data: apps, error } = await supabase
       .from("applications")
-      .select(
-        "id, current_status, applied_at, job:jobs(id, title, company:companies(name))",
-      )
+      .select("id, current_status, applied_at, job_id")
       .eq("applicant_id", user.id)
       .order("applied_at", { ascending: false });
     if (error) throw error;
 
-    return (data ?? [])
-      .map((row) => {
-        const r = row as Record<string, unknown>;
-        const job = pickOne(r.job);
-        const company = pickOne(job?.company);
-        return {
-          id: String(r.id),
-          status: String(r.current_status ?? "submitted"),
-          appliedAt: typeof r.applied_at === "string" ? r.applied_at : null,
-          jobId: job?.id ? String(job.id) : "",
-          jobTitle: job?.title ? String(job.title) : "—",
-          companyName: company?.name ? String(company.name) : "",
-        };
-      })
-      // A closed/deleted job is unreadable to the applicant (jobs RLS exposes
-      // only status='open' to non-owners), so its embed resolves to null. Drop
-      // those rows instead of rendering a dead "—" card with a broken /jobs/
-      // link — matching the mobile app, which filters applications to the jobs
-      // present in job_feed.
-      .filter((a) => a.jobId !== "");
+    const rows = (apps ?? []).map((a) => a as Record<string, unknown>);
+    const jobIds = [...new Set(rows.map((r) => String(r.job_id)))];
+
+    const jobs = new Map<string, Record<string, unknown>>();
+    if (jobIds.length) {
+      const { data: jobRows } = await supabase
+        .from("my_applied_jobs")
+        .select("id, title, status, company_name")
+        .in("id", jobIds);
+      for (const j of jobRows ?? []) {
+        const jr = j as Record<string, unknown>;
+        jobs.set(String(jr.id), jr);
+      }
+    }
+
+    return rows.map((r) => {
+      const jobId = String(r.job_id);
+      const job = jobs.get(jobId);
+      return {
+        id: String(r.id),
+        status: String(r.current_status ?? "submitted"),
+        appliedAt: typeof r.applied_at === "string" ? r.applied_at : null,
+        jobId,
+        jobTitle: job?.title ? String(job.title) : "—",
+        companyName: job?.company_name ? String(job.company_name) : "",
+        jobStatus: job?.status ? String(job.status) : "",
+      };
+    });
   } catch (e) {
     console.error("getMyApplications failed", e);
     return [];

@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -40,17 +41,31 @@ const STATUS_CLASS: Record<string, string> = {
 
 export default async function MyApplicationsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ applied?: string }>;
 }) {
   const { locale } = await params;
+  const { applied } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("applications");
   const apps = await getMyApplications();
+  // The full apply form (apply.ts:applyToJob) redirects here with ?applied=1 —
+  // the seeker just typed a cover letter / answered screening questions and
+  // deserves a clear "it worked", not a silent landing on a generic list.
+  const justApplied = applied === "1" && apps.length > 0;
 
   return (
     <Container className="max-w-2xl py-12">
       <h1 className="text-foreground mb-6 text-2xl font-bold">{t("title")}</h1>
+
+      {justApplied ? (
+        <div className="border-primary/40 bg-accent text-accent-foreground mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium">
+          <CheckCircle2 className="text-primary size-5 shrink-0" />
+          {t("appliedBanner")}
+        </div>
+      ) : null}
 
       {apps.length === 0 ? (
         <EmptyState
@@ -67,12 +82,15 @@ export default async function MyApplicationsPage({
         />
       ) : (
         <ul className="space-y-3">
-          {apps.map((a) => (
-            <li key={a.id}>
-              <Link
-                href={`/jobs/${a.jobId}`}
-                className="border-border bg-card hover:border-primary/40 flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors"
-              >
+          {apps.map((a) => {
+            // A closed (or otherwise gone) job still gets a card — this is
+            // exactly the record an applicant hired for a now-filled position
+            // needs to keep — but it isn't a live listing, so no /jobs/ link.
+            const isOpen = a.jobStatus === "open";
+            const cardClass =
+              "border-border bg-card flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors";
+            const content = (
+              <>
                 <div className="min-w-0">
                   <p className="text-foreground truncate font-semibold">
                     {a.jobTitle}
@@ -80,6 +98,7 @@ export default async function MyApplicationsPage({
                   <p className="text-muted-foreground truncate text-sm">
                     {a.companyName}
                     {a.appliedAt ? ` · ${formatDate(a.appliedAt)}` : ""}
+                    {!isOpen ? ` · ${t("positionClosed")}` : ""}
                   </p>
                 </div>
                 <span
@@ -91,9 +110,23 @@ export default async function MyApplicationsPage({
                     ? t(`status.${a.status}`)
                     : a.status}
                 </span>
-              </Link>
-            </li>
-          ))}
+              </>
+            );
+            return (
+              <li key={a.id}>
+                {isOpen ? (
+                  <Link
+                    href={`/jobs/${a.jobId}`}
+                    className={cn(cardClass, "hover:border-primary/40")}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div className={cardClass}>{content}</div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </Container>

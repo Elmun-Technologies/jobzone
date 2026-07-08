@@ -92,12 +92,14 @@ export async function getApplicantResume(
           "title, company_name, start_date, end_date, is_current, description",
         )
         .eq("profile_id", applicantId)
-        .order("end_date", { ascending: false, nullsFirst: false }),
+        // nullsFirst: an ongoing role has end_date=null and is the most recent —
+        // it must sort to the TOP, not the bottom.
+        .order("end_date", { ascending: false, nullsFirst: true }),
       supabase
         .from("educations")
         .select("school, degree, field, start_date, end_date, is_current")
         .eq("profile_id", applicantId)
-        .order("end_date", { ascending: false, nullsFirst: false }),
+        .order("end_date", { ascending: false, nullsFirst: true }),
       supabase
         .from("certifications")
         .select("name, issuer, issued_date, expiry_date")

@@ -249,6 +249,7 @@
     "reopenJob": "Reopen",
     "viewApplicants": "Candidates",
     "jobPosted": "Vacancy published — it's now visible in the job listings.",
+    "promoteThisJob": "Promote this vacancy",
     "draftSaved": "Draft saved. Publish it when you're ready.",
     "jobUpdated": "Changes saved.",
     "editJob": "Edit vacancy",
@@ -459,6 +460,8 @@
     "empty": "You haven't applied yet",
     "emptyHint": "Find matching jobs and apply in one tap.",
     "browseJobs": "Browse jobs",
+    "positionClosed": "Position closed",
+    "appliedBanner": "Application sent! The employer will get back to you soon.",
     "status": {
       "submitted": "Submitted",
       "viewed": "Viewed",

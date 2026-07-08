@@ -62,13 +62,16 @@ export default async function ApplicantResumePage({
   setRequestLocale(locale);
   await requireEmployer(locale);
 
-  const company = await getMyCompany();
+  // Independent reads run together; the ownership/existence gates apply after.
+  // getApplicantForJob is RLS-gated (is_job_owner) so it's safe before the
+  // company check — a non-owner simply gets null.
+  const [company, job, applicant] = await Promise.all([
+    getMyCompany(),
+    getJobTitleAndCompany(id),
+    getApplicantForJob(id, appId),
+  ]);
   if (!company) redirect(`/${locale}/employer/onboarding`);
-
-  const job = await getJobTitleAndCompany(id);
   if (!job || job.companyId !== company.id) notFound();
-
-  const applicant = await getApplicantForJob(id, appId);
   if (!applicant) notFound();
 
   const resume = await getApplicantResume(applicant.applicantId);
