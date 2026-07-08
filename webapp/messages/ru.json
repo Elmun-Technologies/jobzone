@@ -273,6 +273,9 @@
     "statJobs": "Всего вакансий",
     "applicants": "Кандидаты",
     "noApplicants": "Пока нет кандидатов",
+    "noApplicantsHint": "Пока откликов нет. Продвиньте вакансию или поделитесь ссылкой — её увидит больше кандидатов.",
+    "newApplicants": "{count} новых",
+    "viewPublicListing": "Открыть вакансию",
     "applicantsCount": "{count} кандидатов",
     "errUnknown": "Произошла ошибка",
     "status": {

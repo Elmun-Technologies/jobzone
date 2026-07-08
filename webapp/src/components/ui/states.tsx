@@ -52,11 +52,12 @@ function StateMessage({
   );
 }
 
-/** Empty-list placeholder. */
+/** Empty-list placeholder, with an optional call-to-action. */
 export function EmptyState(props: {
   icon?: React.ReactNode;
   title: string;
   description?: string;
+  action?: React.ReactNode;
 }) {
   return <StateMessage {...props} />;
 }

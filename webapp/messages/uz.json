@@ -273,6 +273,9 @@
     "statJobs": "Jami ishlar",
     "applicants": "Nomzodlar",
     "noApplicants": "Hali nomzod yo'q",
+    "noApplicantsHint": "Hali ariza yo'q. Vakansiyani targ'ib qiling yoki e'lon havolasini ulashing — uni ko'proq nomzod ko'radi.",
+    "newApplicants": "{count} yangi",
+    "viewPublicListing": "E'lonni ko'rish",
     "applicantsCount": "{count} nomzod",
     "errUnknown": "Xatolik yuz berdi",
     "status": {

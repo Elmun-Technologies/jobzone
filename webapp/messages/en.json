@@ -273,6 +273,9 @@
     "statJobs": "Total jobs",
     "applicants": "Applicants",
     "noApplicants": "No applicants yet",
+    "noApplicantsHint": "No applications yet. Promote the vacancy or share its link to reach more candidates.",
+    "newApplicants": "{count} new",
+    "viewPublicListing": "View listing",
     "applicantsCount": "{count} applicants",
     "errUnknown": "Something went wrong",
     "status": {
