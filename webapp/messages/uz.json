@@ -827,7 +827,8 @@
     "perDay": "≈{price} so'm/kun",
     "previewLabel": "Reklamadan keyin",
     "previewOther": "Boshqa vakansiyalar",
-    "topUpFor": "Hamyonni to'ldirish — {price}"
+    "topUpFor": "Hamyonni to'ldirish — {price}",
+    "cheaper": "{pct}% arzon"
   },
   "pricing": {
     "title": "Narxlar",
@@ -851,6 +852,7 @@
     "benefit3Desc": "Yashirin to'lovlar yo'q — nima to'lasangiz, shuni ko'rasiz.",
     "ctaTitle": "Bugun boshlang",
     "ctaText": "Birinchi vakansiya bepul — bir necha daqiqada e'lon qiling.",
-    "ctaButton": "Vakansiya joylash"
+    "ctaButton": "Vakansiya joylash",
+    "cheaper": "{pct}% arzon"
   }
 }

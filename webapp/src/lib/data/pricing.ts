@@ -65,7 +65,7 @@ const FALLBACK_PROMOTIONS: PromotionProduct[] = [
     name: "7 kun TOP",
     description: "Ro'yxat tepasida 7 kun",
     kind: "top",
-    priceUzs: 35000,
+    priceUzs: 30000,
     durationDays: 7,
   },
   {
