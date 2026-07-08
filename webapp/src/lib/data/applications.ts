@@ -38,19 +38,26 @@ export async function getMyApplications(): Promise<MyApplication[]> {
       .order("applied_at", { ascending: false });
     if (error) throw error;
 
-    return (data ?? []).map((row) => {
-      const r = row as Record<string, unknown>;
-      const job = pickOne(r.job);
-      const company = pickOne(job?.company);
-      return {
-        id: String(r.id),
-        status: String(r.current_status ?? "submitted"),
-        appliedAt: typeof r.applied_at === "string" ? r.applied_at : null,
-        jobId: job?.id ? String(job.id) : "",
-        jobTitle: job?.title ? String(job.title) : "—",
-        companyName: company?.name ? String(company.name) : "",
-      };
-    });
+    return (data ?? [])
+      .map((row) => {
+        const r = row as Record<string, unknown>;
+        const job = pickOne(r.job);
+        const company = pickOne(job?.company);
+        return {
+          id: String(r.id),
+          status: String(r.current_status ?? "submitted"),
+          appliedAt: typeof r.applied_at === "string" ? r.applied_at : null,
+          jobId: job?.id ? String(job.id) : "",
+          jobTitle: job?.title ? String(job.title) : "—",
+          companyName: company?.name ? String(company.name) : "",
+        };
+      })
+      // A closed/deleted job is unreadable to the applicant (jobs RLS exposes
+      // only status='open' to non-owners), so its embed resolves to null. Drop
+      // those rows instead of rendering a dead "—" card with a broken /jobs/
+      // link — matching the mobile app, which filters applications to the jobs
+      // present in job_feed.
+      .filter((a) => a.jobId !== "");
   } catch (e) {
     console.error("getMyApplications failed", e);
     return [];

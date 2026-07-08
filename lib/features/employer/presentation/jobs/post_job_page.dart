@@ -15,6 +15,7 @@ import '../../../jobs/data/categories_repository.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/domain/job_language.dart';
 import '../../../jobs/domain/screening_question.dart';
+import '../../../jobs/presentation/category_label.dart';
 import '../../../jobs/presentation/job_details_page.dart';
 import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/ai_content_repository.dart';
@@ -468,7 +469,10 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                       value: cats.any((c) => c.id == _categoryId)
                           ? _categoryId
                           : null,
-                      items: {for (final c in cats) c.id: c.name},
+                      items: {
+                        for (final c in cats)
+                          c.id: localizedCategory(l, slug: c.slug),
+                      },
                       onChanged: (v) => setState(() => _categoryId = v),
                     ),
                     const SizedBox(height: AppSpacing.md),

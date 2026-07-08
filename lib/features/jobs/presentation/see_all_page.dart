@@ -6,6 +6,7 @@ import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../application/paginated_jobs_notifier.dart';
+import 'category_label.dart';
 import 'widgets/job_card.dart';
 
 enum SeeAllKind { suggested, recent }
@@ -131,7 +132,7 @@ class _SeeAllJobsPageState extends ConsumerState<SeeAllJobsPage> {
                 ),
                 for (final c in categories)
                   _CategoryChip(
-                    label: c,
+                    label: localizedCategory(l, name: c),
                     selected: _category == c,
                     onTap: () => setState(() => _category = c),
                   ),

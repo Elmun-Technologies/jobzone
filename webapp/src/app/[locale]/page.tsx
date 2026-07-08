@@ -23,6 +23,14 @@ import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+// Reads per-user bookmarks + the auth-aware header and the live job feed, but
+// getCurrentUser()'s try/catch swallows the cookies() dynamic signal — so
+// without this the homepage bakes as static logged-out HTML: a signed-out
+// header for logged-in users, saved jobs shown as unsaved, and a job list/map
+// frozen at build time (new postings must appear immediately — invariant #3).
+// Render per request, matching the gated pages' pattern.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage({
   params,
 }: {
