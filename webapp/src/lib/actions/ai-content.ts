@@ -119,7 +119,13 @@ export async function generateJobContent(input: {
   notes?: string | null;
   locale: string;
 }): Promise<JobDraftContent> {
-  const { title, category, notes, locale } = input;
+  // Cap each input so one call can't be inflated into a huge-token request
+  // against the shared GLM key (bounded cost per call; the post-job page is
+  // guest-usable by design, so we bound rather than gate on auth).
+  const title = (input.title ?? "").slice(0, 120);
+  const category = input.category?.slice(0, 80) ?? null;
+  const notes = input.notes?.slice(0, 800) ?? null;
+  const { locale } = input;
   const key = process.env.GLM_API_KEY;
   const tmpl = templateDraft(locale);
 

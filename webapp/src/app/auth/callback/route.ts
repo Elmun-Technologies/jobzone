@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeNext } from "@/lib/auth/safe-next";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -10,7 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/uz/account";
+  // Only same-origin local paths — never an attacker-supplied off-site URL.
+  const next = safeNext(searchParams.get("next"), "/uz/account");
 
   if (code) {
     const supabase = await createClient();
