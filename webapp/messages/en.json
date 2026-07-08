@@ -449,6 +449,7 @@
     "empty": "You haven't applied yet",
     "emptyHint": "Find matching jobs and apply in one tap.",
     "browseJobs": "Browse jobs",
+    "positionClosed": "Position closed",
     "status": {
       "submitted": "Submitted",
       "viewed": "Viewed",

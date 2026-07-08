@@ -449,6 +449,7 @@
     "empty": "Hali ariza topshirmadingiz",
     "emptyHint": "Mos ishlarni toping va bir zumda ariza bering.",
     "browseJobs": "Ishlarni ko'rish",
+    "positionClosed": "Vakansiya yopilgan",
     "status": {
       "submitted": "Yuborilgan",
       "viewed": "Ko'rilgan",

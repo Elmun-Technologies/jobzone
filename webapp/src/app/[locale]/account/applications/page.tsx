@@ -67,12 +67,15 @@ export default async function MyApplicationsPage({
         />
       ) : (
         <ul className="space-y-3">
-          {apps.map((a) => (
-            <li key={a.id}>
-              <Link
-                href={`/jobs/${a.jobId}`}
-                className="border-border bg-card hover:border-primary/40 flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors"
-              >
+          {apps.map((a) => {
+            // A closed (or otherwise gone) job still gets a card — this is
+            // exactly the record an applicant hired for a now-filled position
+            // needs to keep — but it isn't a live listing, so no /jobs/ link.
+            const isOpen = a.jobStatus === "open";
+            const cardClass =
+              "border-border bg-card flex items-center justify-between gap-3 rounded-xl border p-4 transition-colors";
+            const content = (
+              <>
                 <div className="min-w-0">
                   <p className="text-foreground truncate font-semibold">
                     {a.jobTitle}
@@ -80,6 +83,7 @@ export default async function MyApplicationsPage({
                   <p className="text-muted-foreground truncate text-sm">
                     {a.companyName}
                     {a.appliedAt ? ` · ${formatDate(a.appliedAt)}` : ""}
+                    {!isOpen ? ` · ${t("positionClosed")}` : ""}
                   </p>
                 </div>
                 <span
@@ -91,9 +95,23 @@ export default async function MyApplicationsPage({
                     ? t(`status.${a.status}`)
                     : a.status}
                 </span>
-              </Link>
-            </li>
-          ))}
+              </>
+            );
+            return (
+              <li key={a.id}>
+                {isOpen ? (
+                  <Link
+                    href={`/jobs/${a.jobId}`}
+                    className={cn(cardClass, "hover:border-primary/40")}
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div className={cardClass}>{content}</div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </Container>
