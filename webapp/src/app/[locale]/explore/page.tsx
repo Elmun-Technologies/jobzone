@@ -1,9 +1,9 @@
+import { List } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
-import { Container } from "@/components/ui/container";
 import { getCompanyRatings } from "@/lib/data/companies";
 import { getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
@@ -33,22 +33,19 @@ export default async function ExplorePage({
   ]);
 
   return (
-    <Container className="py-8">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold sm:text-3xl">
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground text-sm">{t("subtitle")}</p>
-        </div>
-        <Link
-          href="/jobs"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-        >
-          {t("listView")}
-        </Link>
-      </div>
-      <JobsMap jobs={jobs} ratings={ratings} />
-    </Container>
+    <div className="relative">
+      <JobsMap jobs={jobs} ratings={ratings} fullBleed />
+      {/* Floating "list view" escape hatch (bottom-left, clear of near-me). */}
+      <Link
+        href="/jobs"
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "bg-background/95 absolute bottom-6 left-4 z-[1001] gap-1.5 shadow-lg",
+        )}
+      >
+        <List className="size-4" />
+        {t("listView")}
+      </Link>
+    </div>
   );
 }

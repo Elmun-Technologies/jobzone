@@ -32,17 +32,29 @@ const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 type Located = Job & { lat: number; lng: number; distance: number | null };
 
-/** A branded volt/ink map marker showing the compact salary (or a dot). */
+/** A Joyme-style salary price-tag pin (bubble + pointer), or a dot when the
+ * job has no salary. Boosted jobs wear volt; the rest white — both on ink. */
 function pinIcon(label: string | null, boosted: boolean): L.DivIcon {
   const bg = boosted ? "#C7FB00" : "#FFFFFF";
-  const text = label ?? "•";
+  if (!label) {
+    return L.divIcon({
+      className: "",
+      html: `<span style="display:block;width:14px;height:14px;border-radius:9999px;
+        transform:translate(-50%,-50%);background:${bg};border:2px solid #0A0A0A;
+        box-shadow:0 2px 6px rgba(0,0,0,.3)"></span>`,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
+    });
+  }
   return L.divIcon({
     className: "",
-    html: `<span style="display:inline-flex;align-items:center;justify-content:center;
-      transform:translate(-50%,-100%);background:${bg};color:#0A0A0A;
-      border:2px solid #0A0A0A;border-radius:9999px;padding:3px 9px;
-      font:700 12px/1 var(--font-mono,ui-monospace,monospace);
-      box-shadow:0 2px 6px rgba(0,0,0,.28);white-space:nowrap">${text}</span>`,
+    html: `<div style="position:relative;transform:translate(-50%,-100%)">
+      <div style="background:${bg};color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
+        padding:5px 11px;font:800 13px/1 var(--font-mono,ui-monospace,monospace);
+        white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.32)">${label}</div>
+      <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
+        border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
+    </div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
@@ -70,10 +82,14 @@ export default function JobsMapInner({
   jobs,
   ratings,
   height = "70vh",
+  fullBleed = false,
 }: {
   jobs: Job[];
   ratings?: MapRatings;
   height?: string;
+  /** Immersive mode: the map fills the viewport and the filters + near-me
+   * float over it (the /explore "map search" experience, Joyme-style). */
+  fullBleed?: boolean;
 }) {
   const locale = useLocale();
   const t = useTranslations("explore");
@@ -157,141 +173,169 @@ export default function JobsMapInner({
   }
 
   const selectCls =
-    "border-border bg-background text-foreground h-9 rounded-full border px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "border-border bg-background/95 text-foreground h-9 rounded-full border px-3 text-sm font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+  const mapHeight = fullBleed ? "calc(100dvh - 4rem)" : height;
 
   return (
-    <div>
-      {/* Segmentation toolbar — find a job by area, field, company or rating. */}
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <Chip
-          active={nearMe}
-          onClick={toggleNearMe}
-          label={status === "locating" ? t("map.locating") : t("map.nearMe")}
+    <div
+      className={cn(
+        "relative overflow-hidden",
+        fullBleed ? "" : "border-border rounded-2xl border",
+      )}
+      style={{ height: mapHeight }}
+    >
+      {useYandex ? (
+        <YandexMap
+          jobs={shown}
+          loc={loc}
+          locale={locale}
+          applyLabel={t("map.apply")}
+          youAreHere={t("map.youAreHere")}
+          ratings={ratings}
+          onError={() => setYandexFailed(true)}
         />
-        {categories.length > 0 ? (
-          <select
-            aria-label={t("map.byCategory")}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className={cn(selectCls, category && "border-primary")}
-          >
-            <option value="">{t("map.allCategories")}</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        ) : null}
-        {companies.length > 1 ? (
-          <select
-            aria-label={t("map.byCompany")}
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            className={cn(selectCls, company && "border-primary")}
-          >
-            <option value="">{t("map.allCompanies")}</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        ) : null}
-        {hasRatings ? (
-          <Chip
-            active={topRated}
-            onClick={() => setTopRated((v) => !v)}
-            label={`🌸 ${t("map.topRated")}`}
+      ) : (
+        <MapContainer
+          center={loc ? [loc.lat, loc.lng] : TASHKENT}
+          zoom={loc ? 13 : 11}
+          scrollWheelZoom
+          zoomControl={false}
+          className="h-full w-full"
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
-        ) : null}
-        <Chip
-          active={salaryOn}
-          onClick={() => setSalaryOn((v) => !v)}
-          label={t("map.salaryFrom")}
-        />
-        <Chip
-          active={schedule22}
-          onClick={() => setSchedule22((v) => !v)}
-          label={t("map.schedule22")}
-        />
-        <span className="text-foreground bg-muted ml-auto rounded-full px-3 py-1.5 text-sm font-semibold">
+
+          {loc ? (
+            <>
+              <Recenter to={loc} zoom={13} />
+              <Marker position={[loc.lat, loc.lng]} icon={meIcon}>
+                <Popup>{t("map.youAreHere")}</Popup>
+              </Marker>
+            </>
+          ) : null}
+
+          {shown.map((j) => (
+            <Marker
+              key={j.id}
+              position={[j.lat, j.lng]}
+              icon={pinIcon(salaryPill(j), j.boostActive)}
+            >
+              <Popup>
+                <PinCard
+                  job={j}
+                  locale={locale}
+                  applyLabel={t("map.apply")}
+                  rating={ratings?.[j.companyId]}
+                />
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      )}
+
+      {/* Floating filter bar — scrolls horizontally on a phone. */}
+      <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] px-3">
+        <div className="pointer-events-auto flex [scrollbar-width:none] items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+          <Chip
+            active={nearMe}
+            onClick={toggleNearMe}
+            label={status === "locating" ? t("map.locating") : t("map.nearMe")}
+          />
+          {categories.length > 0 ? (
+            <select
+              aria-label={t("map.byCategory")}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className={cn(
+                selectCls,
+                "shrink-0",
+                category && "border-primary",
+              )}
+            >
+              <option value="">{t("map.allCategories")}</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {companies.length > 1 ? (
+            <select
+              aria-label={t("map.byCompany")}
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className={cn(selectCls, "shrink-0", company && "border-primary")}
+            >
+              <option value="">{t("map.allCompanies")}</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {hasRatings ? (
+            <Chip
+              active={topRated}
+              onClick={() => setTopRated((v) => !v)}
+              label={`🌸 ${t("map.topRated")}`}
+            />
+          ) : null}
+          <Chip
+            active={salaryOn}
+            onClick={() => setSalaryOn((v) => !v)}
+            label={t("map.salaryFrom")}
+          />
+          <Chip
+            active={schedule22}
+            onClick={() => setSchedule22((v) => !v)}
+            label={t("map.schedule22")}
+          />
+        </div>
+      </div>
+
+      {/* Live result count (top-right pill). */}
+      <div className="absolute top-3 right-3 z-[1001] hidden sm:block">
+        <span className="bg-foreground text-background rounded-full px-3 py-1.5 text-sm font-semibold shadow-md">
           {t("map.results", { count: shown.length })}
         </span>
       </div>
 
-      <p className="text-muted-foreground mb-3 text-xs">{t("map.hint")}</p>
-
-      <div
-        className="border-border relative overflow-hidden rounded-2xl border"
-        style={{ height }}
-      >
-        {useYandex ? (
-          <YandexMap
-            jobs={shown}
-            loc={loc}
-            locale={locale}
-            applyLabel={t("map.apply")}
-            youAreHere={t("map.youAreHere")}
-            ratings={ratings}
-            onError={() => setYandexFailed(true)}
-          />
-        ) : (
-          <MapContainer
-            center={loc ? [loc.lat, loc.lng] : TASHKENT}
-            zoom={loc ? 13 : 11}
-            scrollWheelZoom
-            className="h-full w-full"
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-
-            {loc ? (
-              <>
-                <Recenter to={loc} zoom={13} />
-                <Marker position={[loc.lat, loc.lng]} icon={meIcon}>
-                  <Popup>{t("map.youAreHere")}</Popup>
-                </Marker>
-              </>
-            ) : null}
-
-            {shown.map((j) => (
-              <Marker
-                key={j.id}
-                position={[j.lat, j.lng]}
-                icon={pinIcon(salaryPill(j), j.boostActive)}
-              >
-                <Popup>
-                  <PinCard
-                    job={j}
-                    locale={locale}
-                    applyLabel={t("map.apply")}
-                    rating={ratings?.[j.companyId]}
-                  />
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+      {/* Prominent "near me" — the fastest path to nearby jobs. */}
+      <button
+        type="button"
+        onClick={toggleNearMe}
+        aria-pressed={nearMe}
+        className={cn(
+          "absolute right-4 bottom-6 z-[1001] flex items-center gap-2 rounded-full px-4 py-3 text-sm font-bold shadow-lg transition-colors",
+          nearMe
+            ? "bg-primary text-primary-foreground"
+            : "bg-background text-foreground border-border border",
         )}
+      >
+        <span aria-hidden>📍</span>
+        {status === "locating" ? t("map.locating") : t("map.nearMe")}
+      </button>
 
-        {shown.length === 0 ? (
-          <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center p-6">
-            <p className="bg-background/95 text-foreground max-w-xs rounded-xl px-4 py-3 text-center text-sm font-medium shadow">
-              {located.length === 0
-                ? t("map.emptyNoJobs")
-                : t("map.emptyFiltered")}
-            </p>
-          </div>
-        ) : null}
+      {shown.length === 0 ? (
+        <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center p-6">
+          <p className="bg-background/95 text-foreground max-w-xs rounded-xl px-4 py-3 text-center text-sm font-medium shadow">
+            {located.length === 0
+              ? t("map.emptyNoJobs")
+              : t("map.emptyFiltered")}
+          </p>
+        </div>
+      ) : null}
 
-        {status === "denied" && nearMe ? (
-          <div className="text-muted-foreground bg-background/95 absolute inset-x-0 bottom-0 z-[1000] m-3 rounded-lg px-3 py-2 text-center text-sm shadow">
-            {t("map.locationDenied")}
-          </div>
-        ) : null}
-      </div>
+      {status === "denied" && nearMe ? (
+        <div className="text-muted-foreground bg-background/95 absolute inset-x-0 bottom-24 z-[1000] mx-3 rounded-lg px-3 py-2 text-center text-sm shadow">
+          {t("map.locationDenied")}
+        </div>
+      ) : null}
     </div>
   );
 }

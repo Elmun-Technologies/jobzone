@@ -23,10 +23,19 @@ export function JobsMap({
   jobs,
   ratings,
   height,
+  fullBleed,
 }: {
   jobs: Job[];
   ratings?: MapRatings;
   height?: string;
+  fullBleed?: boolean;
 }) {
-  return <Inner jobs={jobs} ratings={ratings} height={height} />;
+  return (
+    <Inner
+      jobs={jobs}
+      ratings={ratings}
+      height={height}
+      fullBleed={fullBleed}
+    />
+  );
 }

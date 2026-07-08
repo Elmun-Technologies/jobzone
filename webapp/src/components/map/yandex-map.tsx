@@ -89,7 +89,9 @@ export function YandexMap({
             {
               center: loc ? [loc.lat, loc.lng] : TASHKENT,
               zoom: loc ? 13 : 11,
-              controls: ["zoomControl", "geolocationControl"],
+              // No default zoom/geo controls — clean immersive map (our own
+              // filter bar sits top-left; scroll/pinch to zoom).
+              controls: [],
             },
             { suppressMapOpenBlock: true },
           );
@@ -97,8 +99,12 @@ export function YandexMap({
           map.current.setCenter([loc.lat, loc.lng], 13);
         }
 
+        // Joyme-style salary price-tag: a bubble with a pointer at the point.
         const PinLayout = ymaps.templateLayoutFactory.createClass(
-          `<div style="transform:translate(-50%,-100%);background:$[properties.bg];color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:3px 9px;font:700 12px/1 monospace;box-shadow:0 2px 6px rgba(0,0,0,.28);white-space:nowrap">$[properties.label]</div>`,
+          `<div style="position:relative;transform:translate(-50%,-100%)">
+            <div style="background:$[properties.bg];color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 11px;font:800 13px/1 monospace;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.32)">$[properties.label]</div>
+            <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
+          </div>`,
         );
 
         map.current.geoObjects.removeAll();
