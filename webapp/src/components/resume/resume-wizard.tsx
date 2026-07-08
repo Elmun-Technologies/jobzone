@@ -15,7 +15,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
-import type { EducationEntry, ResumeDraft } from "@/lib/data/resume";
+import type {
+  EducationEntry,
+  ExperienceEntry,
+  ResumeDraft,
+} from "@/lib/data/resume";
 import { cn } from "@/lib/utils";
 
 const inputClass =
@@ -36,6 +40,15 @@ const EMPTY_EDU: EducationEntry = {
   startYear: "",
   endYear: "",
   isCurrent: false,
+};
+
+const EMPTY_EXP: ExperienceEntry = {
+  title: "",
+  companyName: "",
+  startYear: "",
+  endYear: "",
+  isCurrent: false,
+  description: "",
 };
 
 function Field({
@@ -252,6 +265,28 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
       ),
     }));
 
+  const addExp = () =>
+    setDraft((d) => ({
+      ...d,
+      experiences: [...d.experiences, { ...EMPTY_EXP }],
+    }));
+  const removeExp = (i: number) =>
+    setDraft((d) => ({
+      ...d,
+      experiences: d.experiences.filter((_, j) => j !== i),
+    }));
+  const setExp = <K extends keyof ExperienceEntry>(
+    i: number,
+    key: K,
+    value: ExperienceEntry[K],
+  ) =>
+    setDraft((d) => ({
+      ...d,
+      experiences: d.experiences.map((e, j) =>
+        j === i ? { ...e, [key]: value } : e,
+      ),
+    }));
+
   const steps = [
     t("stepPersonal"),
     t("stepExperience"),
@@ -396,6 +431,88 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
                 options={EXP.map((e) => ({ value: e, label: t(`exp.${e}`) }))}
               />
             </Field>
+
+            {/* Real work history — one card per job (experiences table). */}
+            <div>
+              <p className="text-foreground mb-2 text-sm font-medium">
+                {t("workHistory")}
+              </p>
+              {draft.experiences.map((exp, i) => (
+                <div
+                  key={i}
+                  className="border-border mb-3 rounded-xl border p-4"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-foreground text-sm font-semibold">
+                      {t("jobLabel")} #{i + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeExp(i)}
+                      aria-label={t("remove")}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    <input
+                      className={inputClass}
+                      placeholder={t("jobPosition")}
+                      value={exp.title}
+                      onChange={(e) => setExp(i, "title", e.target.value)}
+                    />
+                    <input
+                      className={inputClass}
+                      placeholder={t("company")}
+                      value={exp.companyName}
+                      onChange={(e) => setExp(i, "companyName", e.target.value)}
+                    />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <input
+                        className={inputClass}
+                        inputMode="numeric"
+                        placeholder={t("startYear")}
+                        value={exp.startYear}
+                        onChange={(e) => setExp(i, "startYear", e.target.value)}
+                      />
+                      <input
+                        className={inputClass}
+                        inputMode="numeric"
+                        placeholder={t("endYear")}
+                        disabled={exp.isCurrent}
+                        value={exp.isCurrent ? "" : exp.endYear}
+                        onChange={(e) => setExp(i, "endYear", e.target.value)}
+                      />
+                    </div>
+                    <label className="text-foreground flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={exp.isCurrent}
+                        onChange={(e) =>
+                          setExp(i, "isCurrent", e.target.checked)
+                        }
+                      />
+                      {t("currentlyWorking")}
+                    </label>
+                    <textarea
+                      className={cn(inputClass, "h-auto min-h-[4rem] py-2.5")}
+                      placeholder={t("jobDutiesHint")}
+                      value={exp.description}
+                      onChange={(e) => setExp(i, "description", e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addExp}
+                className="border-border text-foreground hover:border-primary/40 inline-flex items-center gap-2 rounded-lg border border-dashed px-4 py-2 text-sm font-medium"
+              >
+                <Plus className="size-4" /> {t("addJob")}
+              </button>
+            </div>
+
             <Field label={t("expectedSalary")}>
               <div className="flex gap-2">
                 <input

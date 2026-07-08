@@ -186,7 +186,14 @@
     "aiRealityCheckOn": "Bu matn AI yordamida yozildi. Uni o'zingizga moslang — ish beruvchilar AI yordamida yozilganini ko'rishlari mumkin.",
     "dobDay": "Kun",
     "dobMonth": "Oy",
-    "dobYear": "Yil"
+    "dobYear": "Yil",
+    "workHistory": "Ish tajribasi",
+    "jobLabel": "Ish o'rni",
+    "jobPosition": "Lavozim",
+    "company": "Kompaniya",
+    "currentlyWorking": "Hozir shu yerda ishlayman",
+    "jobDutiesHint": "Vazifalar va yutuqlar (ixtiyoriy)",
+    "addJob": "Ish qo'shish"
   },
   "bookmarks": {
     "title": "Saqlangan ishlar",

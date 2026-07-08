@@ -80,5 +80,20 @@ export async function saveResume(
   await supabase.from("educations").delete().eq("profile_id", user.id);
   if (rows.length > 0) await supabase.from("educations").insert(rows);
 
+  // Replace the user's work-experience entries with the wizard's set.
+  const expRows = (draft.experiences ?? [])
+    .filter((e) => e.title.trim() !== "")
+    .map((e) => ({
+      profile_id: user.id,
+      title: e.title.trim(),
+      company_name: clean(e.companyName),
+      start_date: year(e.startYear),
+      end_date: e.isCurrent ? null : year(e.endYear),
+      is_current: e.isCurrent,
+      description: clean(e.description),
+    }));
+  await supabase.from("experiences").delete().eq("profile_id", user.id);
+  if (expRows.length > 0) await supabase.from("experiences").insert(expRows);
+
   return { ok: true };
 }

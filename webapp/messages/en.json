@@ -186,7 +186,14 @@
     "aiRealityCheckOn": "This text was written with AI. Make it your own — employers may see that it was AI-assisted.",
     "dobDay": "Day",
     "dobMonth": "Month",
-    "dobYear": "Year"
+    "dobYear": "Year",
+    "workHistory": "Work history",
+    "jobLabel": "Job",
+    "jobPosition": "Position",
+    "company": "Company",
+    "currentlyWorking": "I work here now",
+    "jobDutiesHint": "Duties and achievements (optional)",
+    "addJob": "Add job"
   },
   "bookmarks": {
     "title": "Saved jobs",
