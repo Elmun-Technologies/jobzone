@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import type { Job } from "@/lib/data/types";
 import type { LatLng } from "@/lib/geo";
-import { salaryPill, salaryText, schedulePatternLabel } from "@/lib/format";
+import { salaryText, schedulePatternLabel } from "@/lib/format";
 import { loadYmaps, type YmapsMap } from "@/lib/yandex-maps-loader";
 
 import type { MapRatings } from "./jobs-map-inner";
@@ -110,12 +110,13 @@ export function YandexMap({
           map.current.setCenter([loc.lat, loc.lng], 13);
         }
 
-        // Joyme-style salary price-tag: a volt bubble with a pointer at the
-        // point. Always volt (#C7FB00) on ink — high-contrast on Yandex's light
-        // tiles, where a white tag washes out; a boosted job is prefixed ★.
+        // Job-title tag: a volt bubble with a pointer at the point. Volt
+        // (#C7FB00) on ink — high-contrast on Yandex's light tiles; long titles
+        // truncate with an ellipsis; a boosted job is prefixed ★. (The salary
+        // lives in the balloon that opens on click.)
         const PinLayout = ymaps.templateLayoutFactory.createClass(
           `<div style="position:relative;transform:translate(-50%,-100%)">
-            <div style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 11px;font:800 13px/1 monospace;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35)">$[properties.label]</div>
+            <div style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px rgba(0,0,0,.35)">$[properties.label]</div>
             <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
           </div>`,
         );
@@ -135,11 +136,13 @@ export function YandexMap({
           ],
         };
         const placemarks = jobs.map((job) => {
-          const pill = salaryPill(job) ?? "•";
+          // The marker shows the JOB TITLE (salary is in the balloon). Yandex's
+          // $[properties.label] template substitution HTML-escapes it.
+          const title = job.title || "•";
           return new ymaps.Placemark(
             [job.lat, job.lng],
             {
-              label: job.boostActive ? `★ ${pill}` : pill,
+              label: job.boostActive ? `★ ${title}` : title,
               balloonContent: balloonHtml(
                 job,
                 locale,
