@@ -119,9 +119,9 @@ notification appears in-app and (if configured) via Telegram/push.
 
 ## 6. Mobile / native
 
-- **Map** — OpenStreetMap (flutter_map) on every platform; no API key needed.
-  (The former Yandex MapKit integration was retired — its abandoned plugin no
-  longer compiles against current Android tooling.)
+- **Yandex MapKit key** — committed (app-id-restricted). Restrict it to app id
+  `io.jobzone.jobzone` in the Yandex cabinet. Mobile uses the official
+  `yandex_maps_mapkit_lite` SDK; the web map is OSM and needs no key.
 - **FCM (optional):** drop `android/app/google-services.json` and
   `ios/Runner/GoogleService-Info.plist` from the Firebase project, add the Gradle
   plugin lines and an APNs key — see `docs/phase-8-realtime-and-push.md`.

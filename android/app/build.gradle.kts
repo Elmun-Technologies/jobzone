@@ -23,8 +23,8 @@ android {
         applicationId = "io.jobzone.jobzone"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Pinned to API 26+ since the Yolla store baseline was set with the old
-        // Yandex map integration; kept to avoid widening support mid-release.
+        // The official Yandex MapKit SDK (yandex_maps_mapkit_lite) requires
+        // Android API 26+, so we pin it here over flutter's default (24).
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

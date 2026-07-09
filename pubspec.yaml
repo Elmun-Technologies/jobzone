@@ -60,6 +60,10 @@ dependencies:
   iconsax_plus: ^1.0.0
   flutter_map: ^8.0.0
   latlong2: ^0.9.0
+  # Official Yandex MapKit Flutter SDK (mobile map). The community
+  # `yandex_mapkit` plugin is abandoned and no longer compiles on current
+  # Android tooling; this is Yandex's own actively-maintained binding.
+  yandex_maps_mapkit_lite: ^4.41.0
   flutter_markdown_plus: ^1.0.7
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1

@@ -8,6 +8,7 @@ import 'app/app.dart';
 import 'core/config/env.dart';
 import 'core/storage/local_cache.dart';
 import 'features/notifications/application/push_providers.dart';
+import 'shared/widgets/jz_map/jz_map.dart';
 
 /// Shared startup path for every flavor entrypoint. Initializes Supabase (only
 /// when credentials are configured), loads SharedPreferences, and runs the app
@@ -33,6 +34,16 @@ Future<void> bootstrap() async {
     firebaseReady = true;
   } catch (_) {
     firebaseReady = false;
+  }
+
+  // Map SDK init: on mobile this boots the official Yandex MapKit (must run
+  // before the first map view); on web it's a no-op (the OSM map needs no
+  // setup). Guarded so a native init failure degrades to a blank map rather
+  // than blocking app startup.
+  try {
+    await initJzMap();
+  } catch (_) {
+    // Non-fatal: map views simply render empty until the SDK can init.
   }
 
   final prefs = await SharedPreferences.getInstance();

@@ -93,7 +93,7 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   driver licenses `kDriverLicenseCategories` in `shared/enums/enums.dart`,
   languages, pay basis, screening questions editor, markdown description, OSM
   location picker, scheduled publish), applicants pipeline with status history,
-  distance sort + applicants map (OpenStreetMap via flutter_map everywhere),
+  distance sort + applicants map (official Yandex SDK on device, OSM on web),
   company/people/gallery admin, monetization (promote sheet, wallet).
 - **l10n:** `lib/localization/l10n/app_{en,ru,uz}.arb` → `flutter gen-l10n`.
   `test/localization/arb_parity_test.dart` enforces identical keys across the

@@ -6,8 +6,8 @@ import '../../../../../localization/l10n_extension.dart';
 import '../../../../../shared/widgets/jz_map/jz_map.dart';
 
 /// Full-screen map picker for a job's work location. Tap the map to drop the
-/// pin; the chosen [LatLng] is returned via `Navigator.pop`. Renders
-/// OpenStreetMap on every platform (via [JzMapView]).
+/// pin; the chosen [LatLng] is returned via `Navigator.pop`. Renders Yandex
+/// (official SDK) on mobile and OpenStreetMap on web (via [JzMapView]).
 class JobLocationPicker extends StatefulWidget {
   const JobLocationPicker({super.key, this.initial});
 

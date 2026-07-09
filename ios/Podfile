@@ -1,4 +1,5 @@
-platform :ios, '12.0'
+# Yandex MapKit 4.x (official SDK) requires iOS 13+.
+platform :ios, '13.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
