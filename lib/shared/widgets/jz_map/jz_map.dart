@@ -1,8 +1,10 @@
-/// Cross-platform map widget. Yandex MapKit on mobile (where it's supported),
-/// OpenStreetMap (flutter_map) on web — selected at compile time so the web
-/// build never pulls in the mobile-only `yandex_mapkit`. Both implementations
-/// expose the same `JzMapView` API.
+/// Cross-platform map widget — OpenStreetMap (flutter_map) on every platform.
+/// The former mobile implementation (Yandex MapKit) was retired: the abandoned
+/// `yandex_mapkit` 4.2.1 plugin no longer compiles against current Android
+/// tooling (its maps.mobile classes never reach the plugin's javac classpath),
+/// which blocked release APK builds. The OSM implementation is feature-parity
+/// (clustered salary-pill markers, "me" dot, tap-to-pick) and needs no API key.
 library;
 
-export 'jz_map_osm.dart' if (dart.library.io) 'jz_map_yandex.dart';
+export 'jz_map_osm.dart';
 export 'jz_map_types.dart';

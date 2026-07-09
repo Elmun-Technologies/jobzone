@@ -12,7 +12,7 @@ import '../../data/applicants_repository.dart';
 import '../../domain/applicant.dart';
 
 /// Applicants plotted on a map so an employer can see who lives near the job
-/// (solving the commute problem). Yandex MapKit on mobile, OSM on web (via
+/// (solving the commute problem). OpenStreetMap on every platform (via
 /// [JzMapView]). [jobId] null → the cross-job inbox; otherwise one job, whose
 /// location is the origin pin and map center.
 class ApplicantsMapPage extends ConsumerWidget {

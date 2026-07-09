@@ -16,7 +16,7 @@ class JzMapMarker {
     this.onTap,
   });
 
-  /// Stable id (used as the Yandex `MapObjectId`).
+  /// Stable id, unique within one map's marker set.
   final String id;
   final LatLng point;
   final JzMarkerKind kind;

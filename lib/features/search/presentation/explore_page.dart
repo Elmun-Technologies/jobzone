@@ -15,8 +15,8 @@ import '../application/search_controller.dart';
 
 /// Map-style Explore screen. Jobs are plotted from each job's lat/lng as
 /// clustered salary markers; a search + filter bar and a Map/List toggle sit on
-/// top, with a job carousel along the bottom of the map. The map is Yandex
-/// MapKit on mobile and OpenStreetMap on web (via [JzMapView]).
+/// top, with a job carousel along the bottom of the map. The map is
+/// OpenStreetMap on every platform (via [JzMapView]).
 class ExplorePage extends ConsumerStatefulWidget {
   const ExplorePage({super.key});
 
