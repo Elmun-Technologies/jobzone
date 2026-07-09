@@ -1133,6 +1133,10 @@ class _FormSection extends StatelessWidget {
           style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         initiallyExpanded: initiallyExpanded,
+        // Keep the fields mounted while collapsed so their FormFields still
+        // register with the Form — otherwise validators (e.g. required salary)
+        // are silently skipped and a job publishes with the field empty.
+        maintainState: true,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(

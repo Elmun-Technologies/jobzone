@@ -148,7 +148,16 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: affordable
+                          // While the wallet is still loading, balance is null;
+                          // show a loading Pay button rather than flashing the
+                          // wrong "Top up" CTA to someone who can afford it.
+                          child: walletAsync.isLoading && balance == null
+                              ? const JzPrimaryButton(
+                                  label: '',
+                                  loading: true,
+                                  onPressed: null,
+                                )
+                              : affordable
                               ? JzPrimaryButton(
                                   label: l.payCta,
                                   loading: _paying,

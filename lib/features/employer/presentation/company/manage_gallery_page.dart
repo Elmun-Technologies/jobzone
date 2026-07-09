@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/widgets/snackbars.dart';
 import '../../../companies/domain/company.dart';
 import '../../data/company_admin_repository.dart';
 
@@ -166,13 +167,20 @@ class _AddGallerySheetState extends ConsumerState<_AddGallerySheet> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
-    await ref
-        .read(companyAdminRepositoryProvider)
-        .addGalleryItem(
-          mediaUrl: _url.text.trim(),
-          caption: _caption.text.trim(),
-        );
-    if (mounted) Navigator.pop(context, true);
+    try {
+      await ref
+          .read(companyAdminRepositoryProvider)
+          .addGalleryItem(
+            mediaUrl: _url.text.trim(),
+            caption: _caption.text.trim(),
+          );
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      // Without this, a failed write left the button spinning forever.
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override

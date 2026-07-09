@@ -169,18 +169,20 @@ class _HomeHeader extends ConsumerWidget {
                           size: 18,
                         ),
                         const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          'Tashkent, Uzbekistan',
-                          style: context.text.titleSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            'Tashkent, Uzbekistan',
+                            style: context.text.titleSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                        // Chevron removed: it implied a location switcher that
+                        // didn't exist (no handler). Restore it only when a real
+                        // city picker is wired.
                       ],
                     ),
                   ],

@@ -178,19 +178,10 @@ class _AboutTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         if (company.headquarters != null &&
             company.headquarters!.isNotEmpty) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l.companyAddress, style: _h(context)),
-              Text(
-                l.viewOnMap,
-                style: context.text.labelLarge?.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+          // "View on map" link removed — companies carry no coordinates and
+          // there's no map/launcher wired, so it was a dead control. The
+          // address text below stays.
+          Text(l.companyAddress, style: _h(context)),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
@@ -575,11 +566,15 @@ class _GalleryTab extends ConsumerWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      Text(
-                        l.seeAll,
-                        style: context.text.labelLarge?.copyWith(
-                          color: context.colors.primary,
-                          fontWeight: FontWeight.w600,
+                      GestureDetector(
+                        onTap: () =>
+                            context.push(Routes.companyGallery(company.id)),
+                        child: Text(
+                          l.seeAll,
+                          style: context.text.labelLarge?.copyWith(
+                            color: context.colors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],

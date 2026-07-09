@@ -18,20 +18,16 @@ class JzTrustBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Brighter variants in dark mode — the original green/indigo were near
+    // the dark surface luminance, so pill text was barely legible on dark.
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final green = dark ? const Color(0xFF34D399) : const Color(0xFF0E9F6E);
+    final indigo = dark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9);
     final (IconData icon, Color color) = switch (kind) {
-      JzTrustKind.phone => (
-        Icons.phone_iphone_rounded,
-        const Color(0xFF0E9F6E),
-      ),
-      JzTrustKind.worker => (
-        Icons.verified_user_rounded,
-        const Color(0xFF0E9F6E),
-      ),
+      JzTrustKind.phone => (Icons.phone_iphone_rounded, green),
+      JzTrustKind.worker => (Icons.verified_user_rounded, green),
       JzTrustKind.employer => (Icons.verified_rounded, context.colors.primary),
-      JzTrustKind.agency => (
-        Icons.workspace_premium_rounded,
-        const Color(0xFF6D28D9),
-      ),
+      JzTrustKind.agency => (Icons.workspace_premium_rounded, indigo),
     };
     if (label == null) {
       return Icon(icon, size: 16, color: color);

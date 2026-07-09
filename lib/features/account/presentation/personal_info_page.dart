@@ -30,6 +30,7 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _phone = TextEditingController();
+  final _email = TextEditingController();
   String? _gender;
   String? _position;
   Uint8List? _avatar;
@@ -40,6 +41,7 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
   void dispose() {
     _name.dispose();
     _phone.dispose();
+    _email.dispose();
     super.dispose();
   }
 
@@ -94,6 +96,7 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
                   if (!_initialized) {
                     _name.text = profile?.fullName ?? '';
                     _phone.text = profile?.phone ?? '';
+                    _email.text = profile?.email ?? '';
                     _initialized = true;
                   }
                   return Form(
@@ -193,12 +196,14 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
                           ],
                         ),
                         const SizedBox(height: AppSpacing.lg),
+                        // Read-only: the sign-in email isn't editable here (and
+                        // was previously backed by a controller rebuilt on every
+                        // setState, so edits were lost and controllers leaked).
                         JzTextField(
                           label: l.email,
                           hint: 'example@gmail.com',
-                          controller: TextEditingController(
-                            text: profile?.email ?? '',
-                          ),
+                          controller: _email,
+                          readOnly: true,
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         _Dropdown(
