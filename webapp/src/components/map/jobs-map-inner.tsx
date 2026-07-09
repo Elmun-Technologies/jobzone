@@ -3,6 +3,7 @@
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
+import { Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
@@ -97,6 +98,7 @@ export default function JobsMapInner({
   const t = useTranslations("explore");
   const { loc, status, request } = useUserLocation();
   const [nearMe, setNearMe] = useState(false);
+  const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [company, setCompany] = useState("");
   const [topRated, setTopRated] = useState(false);
@@ -140,9 +142,18 @@ export default function JobsMapInner({
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [located]);
 
+  const q = query.trim().toLowerCase();
   const shown = useMemo(
     () =>
       located.filter((j) => {
+        if (
+          q &&
+          !j.title.toLowerCase().includes(q) &&
+          !j.companyName.toLowerCase().includes(q) &&
+          !(j.categoryName ?? "").toLowerCase().includes(q)
+        ) {
+          return false;
+        }
         if (nearMe && (j.distance == null || j.distance > NEAR_RADIUS_M)) {
           return false;
         }
@@ -159,6 +170,7 @@ export default function JobsMapInner({
       }),
     [
       located,
+      q,
       nearMe,
       category,
       company,
@@ -237,9 +249,32 @@ export default function JobsMapInner({
         </MapContainer>
       )}
 
-      {/* Floating filter bar — scrolls horizontally on a phone. */}
+      {/* Search-on-map bar (Joyme-style: a full-width search row sits above
+          the filter-chip row) — searches title/company/category over the jobs
+          already on the map, no extra round trip. */}
       <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] px-3">
-        <div className="pointer-events-auto flex [scrollbar-width:none] items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+        <div className="pointer-events-auto relative">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("map.searchPlaceholder")}
+            aria-label={t("map.searchPlaceholder")}
+            className="border-border bg-background/95 text-foreground placeholder:text-muted-foreground focus-visible:ring-ring h-11 w-full rounded-full border pr-10 pl-10 text-sm shadow-sm outline-none focus-visible:ring-2"
+          />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label={t("map.clearSearch")}
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+            >
+              <X className="size-4" />
+            </button>
+          ) : null}
+        </div>
+        <div className="pointer-events-auto mt-2 flex [scrollbar-width:none] items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
           <Chip
             active={nearMe}
             onClick={toggleNearMe}
@@ -300,7 +335,9 @@ export default function JobsMapInner({
       </div>
 
       {/* Live result count (top-right pill). */}
-      <div className="absolute top-3 right-3 z-[1001] hidden sm:block">
+      {/* Below the search bar + chip row now that the search bar spans full
+          width (it used to sit beside the chip row at the same top-3 level). */}
+      <div className="absolute top-24 right-3 z-[1001] hidden sm:block">
         <span className="bg-foreground text-background rounded-full px-3 py-1.5 text-sm font-semibold shadow-md">
           {t("map.results", { count: shown.length })}
         </span>

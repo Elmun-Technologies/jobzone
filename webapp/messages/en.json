@@ -30,6 +30,8 @@
     "subtitle": "See jobs on the map",
     "listView": "List",
     "map": {
+      "searchPlaceholder": "Search by title, company, or category",
+      "clearSearch": "Clear search",
       "nearMe": "Near me",
       "locating": "Locating…",
       "salaryFrom": "From 4M so'm",

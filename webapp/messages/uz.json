@@ -30,6 +30,8 @@
     "subtitle": "Ishlarni xaritada ko'ring",
     "listView": "Ro'yxat",
     "map": {
+      "searchPlaceholder": "Lavozim, kompaniya yoki soha bo'yicha qidirish",
+      "clearSearch": "Qidiruvni tozalash",
       "nearMe": "Yonimda",
       "locating": "Aniqlanmoqda…",
       "salaryFrom": "4 mln dan",
