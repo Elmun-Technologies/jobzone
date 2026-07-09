@@ -19,9 +19,9 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Some plugins (e.g. yandex_mapkit 4.2.1) hardcode an older compileSdk (35) than
-// newer transitive deps require (flutter_plugin_android_lifecycle needs 36).
-// Bump every Android library subproject to at least SDK 36.
+// Some plugins hardcode an older compileSdk (35) than newer transitive deps
+// require (flutter_plugin_android_lifecycle needs 36). Bump every Android
+// library subproject to at least SDK 36.
 //
 // `evaluationDependsOn(":app")` above can leave some projects already evaluated
 // by the time this runs, so calling afterEvaluate would throw; guard on

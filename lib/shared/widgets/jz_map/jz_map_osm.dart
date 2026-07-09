@@ -6,9 +6,9 @@ import 'package:latlong2/latlong.dart';
 import 'cluster_grid.dart';
 import 'jz_map_types.dart';
 
-/// OpenStreetMap (flutter_map) implementation — used on web (where Yandex
-/// MapKit has no support) and as the keyless fallback. Supports grid clustering,
-/// salary-pill markers and a "me" dot, matching the Yandex implementation.
+/// OpenStreetMap (flutter_map) implementation — the app's map on every
+/// platform (keyless, no native SDK). Supports grid clustering, salary-pill
+/// markers and a "me" dot.
 class JzMapView extends StatefulWidget {
   const JzMapView({
     super.key,

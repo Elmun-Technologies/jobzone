@@ -1,8 +1,4 @@
-# Yandex MapKit requires iOS 12+.
 platform :ios, '12.0'
-
-# Yandex MapKit SDK variant: 'lite' (maps only, smaller) or 'full'.
-ENV['YANDEX_MAPKIT_VARIANT'] = 'lite'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'

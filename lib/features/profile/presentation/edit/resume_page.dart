@@ -24,13 +24,15 @@ class _ResumePageState extends ConsumerState<ResumePage> {
   bool _uploading = false;
 
   Future<void> _upload() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf', 'doc', 'docx'],
-      withData: true,
     );
     final file = result?.files.firstOrNull;
-    if (file == null || file.bytes == null) return;
+    if (file == null) return;
+    // file_picker 12: read bytes on demand (from the path on mobile, the blob
+    // on web) rather than the deprecated withData/bytes.
+    final bytes = await file.readAsBytes();
 
     setState(() => _uploading = true);
     try {
@@ -39,7 +41,7 @@ class _ResumePageState extends ConsumerState<ResumePage> {
           .addResume(
             title: file.name,
             fileName: file.name,
-            bytes: file.bytes!,
+            bytes: bytes,
             mimeType: file.extension == 'pdf'
                 ? 'application/pdf'
                 : 'application/octet-stream',

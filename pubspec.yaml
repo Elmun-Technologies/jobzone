@@ -48,22 +48,30 @@ dependencies:
   flutter_local_notifications: ^22.0.0
   pinput: ^6.0.2
   image_picker: ^1.2.2
-  file_picker: ^10.3.4
+  # 12.0.0-beta is the only file_picker line built against win32 ^6, which is
+  # what package_info_plus also needs. Both packages compile their Windows
+  # implementation even for an Android build (their conditional import guards on
+  # dart.library.ffi, true on Android), so they must agree on the win32 major or
+  # the release APK won't compile. Our usage is only pickFiles/PlatformFile/
+  # FileType.custom, which is stable across the 10→12 line.
+  file_picker: 12.0.0-beta.7
   video_player: ^2.10.0
   chewie: ^1.13.0
   iconsax_plus: ^1.0.0
   flutter_map: ^8.0.0
   latlong2: ^0.9.0
-  yandex_mapkit: ^4.2.1
   flutter_markdown_plus: ^1.0.7
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1
 
-# file_picker pins win32 ^5.9.0 while geolocator (via package_info_plus) needs
-# win32 ^6. win32 is Windows-only and this app targets iOS/Android, so we pin
-# the newer line to let dependency resolution succeed.
+# win32 is Windows-only, but both file_picker and package_info_plus compile
+# their Windows implementation even for an Android build (their conditional
+# imports guard on dart.library.ffi, which is true on Android), so the release
+# AOT compile needs a single win32 major that satisfies both. file_picker
+# 12.0.0-beta.7 and package_info_plus both target win32 ^6, so pin the override
+# to the 6.x line; overrides bypass any version-solve conflict.
 dependency_overrides:
-  win32: ^6.0.1
+  win32: ^6.3.0
 
 dev_dependencies:
   flutter_test:

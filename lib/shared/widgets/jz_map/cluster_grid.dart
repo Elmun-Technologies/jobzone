@@ -5,7 +5,7 @@ import 'dart:ui';
 /// callers project lat/lng to screen offsets first, then pass them here. Items
 /// landing in the same grid cell become one cluster.
 ///
-/// Used by the web (OSM) map; Yandex clusters natively on the device.
+/// Used by the OSM map's clustering mode.
 List<List<T>> clusterByGrid<T>(List<(T, Offset)> points, double cell) {
   final cells = <String, List<T>>{};
   for (final (item, pos) in points) {
