@@ -519,6 +519,8 @@
     "postedYesterday": "Yesterday",
     "daysAgo": "{days}d ago",
     "share": "Share",
+    "dismiss": "Archive",
+    "dismissed": "Archived — undo",
     "filters": "Filters",
     "experience": "Experience",
     "region": "Region",

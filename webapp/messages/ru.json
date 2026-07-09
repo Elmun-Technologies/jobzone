@@ -519,6 +519,8 @@
     "postedYesterday": "Вчера",
     "daysAgo": "{days} дн. назад",
     "share": "Поделиться",
+    "dismiss": "Архивировать",
+    "dismissed": "В архиве — вернуть",
     "filters": "Фильтры",
     "experience": "Опыт",
     "region": "Регион",

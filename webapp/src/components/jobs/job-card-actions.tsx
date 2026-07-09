@@ -1,10 +1,11 @@
 "use client";
 
-import { Bookmark, Check, Share2 } from "lucide-react";
+import { Archive, Bookmark, Check, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { toggleBookmark } from "@/lib/actions/bookmark";
+import { toggleDismiss } from "@/lib/actions/dismiss";
 import { cn } from "@/lib/utils";
 
 const iconButton =
@@ -26,8 +27,10 @@ export function JobCardActions({
   const tb = useTranslations("bookmarks");
   const locale = useLocale();
   const [saved, setSaved] = useState(initialSaved);
+  const [dismissed, setDismissed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [dismissPending, startDismissTransition] = useTransition();
 
   function cancel(event: React.MouseEvent) {
     event.preventDefault();
@@ -48,6 +51,21 @@ export function JobCardActions({
         return;
       }
       setSaved(result.saved);
+    });
+  }
+
+  function onDismiss(event: React.MouseEvent) {
+    cancel(event);
+    setDismissed((d) => !d);
+    startDismissTransition(async () => {
+      const result = await toggleDismiss(jobId);
+      if (result.signedOut) {
+        setDismissed(false);
+        const next = encodeURIComponent(window.location.pathname);
+        window.location.href = `/${locale}/sign-in?next=${next}`;
+        return;
+      }
+      setDismissed(result.dismissed);
     });
   }
 
@@ -94,6 +112,20 @@ export function JobCardActions({
         className={cn(iconButton, saved && "text-primary hover:text-primary")}
       >
         <Bookmark className="size-4" fill={saved ? "currentColor" : "none"} />
+      </button>
+      <button
+        type="button"
+        onClick={onDismiss}
+        disabled={dismissPending}
+        aria-pressed={dismissed}
+        aria-label={dismissed ? t("dismissed") : t("dismiss")}
+        title={dismissed ? t("dismissed") : t("dismiss")}
+        className={cn(
+          iconButton,
+          dismissed && "text-primary hover:text-primary",
+        )}
+      >
+        <Archive className="size-4" />
       </button>
     </div>
   );
