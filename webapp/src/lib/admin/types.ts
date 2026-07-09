@@ -113,6 +113,37 @@ export interface AdminCategoryRow {
   isActive: boolean;
 }
 
+export interface AdminWalletTxRow {
+  id: string;
+  companyName: string;
+  kind: string;
+  amountUzs: number;
+  status: string;
+  description: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface AdminOrderRow {
+  id: string;
+  companyName: string;
+  productCode: string;
+  amountUzs: number;
+  status: string;
+  createdAt: string;
+  paidAt: string | null;
+}
+
+export interface AdminProductRow {
+  code: string;
+  name: string;
+  kind: string;
+  priceUzs: number;
+  durationDays: number | null;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 export interface AdminAuditRow {
   id: number;
   actorName: string;
