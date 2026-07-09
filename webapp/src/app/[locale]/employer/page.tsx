@@ -155,7 +155,9 @@ export default async function EmployerDashboardPage({
                       </p>
                       <p className="text-muted-foreground text-sm">
                         {t("applicantsCount", { count: job.applicantsCount })}
-                        {job.postedAt ? ` · ${formatDate(job.postedAt)}` : ""}
+                        {job.postedAt && status !== "draft"
+                          ? ` · ${formatDate(job.postedAt)}`
+                          : ""}
                       </p>
                     </div>
                     <JobStatusPill
