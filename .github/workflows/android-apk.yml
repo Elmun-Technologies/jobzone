@@ -1,0 +1,74 @@
+name: Build Android APK
+
+# Produces an installable Android APK for hands-on testing and publishes it to a
+# rolling GitHub pre-release (tag: apk-latest) so it can be downloaded directly
+# on a phone — no Android Studio needed. Runs on demand (Actions → Run workflow)
+# and on every push to main; also builds on the active development branch so a
+# fresh APK is available while the app is still being worked on.
+#
+# The APK is signed with the debug key (the app has no release keystore yet), so
+# Android will ask to "allow install from unknown sources" — expected for a test
+# build. The Supabase credentials below are the same client-safe, RLS-protected
+# publishable keys the live web demo ships with, so the APK talks to the same
+# backend and data.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, claude/project-completion-review-6lsdq6]
+    paths:
+      - "lib/**"
+      - "android/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: write # create/update the apk-latest release
+
+jobs:
+  build:
+    name: Build & publish APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.2
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter gen-l10n
+
+      # Fat APK (all ABIs) so a single file installs on any device. Debug-signed
+      # (no release keystore committed). Points at the live demo backend.
+      - run: >
+          flutter build apk --release
+          --dart-define=SUPABASE_URL=https://nzxdnsxwxrstcrumwzwu.supabase.co
+          --dart-define=SUPABASE_ANON_KEY=sb_publishable_3OcEGaXAaF0x5bClTA_PkA_e6FvbeGG
+
+      # Downloadable from the run's Artifacts section (zipped).
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yolla-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      # Direct .apk download link (best for installing on a phone).
+      - name: Publish rolling APK release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk-latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create apk-latest \
+            "build/app/outputs/flutter-apk/app-release.apk" \
+            --title "Yolla — APK (eng so'nggi test versiya)" \
+            --prerelease \
+            --notes $'Yolla mobil ilovasining test uchun APK fayli.\n\n**O\'rnatish:**\n1. Quyidagi `app-release.apk` faylini Android telefoningizga yuklab oling.\n2. Ochganda "Notanish manbalardan o\'rnatish" so\'ralsa — ruxsat bering (bu debug-imzoli test versiya).\n3. O\'rnating va oching.\n\nIlova jonli demo backendga ulanadi (web versiya bilan bir xil). Har yangi build shu sahifani yangilaydi.'
