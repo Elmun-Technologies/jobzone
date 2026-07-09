@@ -67,7 +67,7 @@ function pinIcon(label: string | null, boosted: boolean): L.DivIcon {
   return L.divIcon({
     className: "",
     html: `<div style="position:relative;transform:translate(-50%,-100%)">
-      <div style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
+      <div class="yolla-pin" style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
         padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;
         white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;
         box-shadow:0 4px 12px rgba(0,0,0,.35)">${text}</div>
@@ -100,14 +100,13 @@ function Recenter({ to, zoom }: { to: LatLng | null; zoom: number }) {
 export default function JobsMapInner({
   jobs,
   ratings,
-  height = "70vh",
   fullBleed = false,
 }: {
   jobs: Job[];
   ratings?: MapRatings;
-  height?: string;
-  /** Immersive mode: the map fills the viewport and the filters + near-me
-   * float over it (the /explore "map search" experience, Joyme-style). */
+  /** Immersive mode (the /explore "map search"): wheel-zoom stays enabled;
+   * the embedded landing map disables it so the page can scroll past. The
+   * sizing container lives in JobsMap. */
   fullBleed?: boolean;
 }) {
   const locale = useLocale();
@@ -205,16 +204,8 @@ export default function JobsMapInner({
   const selectCls =
     "border-border bg-background/95 text-foreground h-9 rounded-full border px-3 text-sm font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-  const mapHeight = fullBleed ? "calc(100dvh - 4rem)" : height;
-
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden",
-        fullBleed ? "" : "border-border rounded-2xl border",
-      )}
-      style={{ height: mapHeight }}
-    >
+    <div className="relative h-full w-full">
       {useYandex ? (
         <YandexMap
           jobs={shown}
