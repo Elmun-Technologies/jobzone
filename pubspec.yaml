@@ -59,11 +59,15 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1
 
-# file_picker pins win32 ^5.9.0 while geolocator (via package_info_plus) needs
-# win32 ^6. win32 is Windows-only and this app targets iOS/Android, so we pin
-# the newer line to let dependency resolution succeed.
+# win32 is Windows-only, but file_picker imports its Windows implementation
+# unconditionally, so the Android release AOT compile pulls file_picker's
+# windows code in — and it only compiles against the win32 5.x line file_picker
+# pins (^5.9.0). geolocator / package_info_plus want win32 ^6, but they use
+# proper conditional/federated imports, so their Windows code is NOT compiled on
+# Android and the older win32 line is harmless for them here. Pin to 5.x so the
+# APK build succeeds; overrides bypass the version-solve conflict.
 dependency_overrides:
-  win32: ^6.0.1
+  win32: ^5.9.0
 
 dev_dependencies:
   flutter_test:
