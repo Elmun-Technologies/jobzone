@@ -112,6 +112,8 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                     ],
                     carousel: jobs,
                     onMyLocation: _goToMyLocation,
+                    status: results,
+                    onRetry: () => ref.invalidate(searchControllerProvider),
                   ),
                   _ListTab(results: results),
                 ],
@@ -132,6 +134,8 @@ class _MapTab extends StatelessWidget {
     required this.markers,
     required this.carousel,
     required this.onMyLocation,
+    required this.status,
+    required this.onRetry,
   });
 
   final JzMapController map;
@@ -140,6 +144,11 @@ class _MapTab extends StatelessWidget {
   final List<JzMapMarker> markers;
   final List<Job> carousel;
   final VoidCallback onMyLocation;
+
+  /// The search async state, so the map surfaces data loading/errors instead of
+  /// silently showing a bare Tashkent map with no pins and no explanation.
+  final AsyncValue<List<Job>> status;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +164,22 @@ class _MapTab extends StatelessWidget {
             markers: markers,
           ),
         ),
+        // Data-loading chip (map tiles have their own placeholder; this covers
+        // the job fetch): only while loading and nothing is plotted yet.
+        if (status.isLoading && markers.isEmpty)
+          const Positioned(
+            top: AppSpacing.md,
+            left: 0,
+            right: 0,
+            child: Center(child: _MapStatusChip.loading()),
+          ),
+        if (status.hasError)
+          Positioned(
+            top: AppSpacing.md,
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            child: _MapStatusChip.error(onRetry: onRetry),
+          ),
         Positioned(
           right: AppSpacing.lg,
           bottom: 230,
@@ -322,6 +347,72 @@ class _MapListToggle extends StatelessWidget {
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A small floating pill over the map: a spinner while jobs load, or an error
+/// message with a retry action if the fetch failed.
+class _MapStatusChip extends StatelessWidget {
+  const _MapStatusChip.loading() : _error = false, onRetry = null;
+  const _MapStatusChip.error({required this.onRetry}) : _error = true;
+
+  final bool _error;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: _error
+            ? [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 18,
+                  color: colors.danger,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Text(
+                    l.errUnknown,
+                    style: context.text.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                GestureDetector(
+                  onTap: onRetry,
+                  child: Text(
+                    l.retry,
+                    style: context.text.labelMedium?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ]
+            : const [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ],
       ),
     );
   }
