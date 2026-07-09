@@ -20,6 +20,8 @@ export async function getCategories(): Promise<JobCategory[]> {
     const { data, error } = await supabase
       .from("job_categories")
       .select("id, slug, name")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
     if (error) throw error;
     return (data ?? []).map(toCategory);
@@ -48,6 +50,8 @@ export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
     const { data, error } = await supabase
       .from("job_categories")
       .select("id, slug, name")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
     if (error) throw error;
     const cats = (data ?? []).map(toCategory);

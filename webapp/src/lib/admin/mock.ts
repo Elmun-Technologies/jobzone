@@ -1,5 +1,6 @@
 import type {
   AdminAuditRow,
+  AdminCategoryRow,
   AdminCompanyRow,
   AdminJobRow,
   AdminList,
@@ -151,6 +152,19 @@ const MOCK_WORKER_REVIEWS: AdminReviewRow[] = [
   { id: "w-02", subject: "Dilnoza Yusupova", authorName: "Jasur Bekmurodov", rating: 4, body: null, hiddenAt: null, createdAt: "2026-06-22T14:00:00Z" },
 ];
 
+const MOCK_CATEGORIES: AdminCategoryRow[] = [
+  { id: "cat-01", name: "Qurilish", slug: "construction", icon: "🏗️", sortOrder: 0, isActive: true },
+  { id: "cat-02", name: "Haydovchilar", slug: "driver", icon: "🚗", sortOrder: 1, isActive: true },
+  { id: "cat-03", name: "Restoran va mehmonxona", slug: "horeca", icon: "🍽️", sortOrder: 2, isActive: true },
+  { id: "cat-04", name: "Savdo", slug: "retail", icon: "🛍️", sortOrder: 3, isActive: true },
+  { id: "cat-05", name: "Logistika va yetkazib berish", slug: "logistics-delivery", icon: "🚚", sortOrder: 4, isActive: true },
+  { id: "cat-06", name: "Ombor", slug: "warehouse", icon: "📦", sortOrder: 5, isActive: true },
+  { id: "cat-07", name: "Xavfsizlik", slug: "security", icon: "🛡️", sortOrder: 6, isActive: true },
+  { id: "cat-08", name: "Tozalash", slug: "cleaning", icon: "🧹", sortOrder: 7, isActive: true },
+  { id: "cat-09", name: "Ishlab chiqarish", slug: "manufacturing", icon: "🏭", sortOrder: 8, isActive: true },
+  { id: "cat-10", name: "Chet elda ish", slug: "foreign-jobs", icon: "✈️", sortOrder: 9, isActive: false },
+];
+
 const MOCK_AUDIT: AdminAuditRow[] = [
   { id: 4, actorName: "Admin (demo)", action: "job.block", targetType: "jobs", targetId: "j-04", meta: { reason: "Firibgarlik shubhasi" }, createdAt: "2026-06-29T12:00:00Z" },
   { id: 3, actorName: "Admin (demo)", action: "company.block", targetType: "companies", targetId: "c-04", meta: { reason: "Takroriy shikoyatlar" }, createdAt: "2026-06-20T13:00:00Z" },
@@ -173,4 +187,7 @@ export function mockAdminReviews(kind: "company" | "worker", q: string): AdminLi
 }
 export function mockAdminAudit(): AdminList<AdminAuditRow> {
   return { rows: MOCK_AUDIT, hasNext: false };
+}
+export function mockAdminCategories(): AdminCategoryRow[] {
+  return MOCK_CATEGORIES;
 }

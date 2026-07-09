@@ -103,6 +103,15 @@ export interface AdminReviewRow {
   createdAt: string;
 }
 
+export interface AdminCategoryRow {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  sortOrder: number;
+  isActive: boolean;
+}
+
 export interface AdminAuditRow {
   id: number;
   actorName: string;
