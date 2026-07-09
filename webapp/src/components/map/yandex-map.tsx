@@ -122,26 +122,46 @@ export function YandexMap({
 
         map.current.geoObjects.removeAll();
 
-        // A volt price-tag placemark per job (custom PinLayout). Added directly
-        // — wrapping these custom-layout pins in a Clusterer double-rendered a
-        // count badge over each tag ("①2 mln"), which read as broken.
-        for (const job of jobs) {
+        // A volt price-tag placemark per job. `iconShape` gives the clusterer
+        // the tag's bounds (without it, it drew a stray count badge over every
+        // tag). Co-located / overlapping jobs collapse into one ink count
+        // bubble (groupByCoordinates + minClusterSize) that expands on click;
+        // a lone job keeps its clean volt tag.
+        const pinShape = {
+          type: "Rectangle" as const,
+          coordinates: [
+            [-54, -50],
+            [54, 2],
+          ],
+        };
+        const placemarks = jobs.map((job) => {
           const pill = salaryPill(job) ?? "•";
-          map.current.geoObjects.add(
-            new ymaps.Placemark(
-              [job.lat, job.lng],
-              {
-                label: job.boostActive ? `★ ${pill}` : pill,
-                balloonContent: balloonHtml(
-                  job,
-                  locale,
-                  applyLabel,
-                  ratings?.[job.companyId],
-                ),
-              },
-              { iconLayout: PinLayout, iconShape: null },
-            ),
+          return new ymaps.Placemark(
+            [job.lat, job.lng],
+            {
+              label: job.boostActive ? `★ ${pill}` : pill,
+              balloonContent: balloonHtml(
+                job,
+                locale,
+                applyLabel,
+                ratings?.[job.companyId],
+              ),
+            },
+            { iconLayout: PinLayout, iconShape: pinShape },
           );
+        });
+        if (ymaps.Clusterer) {
+          const clusterer = new ymaps.Clusterer({
+            preset: "islands#blackClusterIcons",
+            groupByCoordinates: true,
+            minClusterSize: 2,
+            gridSize: 48,
+            clusterDisableClickZoom: false,
+          });
+          clusterer.add(placemarks);
+          map.current.geoObjects.add(clusterer);
+        } else {
+          for (const p of placemarks) map.current.geoObjects.add(p);
         }
 
         if (loc) {
