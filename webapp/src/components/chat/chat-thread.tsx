@@ -18,10 +18,12 @@ export function ChatThread({
   initial: ChatMessage[];
 }) {
   const t = useTranslations("chat");
+  const tc = useTranslations("common");
   const supabase = useMemo(() => createClient(), []);
   const [messages, setMessages] = useState<ChatMessage[]>(initial);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Subscribe to new messages in this conversation (RLS still applies).
@@ -65,12 +67,34 @@ export function ChatThread({
     if (!content || sending) return;
     setSending(true);
     setText("");
-    const { error } = await supabase.from("messages").insert({
-      conversation_id: conversationId,
-      sender_id: currentUserId,
-      content,
-    });
-    if (error) setText(content); // restore on failure; realtime echoes success
+    setSendError(false);
+    // Return the inserted row and append it directly (deduped by id against the
+    // realtime echo) — otherwise a message only appears IF realtime is live, so
+    // it would silently vanish when the channel isn't subscribed.
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_id: currentUserId,
+        content,
+      })
+      .select()
+      .single();
+    if (error || !data) {
+      setText(content); // restore what they typed
+      setSendError(true);
+    } else {
+      const m = data as Record<string, unknown>;
+      const msg: ChatMessage = {
+        id: String(m.id),
+        senderId: String(m.sender_id),
+        content: typeof m.content === "string" ? m.content : content,
+        createdAt: typeof m.created_at === "string" ? m.created_at : null,
+      };
+      setMessages((prev) =>
+        prev.some((x) => x.id === msg.id) ? prev : [...prev, msg],
+      );
+    }
     setSending(false);
   }
 
@@ -93,11 +117,18 @@ export function ChatThread({
         <div ref={bottomRef} />
       </div>
 
+      {sendError ? (
+        <p role="alert" className="text-destructive mt-2 text-center text-xs">
+          {tc("error")}
+        </p>
+      ) : null}
+
       <form onSubmit={send} className="mt-3 flex gap-2">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t("messagePlaceholder")}
+          aria-label={t("messagePlaceholder")}
           className="border-border bg-background text-foreground focus-visible:ring-ring h-11 flex-1 rounded-full border px-4 outline-none focus-visible:ring-2"
         />
         <button

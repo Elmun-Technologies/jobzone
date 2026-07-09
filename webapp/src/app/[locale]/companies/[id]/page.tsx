@@ -90,7 +90,11 @@ export default async function CompanyPage({
             ) : null}
             {company.website ? (
               <a
-                href={company.website}
+                href={
+                  /^https?:\/\//i.test(company.website)
+                    ? company.website
+                    : `https://${company.website}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary flex items-center gap-1 hover:underline"
