@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/widgets/jz_map/jz_map.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/category_label.dart';
@@ -34,6 +36,15 @@ class HomePage extends ConsumerWidget {
           padding: EdgeInsets.zero,
           children: [
             const _HomeHeader(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.xl,
+                AppSpacing.lg,
+                0,
+              ),
+              child: const _HomeMapPreview(),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
@@ -277,6 +288,110 @@ class _IconSquare extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// The map-first home centrepiece (mirrors the web homepage's "Map — the
+/// centrepiece" section, right after the hero): a non-interactive preview —
+/// wrapped in [IgnorePointer] so it can't steal the outer list's scroll
+/// gesture — built from the jobs Home already loaded (no extra fetch), tap
+/// anywhere to open the full interactive Explore tab. A seeker who wants the
+/// plain list can just keep scrolling past it to the sections below.
+class _HomeMapPreview extends ConsumerWidget {
+  const _HomeMapPreview();
+
+  static const _tashkent = LatLng(41.3111, 69.2797);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final jobs = ref.watch(recentJobsProvider).value ?? const <Job>[];
+    final markers = [
+      for (final j in jobs)
+        if (j.lat != null && j.lng != null)
+          JzMapMarker(id: j.id, point: LatLng(j.lat!, j.lng!)),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: l.mapPreviewTitle,
+          actionLabel: l.openFullMap,
+          onAction: () => context.go(Routes.explore),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          l.mapPreviewSubtitle,
+          style: context.text.bodySmall?.copyWith(color: colors.textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: GestureDetector(
+            onTap: () => context.go(Routes.explore),
+            child: SizedBox(
+              height: 180,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  IgnorePointer(
+                    child: JzMapView(
+                      initialCenter: markers.isNotEmpty
+                          ? markers.first.point
+                          : _tashkent,
+                      initialZoom: 11,
+                      markers: markers,
+                      cluster: true,
+                    ),
+                  ),
+                  // A transparent scrim keeps the "tap to open" affordance
+                  // discoverable without hiding the pins underneath.
+                  Positioned(
+                    right: AppSpacing.md,
+                    bottom: AppSpacing.md,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.map_rounded,
+                            size: 16,
+                            color: colors.primary,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            l.openFullMap,
+                            style: context.text.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
