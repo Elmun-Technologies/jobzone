@@ -23,6 +23,13 @@ export async function generateMetadata({
   };
 }
 
+// The shared SiteHeader reads the session (getCurrentUser) to show
+// account/notifications vs a sign-in button; without this the page was baked
+// as static HTML at build time, so a signed-in visitor saw a signed-out
+// header here (unlike every other page). Trades SSG for correctness — this
+// page isn't a primary organic-search surface, unlike the job/category pages.
+export const dynamic = "force-dynamic";
+
 /** Public "Narxlar" (pricing) marketing page — the employer offer: first
  * vacancy free, then a flat post fee, plus the visibility (reklama) packages.
  * Prices come from the live catalog (fallback offline), so this never drifts

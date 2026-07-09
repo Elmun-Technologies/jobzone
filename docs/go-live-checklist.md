@@ -12,17 +12,21 @@ Work top-to-bottom; each section notes how to verify it.
 ## 1. Database — apply migrations
 
 ```bash
-supabase db push        # applies every migration through 0036
+supabase db push        # applies every migration through 0052
 ```
 
 Most recent, most likely un-applied:
 
 | Migration | Adds |
 |---|---|
-| `0033_wallet` | employer wallet ledger + `wallet_balances` view |
-| `0034_job_feed_expiry` | hides expired postings from `job_feed` |
 | `0035_saved_searches` | `saved_searches` table (owner-scoped) |
 | `0036_saved_search_alerts` | `last_alerted_at` watermark + `run_saved_search_alerts()` + `publish_due_jobs()` posted_at fix |
+| `0044_profile_summary` / `0046_summary_ai_flag` | AI-assisted résumé "About me" + honesty flag |
+| `0047_applicant_resume_access` | `is_job_owner`-gated view so an employer can read an applicant's résumé fields |
+| `0048_applicant_job_status` | keeps a seeker's application to a since-closed job (e.g. hired) visible instead of dropped |
+| `0049_resume_subtables_lockdown` | closes a pre-existing gap — résumé sub-tables (experiences/educations/certifications/skills) were readable by any signed-in user; now owner or a recruiter with a real relationship only |
+| `0050_recommended_candidates` / `0051_recommended_jobs` | the two-way match: employer sees candidates for a new posting, seeker sees jobs matched to their résumé (same scoring, one shared algorithm per side) |
+| `0052_dismissed_jobs` | lets a seeker archive a job out of their browse feed |
 
 **Verify:** `select last_alerted_at from saved_searches limit 1;` resolves, and
 `select count(*) from job_feed;` returns only open, non-expired jobs.

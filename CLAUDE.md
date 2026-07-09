@@ -225,17 +225,24 @@ cd webapp && pnpm typecheck && pnpm lint && pnpm test && pnpm build
 marketplace with auth-last flows, Telegram OTP + Google + email auth,
 screening questions, wallet, promotions/TOP, verification & reliability
 layers, chat, saved searches **with alerts**, category pipeline, filters with
-live counts, go-live runbook (`docs/go-live-checklist.md`).
+live counts, real AI on `generate-job-content` and the résumé "About me"
+assist, web in-app notifications, mobile category-label localization
+(uz/ru/en), the two-way résumé match (employer sees candidates for a new
+posting via `recommended_candidates`, seeker sees jobs matched to their résumé
+via `recommended_jobs` — one shared scoring algorithm per side, both clients
+call the same RPC), one-tap apply from any job card (web + mobile), a seeker's
+"archive" control over their browse feed, a map-first mobile Home, and the
+go-live runbook (`docs/go-live-checklist.md`).
 
-**Go-live is ops, not code** (user's side): `supabase db push` (→0036),
+**Go-live is ops, not code** (user's side): `supabase db push` (→0052),
 secrets (`EDGE_SHARED_SECRET`, `TELEGRAM_GATEWAY_TOKEN`, `SEND_SMS_HOOK_SECRET`,
 `TELEGRAM_BOT_TOKEN`…), deploy edge fns, enable Phone auth + register the
 Send-SMS hook, schedule the cron (§5), Vercel envs, store submission.
 
-**Queued next:** notification UX completion (mobile tap → deep-link is built;
-web in-app notifications surface), real payments via `payment-webhook`
-(Click/Payme), real AI on `generate-job-content`, mobile category-label
-localization, FCM native config, Agora calls.
+**Queued next (genuinely needs third-party ops, not just code):** real
+payments via `payment-webhook` (Click/Payme merchant accounts), FCM native
+config (a real Firebase project + `google-services.json`/`GoogleService-
+Info.plist`), Agora calls (a real Agora project + app credentials).
 
 **Docs to read when relevant:** `docs/go-live-checklist.md` (ops),
 `docs/phase-8-realtime-and-push.md` (calls/FCM wiring),

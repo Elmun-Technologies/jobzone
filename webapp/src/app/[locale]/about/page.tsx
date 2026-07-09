@@ -39,6 +39,13 @@ export async function generateMetadata({
   };
 }
 
+// Two reasons: the shared SiteHeader reads the session (getCurrentUser), so a
+// static build baked a signed-out header here for every visitor; and this
+// page's map reads the live job feed (getOpenJobs) the same way the homepage
+// did before eb3f9c0 — frozen at build time otherwise, so new postings never
+// appeared here (invariant #3).
+export const dynamic = "force-dynamic";
+
 export default async function AboutPage({
   params,
 }: {
