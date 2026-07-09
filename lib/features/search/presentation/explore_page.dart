@@ -226,9 +226,13 @@ class _MapTab extends StatelessWidget {
                     itemCount: carousel.length,
                     separatorBuilder: (_, _) =>
                         const SizedBox(width: AppSpacing.md),
-                    itemBuilder: (_, i) => SizedBox(
-                      width: MediaQuery.sizeOf(context).width * 0.82,
-                      child: JobCard(job: carousel[i]),
+                    itemBuilder: (_, i) => JzFadeSlideIn(
+                      dy: 12,
+                      duration: const Duration(milliseconds: 280),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width * 0.82,
+                        child: JobCard(job: carousel[i]),
+                      ),
                     ),
                   ),
           ),

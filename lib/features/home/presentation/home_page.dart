@@ -35,15 +35,20 @@ class HomePage extends ConsumerWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const _HomeHeader(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.xl,
-                AppSpacing.lg,
-                0,
+            // Staggered entrance: header → map → sections. One-shot (Home
+            // lives in the shell's IndexedStack, so it plays once per launch).
+            const JzFadeSlideIn(dy: 10, child: _HomeHeader()),
+            JzFadeSlideIn(
+              delay: const Duration(milliseconds: 90),
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  0,
+                ),
+                child: _HomeMapPreview(),
               ),
-              child: const _HomeMapPreview(),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -277,13 +282,16 @@ class _IconSquare extends StatelessWidget {
             Positioned(
               right: 10,
               top: 10,
-              child: Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: context.colors.danger,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color, width: 1.5),
+              // A soft pulse pulls the eye to unread notifications.
+              child: JzPulse(
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: context.colors.danger,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: color, width: 1.5),
+                  ),
                 ),
               ),
             ),

@@ -43,140 +43,149 @@ class JobCard extends ConsumerWidget {
       ?experienceLabel(context, job.experienceLevel),
     ];
 
-    return Container(
-      width: width,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.border),
-        // A soft lift so the card reads as tappable (no-op in dark, where the
-        // border carries separation instead).
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => context.push(Routes.jobDetails(job.id)),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    if (job.isBoosted) const JzTopBadge(),
-                    const Spacer(),
-                    _IconToggle(
-                      active: bookmarked,
-                      activeIcon: Icons.bookmark_rounded,
-                      inactiveIcon: Icons.bookmark_border_rounded,
-                      activeColor: colors.primary,
-                      semanticLabel: bookmarked
-                          ? l.removeBookmark
-                          : l.addBookmark,
-                      onTap: () async {
-                        final notifier = ref.read(
-                          bookmarksControllerProvider.notifier,
-                        );
-                        if (!bookmarked) {
-                          notifier.toggle(job.id);
-                          return;
-                        }
-                        final remove = await showRemoveBookmarkSheet(
-                          context,
-                          job,
-                        );
-                        if (remove == true) notifier.toggle(job.id);
-                      },
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    _IconToggle(
-                      active: dismissed,
-                      activeIcon: Icons.archive_rounded,
-                      inactiveIcon: Icons.archive_outlined,
-                      activeColor: colors.primary,
-                      size: 20,
-                      semanticLabel: dismissed ? l.jobDismissed : l.dismissJob,
-                      onTap: () => ref
-                          .read(dismissedControllerProvider.notifier)
-                          .toggle(job.id),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  children: [
-                    _Logo(name: job.companyName, url: job.companyLogoUrl),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            job.title,
-                            style: context.text.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  job.companyName,
-                                  style: context.text.bodySmall?.copyWith(
-                                    color: colors.textSecondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+    // JzPressable: the whole card eases down slightly while pressed — tactile
+    // feedback on the app's most-tapped surface (raw Listener, so it never
+    // steals the InkWell's tap or the toggles' taps).
+    return JzPressable(
+      child: Container(
+        width: width,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: colors.border),
+          // A soft lift so the card reads as tappable (no-op in dark, where
+          // the border carries separation instead).
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => context.push(Routes.jobDetails(job.id)),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      if (job.isBoosted) const JzTopBadge(),
+                      const Spacer(),
+                      _IconToggle(
+                        active: bookmarked,
+                        activeIcon: Icons.bookmark_rounded,
+                        inactiveIcon: Icons.bookmark_border_rounded,
+                        activeColor: colors.primary,
+                        semanticLabel: bookmarked
+                            ? l.removeBookmark
+                            : l.addBookmark,
+                        onTap: () async {
+                          final notifier = ref.read(
+                            bookmarksControllerProvider.notifier,
+                          );
+                          if (!bookmarked) {
+                            notifier.toggle(job.id);
+                            return;
+                          }
+                          final remove = await showRemoveBookmarkSheet(
+                            context,
+                            job,
+                          );
+                          if (remove == true) notifier.toggle(job.id);
+                        },
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      _IconToggle(
+                        active: dismissed,
+                        activeIcon: Icons.archive_rounded,
+                        inactiveIcon: Icons.archive_outlined,
+                        activeColor: colors.primary,
+                        size: 20,
+                        semanticLabel: dismissed
+                            ? l.jobDismissed
+                            : l.dismissJob,
+                        onTap: () => ref
+                            .read(dismissedControllerProvider.notifier)
+                            .toggle(job.id),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    children: [
+                      _Logo(name: job.companyName, url: job.companyLogoUrl),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              job.title,
+                              style: context.text.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
                               ),
-                              if (job.companyVerified) ...[
-                                const SizedBox(width: 4),
-                                const JzTrustBadge(kind: JzTrustKind.employer),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    job.companyName,
+                                    style: context.text.bodySmall?.copyWith(
+                                      color: colors.textSecondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (job.companyVerified) ...[
+                                  const SizedBox(width: 4),
+                                  const JzTrustBadge(
+                                    kind: JzTrustKind.employer,
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (meta.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    _MetaLine(parts: meta),
+                  ],
+                  const SizedBox(height: AppSpacing.md),
+                  Divider(color: colors.border, height: 1),
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(child: _Salary(job: job)),
+                      const SizedBox(width: AppSpacing.sm),
+                      QuickApplyButton(job: job, pill: true),
+                    ],
+                  ),
+                  if (job.applicantsCount > 0) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      '${job.applicantsCount} ${l.applicants}',
+                      style: context.text.labelSmall?.copyWith(
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
-                ),
-                if (meta.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  _MetaLine(parts: meta),
                 ],
-                const SizedBox(height: AppSpacing.md),
-                Divider(color: colors.border, height: 1),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(child: _Salary(job: job)),
-                    const SizedBox(width: AppSpacing.sm),
-                    QuickApplyButton(job: job, pill: true),
-                  ],
-                ),
-                if (job.applicantsCount > 0) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    '${job.applicantsCount} ${l.applicants}',
-                    style: context.text.labelSmall?.copyWith(
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
         ),
@@ -216,9 +225,14 @@ class JobCardCarousel extends StatelessWidget {
           children: [
             for (var i = 0; i < jobs.length; i++) ...[
               if (i > 0) const SizedBox(width: AppSpacing.md),
-              SizedBox(
-                width: cardWidth,
-                child: JobCard(job: jobs[i]),
+              // Staggered entrance (capped so late cards don't lag behind).
+              JzFadeSlideIn(
+                delay: Duration(milliseconds: 70 * (i < 5 ? i : 5)),
+                dy: 12,
+                child: SizedBox(
+                  width: cardWidth,
+                  child: JobCard(job: jobs[i]),
+                ),
               ),
             ],
           ],

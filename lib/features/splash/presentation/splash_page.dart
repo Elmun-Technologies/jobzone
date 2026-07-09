@@ -40,14 +40,29 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/icon/splash_logo.png', width: 120, height: 120),
+            // Logo pops in, then the wordmark follows — a branded beat while
+            // the session flags hydrate.
+            JzFadeSlideIn(
+              duration: const Duration(milliseconds: 550),
+              dy: 0,
+              scaleFrom: 0.82,
+              child: Image.asset(
+                'assets/icon/splash_logo.png',
+                width: 120,
+                height: 120,
+              ),
+            ),
             const SizedBox(height: AppSpacing.lg),
-            Text(
-              'yolla',
-              style: context.text.displayMedium?.copyWith(
-                color: colors.onPrimary,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -2,
+            JzFadeSlideIn(
+              delay: const Duration(milliseconds: 250),
+              dy: 10,
+              child: Text(
+                'yolla',
+                style: context.text.displayMedium?.copyWith(
+                  color: colors.onPrimary,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -2,
+                ),
               ),
             ),
           ],

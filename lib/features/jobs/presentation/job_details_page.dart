@@ -77,7 +77,13 @@ class _JobDetail extends ConsumerWidget {
               ],
             ),
           ),
-          _ApplyBar(job: job),
+          // The apply bar rises from the bottom after the content settles —
+          // draws the eye to the primary action without blocking reading.
+          JzFadeSlideIn(
+            delay: const Duration(milliseconds: 200),
+            dy: 24,
+            child: _ApplyBar(job: job),
+          ),
         ],
       ),
     );
@@ -225,44 +231,53 @@ class _InfoGrid extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.payments_outlined,
-                  label: l.salaryLabel,
-                  value: salary,
+          // The info rows cascade in — a quick, scannable reveal of the
+          // decision-making facts (salary, type, model, level).
+          JzFadeSlideIn(
+            dy: 12,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _InfoCard(
+                    icon: Icons.payments_outlined,
+                    label: l.salaryLabel,
+                    value: salary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.work_outline_rounded,
-                  label: l.fieldJobType,
-                  value: jobTypeLabel(context, job.jobType) ?? '—',
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: _InfoCard(
+                    icon: Icons.work_outline_rounded,
+                    label: l.fieldJobType,
+                    value: jobTypeLabel(context, job.jobType) ?? '—',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.laptop_mac_rounded,
-                  label: l.fieldWorkingModel,
-                  value: workingModelLabel(context, job.workingModel) ?? '—',
+          JzFadeSlideIn(
+            delay: const Duration(milliseconds: 90),
+            dy: 12,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _InfoCard(
+                    icon: Icons.laptop_mac_rounded,
+                    label: l.fieldWorkingModel,
+                    value: workingModelLabel(context, job.workingModel) ?? '—',
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _InfoCard(
-                  icon: Icons.bar_chart_rounded,
-                  label: l.fieldLevel,
-                  value: experienceLabel(context, job.experienceLevel) ?? '—',
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: _InfoCard(
+                    icon: Icons.bar_chart_rounded,
+                    label: l.fieldLevel,
+                    value: experienceLabel(context, job.experienceLevel) ?? '—',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           if (job.payoutFrequency != null) ...[
             const SizedBox(height: AppSpacing.md),
