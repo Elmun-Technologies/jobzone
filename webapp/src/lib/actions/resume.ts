@@ -14,6 +14,25 @@ const clean = (v: string) => {
   return t === "" ? null : t;
 };
 
+/**
+ * Replaces a profile's rows in a résumé sub-table (delete-then-insert) and
+ * reports whether BOTH steps actually succeeded — used to be fire-and-forget,
+ * so a failed insert (after the delete already went through) silently lost the
+ * seeker's section while the wizard still reported "saved."
+ */
+async function replaceRows(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  table: string,
+  profileId: string,
+  rows: Record<string, unknown>[],
+): Promise<boolean> {
+  const del = await supabase.from(table).delete().eq("profile_id", profileId);
+  if (del.error) return false;
+  if (rows.length === 0) return true;
+  const ins = await supabase.from(table).insert(rows);
+  return !ins.error;
+}
+
 /** Persists the resume wizard to the signed-in user's `profiles` row. */
 export async function saveResume(
   draft: ResumeDraft,
@@ -77,8 +96,7 @@ export async function saveResume(
       end_date: e.isCurrent ? null : year(e.endYear),
       is_current: e.isCurrent,
     }));
-  await supabase.from("educations").delete().eq("profile_id", user.id);
-  if (rows.length > 0) await supabase.from("educations").insert(rows);
+  const eduOk = await replaceRows(supabase, "educations", user.id, rows);
 
   // Replace the user's work-experience entries with the wizard's set.
   const expRows = (draft.experiences ?? [])
@@ -92,8 +110,7 @@ export async function saveResume(
       is_current: e.isCurrent,
       description: clean(e.description),
     }));
-  await supabase.from("experiences").delete().eq("profile_id", user.id);
-  if (expRows.length > 0) await supabase.from("experiences").insert(expRows);
+  const expOk = await replaceRows(supabase, "experiences", user.id, expRows);
 
   // Replace the user's certificates/courses with the wizard's set.
   const certRows = (draft.certificates ?? [])
@@ -105,9 +122,13 @@ export async function saveResume(
       issued_date: year(c.issuedYear),
       expiry_date: year(c.expiryYear),
     }));
-  await supabase.from("certifications").delete().eq("profile_id", user.id);
-  if (certRows.length > 0)
-    await supabase.from("certifications").insert(certRows);
+  const certOk = await replaceRows(
+    supabase,
+    "certifications",
+    user.id,
+    certRows,
+  );
 
+  if (!eduOk || !expOk || !certOk) return { error: true };
   return { ok: true };
 }
