@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "57605572691",
+    "project_id": "jobzone-49b5c",
+    "storage_bucket": "jobzone-49b5c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57605572691:android:43df8d78619f3df1421ea6",
+        "android_client_info": {
+          "package_name": "io.jobzone.jobzone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX9pwZlmmjRySZFGMfd-hGdOl3EFf-J9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
