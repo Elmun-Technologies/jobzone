@@ -67,10 +67,10 @@ class HomePage extends ConsumerWidget {
                     onAction: () => context.push(Routes.suggestedJobs),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  SizedBox(
-                    height: 220,
-                    child: suggested.when(
-                      loading: () => Shimmer(
+                  suggested.when(
+                    loading: () => SizedBox(
+                      height: 220,
+                      child: Shimmer(
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: 3,
@@ -80,21 +80,20 @@ class HomePage extends ConsumerWidget {
                               const JobCardSkeleton(width: 300),
                         ),
                       ),
-                      error: (_, _) => _ErrorBox(
+                    ),
+                    error: (_, _) => SizedBox(
+                      height: 220,
+                      child: _ErrorBox(
                         message: l.errUnknown,
                         onRetry: () => ref.invalidate(suggestedJobsProvider),
                       ),
-                      data: (jobs) => jobs.isEmpty
-                          ? _EmptyBox(message: l.noJobsTitle)
-                          : ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: jobs.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: AppSpacing.md),
-                              itemBuilder: (_, i) =>
-                                  JobCard(job: jobs[i], width: 300),
-                            ),
                     ),
+                    data: (jobs) => jobs.isEmpty
+                        ? SizedBox(
+                            height: 220,
+                            child: _EmptyBox(message: l.noJobsTitle),
+                          )
+                        : JobCardCarousel(jobs: jobs),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   SectionHeader(
@@ -469,15 +468,7 @@ class _RecommendedForYou extends ConsumerWidget {
       children: [
         SectionHeader(title: l.recommendedForYou),
         const SizedBox(height: AppSpacing.md),
-        SizedBox(
-          height: 220,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: jobs.length,
-            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (_, i) => JobCard(job: jobs[i], width: 300),
-          ),
-        ),
+        JobCardCarousel(jobs: jobs),
         const SizedBox(height: AppSpacing.xl),
       ],
     );

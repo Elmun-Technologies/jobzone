@@ -54,66 +54,80 @@ class _PromoteSheetState extends ConsumerState<_PromoteSheet> {
         AppSpacing.lg,
         MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.border,
-                borderRadius: BorderRadius.circular(2),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.colors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            l.choosePackage,
-            style: context.text.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l.choosePackage,
+              style: context.text.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          async.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(AppSpacing.xl),
-              child: JzLoader(),
+            const SizedBox(height: AppSpacing.lg),
+            // The package list scrolls — five cards overflow small phones, and
+            // previously pushed the Continue button off-screen (it now stays
+            // pinned below the scroll area).
+            Flexible(
+              child: SingleChildScrollView(
+                child: async.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(AppSpacing.xl),
+                    child: JzLoader(),
+                  ),
+                  error: (_, _) => JzErrorState(
+                    title: l.errorTitle,
+                    message: l.errUnknown,
+                    retryLabel: l.retry,
+                    onRetry: () => ref.invalidate(promotionProductsProvider),
+                  ),
+                  data: (products) {
+                    // Skip the free "start" base — promoting is a paid boost.
+                    final buyable = [
+                      for (final p in products)
+                        if (p.kind != 'base') p,
+                    ];
+                    return Column(
+                      children: [
+                        for (final p in buyable)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
+                            child: PromoPackageCard(
+                              product: p,
+                              selected: _selected == p.code,
+                              onTap: () => setState(() => _selected = p.code),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
-            error: (_, _) => JzErrorState(
-              title: l.errorTitle,
-              message: l.errUnknown,
-              retryLabel: l.retry,
-              onRetry: () => ref.invalidate(promotionProductsProvider),
+            const SizedBox(height: AppSpacing.sm),
+            JzPrimaryButton(
+              label: l.continueLabel,
+              onPressed: _selected == null ? null : _continue,
             ),
-            data: (products) {
-              // Skip the free "start" base — promoting means a paid boost.
-              final buyable = [
-                for (final p in products)
-                  if (p.kind != 'base') p,
-              ];
-              return Column(
-                children: [
-                  for (final p in buyable)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: PromoPackageCard(
-                        product: p,
-                        selected: _selected == p.code,
-                        onTap: () => setState(() => _selected = p.code),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          JzPrimaryButton(
-            label: l.continueLabel,
-            onPressed: _selected == null ? null : _continue,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

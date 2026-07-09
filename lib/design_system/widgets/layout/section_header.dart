@@ -20,7 +20,16 @@ class SectionHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: context.text.titleLarge),
+        // Expanded + ellipsis so a long localized title (uz/ru run longer than
+        // en) can't overflow the row into RenderFlex stripes.
+        Expanded(
+          child: Text(
+            title,
+            style: context.text.titleLarge,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         if (actionLabel != null)
           TextButton(onPressed: onAction, child: Text(actionLabel!)),
       ],

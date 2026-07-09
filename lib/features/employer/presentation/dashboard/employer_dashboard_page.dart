@@ -198,13 +198,18 @@ class _StatGrid extends StatelessWidget {
       (l.statNew, stats.newApplicants, Icons.fiber_new_outlined),
       (l.statInterviews, stats.interviews, Icons.event_outlined),
     ];
-    return GridView.count(
-      crossAxisCount: 2,
+    // A fixed row height (mainAxisExtent) instead of a width-derived aspect
+    // ratio: the old childAspectRatio: 2.4 shrank the cell height on narrow
+    // phones / under font scaling until the number + label column overflowed.
+    return GridView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: AppSpacing.md,
-      crossAxisSpacing: AppSpacing.md,
-      childAspectRatio: 2.4,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisExtent: 80,
+      ),
       children: [
         for (final (label, value, icon) in cards)
           _StatCard(label: label, value: value, icon: icon),
@@ -256,6 +261,8 @@ class _StatCard extends StatelessWidget {
                   style: context.text.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   label,

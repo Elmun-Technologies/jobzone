@@ -215,6 +215,49 @@ class JobCard extends ConsumerWidget {
   }
 }
 
+/// Horizontal, equal-height row of [JobCard]s for the Home strips.
+///
+/// Uses `IntrinsicHeight` so the row is exactly as tall as its tallest card and
+/// every card stretches to match — the old fixed-height (`SizedBox(height:220)`
+/// + horizontal `ListView`) clipped boosted / two-line-tag cards, producing the
+/// "RenderFlex overflowed" stripes. Meant for short lists (suggested /
+/// recommended); it builds all children eagerly, so it is not used for the
+/// potentially-long Explore result carousel.
+class JobCardCarousel extends StatelessWidget {
+  const JobCardCarousel({
+    super.key,
+    required this.jobs,
+    this.cardWidth = 300,
+    this.padding,
+  });
+
+  final List<Job> jobs;
+  final double cardWidth;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: padding,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < jobs.length; i++) ...[
+              if (i > 0) const SizedBox(width: AppSpacing.md),
+              SizedBox(
+                width: cardWidth,
+                child: JobCard(job: jobs[i]),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _Logo extends StatelessWidget {
   const _Logo({required this.name, this.url});
   final String name;

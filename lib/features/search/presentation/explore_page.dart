@@ -182,7 +182,7 @@ class _MapTab extends StatelessWidget {
           ),
         Positioned(
           right: AppSpacing.lg,
-          bottom: 230,
+          bottom: 264,
           child: _CircleFab(
             icon: Icons.my_location_rounded,
             onTap: onMyLocation,
@@ -193,7 +193,9 @@ class _MapTab extends StatelessWidget {
           right: 0,
           bottom: AppSpacing.lg,
           child: SizedBox(
-            height: 210,
+            // Tall enough for a boosted card with a two-line tag wrap (~241px);
+            // the old 210 clipped those into RenderFlex overflow stripes.
+            height: 244,
             child: carousel.isEmpty
                 ? const SizedBox.shrink()
                 : ListView.separated(
