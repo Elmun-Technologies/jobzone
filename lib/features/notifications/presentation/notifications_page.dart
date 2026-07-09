@@ -111,31 +111,38 @@ class _GroupedList extends ConsumerWidget {
         AppSpacing.lg,
       ),
       children: [
-        for (final entry in groups.entries) ...[
+        for (final (i, entry) in groups.entries.indexed) ...[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  entry.key.toUpperCase(),
-                  style: context.text.labelMedium?.copyWith(
-                    color: context.colors.textSecondary,
-                    letterSpacing: 1,
+                Flexible(
+                  child: Text(
+                    entry.key.toUpperCase(),
+                    style: context.text.labelMedium?.copyWith(
+                      color: context.colors.textSecondary,
+                      letterSpacing: 1,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => ref
-                      .read(notificationsControllerProvider.notifier)
-                      .markAllRead(),
-                  child: Text(
-                    l.markAllRead,
-                    style: context.text.labelMedium?.copyWith(
-                      color: context.colors.primary,
-                      fontWeight: FontWeight.w600,
+                // Only once (first group) — it acts on all notifications, so
+                // repeating it per date-group was misleading and overflowed.
+                if (i == 0)
+                  GestureDetector(
+                    onTap: () => ref
+                        .read(notificationsControllerProvider.notifier)
+                        .markAllRead(),
+                    child: Text(
+                      l.markAllRead,
+                      style: context.text.labelMedium?.copyWith(
+                        color: context.colors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

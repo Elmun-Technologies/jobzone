@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/widgets/snackbars.dart';
 import '../../domain/company.dart';
 
 /// Company Details header (Figma): a soft grey bar with back + "Company
@@ -84,19 +86,35 @@ class CompanyHeader extends StatelessWidget {
                 ),
               if (company.website != null && company.website!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.link_rounded, size: 18, color: colors.primary),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      company.website!,
-                      style: context.text.bodyMedium?.copyWith(
-                        color: colors.primary,
-                        fontWeight: FontWeight.w600,
+                // Tapping copies the URL (no in-app browser wired) — previously
+                // the link-styled row did nothing on tap.
+                GestureDetector(
+                  onTap: () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: company.website!),
+                    );
+                    if (context.mounted) {
+                      showInfoSnack(context, context.l10n.copied);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.link_rounded, size: 18, color: colors.primary),
+                      const SizedBox(width: AppSpacing.xs),
+                      Flexible(
+                        child: Text(
+                          company.website!,
+                          style: context.text.bodyMedium?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ],

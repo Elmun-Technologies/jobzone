@@ -274,11 +274,15 @@ class _MessageItem extends StatelessWidget {
                 ),
               ]
             : [
-                Text(
-                  peerName,
-                  style: context.text.labelSmall?.copyWith(
-                    color: colors.textPrimary,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    peerName,
+                    style: context.text.labelSmall?.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),

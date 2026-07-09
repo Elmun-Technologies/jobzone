@@ -26,7 +26,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _agree = true;
+  bool _agree = false;
 
   @override
   void dispose() {
@@ -38,6 +38,12 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_agree) {
+      // The checkbox was inert before — unchecking it still let signup proceed.
+      final l = context.l10n;
+      showInfoSnack(context, '${l.agreeWithTerms} ${l.termsAndConditions}');
+      return;
+    }
     final email = _email.text.trim();
     final ok = await ref
         .read(authControllerProvider.notifier)

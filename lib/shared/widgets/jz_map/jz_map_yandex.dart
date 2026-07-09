@@ -12,6 +12,7 @@ import 'package:yandex_maps_mapkit_lite/mapkit.dart' as ymk;
 import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart' show mapkit;
 import 'package:yandex_maps_mapkit_lite/yandex_map.dart' show YandexMap;
 
+import '../../../design_system/design_system.dart';
 import 'jz_map_types.dart';
 import 'marker_bitmaps.dart';
 
@@ -23,6 +24,67 @@ const _yandexApiKey = '1d02f6b0-05d4-4eb6-ae5b-eea72724a6ff';
 /// One-time Yandex MapKit init; `bootstrap()` awaits this before `runApp`.
 /// The web (OSM) implementation exposes a no-op with the same signature.
 Future<void> initJzMap() => ymk_init.initMapkit(apiKey: _yandexApiKey);
+
+/// Owns the process-wide MapKit engine lifecycle.
+///
+/// `mapkit.onStart()` / `onStop()` start and stop the ENTIRE native engine
+/// (rendering, tiles, network) and are NOT reference-counted by the SDK. So
+/// binding them to each [JzMapView]'s own `initState`/`dispose` — while several
+/// maps are alive at once (the Home preview + the Explore tab both live in the
+/// shell's IndexedStack, and full-screen pickers push on top) — means one map's
+/// `dispose` calls `onStop()` and freezes every other still-visible map.
+///
+/// This singleton fixes that: it ref-counts the mounted map views and also
+/// pauses/resumes the engine with the app lifecycle (MapKit needs `onStop()`
+/// when the app backgrounds and `onStart()` on resume). Every call is guarded,
+/// so a failed init (rejected key) degrades to a blank map instead of crashing.
+class _MapKitLifecycle with WidgetsBindingObserver {
+  _MapKitLifecycle._();
+  static final instance = _MapKitLifecycle._();
+
+  int _active = 0;
+  bool _observing = false;
+  bool _foreground = true;
+  bool _started = false;
+
+  /// A map view mounted — start the engine if it isn't already running.
+  void acquire() {
+    if (!_observing) {
+      WidgetsBinding.instance.addObserver(this);
+      _observing = true;
+    }
+    _active++;
+    _sync();
+  }
+
+  /// A map view unmounted — stop the engine only once the LAST one is gone.
+  void release() {
+    if (_active > 0) _active--;
+    _sync();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    _sync();
+  }
+
+  void _sync() {
+    final shouldRun = _active > 0 && _foreground;
+    if (shouldRun == _started) return;
+    try {
+      if (shouldRun) {
+        mapkit.onStart();
+      } else {
+        mapkit.onStop();
+      }
+      _started = shouldRun;
+    } catch (_) {
+      // MapKit not initialised (init failed / key rejected) — leave the flag
+      // untouched so a later, successful state change can retry.
+    }
+  }
+}
 
 /// Yandex map implementation — Android/iOS, on the OFFICIAL
 /// `yandex_maps_mapkit_lite` SDK (the abandoned community `yandex_mapkit`
@@ -67,6 +129,16 @@ class _JzMapViewState extends State<JzMapView> {
   /// just our objects without touching anything else on the map.
   ymk.MapObjectCollection? _layer;
 
+  /// A separate collection for the "me" dot, so toggling my-location never
+  /// clears and re-renders every job marker (which would flicker all pins).
+  ymk.MapObjectCollection? _meLayer;
+  ymk.PlacemarkMapObject? _mePlacemark;
+  LatLng? _meLatLng;
+
+  /// False until the native platform view is created; drives a loading
+  /// placeholder so the user sees a spinner instead of a blank grey box.
+  bool _mapReady = false;
+
   /// Placemarks by marker id — lets a semantically-equal update refresh only
   /// `userData` (fresh onTap closures) instead of re-adding every object.
   final _placemarks = <String, ymk.PlacemarkMapObject>{};
@@ -100,7 +172,7 @@ class _JzMapViewState extends State<JzMapView> {
   @override
   void initState() {
     super.initState();
-    mapkit.onStart();
+    _MapKitLifecycle.instance.acquire();
   }
 
   void _onMapCreated(ymk.MapWindow window) {
@@ -122,21 +194,26 @@ class _JzMapViewState extends State<JzMapView> {
       window.map.addInputListener(listener);
     }
     _layer = window.map.mapObjects.addCollection();
+    _meLayer = window.map.mapObjects.addCollection();
     _rebuildObjects();
+    _syncMe();
+    if (mounted) setState(() => _mapReady = true);
   }
 
   @override
   void didUpdateWidget(covariant JzMapView old) {
     super.didUpdateWidget(old);
     _rebuildObjects();
+    _syncMe();
   }
 
+  // The "me" dot is intentionally NOT part of this signature — it lives in its
+  // own collection ([_meLayer]) so moving it never forces a full marker rebuild.
   List<String> _signature() => [
     for (final m in widget.markers)
       '${m.id}|${m.point.latitude}|${m.point.longitude}|'
           '${m.label}|${m.imageUrl}|${m.kind}',
     'cluster:${widget.cluster}',
-    'me:${widget.myLocation?.latitude},${widget.myLocation?.longitude}',
   ];
 
   void _rebuildObjects() {
@@ -169,19 +246,37 @@ class _JzMapViewState extends State<JzMapView> {
         _decorate(layer.addPlacemarkWithPoint(_toPoint(m.point)), m);
       }
     }
+  }
 
+  /// Adds/moves/removes the blue "me" dot in its own [_meLayer], independent of
+  /// the marker rebuild so job pins never flicker when the user taps "locate".
+  void _syncMe() {
+    final meLayer = _meLayer;
+    if (meLayer == null) return;
     final me = widget.myLocation;
-    if (me != null) {
-      layer
-          .addPlacemarkWithPoint(_toPoint(me))
-          .setIconWithStyle(
-            ymk_image.ImageProvider(
-              () async => (await MarkerBitmaps.meDot()).clone(),
-              id: 'jz:me',
-            ),
-            _centered,
-          );
+    if (me == null) {
+      if (_mePlacemark != null) {
+        meLayer.clear();
+        _mePlacemark = null;
+        _meLatLng = null;
+      }
+      return;
     }
+    if (_mePlacemark != null &&
+        _meLatLng?.latitude == me.latitude &&
+        _meLatLng?.longitude == me.longitude) {
+      return;
+    }
+    meLayer.clear();
+    _meLatLng = me;
+    _mePlacemark = meLayer.addPlacemarkWithPoint(_toPoint(me))
+      ..setIconWithStyle(
+        ymk_image.ImageProvider(
+          () async => (await MarkerBitmaps.meDot()).clone(),
+          id: 'jz:me',
+        ),
+        _centered,
+      );
   }
 
   static const _centered = ymk.IconStyle(anchor: math.Point(0.5, 0.5));
@@ -242,20 +337,18 @@ class _JzMapViewState extends State<JzMapView> {
   static Future<ui.Image?> _logoImage(String url) async {
     final cached = _logoImages[url];
     if (cached != null) return cached;
+    final client = HttpClient();
     try {
-      final client = HttpClient();
       final resp = await (await client.getUrl(Uri.parse(url))).close();
-      if (resp.statusCode != 200) {
-        client.close();
-        return null;
-      }
+      if (resp.statusCode != 200) return null;
       final bytes = await consolidateHttpClientResponseBytes(resp);
-      client.close();
       final img = await MarkerBitmaps.decodeImage(bytes);
       _logoImages[url] = img;
       return img;
     } catch (_) {
       return null;
+    } finally {
+      client.close();
     }
   }
 
@@ -273,12 +366,27 @@ class _JzMapViewState extends State<JzMapView> {
       final listener = _inputListener;
       if (listener != null) _window?.map.removeInputListener(listener);
     } catch (_) {}
-    mapkit.onStop();
+    // Ref-counted: only stops the shared engine once the last map unmounts.
+    _MapKitLifecycle.instance.release();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => YandexMap(onMapCreated: _onMapCreated);
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        YandexMap(onMapCreated: _onMapCreated),
+        // A placeholder until the native view exists, so the user sees a
+        // spinner rather than a blank grey box while the map spins up.
+        if (!_mapReady)
+          ColoredBox(
+            color: context.colors.surfaceVariant,
+            child: const JzLoader(),
+          ),
+      ],
+    );
+  }
 }
 
 /// Routes a placemark tap to its marker's `onTap` (stored in `userData`).

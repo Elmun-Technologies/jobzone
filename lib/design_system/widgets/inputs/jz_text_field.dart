@@ -19,6 +19,7 @@ class JzTextField extends StatelessWidget {
     this.textInputAction,
     this.maxLines = 1,
     this.minLines,
+    this.readOnly = false,
   });
 
   final String? label;
@@ -33,6 +34,7 @@ class JzTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final int? maxLines;
   final int? minLines;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class JzTextField extends StatelessWidget {
         ],
         TextFormField(
           controller: controller,
+          readOnly: readOnly,
           obscureText: obscureText,
           keyboardType: keyboardType,
           onChanged: onChanged,

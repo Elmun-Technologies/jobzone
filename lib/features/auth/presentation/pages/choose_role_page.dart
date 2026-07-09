@@ -63,43 +63,51 @@ class _ChooseRolePageState extends ConsumerState<ChooseRolePage> {
     }
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xl,
-            AppSpacing.xl,
-            AppSpacing.xl,
-            AppSpacing.xl,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AuthHeader(
-                title: l.roleChooseTitle,
-                subtitle: l.roleChooseSubtitle,
+        // Scroll when the content is taller than the viewport (small screens /
+        // large font scale) so the Spacer layout can't overflow.
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AuthHeader(
+                        title: l.roleChooseTitle,
+                        subtitle: l.roleChooseSubtitle,
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      _RoleCard(
+                        icon: Icons.work_outline_rounded,
+                        title: l.roleSeekerTitle,
+                        description: l.roleSeekerDesc,
+                        selected: _selected == UserRole.jobSeeker,
+                        onTap: () =>
+                            setState(() => _selected = UserRole.jobSeeker),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _RoleCard(
+                        icon: Icons.business_center_outlined,
+                        title: l.roleEmployerTitle,
+                        description: l.roleEmployerDesc,
+                        selected: _selected == UserRole.employer,
+                        onTap: () =>
+                            setState(() => _selected = UserRole.employer),
+                      ),
+                      const Spacer(),
+                      JzPrimaryButton(
+                        label: l.continueLabel,
+                        loading: _saving,
+                        onPressed: _selected == null ? null : _continue,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
-              _RoleCard(
-                icon: Icons.work_outline_rounded,
-                title: l.roleSeekerTitle,
-                description: l.roleSeekerDesc,
-                selected: _selected == UserRole.jobSeeker,
-                onTap: () => setState(() => _selected = UserRole.jobSeeker),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _RoleCard(
-                icon: Icons.business_center_outlined,
-                title: l.roleEmployerTitle,
-                description: l.roleEmployerDesc,
-                selected: _selected == UserRole.employer,
-                onTap: () => setState(() => _selected = UserRole.employer),
-              ),
-              const Spacer(),
-              JzPrimaryButton(
-                label: l.continueLabel,
-                loading: _saving,
-                onPressed: _selected == null ? null : _continue,
-              ),
-            ],
+            ),
           ),
         ),
       ),

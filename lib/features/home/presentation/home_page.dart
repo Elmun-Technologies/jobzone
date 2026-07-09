@@ -67,10 +67,10 @@ class HomePage extends ConsumerWidget {
                     onAction: () => context.push(Routes.suggestedJobs),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  SizedBox(
-                    height: 220,
-                    child: suggested.when(
-                      loading: () => Shimmer(
+                  suggested.when(
+                    loading: () => SizedBox(
+                      height: 220,
+                      child: Shimmer(
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: 3,
@@ -80,21 +80,20 @@ class HomePage extends ConsumerWidget {
                               const JobCardSkeleton(width: 300),
                         ),
                       ),
-                      error: (_, _) => _ErrorBox(
+                    ),
+                    error: (_, _) => SizedBox(
+                      height: 220,
+                      child: _ErrorBox(
                         message: l.errUnknown,
                         onRetry: () => ref.invalidate(suggestedJobsProvider),
                       ),
-                      data: (jobs) => jobs.isEmpty
-                          ? _EmptyBox(message: l.noJobsTitle)
-                          : ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: jobs.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: AppSpacing.md),
-                              itemBuilder: (_, i) =>
-                                  JobCard(job: jobs[i], width: 300),
-                            ),
                     ),
+                    data: (jobs) => jobs.isEmpty
+                        ? SizedBox(
+                            height: 220,
+                            child: _EmptyBox(message: l.noJobsTitle),
+                          )
+                        : JobCardCarousel(jobs: jobs),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   SectionHeader(
@@ -170,18 +169,20 @@ class _HomeHeader extends ConsumerWidget {
                           size: 18,
                         ),
                         const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          'Tashkent, Uzbekistan',
-                          style: context.text.titleSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            'Tashkent, Uzbekistan',
+                            style: context.text.titleSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                        // Chevron removed: it implied a location switcher that
+                        // didn't exist (no handler). Restore it only when a real
+                        // city picker is wired.
                       ],
                     ),
                   ],
@@ -469,15 +470,7 @@ class _RecommendedForYou extends ConsumerWidget {
       children: [
         SectionHeader(title: l.recommendedForYou),
         const SizedBox(height: AppSpacing.md),
-        SizedBox(
-          height: 220,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: jobs.length,
-            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (_, i) => JobCard(job: jobs[i], width: 300),
-          ),
-        ),
+        JobCardCarousel(jobs: jobs),
         const SizedBox(height: AppSpacing.xl),
       ],
     );
