@@ -16,16 +16,20 @@ class MarkerBitmaps {
 
   static final _cache = <String, ui.Image>{};
 
-  static const _brand = Color(0xFF1F8F4E); // green, matching the reference maps
-  static const _blue = Color(0xFF0D80F2);
+  // Yolla brand: ink cluster bubbles, volt salary pills (ink text) — adapted
+  // to our identity rather than the reference apps' green.
+  static const _ink = Color(0xFF0A0A0A);
+  static const _volt = Color(0xFFC7FB00);
+  static const _blue = Color(0xFF0D80F2); // "me" location — map convention
   static const _white = Color(0xFFFFFFFF);
   static const _dpr = 3.0; // render at 3x for crisp icons on hi-dpi screens
 
-  /// A green circle with the cluster [count] centered in white.
+  /// An ink circle with the cluster [count] centered in white.
   static Future<ui.Image> clusterBubble(int count) =>
-      _cached('cluster:$count', () => _circle('$count', _brand, 22));
+      _cached('cluster:$count', () => _circle('$count', _ink, 22));
 
-  /// A rounded "pill" showing the salary [label] (e.g. "5 mln so'm").
+  /// A volt "price tag" pill (ink text) with a downward tail that points at the
+  /// exact location — showing the salary [label] (e.g. "5 mln so'm").
   static Future<ui.Image> salaryPill(String label) =>
       _cached('pill:$label', () => _pill(label));
 
@@ -92,29 +96,42 @@ class MarkerBitmaps {
     return rec.endRecording().toImage(size, size);
   }
 
+  /// Volt "price tag" bubble with ink text and a downward tail. The image is
+  /// sized so the tail tip is at bottom-centre — callers tip-anchor it (0.5,1)
+  /// so the tag points at the exact map location.
   static Future<ui.Image> _pill(String label) {
-    final padH = 11 * _dpr;
-    final padV = 6 * _dpr;
+    final padH = 12 * _dpr;
+    final padV = 7 * _dpr;
+    final tail = 7 * _dpr;
     final tp = TextPainter(
       text: TextSpan(
         text: label,
         style: TextStyle(
-          color: _white,
+          color: _ink,
           fontSize: 13 * _dpr,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w800,
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
     final w = (tp.width + padH * 2).round();
-    final h = (tp.height + padV * 2).round();
+    final bubbleH = tp.height + padV * 2;
+    final h = (bubbleH + tail).round();
     final rec = ui.PictureRecorder();
     final canvas = Canvas(rec);
+    final paint = Paint()..color = _volt;
     final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
-      Radius.circular(h / 2),
+      Rect.fromLTWH(0, 0, w.toDouble(), bubbleH),
+      Radius.circular(10 * _dpr),
     );
-    canvas.drawRRect(rrect, Paint()..color = _brand);
+    canvas.drawRRect(rrect, paint);
+    final cx = w / 2;
+    final tailPath = Path()
+      ..moveTo(cx - tail, bubbleH)
+      ..lineTo(cx + tail, bubbleH)
+      ..lineTo(cx, bubbleH + tail)
+      ..close();
+    canvas.drawPath(tailPath, paint);
     tp.paint(canvas, Offset(padH, padV));
     return rec.endRecording().toImage(w, h);
   }
@@ -131,9 +148,9 @@ class MarkerBitmaps {
         text: TextSpan(
           text: label,
           style: TextStyle(
-            color: _white,
+            color: _ink,
             fontSize: 12 * _dpr,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -183,7 +200,7 @@ class MarkerBitmaps {
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(pillRect, Radius.circular(pillH / 2)),
-        Paint()..color = _brand,
+        Paint()..color = _volt,
       );
       tp.paint(
         canvas,

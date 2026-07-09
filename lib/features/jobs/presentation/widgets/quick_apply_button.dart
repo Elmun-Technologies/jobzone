@@ -20,9 +20,13 @@ import '../../domain/job.dart';
 ///  - otherwise applies immediately and flips to a ✓ state (idempotent: a
 ///    duplicate-apply error is treated as success, not shown as a failure).
 class QuickApplyButton extends ConsumerStatefulWidget {
-  const QuickApplyButton({super.key, required this.job});
+  const QuickApplyButton({super.key, required this.job, this.pill = false});
 
   final Job job;
+
+  /// When true, renders as a labelled volt "⚡ Apply" pill (used in the job
+  /// card footer) instead of the bare bolt icon.
+  final bool pill;
 
   @override
   ConsumerState<QuickApplyButton> createState() => _QuickApplyButtonState();
@@ -67,8 +71,6 @@ class _QuickApplyButtonState extends ConsumerState<QuickApplyButton> {
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
-    final colors = context.colors;
     final applied =
         ref
             .watch(applicationsControllerProvider)
@@ -76,29 +78,141 @@ class _QuickApplyButtonState extends ConsumerState<QuickApplyButton> {
             ?.any((a) => a.job.id == widget.job.id) ??
         false;
 
-    if (applied) {
+    final state = applied
+        ? _ApplyState.applied
+        : (_pending ? _ApplyState.pending : _ApplyState.idle);
+
+    // A single AnimatedSwitcher so every state change (idle → pending →
+    // applied) pops in with a scale + fade rather than snapping.
+    final child = widget.pill
+        ? _buildPill(context, state)
+        : _buildIcon(context, state);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOutBack,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (c, a) => ScaleTransition(
+        scale: a,
+        child: FadeTransition(opacity: a, child: c),
+      ),
+      child: KeyedSubtree(key: ValueKey(state), child: child),
+    );
+  }
+
+  Widget _buildIcon(BuildContext context, _ApplyState state) {
+    final l = context.l10n;
+    final colors = context.colors;
+    switch (state) {
+      case _ApplyState.applied:
+        return Semantics(
+          label: l.quickApplied,
+          child: Icon(Icons.check_circle_rounded, color: colors.primary),
+        );
+      case _ApplyState.pending:
+        return SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: colors.primary,
+          ),
+        );
+      case _ApplyState.idle:
+        return Semantics(
+          button: true,
+          label: l.quickApply,
+          child: InkResponse(
+            onTap: _onTap,
+            child: Icon(Icons.bolt_rounded, color: colors.primary),
+          ),
+        );
+    }
+  }
+
+  Widget _buildPill(BuildContext context, _ApplyState state) {
+    final l = context.l10n;
+    final colors = context.colors;
+    const shape = StadiumBorder();
+
+    if (state == _ApplyState.applied) {
       return Semantics(
         label: l.quickApplied,
-        child: Icon(Icons.check_circle_rounded, color: colors.primary),
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: ShapeDecoration(
+            color: colors.surfaceVariant,
+            shape: shape,
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_rounded, size: 17, color: colors.success),
+              const SizedBox(width: 6),
+              Text(
+                l.quickApplied,
+                style: context.text.labelLarge?.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
+    final pending = state == _ApplyState.pending;
     return Semantics(
       button: true,
       label: l.quickApply,
-      child: InkResponse(
-        onTap: _pending ? null : _onTap,
-        child: _pending
-            ? SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: colors.primary,
-                ),
-              )
-            : Icon(Icons.bolt_rounded, color: colors.primary),
+      child: Material(
+        color: colors.gold,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: pending ? null : _onTap,
+          child: SizedBox(
+            height: 40,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: pending
+                    ? [
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colors.onGold,
+                          ),
+                        ),
+                      ]
+                    : [
+                        Icon(
+                          Icons.bolt_rounded,
+                          size: 18,
+                          color: colors.onGold,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          l.applyShort,
+                          style: context.text.labelLarge?.copyWith(
+                            color: colors.onGold,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 }
+
+enum _ApplyState { idle, pending, applied }
