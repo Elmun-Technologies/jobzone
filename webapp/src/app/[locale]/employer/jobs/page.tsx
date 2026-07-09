@@ -78,9 +78,17 @@ export default async function MyJobsPage({
           {justPublishedJobId ? (
             <div className="mt-3 flex flex-wrap gap-2">
               <Link
-                href={`/employer/jobs/${justPublishedJobId}/promote`}
+                href={`/employer/jobs/${justPublishedJobId}/matches`}
                 className={cn(
                   buttonVariants({ variant: "primary", size: "sm" }),
+                )}
+              >
+                {t("viewMatches")}
+              </Link>
+              <Link
+                href={`/employer/jobs/${justPublishedJobId}/promote`}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
                 )}
               >
                 {t("promoteThisJob")}

@@ -28,6 +28,19 @@ export interface CompanyCandidate {
   avatarUrl: string | null;
 }
 
+export interface RecommendedCandidate {
+  id: string;
+  name: string;
+  headline: string | null;
+  avatarUrl: string | null;
+  city: string | null;
+  workerVerified: boolean;
+  score: number;
+  sameCity: boolean;
+  roleMatch: boolean;
+  skillsMatched: number;
+}
+
 export interface ApplicantDetail {
   applicationId: string;
   applicantId: string;
@@ -195,6 +208,40 @@ export async function getJobApplicants(jobId: string): Promise<Applicant[]> {
     });
   } catch (e) {
     console.error("getJobApplicants failed", e);
+    return [];
+  }
+}
+
+/**
+ * Ranked candidate recommendations for a job — open-to-work seekers matched on
+ * city / role / skills by the `recommended_candidates` definer RPC (0050),
+ * gated to the job owner. Returns only safe card fields (no PII); an empty
+ * array covers both "no matches" and a DB behind on 0050.
+ */
+export async function getRecommendedCandidates(
+  jobId: string,
+): Promise<RecommendedCandidate[]> {
+  if (!hasSupabase()) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("recommended_candidates", {
+      p_job_id: jobId,
+    });
+    if (error) throw error;
+    return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+      id: String(r.id),
+      name: r.full_name ? String(r.full_name) : "—",
+      headline: r.headline ? String(r.headline) : null,
+      avatarUrl: r.avatar_url ? String(r.avatar_url) : null,
+      city: r.city ? String(r.city) : null,
+      workerVerified: r.worker_verified === true,
+      score: typeof r.score === "number" ? r.score : 0,
+      sameCity: r.same_city === true,
+      roleMatch: r.role_match === true,
+      skillsMatched: typeof r.skills_matched === "number" ? r.skills_matched : 0,
+    }));
+  } catch (e) {
+    console.error("getRecommendedCandidates failed", e);
     return [];
   }
 }

@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -51,11 +52,24 @@ export default async function JobApplicantsPage({
       <p className="text-muted-foreground text-sm">{t("applicants")}</p>
       <h1 className="text-foreground mb-2 text-2xl font-bold">{job.title}</h1>
       {applicants.length > 0 ? (
-        <p className="text-muted-foreground mb-6 text-sm">
+        <p className="text-muted-foreground mb-4 text-sm">
           {t("applicantsCount", { count: applicants.length })}
           {newCount > 0 ? ` · ${t("newApplicants", { count: newCount })}` : ""}
         </p>
       ) : null}
+
+      {/* Beyond who applied — proactively surface open-to-work seekers the
+          algorithm matched to this vacancy. */}
+      <Link
+        href={`/employer/jobs/${id}/matches`}
+        className="border-primary/40 bg-accent text-accent-foreground hover:border-primary mb-6 flex items-center justify-between gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <Sparkles className="text-primary size-4" />
+          {t("recommendedCandidates")}
+        </span>
+        <span aria-hidden>→</span>
+      </Link>
 
       {applicants.length === 0 ? (
         <EmptyState
