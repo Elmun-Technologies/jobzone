@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:yandex_maps_mapkit_lite/image.dart' as ymk_image;
 import 'package:yandex_maps_mapkit_lite/init.dart' as ymk_init;
@@ -175,8 +175,28 @@ class _JzMapViewState extends State<JzMapView> {
     _MapKitLifecycle.instance.acquire();
   }
 
+  /// Follows the app's light/dark theme — a dark job map instead of a bright
+  /// one at night (matches the reference apps' night map).
+  void _applyNightMode() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    try {
+      _window?.map.nightModeEnabled = isDark;
+    } catch (_) {
+      // Non-fatal if the native map isn't ready.
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fires when the Theme changes — re-apply so a light/dark toggle recolours
+    // the already-created map.
+    _applyNightMode();
+  }
+
   void _onMapCreated(ymk.MapWindow window) {
     _window = window;
+    _applyNightMode();
     widget.controller?.bind(_move);
     window.map.move(
       ymk.CameraPosition(

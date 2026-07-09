@@ -48,6 +48,42 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     return j.salaryText;
   }
 
+  /// Tapping a map pin opens the job's card in a bottom sheet — the seeker
+  /// stays on the map (like the reference apps) instead of jumping straight to
+  /// the detail page. Tapping the card itself still opens full details.
+  void _showJobPreview(Job job) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.colors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              JobCard(job: job),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _goToMyLocation() async {
     final messenger = ScaffoldMessenger.of(context);
     final pos = await ref.read(permissionServiceProvider).currentPosition();
@@ -106,8 +142,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                             point: LatLng(job.lat!, job.lng!),
                             label: _salaryLabel(job),
                             imageUrl: job.companyLogoUrl,
-                            onTap: () =>
-                                context.push(Routes.jobDetails(job.id)),
+                            onTap: () => _showJobPreview(job),
                           ),
                     ],
                     carousel: jobs,
@@ -183,10 +218,7 @@ class _MapTab extends StatelessWidget {
         Positioned(
           right: AppSpacing.lg,
           bottom: 264,
-          child: _CircleFab(
-            icon: Icons.my_location_rounded,
-            onTap: onMyLocation,
-          ),
+          child: _NearMeButton(onTap: onMyLocation),
         ),
         Positioned(
           left: 0,
@@ -420,9 +452,10 @@ class _MapStatusChip extends StatelessWidget {
   }
 }
 
-class _CircleFab extends StatelessWidget {
-  const _CircleFab({required this.icon, required this.onTap});
-  final IconData icon;
+/// A labelled "Near me" pill that recentres the map on the user's location
+/// (matches the reference apps' "Yaqinimda" button).
+class _NearMeButton extends StatelessWidget {
+  const _NearMeButton({required this.onTap});
   final VoidCallback onTap;
 
   @override
@@ -430,15 +463,29 @@ class _CircleFab extends StatelessWidget {
     final colors = context.colors;
     return Material(
       color: colors.surface,
-      shape: const CircleBorder(),
+      shape: const StadiumBorder(),
       elevation: 2,
       child: InkWell(
-        customBorder: const CircleBorder(),
+        customBorder: const StadiumBorder(),
         onTap: onTap,
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: Icon(icon, color: colors.primary),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.near_me_rounded, size: 18, color: colors.primary),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                context.l10n.nearMe,
+                style: context.text.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

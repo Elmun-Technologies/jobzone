@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +77,7 @@ class _JobDetail extends ConsumerWidget {
               ],
             ),
           ),
-          _ApplyBar(jobId: job.id),
+          _ApplyBar(job: job),
         ],
       ),
     );
@@ -134,22 +135,36 @@ class _Header extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Container(
-            height: 72,
-            width: 72,
-            decoration: BoxDecoration(
-              color: colors.primary,
-              shape: BoxShape.circle,
-              border: Border.all(color: colors.surface, width: 3),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              letter,
-              style: context.text.headlineMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+          Builder(
+            builder: (context) {
+              final fallback = Center(
+                child: Text(
+                  letter,
+                  style: context.text.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              );
+              final url = job.companyLogoUrl;
+              return Container(
+                height: 72,
+                width: 72,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colors.surface, width: 3),
+                ),
+                child: (url == null || url.isEmpty)
+                    ? fallback
+                    : CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => fallback,
+                      ),
+              );
+            },
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -1065,19 +1080,85 @@ class _CompanyTab extends StatelessWidget {
   }
 }
 
+/// Sticky footer: the salary (the decision the seeker is making) above a
+/// full-width apply CTA. A top border + shadow separate it from the scrolling
+/// content.
 class _ApplyBar extends StatelessWidget {
-  const _ApplyBar({required this.jobId});
-  final String jobId;
+  const _ApplyBar({required this.job});
+  final Job job;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: JzPrimaryButton(
-          label: context.l10n.applyForJob,
-          onPressed: () => context.push(Routes.applyJob(jobId)),
+    final l = context.l10n;
+    final colors = context.colors;
+    final salary = job.salaryText;
+    final period = salaryPeriodLabel(context, job.salaryPeriod);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(top: BorderSide(color: colors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (salary != null && salary.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Text(
+                      l.salaryLabel,
+                      style: context.text.bodySmall?.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: RichText(
+                          maxLines: 1,
+                          text: TextSpan(
+                            text: salary,
+                            style: context.text.titleMedium?.copyWith(
+                              color: colors.textPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            children: [
+                              if (period != null)
+                                TextSpan(
+                                  text: ' $period',
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: colors.textSecondary,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+              JzPrimaryButton(
+                label: l.applyForJob,
+                onPressed: () => context.push(Routes.applyJob(job.id)),
+              ),
+            ],
+          ),
         ),
       ),
     );
