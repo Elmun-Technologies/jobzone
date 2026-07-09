@@ -32,18 +32,19 @@ class JobsRepositoryImpl implements JobsRepository {
     required int limit,
     bool recentFirst = true,
   }) async {
-    var query = _client
-        .from('job_feed')
-        .select()
-        .eq('status', 'open')
-        // Active paid promotions float to the top, then by recency.
-        .order('boost_active', ascending: false)
-        .order('posted_at', ascending: !recentFirst);
+    var query = _client.from('job_feed').select().eq('status', 'open');
     final dismissed = await _dismissedIds();
     if (dismissed.isNotEmpty) {
       query = query.not('id', 'in', '(${dismissed.join(',')})');
     }
-    final rows = await query.limit(limit);
+    // Filters (.eq/.not) must all land before any transform (.order/.limit) —
+    // PostgrestFilterBuilder narrows to PostgrestTransformBuilder afterward,
+    // which has no .not().
+    final rows = await query
+        // Active paid promotions float to the top, then by recency.
+        .order('boost_active', ascending: false)
+        .order('posted_at', ascending: !recentFirst)
+        .limit(limit);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
 
@@ -71,17 +72,15 @@ class JobsRepositoryImpl implements JobsRepository {
       final all = _boostedFirst(recentFirst ? mockJobs : mockJobs.reversed);
       return all.skip(offset).take(limit).toList();
     }
-    var query = _client
-        .from('job_feed')
-        .select()
-        .eq('status', 'open')
-        .order('boost_active', ascending: false)
-        .order('posted_at', ascending: !recentFirst);
+    var query = _client.from('job_feed').select().eq('status', 'open');
     final dismissed = await _dismissedIds();
     if (dismissed.isNotEmpty) {
       query = query.not('id', 'in', '(${dismissed.join(',')})');
     }
-    final rows = await query.range(offset, offset + limit - 1);
+    final rows = await query
+        .order('boost_active', ascending: false)
+        .order('posted_at', ascending: !recentFirst)
+        .range(offset, offset + limit - 1);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
 
@@ -166,14 +165,15 @@ class JobsRepositoryImpl implements JobsRepository {
         .from('job_feed')
         .select()
         .eq('status', 'open')
-        .eq('category_name', categoryName)
-        .order('boost_active', ascending: false)
-        .order('posted_at', ascending: false);
+        .eq('category_name', categoryName);
     final dismissed = await _dismissedIds();
     if (dismissed.isNotEmpty) {
       query = query.not('id', 'in', '(${dismissed.join(',')})');
     }
-    final rows = await query.limit(limit);
+    final rows = await query
+        .order('boost_active', ascending: false)
+        .order('posted_at', ascending: false)
+        .limit(limit);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
   }
 
