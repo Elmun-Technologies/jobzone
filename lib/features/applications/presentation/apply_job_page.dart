@@ -39,7 +39,6 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
     final res = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf', 'doc', 'docx'],
-      withData: true, // we need the bytes to actually upload the CV
     );
     if (res != null && res.files.isNotEmpty) {
       setState(() => _cvFile = res.files.first);
@@ -71,13 +70,15 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
       // earlier version captured only the file name and dropped the file.
       String? resumeId;
       final cv = _cvFile;
-      if (cv != null && cv.bytes != null) {
+      if (cv != null) {
+        // file_picker 12: read bytes on demand instead of the deprecated
+        // withData/bytes (reads from the path on mobile, the blob on web).
         resumeId = await ref
             .read(cvRepositoryProvider)
             .addResume(
               title: cv.name,
               fileName: cv.name,
-              bytes: cv.bytes!,
+              bytes: await cv.readAsBytes(),
               mimeType: _mimeFor(cv.extension),
             );
       }
