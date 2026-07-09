@@ -313,12 +313,13 @@ class _JzMapViewState extends State<JzMapView> {
       return;
     }
     if (label != null) {
+      // Tip-anchored: the volt price tag's tail points at the exact location.
       placemark.setIconWithStyle(
         ymk_image.ImageProvider(
           () async => (await MarkerBitmaps.salaryPill(label)).clone(),
           id: 'jz:pill:$label',
         ),
-        _centered,
+        _tipAnchored,
       );
       return;
     }
