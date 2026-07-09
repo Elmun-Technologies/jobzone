@@ -73,7 +73,11 @@ class _MapKitLifecycle with WidgetsBindingObserver {
     final shouldRun = _active > 0 && _foreground;
     if (shouldRun == _started) return;
     try {
-      shouldRun ? mapkit.onStart() : mapkit.onStop();
+      if (shouldRun) {
+        mapkit.onStart();
+      } else {
+        mapkit.onStop();
+      }
       _started = shouldRun;
     } catch (_) {
       // MapKit not initialised (init failed / key rejected) — leave the flag
