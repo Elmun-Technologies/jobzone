@@ -92,7 +92,7 @@ export function JobFilters({ cities }: { cities: string[] }) {
             aria-expanded={open}
             className="border-border rounded-full border px-3 py-1 text-sm lg:hidden"
           >
-            {open ? t("clear") : t("filters")}
+            {open ? t("hideFilters") : t("filters")}
           </button>
         </div>
       </div>

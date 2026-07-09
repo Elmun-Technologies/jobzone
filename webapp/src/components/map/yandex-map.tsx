@@ -58,6 +58,7 @@ export function YandexMap({
   applyLabel,
   youAreHere,
   ratings,
+  wheelZoom = true,
   onError,
 }: {
   jobs: Located[];
@@ -66,6 +67,9 @@ export function YandexMap({
   applyLabel: string;
   youAreHere: string;
   ratings?: MapRatings;
+  /** When false (embedded landing map), the mouse wheel scrolls the page
+   * instead of zooming — no scroll-zoom trap. */
+  wheelZoom?: boolean;
   onError: () => void;
 }) {
   const el = useRef<HTMLDivElement>(null);
@@ -95,6 +99,7 @@ export function YandexMap({
             },
             { suppressMapOpenBlock: true },
           );
+          if (!wheelZoom) map.current.behaviors.disable("scrollZoom");
         } else if (loc) {
           map.current.setCenter([loc.lat, loc.lng], 13);
         }
@@ -145,7 +150,7 @@ export function YandexMap({
     return () => {
       cancelled = true;
     };
-  }, [jobs, loc, lang, locale, applyLabel, youAreHere, ratings]);
+  }, [jobs, loc, lang, locale, applyLabel, youAreHere, ratings, wheelZoom]);
 
   useEffect(() => {
     return () => {

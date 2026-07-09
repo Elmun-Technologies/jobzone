@@ -207,13 +207,16 @@ export default function JobsMapInner({
           applyLabel={t("map.apply")}
           youAreHere={t("map.youAreHere")}
           ratings={ratings}
+          // Only the immersive /explore map wheel-zooms; the embedded landing
+          // map must let the page scroll past it (no scroll-zoom trap).
+          wheelZoom={fullBleed}
           onError={() => setYandexFailed(true)}
         />
       ) : (
         <MapContainer
           center={loc ? [loc.lat, loc.lng] : TASHKENT}
           zoom={loc ? 13 : 11}
-          scrollWheelZoom
+          scrollWheelZoom={fullBleed}
           zoomControl={false}
           className="h-full w-full"
         >
@@ -337,7 +340,7 @@ export default function JobsMapInner({
       {/* Live result count (top-right pill). */}
       {/* Below the search bar + chip row now that the search bar spans full
           width (it used to sit beside the chip row at the same top-3 level). */}
-      <div className="absolute top-24 right-3 z-[1001] hidden sm:block">
+      <div className="absolute top-24 right-3 z-[1001]">
         <span className="bg-foreground text-background rounded-full px-3 py-1.5 text-sm font-semibold shadow-md">
           {t("map.results", { count: shown.length })}
         </span>

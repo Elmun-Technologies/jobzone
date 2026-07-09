@@ -29,6 +29,7 @@ export type YmapsMap = {
     removeAll: () => void;
   };
   events: { add: (t: string, f: (e: YmapsEvent) => void) => void };
+  behaviors: { disable: (name: string) => void; enable: (name: string) => void };
   setCenter: (c: [number, number], zoom?: number) => void;
   destroy: () => void;
 };
