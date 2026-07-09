@@ -6,15 +6,14 @@ allprojects {
     // The yandex_mapkit 4.2.1 plugin ALWAYS compiles its `lite` controller,
     // which imports traffic + user-location listeners that only ship in the
     // `full` MapKit bundle. The plugin otherwise pulls maps.mobile:4.22.0-lite,
-    // and Gradle's version conflict resolution even prefers `-lite` over `-full`
-    // ("lite" > "full" as a string), so a plain force/useVersion loses. Swap the
-    // module outright: any maps.mobile:4.22.0-lite request resolves to -full,
-    // which carries those classes (verified present in the -full AAR).
+    // and Gradle even prefers `-lite` over `-full` in conflict resolution
+    // ("lite" > "full" as a string). Force the module to -full, which carries
+    // those classes (verified present in the -full AAR). NOTE: the APK CI also
+    // applies this via a Gradle init script — repo-level hooks here did not
+    // always reach the plugin subproject's own configuration.
     configurations.all {
-        resolutionStrategy.dependencySubstitution {
-            substitute(module("com.yandex.android:maps.mobile:4.22.0-lite"))
-                .using(module("com.yandex.android:maps.mobile:4.22.0-full"))
-                .because("yandex_mapkit's controller needs full-SDK classes")
+        resolutionStrategy {
+            force("com.yandex.android:maps.mobile:4.22.0-full")
         }
     }
 }
