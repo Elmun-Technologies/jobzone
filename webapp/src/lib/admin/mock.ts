@@ -4,8 +4,11 @@ import type {
   AdminCompanyRow,
   AdminJobRow,
   AdminList,
+  AdminOrderRow,
+  AdminProductRow,
   AdminReviewRow,
   AdminUserRow,
+  AdminWalletTxRow,
   DashboardStats,
   SeriesPoint,
 } from "./types";
@@ -166,6 +169,28 @@ const MOCK_CATEGORIES: AdminCategoryRow[] = [
   { id: "cat-10", name: "Chet elda ish", slug: "foreign-jobs", icon: "✈️", sortOrder: 9, isActive: false },
 ];
 
+const MOCK_WALLET_TX: AdminWalletTxRow[] = [
+  { id: "wt-01", companyName: "Qurilish Invest", kind: "topup", amountUzs: 500_000, status: "pending", description: "Click orqali to'lov", createdAt: "2026-07-01T09:00:00Z", completedAt: null },
+  { id: "wt-02", companyName: "Oqtepa Lavash", kind: "topup", amountUzs: 1_200_000, status: "completed", description: "Payme orqali to'lov", createdAt: "2026-06-20T10:00:00Z", completedAt: "2026-06-20T10:05:00Z" },
+  { id: "wt-03", companyName: "Trans Logistika", kind: "spend", amountUzs: -35_000, status: "completed", description: "7 kun TOP", createdAt: "2026-06-22T11:00:00Z", completedAt: "2026-06-22T11:00:00Z" },
+  { id: "wt-04", companyName: "Shaffof Servis", kind: "topup", amountUzs: 300_000, status: "pending", description: null, createdAt: "2026-07-02T08:30:00Z", completedAt: null },
+];
+
+const MOCK_ORDERS: AdminOrderRow[] = [
+  { id: "po-01", companyName: "Qurilish Invest", productCode: "top_7", amountUzs: 35_000, status: "pending", createdAt: "2026-07-01T09:10:00Z", paidAt: null },
+  { id: "po-02", companyName: "Oqtepa Lavash", productCode: "featured", amountUzs: 10_000, status: "paid", createdAt: "2026-06-21T10:00:00Z", paidAt: "2026-06-21T10:02:00Z" },
+  { id: "po-03", companyName: "Trans Logistika", productCode: "top_3", amountUzs: 15_000, status: "cancelled", createdAt: "2026-06-18T09:00:00Z", paidAt: null },
+];
+
+const MOCK_PRODUCTS: AdminProductRow[] = [
+  { code: "start", name: "Start", kind: "base", priceUzs: 0, durationDays: null, isActive: true, sortOrder: 0 },
+  { code: "featured", name: "Tezkor topish", kind: "featured", priceUzs: 10_000, durationDays: 7, isActive: true, sortOrder: 1 },
+  { code: "top_3", name: "3 kun TOP", kind: "top", priceUzs: 15_000, durationDays: 3, isActive: true, sortOrder: 2 },
+  { code: "top_7", name: "7 kun TOP", kind: "top", priceUzs: 35_000, durationDays: 7, isActive: true, sortOrder: 3 },
+  { code: "top_30", name: "30 kun TOP", kind: "top", priceUzs: 99_000, durationDays: 30, isActive: true, sortOrder: 4 },
+  { code: "ai_screening", name: "AI saralash", kind: "ai", priceUzs: 0, durationDays: null, isActive: true, sortOrder: 5 },
+];
+
 const MOCK_AUDIT: AdminAuditRow[] = [
   { id: 4, actorName: "Admin (demo)", action: "job.block", targetType: "jobs", targetId: "j-04", meta: { reason: "Firibgarlik shubhasi" }, createdAt: "2026-06-29T12:00:00Z" },
   { id: 3, actorName: "Admin (demo)", action: "company.block", targetType: "companies", targetId: "c-04", meta: { reason: "Takroriy shikoyatlar" }, createdAt: "2026-06-20T13:00:00Z" },
@@ -191,4 +216,13 @@ export function mockAdminAudit(): AdminList<AdminAuditRow> {
 }
 export function mockAdminCategories(): AdminCategoryRow[] {
   return MOCK_CATEGORIES;
+}
+export function mockAdminWalletTx(q: string): AdminList<AdminWalletTxRow> {
+  return filtered(MOCK_WALLET_TX, q, (r) => `${r.companyName} ${r.description ?? ""}`);
+}
+export function mockAdminOrders(q: string): AdminList<AdminOrderRow> {
+  return filtered(MOCK_ORDERS, q, (r) => `${r.companyName} ${r.productCode}`);
+}
+export function mockAdminProducts(): AdminProductRow[] {
+  return MOCK_PRODUCTS;
 }

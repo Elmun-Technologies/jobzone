@@ -45,8 +45,8 @@ export const adminNav: AdminNavGroup[] = [
   {
     label: n.groups.finance,
     items: [
-      { key: "wallet", label: n.wallet, href: "/admin/finance", enabled: false },
-      { key: "orders", label: n.orders, href: "/admin/orders", enabled: false },
+      { key: "wallet", label: n.wallet, href: "/admin/finance", enabled: true },
+      { key: "orders", label: n.orders, href: "/admin/orders", enabled: true },
     ],
   },
   {
