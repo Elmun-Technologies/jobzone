@@ -14,10 +14,9 @@ import 'bookmark_confirm_sheet.dart';
 import 'quick_apply_button.dart';
 
 /// Job summary card used across Home, See-all, Bookmarks and Search. Tapping
-/// opens details; the bookmark toggle is wired to [bookmarksControllerProvider];
-/// the ⚡ icon is [QuickApplyButton] (apply in one tap, no extra screens); the
-/// archive icon dismisses the job from the browse feed
-/// ([dismissedControllerProvider]) — "not interested," reversible.
+/// opens details (with an ink ripple); the top strip carries the bookmark and
+/// archive toggles (animated); the footer pairs the salary — the number a
+/// seeker decides on — with a one-tap [QuickApplyButton] "⚡ Apply" pill.
 /// Pass [width] to use it inside a horizontal carousel.
 class JobCard extends ConsumerWidget {
   const JobCard({super.key, required this.job, this.width});
@@ -33,182 +32,153 @@ class JobCard extends ConsumerWidget {
         ref.watch(bookmarksControllerProvider).value?.contains(job.id) ?? false;
     final dismissed =
         ref.watch(dismissedControllerProvider).value?.contains(job.id) ?? false;
-    final tags = [
+
+    // Location + working conditions collapse into one dotted meta line — the
+    // old separate location row + three-chip Wrap could run to two lines and
+    // stretch the card.
+    final meta = <String>[
+      if (job.locationText.isNotEmpty) job.locationText,
       ?jobTypeLabel(context, job.jobType),
       ?workingModelLabel(context, job.workingModel),
       ?experienceLabel(context, job.experienceLevel),
     ];
 
-    return GestureDetector(
-      onTap: () => context.push(Routes.jobDetails(job.id)),
-      child: Container(
-        width: width,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: colors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+    return Container(
+      width: width,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: colors.border),
+        // A soft lift so the card reads as tappable (no-op in dark, where the
+        // border carries separation instead).
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push(Routes.jobDetails(job.id)),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _Logo(name: job.companyName, url: job.companyLogoUrl),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (job.isBoosted) ...[
-                        const JzTopBadge(),
-                        const SizedBox(height: AppSpacing.xs),
-                      ],
-                      Text(
-                        job.title,
-                        style: context.text.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Row(
+                Row(
+                  children: [
+                    if (job.isBoosted) const JzTopBadge(),
+                    const Spacer(),
+                    _IconToggle(
+                      active: bookmarked,
+                      activeIcon: Icons.bookmark_rounded,
+                      inactiveIcon: Icons.bookmark_border_rounded,
+                      activeColor: colors.primary,
+                      semanticLabel: bookmarked
+                          ? l.removeBookmark
+                          : l.addBookmark,
+                      onTap: () async {
+                        final notifier = ref.read(
+                          bookmarksControllerProvider.notifier,
+                        );
+                        if (!bookmarked) {
+                          notifier.toggle(job.id);
+                          return;
+                        }
+                        final remove = await showRemoveBookmarkSheet(
+                          context,
+                          job,
+                        );
+                        if (remove == true) notifier.toggle(job.id);
+                      },
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    _IconToggle(
+                      active: dismissed,
+                      activeIcon: Icons.archive_rounded,
+                      inactiveIcon: Icons.archive_outlined,
+                      activeColor: colors.primary,
+                      size: 20,
+                      semanticLabel: dismissed ? l.jobDismissed : l.dismissJob,
+                      onTap: () => ref
+                          .read(dismissedControllerProvider.notifier)
+                          .toggle(job.id),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    _Logo(name: job.companyName, url: job.companyLogoUrl),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Text(
-                              job.companyName,
-                              style: context.text.bodySmall?.copyWith(
-                                color: colors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            job.title,
+                            style: context.text.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (job.companyVerified) ...[
-                            const SizedBox(width: 4),
-                            const JzTrustBadge(kind: JzTrustKind.employer),
-                          ],
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  job.companyName,
+                                  style: context.text.bodySmall?.copyWith(
+                                    color: colors.textSecondary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (job.companyVerified) ...[
+                                const SizedBox(width: 4),
+                                const JzTrustBadge(kind: JzTrustKind.employer),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                QuickApplyButton(job: job),
-                const SizedBox(width: AppSpacing.sm),
-                Semantics(
-                  button: true,
-                  label: bookmarked ? l.removeBookmark : l.addBookmark,
-                  child: InkResponse(
-                    onTap: () async {
-                      final notifier = ref.read(
-                        bookmarksControllerProvider.notifier,
-                      );
-                      if (!bookmarked) {
-                        notifier.toggle(job.id);
-                        return;
-                      }
-                      final remove = await showRemoveBookmarkSheet(
-                        context,
-                        job,
-                      );
-                      if (remove == true) notifier.toggle(job.id);
-                    },
-                    child: Icon(
-                      bookmarked
-                          ? Icons.bookmark_rounded
-                          : Icons.bookmark_border_rounded,
-                      color: bookmarked ? colors.primary : colors.textSecondary,
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Semantics(
-                  button: true,
-                  label: dismissed ? l.jobDismissed : l.dismissJob,
-                  child: InkResponse(
-                    onTap: () => ref
-                        .read(dismissedControllerProvider.notifier)
-                        .toggle(job.id),
-                    child: Icon(
-                      dismissed
-                          ? Icons.archive_rounded
-                          : Icons.archive_outlined,
-                      size: 20,
-                      color: dismissed ? colors.primary : colors.textSecondary,
-                    ),
-                  ),
+                if (meta.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  _MetaLine(parts: meta),
+                ],
+                const SizedBox(height: AppSpacing.md),
+                Divider(color: colors.border, height: 1),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(child: _Salary(job: job)),
+                    const SizedBox(width: AppSpacing.sm),
+                    QuickApplyButton(job: job, pill: true),
+                  ],
                 ),
-              ],
-            ),
-            if (job.locationText.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on_rounded,
-                    size: 16,
-                    color: colors.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      job.locationText,
-                      style: context.text.bodySmall?.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                if (job.applicantsCount > 0) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    '${job.applicantsCount} ${l.applicants}',
+                    style: context.text.labelSmall?.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
-              ),
-            ],
-            if (tags.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.xs,
-                children: [for (final t in tags) _Tag(t)],
-              ),
-            ],
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(color: colors.border, height: 1),
-            ),
-            Row(
-              children: [
-                Expanded(child: _Applicants(count: job.applicantsCount)),
-                if (job.salaryText != null)
-                  Flexible(
-                    child: RichText(
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
-                      text: TextSpan(
-                        text: job.salaryText,
-                        style: context.text.titleSmall?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w800,
-                        ),
-                        children: [
-                          if (salaryPeriodLabel(context, job.salaryPeriod) !=
-                              null)
-                            TextSpan(
-                              text:
-                                  ' ${salaryPeriodLabel(context, job.salaryPeriod)}',
-                              style: context.text.bodySmall?.copyWith(
-                                color: colors.textSecondary,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -258,6 +228,131 @@ class JobCardCarousel extends StatelessWidget {
   }
 }
 
+/// Salary (the number a seeker decides on) shown large and bold, with the pay
+/// period as a lighter suffix. Scales down instead of clipping in narrow cards.
+class _Salary extends StatelessWidget {
+  const _Salary({required this.job});
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final salary = job.salaryText;
+    if (salary == null || salary.isEmpty) return const SizedBox.shrink();
+    final period = salaryPeriodLabel(context, job.salaryPeriod);
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: RichText(
+        maxLines: 1,
+        text: TextSpan(
+          text: salary,
+          style: context.text.titleMedium?.copyWith(
+            color: colors.textPrimary,
+            fontWeight: FontWeight.w800,
+          ),
+          children: [
+            if (period != null)
+              TextSpan(
+                text: ' $period',
+                style: context.text.bodySmall?.copyWith(
+                  color: colors.textSecondary,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A dotted, single-run meta line: "Location · Full-time · Experience". Wraps
+/// gracefully rather than overflowing.
+class _MetaLine extends StatelessWidget {
+  const _MetaLine({required this.parts});
+  final List<String> parts;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final style = context.text.bodySmall?.copyWith(color: colors.textSecondary);
+    final children = <Widget>[];
+    for (var i = 0; i < parts.length; i++) {
+      if (i > 0) {
+        children.add(
+          Container(
+            width: 3,
+            height: 3,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: colors.textSecondary.withValues(alpha: 0.6),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      }
+      children.add(Text(parts[i], style: style));
+    }
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: children,
+    );
+  }
+}
+
+/// A small, animated toggle icon (bookmark / archive) with a comfortable tap
+/// target. The icon pops with a scale when its state flips.
+class _IconToggle extends StatelessWidget {
+  const _IconToggle({
+    required this.active,
+    required this.activeIcon,
+    required this.inactiveIcon,
+    required this.activeColor,
+    required this.semanticLabel,
+    required this.onTap,
+    this.size = 24,
+  });
+
+  final bool active;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
+  final Color activeColor;
+  final String semanticLabel;
+  final VoidCallback onTap;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 22,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeOutBack,
+            transitionBuilder: (child, anim) =>
+                ScaleTransition(scale: anim, child: child),
+            child: Icon(
+              active ? activeIcon : inactiveIcon,
+              key: ValueKey(active),
+              size: size,
+              color: active ? activeColor : colors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _Logo extends StatelessWidget {
   const _Logo({required this.name, this.url});
   final String name;
@@ -290,8 +385,8 @@ class _Logo extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: SizedBox(
-        height: 48,
-        width: 48,
+        height: 52,
+        width: 52,
         child: (url == null || url!.isEmpty)
             ? fallback
             : CachedNetworkImage(
@@ -300,84 +395,6 @@ class _Logo extends StatelessWidget {
                 errorWidget: (_, _, _) => fallback,
               ),
       ),
-    );
-  }
-}
-
-class _Tag extends StatelessWidget {
-  const _Tag(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surfaceVariant,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
-      child: Text(
-        label,
-        style: context.text.labelSmall?.copyWith(color: colors.textPrimary),
-      ),
-    );
-  }
-}
-
-/// Overlapping applicant avatars + "N Applicants".
-class _Applicants extends StatelessWidget {
-  const _Applicants({required this.count});
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    const n = 3;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 18.0 * n + 6,
-          height: 24,
-          child: Stack(
-            children: [
-              for (var i = 0; i < n; i++)
-                Positioned(
-                  left: i * 16.0,
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: colors.surfaceVariant,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colors.surface, width: 1.5),
-                    ),
-                    child: Icon(
-                      Icons.person_rounded,
-                      size: 14,
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            '$count ${context.l10n.applicants}',
-            style: context.text.bodySmall?.copyWith(
-              color: colors.textSecondary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }
