@@ -226,3 +226,10 @@ export function mockAdminOrders(q: string): AdminList<AdminOrderRow> {
 export function mockAdminProducts(): AdminProductRow[] {
   return MOCK_PRODUCTS;
 }
+export function mockBroadcastCounts(): {
+  all: number;
+  seekers: number;
+  employers: number;
+} {
+  return { all: 13_795, seekers: 12_480, employers: 1_315 };
+}
