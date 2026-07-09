@@ -27,6 +27,7 @@ class HomePage extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(suggestedJobsProvider);
           ref.invalidate(recentJobsProvider);
+          ref.invalidate(recommendedJobsProvider);
           await ref.read(recentJobsProvider.future);
         },
         child: ListView(
@@ -48,6 +49,7 @@ class HomePage extends ConsumerWidget {
                   const JobCollectionsRow(),
                   const SizedBox(height: AppSpacing.xl),
                   const _BrowseByCategory(),
+                  const _RecommendedForYou(),
                   SectionHeader(
                     title: l.suggestedJobs,
                     actionLabel: l.seeAll,
@@ -330,6 +332,38 @@ class _RecentSectionState extends State<_RecentSection> {
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: JobCard(job: j),
           ),
+      ],
+    );
+  }
+}
+
+/// Personalized "Recommended for you" strip — open jobs matched to the seeker's
+/// résumé by the shared `recommended_jobs` RPC (identical ranking to web).
+/// Hidden until it has matches, so a seeker with no résumé just sees the normal
+/// feed.
+class _RecommendedForYou extends ConsumerWidget {
+  const _RecommendedForYou();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final jobs = ref.watch(recommendedJobsProvider).value ?? const <Job>[];
+    if (jobs.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(title: l.recommendedForYou),
+        const SizedBox(height: AppSpacing.md),
+        SizedBox(
+          height: 220,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: jobs.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
+            itemBuilder: (_, i) => JobCard(job: jobs[i], width: 300),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
       ],
     );
   }

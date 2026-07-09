@@ -67,6 +67,20 @@ class JobsRepositoryImpl implements JobsRepository {
   }
 
   @override
+  Future<List<Job>> recommended({int limit = 30}) async {
+    if (!_live) {
+      // Offline demo: stand in with the mock feed (boosted first).
+      return _boostedFirst(mockJobs).take(limit).toList();
+    }
+    // Same shared RPC the web app calls, so both rank identically.
+    final rows = (await _client.rpc('recommended_jobs')) as List;
+    return rows
+        .map<Job>((r) => Job.fromMap(r as Map<String, dynamic>))
+        .take(limit)
+        .toList();
+  }
+
+  @override
   Future<List<Job>> recent({int limit = 10}) async {
     if (!_live) return _boostedFirst(mockJobs).take(limit).toList();
     return _query(limit: limit);

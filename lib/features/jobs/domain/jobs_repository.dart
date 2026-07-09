@@ -4,6 +4,11 @@ abstract interface class JobsRepository {
   Future<List<Job>> suggested({int limit});
   Future<List<Job>> recent({int limit});
 
+  /// Open jobs matched to the signed-in seeker's résumé, ranked by the shared
+  /// `recommended_jobs` RPC (0051) — the same algorithm the web app calls, so
+  /// both rank identically. Empty when there's no résumé / no match.
+  Future<List<Job>> recommended({int limit});
+
   /// One page of open jobs for infinite-scroll lists. [offset] is zero-based;
   /// [limit] is the page size. Returns fewer than [limit] items on the last page.
   Future<List<Job>> jobsPage({
