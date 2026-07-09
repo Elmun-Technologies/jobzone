@@ -329,12 +329,23 @@ class _HomeMapPreview extends ConsumerWidget {
           style: context.text.bodySmall?.copyWith(color: colors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.md),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
+        Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: colors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
           child: GestureDetector(
             onTap: () => context.go(Routes.explore),
             child: SizedBox(
-              height: 180,
+              height: 200,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -495,7 +506,7 @@ class _BrowseByCategory extends ConsumerWidget {
         SectionHeader(title: l.browseByCategory),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
-          height: 92,
+          height: 116,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: top.length,
@@ -526,43 +537,65 @@ class _CategoryCountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return InkWell(
-      onTap: () => context.push(Routes.categoryResults(name)),
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: Container(
-        width: 150,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: colors.surfaceVariant,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: colors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 26)),
-            Column(
+    return Container(
+      width: 150,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: colors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push(Routes.categoryResults(name)),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  localizedCategory(context.l10n, name: name),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.text.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                // Emoji in a volt-tint tile — a small brand accent per category.
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colors.gold.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
+                  child: Text(emoji, style: const TextStyle(fontSize: 20)),
                 ),
-                Text(
-                  '$count',
-                  style: context.text.labelSmall?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      localizedCategory(context.l10n, name: name),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.text.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '$count',
+                      style: context.text.titleSmall?.copyWith(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
