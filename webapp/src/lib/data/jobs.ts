@@ -246,6 +246,24 @@ export async function getJobById(id: string): Promise<Job | null> {
   }
 }
 
+/**
+ * Open jobs matched to the signed-in seeker's résumé, ranked by the shared
+ * `recommended_jobs` RPC (0051) — the same algorithm the mobile app calls, so
+ * both rank identically. Returns [] for a guest / no profile / no matches.
+ */
+export async function getRecommendedJobs(): Promise<Job[]> {
+  if (!hasSupabase()) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("recommended_jobs");
+    if (error) throw error;
+    return ((data ?? []) as Record<string, unknown>[]).map(toJob);
+  } catch (e) {
+    console.error("getRecommendedJobs failed", e);
+    return [];
+  }
+}
+
 /** Ids of all open jobs (for the sitemap). Capped to keep the sitemap sane. */
 export async function getAllJobIds(limit = 1000): Promise<string[]> {
   if (!hasSupabase()) return mockJobs.map((j) => j.id);

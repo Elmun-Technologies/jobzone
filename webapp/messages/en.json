@@ -80,6 +80,7 @@
   "account": {
     "title": "Account",
     "myApplications": "My applications",
+    "recommendedJobs": "Recommended jobs",
     "savedJobs": "Saved jobs",
     "savedSearches": "Saved searches",
     "notifications": "Notifications",
@@ -471,6 +472,14 @@
       "rejected": "Rejected",
       "hired": "Hired"
     }
+  },
+  "recommended": {
+    "title": "Recommended jobs",
+    "subtitle": "Open vacancies matched to your résumé",
+    "empty": "No matching jobs yet",
+    "emptyHint": "Fill in your résumé (role, city, skills) for sharper matches — or browse all jobs.",
+    "completeResume": "Complete résumé",
+    "browseAll": "Browse all jobs"
   },
   "home": {
     "heroTitle": "Find the right job across Uzbekistan",
