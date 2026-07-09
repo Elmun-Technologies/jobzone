@@ -22,10 +22,15 @@ export type YmapsObject = {
   events: { add: (t: string, f: (e: YmapsEvent) => void) => void };
   geometry: { getCoordinates: () => [number, number] };
 };
+/** A cluster manager — groups nearby placemarks into count bubbles. */
+export type YmapsClusterer = {
+  add: (o: YmapsObject | YmapsObject[]) => void;
+  removeAll: () => void;
+};
 export type YmapsMap = {
   geoObjects: {
-    add: (o: YmapsObject) => void;
-    remove: (o: YmapsObject) => void;
+    add: (o: YmapsObject | YmapsClusterer) => void;
+    remove: (o: YmapsObject | YmapsClusterer) => void;
     removeAll: () => void;
   };
   events: { add: (t: string, f: (e: YmapsEvent) => void) => void };
@@ -45,6 +50,7 @@ export type YmapsApi = {
     props: Record<string, unknown>,
     opts?: Record<string, unknown>,
   ) => YmapsObject;
+  Clusterer?: new (opts?: Record<string, unknown>) => YmapsClusterer;
   geocode: (
     request: string | [number, number],
     opts?: Record<string, unknown>,

@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
-import { Search, X } from "lucide-react";
+import { Navigation, Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
@@ -340,7 +340,7 @@ export default function JobsMapInner({
       {/* Live result count (top-right pill). */}
       {/* Below the search bar + chip row now that the search bar spans full
           width (it used to sit beside the chip row at the same top-3 level). */}
-      <div className="absolute top-24 right-3 z-[1001]">
+      <div className="absolute top-28 right-3 z-[1001]">
         <span className="bg-foreground text-background rounded-full px-3 py-1.5 text-sm font-semibold shadow-md">
           {t("map.results", { count: shown.length })}
         </span>
@@ -358,7 +358,7 @@ export default function JobsMapInner({
             : "bg-background text-foreground border-border border",
         )}
       >
-        <span aria-hidden>📍</span>
+        <Navigation className="size-4" aria-hidden />
         {status === "locating" ? t("map.locating") : t("map.nearMe")}
       </button>
 

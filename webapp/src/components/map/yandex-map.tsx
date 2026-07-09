@@ -115,24 +115,40 @@ export function YandexMap({
         );
 
         map.current.geoObjects.removeAll();
-        for (const job of jobs) {
+
+        // Build the volt price-tag placemarks, then group nearby ones into ink
+        // count bubbles (islands#blackClusterIcons ≈ the app's ink clusters) so
+        // a city view isn't a wall of overlapping tags. Clicking a cluster
+        // zooms in / splits it.
+        const placemarks = jobs.map((job) => {
           const pill = salaryPill(job) ?? "•";
-          map.current.geoObjects.add(
-            new ymaps.Placemark(
-              [job.lat, job.lng],
-              {
-                label: job.boostActive ? `★ ${pill}` : pill,
-                balloonContent: balloonHtml(
-                  job,
-                  locale,
-                  applyLabel,
-                  ratings?.[job.companyId],
-                ),
-              },
-              { iconLayout: PinLayout, iconShape: null },
-            ),
+          return new ymaps.Placemark(
+            [job.lat, job.lng],
+            {
+              label: job.boostActive ? `★ ${pill}` : pill,
+              balloonContent: balloonHtml(
+                job,
+                locale,
+                applyLabel,
+                ratings?.[job.companyId],
+              ),
+            },
+            { iconLayout: PinLayout, iconShape: null },
           );
+        });
+        if (ymaps.Clusterer) {
+          const clusterer = new ymaps.Clusterer({
+            preset: "islands#blackClusterIcons",
+            groupByCoordinates: false,
+            clusterDisableClickZoom: false,
+            gridSize: 64,
+          });
+          clusterer.add(placemarks);
+          map.current.geoObjects.add(clusterer);
+        } else {
+          for (const p of placemarks) map.current.geoObjects.add(p);
         }
+
         if (loc) {
           map.current.geoObjects.add(
             new ymaps.Placemark(
