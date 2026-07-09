@@ -57,7 +57,9 @@ dependencies {
     // Yandex MapKit native SDK. The yandex_mapkit plugin declares this only as
     // `implementation`, so MainApplication.kt (which calls MapKitFactory) can't
     // see it unless the app module depends on it too — see the plugin README.
-    // The variant must match the plugin's default (`lite`); resolved from
-    // mavenCentral (already configured in android/build.gradle.kts).
-    implementation("com.yandex.android:maps.mobile:4.22.0-lite")
+    // Must be the `full` variant (matching yandexMapkit.variant in
+    // gradle.properties): the plugin's controller references traffic +
+    // user-location listeners that the `lite` bundle omits, so `lite` won't
+    // compile. Resolved from mavenCentral (configured in android/build.gradle.kts).
+    implementation("com.yandex.android:maps.mobile:4.22.0-full")
 }
