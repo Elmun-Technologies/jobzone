@@ -122,37 +122,26 @@ export function YandexMap({
 
         map.current.geoObjects.removeAll();
 
-        // Build the volt price-tag placemarks, then group nearby ones into ink
-        // count bubbles (islands#blackClusterIcons ≈ the app's ink clusters) so
-        // a city view isn't a wall of overlapping tags. Clicking a cluster
-        // zooms in / splits it.
-        const placemarks = jobs.map((job) => {
+        // A volt price-tag placemark per job (custom PinLayout). Added directly
+        // — wrapping these custom-layout pins in a Clusterer double-rendered a
+        // count badge over each tag ("①2 mln"), which read as broken.
+        for (const job of jobs) {
           const pill = salaryPill(job) ?? "•";
-          return new ymaps.Placemark(
-            [job.lat, job.lng],
-            {
-              label: job.boostActive ? `★ ${pill}` : pill,
-              balloonContent: balloonHtml(
-                job,
-                locale,
-                applyLabel,
-                ratings?.[job.companyId],
-              ),
-            },
-            { iconLayout: PinLayout, iconShape: null },
+          map.current.geoObjects.add(
+            new ymaps.Placemark(
+              [job.lat, job.lng],
+              {
+                label: job.boostActive ? `★ ${pill}` : pill,
+                balloonContent: balloonHtml(
+                  job,
+                  locale,
+                  applyLabel,
+                  ratings?.[job.companyId],
+                ),
+              },
+              { iconLayout: PinLayout, iconShape: null },
+            ),
           );
-        });
-        if (ymaps.Clusterer) {
-          const clusterer = new ymaps.Clusterer({
-            preset: "islands#blackClusterIcons",
-            groupByCoordinates: false,
-            clusterDisableClickZoom: false,
-            gridSize: 64,
-          });
-          clusterer.add(placemarks);
-          map.current.geoObjects.add(clusterer);
-        } else {
-          for (const p of placemarks) map.current.geoObjects.add(p);
         }
 
         if (loc) {
