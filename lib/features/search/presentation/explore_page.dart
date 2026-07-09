@@ -33,21 +33,6 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   int _tab = 0; // 0 = map, 1 = list
   LatLng? _myLocation;
 
-  /// A compact salary for the marker pill (e.g. "2.5 mln", "$1.5k"). Null when
-  /// the job has no salary.
-  String? _salaryLabel(Job j) {
-    final v = j.salaryMin ?? j.salaryMax;
-    if (v == null) return null;
-    if (j.currency == 'UZS') {
-      final mln = v / 1000000;
-      if (mln >= 1) return '${mln.toStringAsFixed(mln % 1 == 0 ? 0 : 1)} mln';
-      final k = v / 1000;
-      if (k >= 1) return '${k.toStringAsFixed(0)}k';
-      return v.toStringAsFixed(0);
-    }
-    return j.salaryText;
-  }
-
   /// Tapping a map pin opens the job's card in a bottom sheet — the seeker
   /// stays on the map (like the reference apps) instead of jumping straight to
   /// the detail page. Tapping the card itself still opens full details.
@@ -140,7 +125,10 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                           JzMapMarker(
                             id: job.id,
                             point: LatLng(job.lat!, job.lng!),
-                            label: _salaryLabel(job),
+                            // The pin shows the job TITLE (truncated when
+                            // long); salary and details are in the preview
+                            // sheet that opens on tap.
+                            label: job.title,
                             imageUrl: job.companyLogoUrl,
                             onTap: () => _showJobPreview(job),
                           ),

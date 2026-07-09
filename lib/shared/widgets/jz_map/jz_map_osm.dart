@@ -11,8 +11,8 @@ import 'jz_map_types.dart';
 Future<void> initJzMap() async {}
 
 /// OpenStreetMap (flutter_map) implementation — the web map (where the native
-/// Yandex SDK has no support). Keyless. Supports grid clustering, salary-pill
-/// markers and a "me" dot, matching the Yandex implementation.
+/// Yandex SDK has no support). Keyless. Supports grid clustering, job-title
+/// tag markers and a "me" dot, matching the Yandex implementation.
 class JzMapView extends StatefulWidget {
   const JzMapView({
     super.key,
@@ -105,7 +105,8 @@ Marker _markerFor(JzMapMarker m) {
   final rich = job && (hasLogo || m.label != null);
   return Marker(
     point: m.point,
-    width: rich ? 130 : 44,
+    // Wide enough for a truncated job title.
+    width: rich ? 168 : 44,
     height: hasLogo ? 70 : (rich ? 40 : 44),
     alignment: rich ? Alignment.center : Alignment.topCenter,
     child: _MarkerChild(marker: m),
@@ -170,7 +171,7 @@ class _MarkerChild extends StatelessWidget {
         children: [
           if (hasLogo) _LogoAvatar(url: marker.imageUrl!),
           if (hasLogo && marker.label != null) const SizedBox(height: 3),
-          if (marker.label != null) _SalaryPill(label: marker.label!),
+          if (marker.label != null) _LabelTag(label: marker.label!),
         ],
       );
       return marker.onTap == null
@@ -181,18 +182,19 @@ class _MarkerChild extends StatelessWidget {
   }
 }
 
-class _SalaryPill extends StatelessWidget {
-  const _SalaryPill({required this.label});
+/// The job-title tag — Yolla volt on ink, matching the mobile Yandex markers.
+class _LabelTag extends StatelessWidget {
+  const _LabelTag({required this.label});
   final String label;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFF1F8F4E),
+        color: const Color(0xFFC7FB00),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 1.5),
+        border: Border.all(color: const Color(0xFF0A0A0A), width: 1.5),
         boxShadow: const [
           BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
         ],
@@ -203,7 +205,7 @@ class _SalaryPill extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
         style: const TextStyle(
-          color: Colors.white,
+          color: Color(0xFF0A0A0A),
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),
@@ -257,7 +259,8 @@ class _ClusterBubble extends StatelessWidget {
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: const Color(0xFF1F8F4E),
+          // Ink cluster bubble — matches the mobile map + brand.
+          color: const Color(0xFF0A0A0A),
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 2),
           boxShadow: const [

@@ -16,7 +16,7 @@ class MarkerBitmaps {
 
   static final _cache = <String, ui.Image>{};
 
-  // Yolla brand: ink cluster bubbles, volt salary pills (ink text) — adapted
+  // Yolla brand: ink cluster bubbles, volt title tags (ink text) — adapted
   // to our identity rather than the reference apps' green.
   static const _ink = Color(0xFF0A0A0A);
   static const _volt = Color(0xFFC7FB00);
@@ -28,10 +28,11 @@ class MarkerBitmaps {
   static Future<ui.Image> clusterBubble(int count) =>
       _cached('cluster:$count', () => _circle('$count', _ink, 22));
 
-  /// A volt "price tag" pill (ink text) with a downward tail that points at the
-  /// exact location — showing the salary [label] (e.g. "5 mln so'm").
-  static Future<ui.Image> salaryPill(String label) =>
-      _cached('pill:$label', () => _pill(label));
+  /// A volt tag (ink text) with a downward tail that points at the exact
+  /// location — showing the job-title [label]. Long titles truncate with an
+  /// ellipsis so a tag never dominates the map.
+  static Future<ui.Image> labelTag(String label) =>
+      _cached('tag:$label', () => _pill(label));
 
   /// A blue dot for the user's own location.
   static Future<ui.Image> meDot() =>
@@ -44,8 +45,8 @@ class MarkerBitmaps {
     return frame.image;
   }
 
-  /// A circular [logo] (white ring) with the salary [label] in a pill below it.
-  /// Cached by [cacheKey] so a given company+salary is composited once.
+  /// A circular [logo] (white ring) with the job-title [label] in a volt pill
+  /// below it. Cached by [cacheKey] so a given company+title is composited once.
   static Future<ui.Image> markerWithLogo({
     required String cacheKey,
     required ui.Image logo,
@@ -96,9 +97,10 @@ class MarkerBitmaps {
     return rec.endRecording().toImage(size, size);
   }
 
-  /// Volt "price tag" bubble with ink text and a downward tail. The image is
-  /// sized so the tail tip is at bottom-centre — callers tip-anchor it (0.5,1)
-  /// so the tag points at the exact map location.
+  /// Volt tag bubble with ink text and a downward tail. The image is sized so
+  /// the tail tip is at bottom-centre — callers tip-anchor it (0.5,1) so the
+  /// tag points at the exact map location. Text is capped at one truncated
+  /// line (job titles are unbounded employer text).
   static Future<ui.Image> _pill(String label) {
     final padH = 12 * _dpr;
     final padV = 7 * _dpr;
@@ -108,12 +110,14 @@ class MarkerBitmaps {
         text: label,
         style: TextStyle(
           color: _ink,
-          fontSize: 13 * _dpr,
-          fontWeight: FontWeight.w800,
+          fontSize: 12.5 * _dpr,
+          fontWeight: FontWeight.w700,
         ),
       ),
+      maxLines: 1,
+      ellipsis: '…',
       textDirection: TextDirection.ltr,
-    )..layout();
+    )..layout(maxWidth: 170 * _dpr);
     final w = (tp.width + padH * 2).round();
     final bubbleH = tp.height + padV * 2;
     final h = (bubbleH + tail).round();
@@ -136,7 +140,7 @@ class MarkerBitmaps {
     return rec.endRecording().toImage(w, h);
   }
 
-  /// Circular [logo] (white ring) with the salary [label] in a pill below it.
+  /// Circular [logo] (white ring) with the [label] in a volt pill below it.
   static Future<ui.Image> _withLogo(ui.Image logo, String? label) async {
     final logoD = 44 * _dpr;
     final ring = 2.5 * _dpr;
@@ -150,11 +154,13 @@ class MarkerBitmaps {
           style: TextStyle(
             color: _ink,
             fontSize: 12 * _dpr,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
           ),
         ),
+        maxLines: 1,
+        ellipsis: '…',
         textDirection: TextDirection.ltr,
-      )..layout();
+      )..layout(maxWidth: 150 * _dpr);
       pillW = tp.width + 18 * _dpr;
       pillH = tp.height + 8 * _dpr;
     }
