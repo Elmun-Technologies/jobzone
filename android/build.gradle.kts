@@ -38,6 +38,24 @@ subprojects {
     if (proj.state.executed) bumpCompileSdk() else proj.afterEvaluate { bumpCompileSdk() }
 }
 
+// The yandex_mapkit 4.2.1 plugin ALWAYS compiles its `lite` controller (its
+// sourceSet unconditionally includes com/unact/yandexmapkit/lite/*), and that
+// controller imports traffic + user-location listeners that only ship in the
+// `full` MapKit bundle. The plugin otherwise resolves `maps.mobile:4.22.0-lite`,
+// so the native Android build fails with "cannot find symbol". Force every
+// maps.mobile resolution (plugin + app) to the `-full` classifier so those
+// classes are always on the classpath.
+subprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.yandex.android" && requested.name == "maps.mobile") {
+                useVersion("4.22.0-full")
+                because("yandex_mapkit's controller needs full-SDK classes (traffic/user_location)")
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
