@@ -13,15 +13,13 @@ name: Build Android APK
 # backend and data.
 
 on:
+  # Manual only. The abandoned yandex_mapkit 4.2.1 plugin's native build is
+  # unresolved in this CI environment (its maps.mobile AAR classes don't land
+  # on the plugin's javac classpath), so building the APK on every push would
+  # keep failing. Kept as an on-demand action: once the Yandex map is fixed in
+  # a local Android toolchain (or the mobile map is moved to the same OSM stack
+  # the web uses), trigger this manually to publish the apk-latest release.
   workflow_dispatch:
-  push:
-    branches: [main, claude/project-completion-review-6lsdq6]
-    paths:
-      - "lib/**"
-      - "android/**"
-      - "pubspec.yaml"
-      - "pubspec.lock"
-      - ".github/workflows/android-apk.yml"
 
 permissions:
   contents: write # create/update the apk-latest release
