@@ -6,7 +6,14 @@ import L from "leaflet";
 import { Navigation, Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  ZoomControl,
+  useMap,
+} from "react-leaflet";
 
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import type { Job } from "@/lib/data/types";
@@ -224,6 +231,10 @@ export default function JobsMapInner({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
+          {/* Zoom +/- buttons — the map must stay controllable when wheel-zoom
+              is off (embedded landing map) or on touch devices. */}
+          <ZoomControl position="bottomright" />
+
 
           {loc ? (
             <>
@@ -352,7 +363,8 @@ export default function JobsMapInner({
         onClick={toggleNearMe}
         aria-pressed={nearMe}
         className={cn(
-          "absolute right-4 bottom-6 z-[1001] flex items-center gap-2 rounded-full px-4 py-3 text-sm font-bold shadow-lg transition-colors",
+          // bottom-24 keeps it clear of the bottom-right zoom control.
+          "absolute right-4 bottom-24 z-[1001] flex items-center gap-2 rounded-full px-4 py-3 text-sm font-bold shadow-lg transition-colors",
           nearMe
             ? "bg-primary text-primary-foreground"
             : "bg-background text-foreground border-border border",

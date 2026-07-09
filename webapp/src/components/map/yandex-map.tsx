@@ -100,6 +100,12 @@ export function YandexMap({
             { suppressMapOpenBlock: true },
           );
           if (!wheelZoom) map.current.behaviors.disable("scrollZoom");
+          // Zoom +/- buttons so the map is controllable without the wheel
+          // (essential on the embedded landing map, where wheel-zoom is off to
+          // avoid trapping page scroll). Placed top-right, below the count pill.
+          map.current.controls.add("zoomControl", {
+            position: { right: 12, top: 152 },
+          });
         } else if (loc) {
           map.current.setCenter([loc.lat, loc.lng], 13);
         }
