@@ -36,7 +36,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
   }
 
   Future<void> _pickCv() async {
-    final res = await FilePicker.platform.pickFiles(
+    final res = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf', 'doc', 'docx'],
       withData: true, // we need the bytes to actually upload the CV

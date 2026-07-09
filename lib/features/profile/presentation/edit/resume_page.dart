@@ -24,7 +24,7 @@ class _ResumePageState extends ConsumerState<ResumePage> {
   bool _uploading = false;
 
   Future<void> _upload() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf', 'doc', 'docx'],
       withData: true,
