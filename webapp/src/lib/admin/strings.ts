@@ -86,6 +86,24 @@ export const adminStrings = {
     add: "Qo'shish",
     saveChanges: "Saqlash",
   },
+  broadcast: {
+    title: "Xabar sarlavhasi",
+    body: "Xabar matni",
+    audience: "Kimga",
+    audienceAll: "Barcha foydalanuvchilar",
+    audienceSeekers: "Ish izlovchilar",
+    audienceEmployers: "Ish beruvchilar",
+    city: "Shahar (ixtiyoriy)",
+    cityHint: "Bo'sh qoldirilsa — barcha shaharlar",
+    send: "Yuborish",
+    sentOne: "Xabar yuborildi",
+    sentCount: "ta foydalanuvchiga yuborildi",
+    reach: "Qamrov",
+    hint:
+      "Xabar ilova ichidagi bildirishnoma sifatida yetkaziladi va (ulangan bo'lsa) " +
+      "Telegram/push orqali ham boradi. Bir marta yuborishda eng ko'pi 5000 kishi — " +
+      "kattaroq bo'lsa shahar bo'yicha toraytiring.",
+  },
   finance: {
     company: "Kompaniya",
     amount: "Summa",
