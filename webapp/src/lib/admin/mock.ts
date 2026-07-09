@@ -119,11 +119,12 @@ function filtered<T>(rows: T[], q: string, text: (row: T) => string): AdminList<
 }
 
 const MOCK_USERS: AdminUserRow[] = [
-  { id: "u-01", fullName: "Aziz Karimov", phone: "+998901234501", email: null, city: "Toshkent", role: "job_seeker", createdAt: "2026-05-14T09:00:00Z", suspendedAt: null, workerVerifiedAt: "2026-06-01T10:00:00Z" },
-  { id: "u-02", fullName: "Dilnoza Yusupova", phone: "+998901234502", email: "dilnoza@example.uz", city: "Samarqand", role: "job_seeker", createdAt: "2026-05-20T12:30:00Z", suspendedAt: null, workerVerifiedAt: null },
-  { id: "u-03", fullName: "Rustam Qodirov", phone: "+998901234503", email: null, city: "Namangan", role: "employer", createdAt: "2026-06-02T08:15:00Z", suspendedAt: null, workerVerifiedAt: null },
-  { id: "u-04", fullName: "Malika Tosheva", phone: null, email: "malika@example.uz", city: "Toshkent", role: "job_seeker", createdAt: "2026-06-10T16:45:00Z", suspendedAt: "2026-06-25T11:00:00Z", workerVerifiedAt: null },
-  { id: "u-05", fullName: "Jasur Bekmurodov", phone: "+998901234505", email: null, city: "Buxoro", role: "employer", createdAt: "2026-06-18T14:20:00Z", suspendedAt: null, workerVerifiedAt: null },
+  { id: "u-01", fullName: "Aziz Karimov", phone: "+998901234501", email: null, city: "Toshkent", role: "job_seeker", createdAt: "2026-05-14T09:00:00Z", suspendedAt: null, workerVerifiedAt: "2026-06-01T10:00:00Z", isAdmin: false },
+  { id: "u-02", fullName: "Dilnoza Yusupova", phone: "+998901234502", email: "dilnoza@example.uz", city: "Samarqand", role: "job_seeker", createdAt: "2026-05-20T12:30:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: false },
+  { id: "u-03", fullName: "Rustam Qodirov", phone: "+998901234503", email: null, city: "Namangan", role: "employer", createdAt: "2026-06-02T08:15:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: false },
+  { id: "u-04", fullName: "Malika Tosheva", phone: null, email: "malika@example.uz", city: "Toshkent", role: "job_seeker", createdAt: "2026-06-10T16:45:00Z", suspendedAt: "2026-06-25T11:00:00Z", workerVerifiedAt: null, isAdmin: false },
+  { id: "u-05", fullName: "Jasur Bekmurodov", phone: "+998901234505", email: null, city: "Buxoro", role: "employer", createdAt: "2026-06-18T14:20:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: false },
+  { id: "u-06", fullName: "Nodira Aliyeva", phone: "+998901234506", email: "nodira@yolla.uz", city: "Toshkent", role: "job_seeker", createdAt: "2026-04-01T09:00:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: true },
 ];
 
 const MOCK_COMPANIES: AdminCompanyRow[] = [

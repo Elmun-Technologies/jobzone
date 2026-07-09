@@ -11,6 +11,7 @@ import { getAdminUsers } from "@/lib/admin/data/users";
 import { adminStrings } from "@/lib/admin/strings";
 import type { AdminUserRow } from "@/lib/admin/types";
 import { setProfileSuspended, verifyWorker } from "@/lib/actions/admin/moderation";
+import { setProfileAdmin } from "@/lib/actions/admin/users";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { formatDate } from "@/lib/format";
 
@@ -89,6 +90,7 @@ export default async function AdminUsersPage({
           {u.workerVerifiedAt ? (
             <StatusBadge tone="ok">{s.verified}</StatusBadge>
           ) : null}
+          {u.isAdmin ? <StatusBadge tone="ok">{s.admin}</StatusBadge> : null}
         </div>
       ),
     },
@@ -106,6 +108,11 @@ export default async function AdminUsersPage({
             }}
             label={u.suspendedAt ? s.unsuspend : s.suspend}
             withReason={!u.suspendedAt}
+          />
+          <ModerationForm
+            action={setProfileAdmin}
+            fields={{ locale, id: u.id, isAdmin: u.isAdmin ? "0" : "1" }}
+            label={u.isAdmin ? s.revokeAdmin : s.makeAdmin}
           />
           {u.role === "job_seeker" && !u.workerVerifiedAt ? (
             <form action={verifyWorker} className="flex items-center gap-2">

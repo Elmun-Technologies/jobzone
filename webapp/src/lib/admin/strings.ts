@@ -46,6 +46,9 @@ export const adminStrings = {
     methodLicensedAgency: "Litsenziyali agentlik",
     methodIdDocument: "Hujjat bo'yicha",
     methodManual: "Qo'lda",
+    admin: "Administrator",
+    makeAdmin: "Admin qilish",
+    revokeAdmin: "Administratordan olib tashlash",
   },
   nav: {
     groups: {
