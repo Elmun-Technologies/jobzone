@@ -949,6 +949,7 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
           disabled={!valid || pending}
           className={cn(buttonVariants({ variant: "primary", size: "md" }))}
         >
+          {pending ? <Loader2 className="size-4 animate-spin" /> : null}
           {step === steps.length - 1 ? t("finish") : t("next")}
         </button>
       </div>

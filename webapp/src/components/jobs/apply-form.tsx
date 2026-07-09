@@ -1,8 +1,13 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
+
+// Locale-aware router so the sign-in detour keeps the active locale (the plain
+// next/navigation router dropped the prefix → /uz guest landed on a re-resolved
+// /sign-in in the wrong language).
+import { useRouter } from "@/i18n/navigation";
 
 import { buttonVariants } from "@/components/ui/button";
 import { applyToJob, type ApplyState } from "@/lib/actions/apply";
@@ -168,6 +173,7 @@ export function ApplyForm({
         disabled={pending}
         className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
       >
+        {pending ? <Loader2 className="size-4 animate-spin" /> : null}
         {t("submit")}
       </button>
     </form>

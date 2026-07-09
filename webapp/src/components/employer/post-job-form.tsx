@@ -958,14 +958,17 @@ export function PostJobForm({
       {state.error ? (
         <div className="mt-3">
           <p className="text-destructive text-sm">{t("errUnknown")}</p>
-          <p className="text-muted-foreground mt-1 font-mono text-xs break-words">
-            {state.detail || "(no detail — server returned an empty error)"}
-          </p>
+          {state.detail ? (
+            <p className="text-muted-foreground mt-1 font-mono text-xs break-words">
+              {state.detail}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
-      {/* Footer nav */}
-      <div className="border-border mt-6 flex items-center justify-between gap-3 border-t pt-4">
+      {/* Footer nav — wraps on narrow screens so the Back / step / publish
+          group can't overflow horizontally. */}
+      <div className="border-border mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
         <button
           type="button"
           onClick={() => setStep((s) => Math.max(s - 1, 0))}

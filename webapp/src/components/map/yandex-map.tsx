@@ -58,6 +58,7 @@ export function YandexMap({
   applyLabel,
   youAreHere,
   ratings,
+  wheelZoom = true,
   onError,
 }: {
   jobs: Located[];
@@ -66,6 +67,9 @@ export function YandexMap({
   applyLabel: string;
   youAreHere: string;
   ratings?: MapRatings;
+  /** When false (embedded landing map), the mouse wheel scrolls the page
+   * instead of zooming — no scroll-zoom trap. */
+  wheelZoom?: boolean;
   onError: () => void;
 }) {
   const el = useRef<HTMLDivElement>(null);
@@ -95,6 +99,13 @@ export function YandexMap({
             },
             { suppressMapOpenBlock: true },
           );
+          if (!wheelZoom) map.current.behaviors.disable("scrollZoom");
+          // Zoom +/- buttons so the map is controllable without the wheel
+          // (essential on the embedded landing map, where wheel-zoom is off to
+          // avoid trapping page scroll). Placed top-right, below the count pill.
+          map.current.controls.add("zoomControl", {
+            position: { right: 12, top: 152 },
+          });
         } else if (loc) {
           map.current.setCenter([loc.lat, loc.lng], 13);
         }
@@ -110,6 +121,10 @@ export function YandexMap({
         );
 
         map.current.geoObjects.removeAll();
+
+        // A volt price-tag placemark per job (custom PinLayout). Added directly
+        // — wrapping these custom-layout pins in a Clusterer double-rendered a
+        // count badge over each tag ("①2 mln"), which read as broken.
         for (const job of jobs) {
           const pill = salaryPill(job) ?? "•";
           map.current.geoObjects.add(
@@ -128,6 +143,7 @@ export function YandexMap({
             ),
           );
         }
+
         if (loc) {
           map.current.geoObjects.add(
             new ymaps.Placemark(
@@ -145,7 +161,7 @@ export function YandexMap({
     return () => {
       cancelled = true;
     };
-  }, [jobs, loc, lang, locale, applyLabel, youAreHere, ratings]);
+  }, [jobs, loc, lang, locale, applyLabel, youAreHere, ratings, wheelZoom]);
 
   useEffect(() => {
     return () => {
