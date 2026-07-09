@@ -14,8 +14,11 @@ android {
     compileOptions {
         // Required by flutter_local_notifications (uses java.time APIs).
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        // Java 21 to match the toolchain AGP 9 runs on — plugin modules (e.g.
+        // the official Yandex SDK) compile to 21 bytecode, and a 17-pinned app
+        // javac can't read their classes ("wrong version 65.0, should be 61.0").
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     defaultConfig {
@@ -23,8 +26,8 @@ android {
         applicationId = "io.jobzone.jobzone"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Pinned to API 26+ since the Yolla store baseline was set with the old
-        // Yandex map integration; kept to avoid widening support mid-release.
+        // The official Yandex MapKit SDK (yandex_maps_mapkit_lite) requires
+        // Android API 26+, so we pin it here over flutter's default (24).
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -42,7 +45,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
     }
 }
 
