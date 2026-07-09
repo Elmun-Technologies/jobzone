@@ -7,12 +7,17 @@ import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../application/bookmarks_controller.dart';
+import '../../application/dismissed_controller.dart';
 import '../../domain/job.dart';
 import '../util/job_labels.dart';
 import 'bookmark_confirm_sheet.dart';
+import 'quick_apply_button.dart';
 
 /// Job summary card used across Home, See-all, Bookmarks and Search. Tapping
-/// opens details; the bookmark toggle is wired to [bookmarksControllerProvider].
+/// opens details; the bookmark toggle is wired to [bookmarksControllerProvider];
+/// the ⚡ icon is [QuickApplyButton] (apply in one tap, no extra screens); the
+/// archive icon dismisses the job from the browse feed
+/// ([dismissedControllerProvider]) — "not interested," reversible.
 /// Pass [width] to use it inside a horizontal carousel.
 class JobCard extends ConsumerWidget {
   const JobCard({super.key, required this.job, this.width});
@@ -26,6 +31,8 @@ class JobCard extends ConsumerWidget {
     final colors = context.colors;
     final bookmarked =
         ref.watch(bookmarksControllerProvider).value?.contains(job.id) ?? false;
+    final dismissed =
+        ref.watch(dismissedControllerProvider).value?.contains(job.id) ?? false;
     final tags = [
       ?jobTypeLabel(context, job.jobType),
       ?workingModelLabel(context, job.workingModel),
@@ -88,6 +95,8 @@ class JobCard extends ConsumerWidget {
                     ],
                   ),
                 ),
+                QuickApplyButton(job: job),
+                const SizedBox(width: AppSpacing.sm),
                 Semantics(
                   button: true,
                   label: bookmarked ? l.removeBookmark : l.addBookmark,
@@ -111,6 +120,23 @@ class JobCard extends ConsumerWidget {
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
                       color: bookmarked ? colors.primary : colors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Semantics(
+                  button: true,
+                  label: dismissed ? l.jobDismissed : l.dismissJob,
+                  child: InkResponse(
+                    onTap: () => ref
+                        .read(dismissedControllerProvider.notifier)
+                        .toggle(job.id),
+                    child: Icon(
+                      dismissed
+                          ? Icons.archive_rounded
+                          : Icons.archive_outlined,
+                      size: 20,
+                      color: dismissed ? colors.primary : colors.textSecondary,
                     ),
                   ),
                 ),

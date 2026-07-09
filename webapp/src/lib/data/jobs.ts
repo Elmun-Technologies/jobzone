@@ -10,6 +10,27 @@ import type { Job, JobQuery } from "./types";
 const COLUMNS = "*";
 const DAY_MS = 86_400_000;
 
+/**
+ * The signed-in caller's dismissed job ids ("archived" / "not interested" —
+ * see 0052), or [] for a guest. Used to exclude them from the open-jobs feed
+ * everywhere it's read (mirrors bookmarks' own separate-lookup pattern) —
+ * dismissal only affects browsing, not a direct link or Bookmarks (a job
+ * stays saved there even if later dismissed from the feed).
+ */
+async function dismissedJobIds(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("dismissed_jobs")
+    .select("job_id")
+    .eq("profile_id", user.id);
+  return (data ?? []).map((r) => String((r as { job_id: unknown }).job_id));
+}
+
 function salaryTop(j: Job): number | null {
   return j.salaryMax ?? j.salaryMin;
 }
@@ -124,6 +145,10 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
     const cutoff = postedCutoff(query);
     if (cutoff) req = req.gte("posted_at", cutoff);
 
+    const dismissed = await dismissedJobIds(supabase);
+    if (dismissed.length > 0)
+      req = req.not("id", "in", `(${dismissed.join(",")})`);
+
     req = req.range(offset, offset + limit - 1);
 
     const { data, error } = await req;
@@ -171,6 +196,12 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
     const cutoff = postedCutoff(query);
     if (cutoff) req = req.gte("posted_at", cutoff);
 
+    // Must match getOpenJobs' exclusions exactly — this count backs the live
+    // "N vacancies" button, which has to agree with what actually renders.
+    const dismissed = await dismissedJobIds(supabase);
+    if (dismissed.length > 0)
+      req = req.not("id", "in", `(${dismissed.join(",")})`);
+
     const { count, error } = await req;
     if (error) throw error;
     return count ?? 0;
@@ -213,13 +244,17 @@ export async function getRecentJobs(limit = 6): Promise<Job[]> {
   if (!hasSupabase()) return mockJobs.slice(0, limit);
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const dismissed = await dismissedJobIds(supabase);
+    let req = supabase
       .from("job_feed")
       .select(COLUMNS)
       .eq("status", "open")
       .order("boost_active", { ascending: false })
       .order("posted_at", { ascending: false })
       .limit(limit);
+    if (dismissed.length > 0)
+      req = req.not("id", "in", `(${dismissed.join(",")})`);
+    const { data, error } = await req;
     if (error) throw error;
     return (data ?? []).map(toJob);
   } catch (e) {
@@ -243,6 +278,24 @@ export async function getJobById(id: string): Promise<Job | null> {
   } catch (e) {
     console.error("getJobById failed", e);
     return null;
+  }
+}
+
+/**
+ * Open jobs matched to the signed-in seeker's résumé, ranked by the shared
+ * `recommended_jobs` RPC (0051) — the same algorithm the mobile app calls, so
+ * both rank identically. Returns [] for a guest / no profile / no matches.
+ */
+export async function getRecommendedJobs(): Promise<Job[]> {
+  if (!hasSupabase()) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("recommended_jobs");
+    if (error) throw error;
+    return ((data ?? []) as Record<string, unknown>[]).map(toJob);
+  } catch (e) {
+    console.error("getRecommendedJobs failed", e);
+    return [];
   }
 }
 

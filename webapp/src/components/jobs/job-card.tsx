@@ -9,6 +9,7 @@ import { locationText, postedInfo, salaryText } from "@/lib/format";
 import { useNow } from "@/lib/use-now";
 
 import { JobCardActions } from "./job-card-actions";
+import { QuickApplyButton } from "./quick-apply-button";
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
@@ -41,6 +42,8 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
       timeText = `${t("postedYesterday")} ${info.clock}`;
     else timeText = t("daysAgo", { days: info.dayOffset });
   }
+  // Same gate the job-detail page's QuickApplyButton already uses.
+  const needsForm = job.screeningQuestions.some((q) => q.required);
 
   return (
     <Link
@@ -123,6 +126,21 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
               ) : null}
             </div>
           ) : null}
+
+          {/* The card is one big <Link>; stop the tap from also navigating. */}
+          <div
+            className="mt-3"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <QuickApplyButton
+              jobId={job.id}
+              needsForm={needsForm}
+              className="w-full justify-center"
+            />
+          </div>
         </div>
       </div>
     </Link>

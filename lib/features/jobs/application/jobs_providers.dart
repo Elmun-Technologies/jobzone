@@ -12,6 +12,12 @@ final recentJobsProvider = FutureProvider<List<Job>>(
   (ref) => ref.watch(jobsRepositoryProvider).recent(),
 );
 
+/// Jobs matched to the signed-in seeker's résumé (shared `recommended_jobs`
+/// RPC). Backs the "Recommended for you" home section.
+final recommendedJobsProvider = FutureProvider<List<Job>>(
+  (ref) => ref.watch(jobsRepositoryProvider).recommended(),
+);
+
 final jobByIdProvider = FutureProvider.family<Job?, String>(
   (ref, id) => ref.watch(jobsRepositoryProvider).byId(id),
 );

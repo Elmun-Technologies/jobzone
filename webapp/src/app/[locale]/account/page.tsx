@@ -8,6 +8,7 @@ import {
   FileText,
   LayoutDashboard,
   MessageSquare,
+  Sparkles,
   UserCog,
   Wallet,
   type LucideIcon,
@@ -114,6 +115,12 @@ export default async function AccountPage({
         { href: "/employer/wallet", label: tw("title"), icon: Wallet },
       ]
     : [
+        {
+          href: "/account/recommended",
+          label: t("recommendedJobs"),
+          icon: Sparkles,
+          featured: true,
+        },
         {
           href: "/account/applications",
           label: t("myApplications"),

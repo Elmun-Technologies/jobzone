@@ -30,6 +30,8 @@
     "subtitle": "Ishlarni xaritada ko'ring",
     "listView": "Ro'yxat",
     "map": {
+      "searchPlaceholder": "Lavozim, kompaniya yoki soha bo'yicha qidirish",
+      "clearSearch": "Qidiruvni tozalash",
       "nearMe": "Yonimda",
       "locating": "Aniqlanmoqda…",
       "salaryFrom": "4 mln dan",
@@ -80,6 +82,7 @@
   "account": {
     "title": "Hisob",
     "myApplications": "Mening arizalarim",
+    "recommendedJobs": "Sizga mos ishlar",
     "savedJobs": "Saqlangan ishlar",
     "savedSearches": "Obunalar",
     "notifications": "Bildirishnomalar",
@@ -482,6 +485,14 @@
       "hired": "Ishga olingan"
     }
   },
+  "recommended": {
+    "title": "Sizga mos ishlar",
+    "subtitle": "Rezyumengiz asosida tanlangan ochiq vakansiyalar",
+    "empty": "Hozircha mos ish topilmadi",
+    "emptyHint": "Rezyumengizni to'ldiring (lavozim, shahar, ko'nikmalar) — moslik aniqroq bo'ladi. Yoki barcha ishlarni ko'ring.",
+    "completeResume": "Rezyumeni to'ldirish",
+    "browseAll": "Barcha ishlar"
+  },
   "home": {
     "heroTitle": "O'zbekiston bo'ylab mos ishni toping",
     "heroSubtitle": "Har qanday soha. Har qanday tajriba.",
@@ -518,6 +529,8 @@
     "postedYesterday": "Kecha",
     "daysAgo": "{days} kun oldin",
     "share": "Ulashish",
+    "dismiss": "Arxivlash",
+    "dismissed": "Arxivlandi — qaytarish",
     "filters": "Filtrlar",
     "experience": "Tajriba",
     "region": "Hudud",

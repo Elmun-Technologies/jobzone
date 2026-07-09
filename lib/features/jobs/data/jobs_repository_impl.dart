@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
+import '../application/dismissed_controller.dart';
 import '../domain/job.dart';
 import '../domain/jobs_repository.dart';
 import 'mock_jobs.dart';
@@ -17,14 +18,29 @@ class JobsRepositoryImpl implements JobsRepository {
   bool get _live => Env.hasSupabase;
   SupabaseClient get _client => _ref.read(supabaseClientProvider);
 
+  /// The caller's "archived" job ids (0052) — excluded from the browse feed
+  /// (Home, See-all, category browsing) so a seeker's dismissal actually keeps
+  /// a job from resurfacing there. Same table + same exclusion scope the web
+  /// app applies (getOpenJobs/getRecentJobs/getJobCount), for one algorithm
+  /// across both clients.
+  Future<List<String>> _dismissedIds() async {
+    final ids = await _ref.read(dismissedControllerProvider.future);
+    return ids.toList();
+  }
+
   Future<List<Job>> _query({
     required int limit,
     bool recentFirst = true,
   }) async {
-    final rows = await _client
-        .from('job_feed')
-        .select()
-        .eq('status', 'open')
+    var query = _client.from('job_feed').select().eq('status', 'open');
+    final dismissed = await _dismissedIds();
+    if (dismissed.isNotEmpty) {
+      query = query.not('id', 'in', '(${dismissed.join(',')})');
+    }
+    // Filters (.eq/.not) must all land before any transform (.order/.limit) —
+    // PostgrestFilterBuilder narrows to PostgrestTransformBuilder afterward,
+    // which has no .not().
+    final rows = await query
         // Active paid promotions float to the top, then by recency.
         .order('boost_active', ascending: false)
         .order('posted_at', ascending: !recentFirst)
@@ -56,14 +72,30 @@ class JobsRepositoryImpl implements JobsRepository {
       final all = _boostedFirst(recentFirst ? mockJobs : mockJobs.reversed);
       return all.skip(offset).take(limit).toList();
     }
-    final rows = await _client
-        .from('job_feed')
-        .select()
-        .eq('status', 'open')
+    var query = _client.from('job_feed').select().eq('status', 'open');
+    final dismissed = await _dismissedIds();
+    if (dismissed.isNotEmpty) {
+      query = query.not('id', 'in', '(${dismissed.join(',')})');
+    }
+    final rows = await query
         .order('boost_active', ascending: false)
         .order('posted_at', ascending: !recentFirst)
         .range(offset, offset + limit - 1);
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
+  }
+
+  @override
+  Future<List<Job>> recommended({int limit = 30}) async {
+    if (!_live) {
+      // Offline demo: stand in with the mock feed (boosted first).
+      return _boostedFirst(mockJobs).take(limit).toList();
+    }
+    // Same shared RPC the web app calls, so both rank identically.
+    final rows = (await _client.rpc('recommended_jobs')) as List;
+    return rows
+        .map<Job>((r) => Job.fromMap(r as Map<String, dynamic>))
+        .take(limit)
+        .toList();
   }
 
   @override
@@ -129,11 +161,16 @@ class JobsRepositoryImpl implements JobsRepository {
         mockJobs.where((j) => j.categoryName == categoryName),
       ).take(limit).toList();
     }
-    final rows = await _client
+    var query = _client
         .from('job_feed')
         .select()
         .eq('status', 'open')
-        .eq('category_name', categoryName)
+        .eq('category_name', categoryName);
+    final dismissed = await _dismissedIds();
+    if (dismissed.isNotEmpty) {
+      query = query.not('id', 'in', '(${dismissed.join(',')})');
+    }
+    final rows = await query
         .order('boost_active', ascending: false)
         .order('posted_at', ascending: false)
         .limit(limit);
@@ -150,12 +187,18 @@ class JobsRepositoryImpl implements JobsRepository {
       }
       return counts;
     }
-    // Only the category name is needed, so keep the projection light.
-    final rows = await _client
+    // Only the category name is needed, so keep the projection light. Must
+    // exclude dismissed jobs too — the count on a browse-by-category card has
+    // to match what byCategory() actually shows when tapped.
+    var query = _client
         .from('job_feed')
         .select('category_name')
-        .eq('status', 'open')
-        .limit(1000);
+        .eq('status', 'open');
+    final dismissed = await _dismissedIds();
+    if (dismissed.isNotEmpty) {
+      query = query.not('id', 'in', '(${dismissed.join(',')})');
+    }
+    final rows = await query.limit(1000);
     for (final r in rows) {
       final c = r['category_name'] as String?;
       if (c != null && c.isNotEmpty) counts[c] = (counts[c] ?? 0) + 1;

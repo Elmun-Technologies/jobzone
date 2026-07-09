@@ -19,5 +19,6 @@ abstract final class CacheKeys {
   static const String userRole = 'pref_user_role';
   static const String userRoleChosen = 'pref_user_role_chosen';
   static const String bookmarks = 'pref_bookmarks';
+  static const String dismissedJobs = 'pref_dismissed_jobs';
   static const String recentSearches = 'pref_recent_searches';
 }

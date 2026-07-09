@@ -368,7 +368,8 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
           `/sign-in?next=${encodeURIComponent(`/${locale}/resumes/new`)}`,
         );
       } else if (res.error) setError(true);
-      else router.push("/account");
+      // First time their résumé is saved, land them on the jobs matched to it.
+      else router.push("/account/recommended");
     });
   }
 
