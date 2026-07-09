@@ -69,4 +69,18 @@ export const adminStrings = {
     settings: "Sozlamalar",
     audit: "Jurnal",
   },
+  categories: {
+    newTitle: "Yangi kategoriya",
+    editTitle: "Tahrirlash",
+    name: "Nomi",
+    slug: "Slug",
+    icon: "Ikonka (emoji)",
+    sortOrder: "Tartib raqami",
+    active: "Faol",
+    inactive: "Faol emas",
+    activate: "Faollashtirish",
+    deactivate: "Faolsizlantirish",
+    add: "Qo'shish",
+    saveChanges: "Saqlash",
+  },
 } as const;

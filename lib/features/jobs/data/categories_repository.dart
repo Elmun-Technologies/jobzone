@@ -62,6 +62,8 @@ class CategoriesRepository {
         .read(supabaseClientProvider)
         .from('job_categories')
         .select('id, name, slug')
+        .eq('is_active', true)
+        .order('sort_order')
         .order('name');
     return (rows as List)
         .map((r) => JobCategory.fromMap(r as Map<String, dynamic>))
