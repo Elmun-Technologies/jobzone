@@ -53,7 +53,7 @@ export const adminNav: AdminNavGroup[] = [
     label: n.groups.system,
     items: [
       { key: "broadcast", label: n.broadcast, href: "/admin/broadcast", enabled: true },
-      { key: "settings", label: n.settings, href: "/admin/settings", enabled: false },
+      { key: "settings", label: n.settings, href: "/admin/settings", enabled: true },
       { key: "audit", label: n.audit, href: "/admin/audit", enabled: true },
     ],
   },

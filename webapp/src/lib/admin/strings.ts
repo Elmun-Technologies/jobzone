@@ -86,6 +86,19 @@ export const adminStrings = {
     add: "Qo'shish",
     saveChanges: "Saqlash",
   },
+  settings: {
+    bannerTitle: "Sayt e'loni (banner)",
+    bannerHint:
+      "Yoqilganda sayt tepasida barcha sahifalarda ko'rinadi — texnik ishlar " +
+      "yoki muhim xabar uchun. Bo'sh matn — banner ko'rinmaydi.",
+    enabled: "Yoqilgan",
+    message: "Matn",
+    tone: "Ko'rinishi",
+    toneInfo: "Oddiy (ko'k)",
+    toneWarning: "Ogohlantirish (sariq)",
+    save: "Saqlash",
+    saved: "Saqlandi",
+  },
   broadcast: {
     title: "Xabar sarlavhasi",
     body: "Xabar matni",
