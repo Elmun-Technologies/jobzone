@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
+import '../../jobs/application/dismissed_controller.dart';
 import '../../jobs/data/mock_jobs.dart';
 import '../../jobs/domain/job.dart';
 import '../domain/search_filters.dart';
@@ -31,7 +32,7 @@ class SearchRepository {
   /// never drift from the results it promises.
   Future<int> count(SearchFilters filters) async {
     if (!Env.hasSupabase) return _filterMock(filters).length;
-    final q = _applyFilters(
+    final q = await _applyFilters(
       _ref
           .read(supabaseClientProvider)
           .from('job_feed')
@@ -43,7 +44,7 @@ class SearchRepository {
   }
 
   Future<List<Job>> _searchViaFeed(SearchFilters f) async {
-    final q = _applyFilters(
+    final q = await _applyFilters(
       _ref
           .read(supabaseClientProvider)
           .from('job_feed')
@@ -69,11 +70,18 @@ class SearchRepository {
   /// `job_feed` query builder (the caller has already scoped it to
   /// `status = 'open'`). Generic over the builder's row type so the same logic
   /// serves both the row query (`select`) and the head count (`count`).
-  PostgrestFilterBuilder<T> _applyFilters<T>(
+  /// Also excludes the caller's archived jobs (0052) — same table/scope as
+  /// Home/See-all/category browse, so a dismissal actually keeps a job from
+  /// resurfacing anywhere, including search and the Explore map.
+  Future<PostgrestFilterBuilder<T>> _applyFilters<T>(
     PostgrestFilterBuilder<T> query,
     SearchFilters f,
-  ) {
+  ) async {
     var q = query;
+    final dismissed = await _ref.read(dismissedControllerProvider.future);
+    if (dismissed.isNotEmpty) {
+      q = q.not('id', 'in', '(${dismissed.join(',')})');
+    }
     final text = f.query.trim();
     if (text.isNotEmpty) {
       // Strip PostgREST filter delimiters so the term can't break out of the
