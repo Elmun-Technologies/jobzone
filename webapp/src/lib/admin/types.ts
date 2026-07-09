@@ -70,6 +70,7 @@ export interface AdminUserRow {
   createdAt: string;
   suspendedAt: string | null;
   workerVerifiedAt: string | null;
+  isAdmin: boolean;
 }
 
 export interface AdminCompanyRow {

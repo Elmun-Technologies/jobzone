@@ -21,7 +21,7 @@ export async function getAdminUsers(
     let query = client
       .from("profiles")
       .select(
-        "id, full_name, phone, email, city, role, created_at, suspended_at, worker_verified_at",
+        "id, full_name, phone, email, city, role, created_at, suspended_at, worker_verified_at, is_admin",
       )
       .order("created_at", { ascending: false })
       .range(from, to);
@@ -48,6 +48,7 @@ export async function getAdminUsers(
           workerVerifiedAt: r.worker_verified_at
             ? String(r.worker_verified_at)
             : null,
+          isAdmin: Boolean(r.is_admin ?? false),
         };
       }),
     );
