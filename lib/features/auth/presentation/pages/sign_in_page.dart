@@ -151,7 +151,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               const SizedBox(height: AppSpacing.xxl),
               JzTextField(
                 label: l.email,
-                hint: 'example@gmail.com',
+                hint: context.l10n.emailHint,
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) =>

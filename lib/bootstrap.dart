@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +16,11 @@ import 'shared/widgets/jz_map/jz_map.dart';
 /// inside a [ProviderScope].
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load date-symbol data for every locale so DateFormat can render month/day
+  // names in uz/ru (not just en_US) once Intl.defaultLocale is set to the
+  // in-app language (see YollaApp.builder).
+  await initializeDateFormatting();
 
   if (Env.hasSupabase) {
     await Supabase.initialize(

@@ -1,0 +1,4 @@
+/* iOS system permission dialogs — English. */
+"NSLocationWhenInUseUsageDescription" = "Yolla uses your location to show jobs near you.";
+"NSPhotoLibraryUsageDescription" = "Yolla needs access to your photos to set a profile picture.";
+"NSCameraUsageDescription" = "Yolla needs camera access to take a profile picture.";

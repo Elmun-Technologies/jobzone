@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/options/option_lists.dart';
 import '../data/monetization_repository.dart';
 import '../domain/promotion.dart';
 
@@ -52,9 +53,13 @@ class PromotionsHistoryPage extends ConsumerWidget {
                     separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, i) => _OrderRow(
                       order: orders[i],
-                      productName:
-                          nameByCode[orders[i].productCode] ??
-                          orders[i].productCode,
+                      productName: promotionName(
+                        l,
+                        orders[i].productCode,
+                        fallback:
+                            nameByCode[orders[i].productCode] ??
+                            orders[i].productCode,
+                      ),
                     ),
                   );
                 },

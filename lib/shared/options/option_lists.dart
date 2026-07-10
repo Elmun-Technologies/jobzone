@@ -36,3 +36,31 @@ Map<String, String> cityOptions(AppLocalizations l) => {
   'Fergana': l.cityFergana,
   'Nukus': l.cityNukus,
 };
+
+/// Localized promotion-product name for a catalog [code]. The live catalog and
+/// the offline seed both store Uzbek-only `name`/`description`, so displaying
+/// `product.name` directly leaves ru/en employers reading Uzbek — route the
+/// stable product code through l10n instead. Falls back to [fallback] (the raw
+/// stored name) for any unknown/new code.
+String promotionName(AppLocalizations l, String code, {String fallback = ''}) =>
+    switch (code) {
+      'start' => l.promoStartName,
+      'featured' => l.promoFeaturedName,
+      'top_3' => l.promoTop3Name,
+      'top_7' => l.promoTop7Name,
+      'top_30' => l.promoTop30Name,
+      'ai_screening' => l.promoAiName,
+      _ => fallback,
+    };
+
+/// Localized promotion-product description for a catalog [code]; null for an
+/// unknown code so callers can fall back to the raw stored description.
+String? promotionDesc(AppLocalizations l, String code) => switch (code) {
+  'start' => l.promoStartDesc,
+  'featured' => l.promoFeaturedDesc,
+  'top_3' => l.promoTop3Desc,
+  'top_7' => l.promoTop7Desc,
+  'top_30' => l.promoTop30Desc,
+  'ai_screening' => l.promoAiDesc,
+  _ => null,
+};

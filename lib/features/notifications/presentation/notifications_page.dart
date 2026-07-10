@@ -192,7 +192,7 @@ class _NotificationTile extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          notification.title,
+                          _title(context),
                           style: context.text.titleSmall?.copyWith(
                             fontWeight: unread
                                 ? FontWeight.w700
@@ -255,6 +255,18 @@ class _NotificationTile extends ConsumerWidget {
         Routes.applicationStatus,
       ),
       NotificationType.review || NotificationType.system => null,
+    };
+  }
+
+  // Derive the title from the notification type so it renders in the in-app
+  // language (uz/ru/en). review/system keep their server-provided title.
+  String _title(BuildContext context) {
+    final l = context.l10n;
+    return switch (notification.type) {
+      NotificationType.applicationUpdate => l.notifTitleApplicationUpdate,
+      NotificationType.message => l.notifTitleMessage,
+      NotificationType.jobMatch => l.notifTitleJobMatch,
+      NotificationType.review || NotificationType.system => notification.title,
     };
   }
 

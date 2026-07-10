@@ -23,7 +23,8 @@
     "postVacancy": "Vakansiya joylash",
     "openMenu": "Menyuni ochish",
     "closeMenu": "Menyuni yopish",
-    "pricing": "Narxlar"
+    "pricing": "Narxlar",
+    "language": "Til"
   },
   "explore": {
     "title": "Ishlar xaritasi",
@@ -233,10 +234,10 @@
   },
   "notifications": {
     "title": "Bildirishnomalar",
-    "subtitle": "Mos vakansiyalar, otkliklar yangilanishi va xabarlar shu yerga keladi.",
+    "subtitle": "Mos vakansiyalar, arizalar yangilanishi va xabarlar shu yerga keladi.",
     "markAllRead": "Hammasini o'qilgan deb belgilash",
     "emptyTitle": "Hozircha bildirishnomalar yo'q",
-    "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga otklik qoldiring — yangiliklar shu yerda ko'rinadi."
+    "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga ariza bering — yangiliklar shu yerda ko'rinadi."
   },
   "employer": {
     "dashboard": "Boshqaruv paneli",
@@ -382,7 +383,7 @@
       "back": "Orqaga",
       "stepOf": "Qadam {n}/{total}",
       "previewTitle": "Vakansiya qanday ko‘rinadi",
-      "previewSub": "Publish qilishdan oldin tekshiring.",
+      "previewSub": "Nashr qilishdan oldin tekshiring.",
       "titleRequired": "Lavozim nomini kiriting",
       "noDescription": "Tavsif kiritilmagan",
       "aiTitle": "AI yordamida to‘ldirish",
@@ -516,7 +517,7 @@
     "title": "Ishlar",
     "searchPlaceholder": "Lavozim yoki kompaniya",
     "search": "Qidirish",
-    "negotiable": "Kelishilgan",
+    "negotiable": "Kelishiladi",
     "resultsZero": "Hech qanday ish topilmadi",
     "jobType": "Ish turi",
     "workingModel": "Format",
@@ -711,7 +712,7 @@
         "s3": "Reyting belgida ko'rinadi: gullar va asalarilar — yoki pashshalar"
       },
       "chips": {
-        "verified": "faqat tasdiqlangan naymlar",
+        "verified": "faqat tasdiqlangan ishga joylashishlar",
         "badge": "belgi — 5 bahodan",
         "notForSale": "pulga o'chirilmaydi",
         "reply": "ochiq javob huquqi"
@@ -725,7 +726,7 @@
         "name": "7-ombor",
         "caption": "shartlar mos kelmadi · 11 baho"
       },
-      "footnote": "baholar — faqat haqiqiy naymlardan"
+      "footnote": "baholar — faqat haqiqiy ishga joylashishlardan"
     },
     "pricing": {
       "eyebrow": "Tariflar",
@@ -800,7 +801,7 @@
       },
       "budgetTitle": "Start byudjeti",
       "budgetTotal": "$5 000",
-      "budgetNote": "solo-founder · vibe-coding",
+      "budgetNote": "yakka asoschi · vibe-coding",
       "budget": {
         "marketing": {
           "label": "Marketing",

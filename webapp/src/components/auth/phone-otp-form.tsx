@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -29,6 +29,7 @@ function normalizePhone(raw: string): string {
  */
 export function PhoneOtpForm({ next }: { next?: string }) {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -84,7 +85,7 @@ export function PhoneOtpForm({ next }: { next?: string }) {
       );
       return;
     }
-    router.push(safeNext(next, "/account"));
+    router.push(safeNext(next, `/${locale}/account`));
     router.refresh();
   }
 
