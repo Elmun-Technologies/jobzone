@@ -31,7 +31,9 @@ void main() {
       ),
     );
 
-    expect(find.text('3 kun TOP'), findsOneWidget);
+    // The card localizes the product by its stable code (not the raw uz name),
+    // so in the `en` locale 'top_3' renders as "3-day TOP".
+    expect(find.text('3-day TOP'), findsOneWidget);
     expect(find.text("15 000 so'm"), findsOneWidget);
   });
 }
