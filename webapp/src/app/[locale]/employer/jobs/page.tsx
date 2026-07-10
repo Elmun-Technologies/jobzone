@@ -86,6 +86,14 @@ export default async function MyJobsPage({
                 {t("viewMatches")}
               </Link>
               <Link
+                href={`/employer/jobs/${justPublishedJobId}/share`}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
+              >
+                {t("promoteShare")}
+              </Link>
+              <Link
                 href={`/employer/jobs/${justPublishedJobId}/promote`}
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
@@ -188,6 +196,14 @@ export default async function MyJobsPage({
                     >
                       {t("edit")}
                     </Link>
+                    {job.status === "open" ? (
+                      <Link
+                        href={`/employer/jobs/${job.id}/share`}
+                        className={cn(actionBtn, "text-foreground")}
+                      >
+                        {t("promoteShare")}
+                      </Link>
+                    ) : null}
                     {job.status === "open" ? (
                       <Link
                         href={`/employer/jobs/${job.id}/promote`}
