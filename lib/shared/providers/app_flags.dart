@@ -8,12 +8,19 @@ import '../enums/enums.dart';
 class AppFlags {
   const AppFlags({
     required this.onboardingSeen,
+    required this.languageChosen,
     required this.profileComplete,
     this.role = UserRole.jobSeeker,
     this.roleChosen = false,
   });
 
   final bool onboardingSeen;
+
+  /// Whether the user has picked a language on the first-run picker (the hop
+  /// after onboarding). Device-wide, so it survives sign-out like
+  /// [onboardingSeen] — you only choose your language once.
+  final bool languageChosen;
+
   final bool profileComplete;
 
   /// Which experience the user gets. Read synchronously by the router redirect,
@@ -27,11 +34,13 @@ class AppFlags {
 
   AppFlags copyWith({
     bool? onboardingSeen,
+    bool? languageChosen,
     bool? profileComplete,
     UserRole? role,
     bool? roleChosen,
   }) => AppFlags(
     onboardingSeen: onboardingSeen ?? this.onboardingSeen,
+    languageChosen: languageChosen ?? this.languageChosen,
     profileComplete: profileComplete ?? this.profileComplete,
     role: role ?? this.role,
     roleChosen: roleChosen ?? this.roleChosen,
@@ -44,6 +53,7 @@ class AppFlagsController extends Notifier<AppFlags> {
     final prefs = ref.read(sharedPreferencesProvider);
     return AppFlags(
       onboardingSeen: prefs.getBool(CacheKeys.onboardingComplete) ?? false,
+      languageChosen: prefs.getBool(CacheKeys.languageChosen) ?? false,
       profileComplete: prefs.getBool(CacheKeys.profileSetupComplete) ?? false,
       role:
           UserRole.fromWire(prefs.getString(CacheKeys.userRole)) ??
@@ -57,6 +67,13 @@ class AppFlagsController extends Notifier<AppFlags> {
         .read(sharedPreferencesProvider)
         .setBool(CacheKeys.onboardingComplete, true);
     state = state.copyWith(onboardingSeen: true);
+  }
+
+  Future<void> markLanguageChosen() async {
+    await ref
+        .read(sharedPreferencesProvider)
+        .setBool(CacheKeys.languageChosen, true);
+    state = state.copyWith(languageChosen: true);
   }
 
   Future<void> setProfileComplete(bool value) async {

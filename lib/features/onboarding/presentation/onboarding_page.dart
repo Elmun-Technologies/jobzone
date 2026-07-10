@@ -8,9 +8,13 @@ import '../../../localization/l10n_extension.dart';
 import '../../../shared/providers/app_flags.dart';
 
 class _Slide {
-  const _Slide(this.title, this.body);
+  const _Slide(this.title, this.body, this.art);
   final String title;
   final String body;
+
+  /// On-brand illustration for the slide. A raster photo can be dropped in
+  /// later by swapping the asset here (see [_OnboardingArt]).
+  final String art;
 }
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -32,7 +36,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   Future<void> _finish() async {
     await ref.read(appFlagsProvider.notifier).markOnboardingSeen();
-    if (mounted) context.go(Routes.welcome);
+    // Next stop is the first-run language picker; the router guard also
+    // enforces this hop, so a returning user who already chose skips it.
+    if (mounted) context.go(Routes.chooseLanguage);
   }
 
   void _next(bool isLast) {
@@ -51,9 +57,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final l = context.l10n;
     final colors = context.colors;
     final slides = [
-      _Slide(l.onboard1Title, l.onboard1Body),
-      _Slide(l.onboard2Title, l.onboard2Body),
-      _Slide(l.onboard3Title, l.onboard3Body),
+      _Slide(l.onboard1Title, l.onboard1Body, 'assets/onboarding/step_1.svg'),
+      _Slide(l.onboard2Title, l.onboard2Body, 'assets/onboarding/step_2.svg'),
+      _Slide(l.onboard3Title, l.onboard3Body, 'assets/onboarding/step_3.svg'),
     ];
     final isLast = _index == slides.length - 1;
 
@@ -95,7 +101,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: Column(
                       children: [
                         const Spacer(flex: 2),
-                        const Expanded(flex: 8, child: _PhoneMockup()),
+                        Expanded(flex: 8, child: _OnboardingArt(s.art)),
                         const Spacer(),
                         HighlightText(
                           s.title,
@@ -158,51 +164,22 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 }
 
-/// A neutral device-frame placeholder (the reference shows an empty phone
-/// mockup on each slide).
-class _PhoneMockup extends StatelessWidget {
-  const _PhoneMockup();
+/// The per-slide illustration. Ships a brand-matched SVG (ink line-art + volt
+/// accents on a soft self-framed panel, so it reads on both light and dark
+/// app backgrounds). To use a photo instead, point [asset] at a bundled raster
+/// (`assets/onboarding/*.png`) — [JzSvgAsset] handles SVGs; swap to
+/// `Image.asset` here if you move to raster art.
+class _OnboardingArt extends StatelessWidget {
+  const _OnboardingArt(this.asset);
+  final String asset;
 
   @override
   Widget build(BuildContext context) {
+    // Fixed intrinsic size scaled to the slide via FittedBox, so it never
+    // overflows on small screens (matches the old device-frame sizing).
     return FittedBox(
       fit: BoxFit.contain,
-      child: Container(
-        width: 220,
-        height: 440,
-        padding: const EdgeInsets.all(7),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
-              blurRadius: 30,
-              offset: const Offset(0, 16),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFE6E7EB),
-                borderRadius: BorderRadius.circular(33),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 86,
-              height: 26,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A),
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: JzSvgAsset(asset, width: 320, height: 300),
     );
   }
 }
