@@ -137,11 +137,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              SnackBar(content: Text(l.comingSoon)),
-                            ),
+                          onTap: () => context.push(Routes.accountPrivacy),
                           child: Text(
                             l.termsAndConditions,
                             style: context.text.bodyMedium?.copyWith(

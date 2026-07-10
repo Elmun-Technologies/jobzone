@@ -97,10 +97,11 @@ class _PromoteSheetState extends ConsumerState<_PromoteSheet> {
                     onRetry: () => ref.invalidate(promotionProductsProvider),
                   ),
                   data: (products) {
-                    // Skip the free "start" base — promoting is a paid boost.
+                    // Skip the free "start" base (promoting is a paid boost)
+                    // and any not-yet-live "coming soon" tiers (kind 'ai').
                     final buyable = [
                       for (final p in products)
-                        if (p.kind != 'base') p,
+                        if (p.kind != 'base' && !p.isComingSoon) p,
                     ];
                     return Column(
                       children: [

@@ -5,13 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
-import '../../../shared/widgets/snackbars.dart';
 import '../application/cv_providers.dart';
 import '../domain/cv_models.dart';
 
-/// Resume landing (SuperJob-style): premium service cards across the top, then
-/// either the seeker's uploaded resumes or an empty-state prompt to add one.
-/// Upload/manage itself lives in [ResumePage] (Routes.profileResume).
+/// Resume landing: the seeker's uploaded resumes, or an empty-state prompt to
+/// add one. Upload/manage itself lives in [ResumePage] (Routes.profileResume).
 class ResumeHomePage extends ConsumerWidget {
   const ResumeHomePage({super.key});
 
@@ -33,37 +31,11 @@ class ResumeHomePage extends ConsumerWidget {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                padding: const EdgeInsets.only(
+                  top: AppSpacing.sm,
+                  bottom: AppSpacing.xl,
+                ),
                 children: [
-                  SizedBox(
-                    height: 128,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.lg,
-                      ),
-                      children: [
-                        _ServiceCard(
-                          icon: Icons.description_outlined,
-                          title: l.svcReadyTitle,
-                          body: l.svcReadyBody,
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        _ServiceCard(
-                          icon: Icons.headset_mic_outlined,
-                          title: l.svcCareerTitle,
-                          body: l.svcCareerBody,
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        _ServiceCard(
-                          icon: Icons.work_outline_rounded,
-                          title: l.svcSupportTitle,
-                          body: l.svcSupportBody,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
                   if (loading)
                     const Padding(
                       padding: EdgeInsets.only(top: AppSpacing.xxxl),
@@ -77,80 +49,6 @@ class ResumeHomePage extends ConsumerWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A premium-service upsell card (order resume / career consult / search help).
-/// The services aren't live yet, so a tap surfaces a "coming soon" message.
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-  });
-  final IconData icon;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return SizedBox(
-      width: 250,
-      child: Material(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: () => showInfoSnack(context, context.l10n.comingSoon),
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: colors.border),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: context.text.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        body,
-                        style: context.text.bodySmall?.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: colors.chipBackground,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: colors.primary, size: 22),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );

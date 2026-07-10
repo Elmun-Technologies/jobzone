@@ -7,8 +7,8 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../application/auth_controller.dart';
 import '../util/auth_failure_message.dart';
 
-/// "Or sign in with" divider + Apple / Google / Facebook circular buttons.
-/// Google is wired to Supabase OAuth; Apple/Facebook are coming soon.
+/// "Or sign in with" divider + Apple / Google circular buttons.
+/// Google is wired to Supabase OAuth; Apple sign-in is coming soon.
 class AuthSocialRow extends ConsumerWidget {
   const AuthSocialRow({super.key, required this.label});
 
@@ -71,15 +71,6 @@ class AuthSocialRow extends ConsumerWidget {
                   color: const Color(0xFF4285F4),
                   fontWeight: FontWeight.w700,
                 ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
-            _SocialButton(
-              onTap: () => _comingSoon(context),
-              child: const Icon(
-                Icons.facebook,
-                color: Color(0xFF1877F2),
-                size: 28,
               ),
             ),
           ],
