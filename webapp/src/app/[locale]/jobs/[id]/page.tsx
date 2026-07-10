@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
+import { ShareCreative } from "@/components/jobs/share-creative";
 import { hasApplied } from "@/lib/data/applications";
 import { isBookmarked } from "@/lib/data/bookmarks";
 import { getJobById } from "@/lib/data/jobs";
@@ -38,8 +39,10 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: url },
+    // The `opengraph-image` file in this segment supplies og:image /
+    // twitter:image automatically, so a shared job link renders a branded card.
     openGraph: { title, description, url, type: "website" },
-    twitter: { card: "summary", title, description },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -285,6 +288,12 @@ export default async function JobDetailsPage({
               </p>
             ) : null}
           </div>
+
+          <ShareCreative
+            basePath={`/${locale}/jobs/${id}`}
+            shareUrl={`${siteUrl()}/${locale}/jobs/${id}`}
+            title={job.title}
+          />
         </aside>
       </div>
     </Container>
