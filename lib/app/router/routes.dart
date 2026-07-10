@@ -6,6 +6,10 @@ abstract final class Routes {
   static const welcome = '/welcome';
   static const onboarding = '/onboarding';
 
+  /// First-run language picker (after onboarding, before welcome). Distinct
+  /// from [accountLanguage], the in-app settings switcher.
+  static const chooseLanguage = '/language';
+
   // Auth
   static const signIn = '/auth/sign-in';
   static const phoneSignIn = '/auth/phone';

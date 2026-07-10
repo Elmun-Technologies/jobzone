@@ -42,4 +42,34 @@ void main() {
       expect(container.read(appFlagsProvider).role, UserRole.employer);
     });
   });
+
+  group('AppFlags first-run language', () {
+    test('defaults to not chosen and markLanguageChosen persists + updates '
+        'the provider', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final container = ProviderContainer(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(container.dispose);
+
+      expect(container.read(appFlagsProvider).languageChosen, isFalse);
+
+      await container.read(appFlagsProvider.notifier).markLanguageChosen();
+
+      expect(container.read(appFlagsProvider).languageChosen, isTrue);
+      expect(prefs.getBool(CacheKeys.languageChosen), isTrue);
+    });
+
+    test('hydrates the persisted flag on build', () async {
+      SharedPreferences.setMockInitialValues({CacheKeys.languageChosen: true});
+      final prefs = await SharedPreferences.getInstance();
+      final container = ProviderContainer(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      );
+      addTearDown(container.dispose);
+
+      expect(container.read(appFlagsProvider).languageChosen, isTrue);
+    });
+  });
 }

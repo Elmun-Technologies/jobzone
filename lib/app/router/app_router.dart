@@ -56,6 +56,7 @@ import '../../features/jobs/presentation/job_details_page.dart';
 import '../../features/jobs/presentation/see_all_page.dart';
 import '../../features/notifications/presentation/notification_settings_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
+import '../../features/onboarding/presentation/first_run_language_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/onboarding/presentation/welcome_page.dart';
 import '../../features/permissions/presentation/location_access_page.dart';
@@ -117,6 +118,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.onboarding,
         builder: (c, s) => const OnboardingPage(),
+      ),
+      GoRoute(
+        path: Routes.chooseLanguage,
+        builder: (c, s) => const FirstRunLanguagePage(),
       ),
 
       // Auth

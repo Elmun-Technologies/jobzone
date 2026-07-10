@@ -125,6 +125,80 @@ void main() {
     });
   });
 
+  group('resolveRedirect — first-run language', () {
+    test('onboarded user who has not chosen a language is sent to the '
+        'language picker', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: false,
+          onboardingSeen: true,
+          languageChosen: false,
+          profileComplete: false,
+          location: Routes.home,
+        ),
+        Routes.chooseLanguage,
+      );
+    });
+
+    test('user may stay on the language picker until they choose', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: false,
+          onboardingSeen: true,
+          languageChosen: false,
+          profileComplete: false,
+          location: Routes.chooseLanguage,
+        ),
+        isNull,
+      );
+    });
+
+    test('language gate comes after onboarding, not before', () {
+      // Onboarding still wins when nothing is seen yet.
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: false,
+          onboardingSeen: false,
+          languageChosen: false,
+          profileComplete: false,
+          location: Routes.home,
+        ),
+        Routes.onboarding,
+      );
+    });
+
+    test('once chosen, the picker sends the user on to sign in', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: false,
+          onboardingSeen: true,
+          languageChosen: true,
+          profileComplete: false,
+          location: Routes.chooseLanguage,
+        ),
+        Routes.signIn,
+      );
+    });
+
+    test('a fully onboarded user is bounced off the first-run picker', () {
+      expect(
+        resolveRedirect(
+          hasSupabase: true,
+          signedIn: true,
+          onboardingSeen: true,
+          languageChosen: true,
+          profileComplete: true,
+          location: Routes.chooseLanguage,
+        ),
+        Routes.home,
+      );
+    });
+  });
+
   group('resolveRedirect — role', () {
     test('signed-in user without a complete profile may pick a role', () {
       // The choose-role screen sits between verify and complete-profile.

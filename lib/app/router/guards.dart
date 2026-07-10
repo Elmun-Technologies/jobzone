@@ -24,6 +24,9 @@ String? resolveRedirect({
   required String location,
   UserRole role = UserRole.jobSeeker,
   bool roleChosen = false,
+  // Defaults true so existing flows/tests (which predate the first-run picker)
+  // are unaffected; the live binding passes the real flag.
+  bool languageChosen = true,
 }) {
   if (!hasSupabase) return null;
   if (location == Routes.splash) return null; // splash performs the first hop
@@ -35,6 +38,7 @@ String? resolveRedirect({
       (location == Routes.welcome || location.startsWith('/auth')) &&
       location != Routes.newPassword;
   final inOnboarding = location == Routes.onboarding;
+  final inChooseLanguage = location == Routes.chooseLanguage;
   final inEmployerArea = location.startsWith('/employer');
   // Chat + calls (`/chat/:id/call/...`) are shared by both roles — employers
   // message candidates from there too.
@@ -52,6 +56,10 @@ String? resolveRedirect({
                 location.startsWith('/permissions')));
 
   if (!onboardingSeen) return inOnboarding ? null : Routes.onboarding;
+  // First-run language picker sits between onboarding and welcome.
+  if (!languageChosen) {
+    return inChooseLanguage ? null : Routes.chooseLanguage;
+  }
   if (!signedIn) return inAuth ? null : Routes.signIn;
   // Password reset rides a recovery session whose profile may look incomplete
   // (e.g. straight after a sign-out). Let the new-password screen through the
@@ -74,7 +82,9 @@ String? resolveRedirect({
     }
     return Routes.employerDashboard;
   }
-  if (inAuth || inOnboarding || inEmployerArea) return Routes.home;
+  if (inAuth || inOnboarding || inChooseLanguage || inEmployerArea) {
+    return Routes.home;
+  }
   return null;
 }
 
@@ -84,6 +94,7 @@ String? redirectFromRef(Ref ref, String location) {
     hasSupabase: Env.hasSupabase,
     signedIn: ref.read(currentSessionProvider) != null,
     onboardingSeen: ref.read(appFlagsProvider).onboardingSeen,
+    languageChosen: ref.read(appFlagsProvider).languageChosen,
     profileComplete: ref.read(appFlagsProvider).profileComplete,
     role: ref.read(appFlagsProvider).role,
     roleChosen: ref.read(appFlagsProvider).roleChosen,
