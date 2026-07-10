@@ -47,10 +47,15 @@ jobs:
       - run: flutter pub get
       - run: flutter gen-l10n
 
-      # Fat APK (all ABIs) so a single file installs on any device. Debug-signed
-      # (no release keystore committed). Points at the live demo backend.
+      # arm64-only, R8-shrunk, Dart-obfuscated release build — the smallest
+      # single APK that installs on essentially every real phone (minSdk 26 =
+      # Android 8, all arm64-v8a). Debug-signed (no release keystore committed);
+      # points at the live demo backend. Split-debug-info keeps the symbols so
+      # obfuscated crash traces can be de-symbolized from the uploaded artifact.
       - run: >
           flutter build apk --release
+          --target-platform android-arm64
+          --obfuscate --split-debug-info=build/symbols
           --dart-define=SUPABASE_URL=https://nzxdnsxwxrstcrumwzwu.supabase.co
           --dart-define=SUPABASE_ANON_KEY=sb_publishable_3OcEGaXAaF0x5bClTA_PkA_e6FvbeGG
 
@@ -60,6 +65,13 @@ jobs:
           name: yolla-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+
+      # Obfuscation symbols — needed to de-symbolize a release crash trace.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yolla-apk-symbols
+          path: build/symbols
+          if-no-files-found: warn
 
       # Direct .apk download link (best for installing on a phone).
       - name: Publish rolling APK release
