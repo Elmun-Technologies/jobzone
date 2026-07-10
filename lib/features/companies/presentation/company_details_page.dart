@@ -262,10 +262,6 @@ class _ContactRow extends StatelessWidget {
   const _ContactRow({required this.person});
   final CompanyPerson person;
 
-  void _soon(BuildContext context) => ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(context.l10n.comingSoon)));
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -303,37 +299,25 @@ class _ContactRow extends StatelessWidget {
             ],
           ),
         ),
-        _RoundAction(
-          icon: Icons.chat_bubble_rounded,
-          onTap: () => _soon(context),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _RoundAction(icon: Icons.call_rounded, onTap: () => _soon(context)),
+        if (person.isRecruiter)
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: colors.chipBackground,
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+            child: Text(
+              context.l10n.recruiterBadge,
+              style: context.text.labelSmall?.copyWith(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
       ],
-    );
-  }
-}
-
-class _RoundAction extends StatelessWidget {
-  const _RoundAction({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: colors.primary,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: Icon(icon, color: colors.onPrimary, size: 20),
-        ),
-      ),
     );
   }
 }
