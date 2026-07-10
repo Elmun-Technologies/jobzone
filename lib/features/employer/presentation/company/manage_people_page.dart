@@ -146,6 +146,7 @@ class _PersonRow extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: context.l10n.remove,
             onPressed: onRemove,
             icon: Icon(Icons.delete_outline_rounded, color: colors.danger),
           ),

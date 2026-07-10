@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
+import '../../../../localization/l10n_extension.dart';
 
 /// Row of five tappable stars for selecting a 1–5 rating.
 class StarRatingInput extends StatelessWidget {
@@ -23,6 +24,7 @@ class StarRatingInput extends StatelessWidget {
       children: [
         for (var i = 1; i <= 5; i++)
           IconButton(
+            tooltip: context.l10n.ratingStar(i),
             onPressed: () => onChanged(i),
             iconSize: size,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),

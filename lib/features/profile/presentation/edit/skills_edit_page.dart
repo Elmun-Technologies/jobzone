@@ -83,6 +83,7 @@ class _SkillsEditPageState extends ConsumerState<SkillsEditPage> {
               textInputAction: TextInputAction.done,
               onChanged: (_) {},
               suffixIcon: IconButton(
+                tooltip: l.add,
                 icon: const Icon(Icons.add_rounded),
                 onPressed: _add,
               ),

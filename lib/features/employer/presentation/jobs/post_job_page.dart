@@ -1201,6 +1201,7 @@ class _ScreeningEditor extends StatelessWidget {
                       ),
                     ),
                     IconButton(
+                      tooltip: l.remove,
                       icon: const Icon(Icons.close_rounded),
                       onPressed: () => _removeAt(i),
                     ),
@@ -1267,6 +1268,7 @@ class _ScreeningEditor extends StatelessWidget {
                             ),
                           ),
                           IconButton(
+                            tooltip: l.remove,
                             icon: const Icon(Icons.close_rounded, size: 16),
                             visualDensity: VisualDensity.compact,
                             onPressed: () {
@@ -1388,6 +1390,7 @@ class _LanguagesEditor extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  tooltip: l.remove,
                   icon: const Icon(Icons.close_rounded),
                   onPressed: () => _removeAt(i),
                 ),
@@ -1424,11 +1427,14 @@ class _MarkdownToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final color = context.colors.textSecondary;
     Widget btn(
       IconData icon,
+      String label,
       MarkdownEdit Function(String, TextSelection) op,
     ) => IconButton(
+      tooltip: label,
       icon: Icon(icon, size: 20),
       color: color,
       visualDensity: VisualDensity.compact,
@@ -1439,14 +1445,24 @@ class _MarkdownToolbar extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          btn(Icons.format_bold_rounded, (t, s) => mdWrap(t, s, '**')),
-          btn(Icons.format_italic_rounded, (t, s) => mdWrap(t, s, '*')),
+          btn(
+            Icons.format_bold_rounded,
+            l.mdBold,
+            (t, s) => mdWrap(t, s, '**'),
+          ),
+          btn(
+            Icons.format_italic_rounded,
+            l.mdItalic,
+            (t, s) => mdWrap(t, s, '*'),
+          ),
           btn(
             Icons.format_list_bulleted_rounded,
+            l.mdBulletList,
             (t, s) => mdLinePrefix(t, s, '- '),
           ),
           btn(
             Icons.format_list_numbered_rounded,
+            l.mdNumberList,
             (t, s) => mdLinePrefix(t, s, '1. '),
           ),
         ],

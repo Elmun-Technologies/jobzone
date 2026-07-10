@@ -204,6 +204,7 @@ class _ResumeRow extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: context.l10n.delete,
             icon: Icon(
               Icons.delete_outline_rounded,
               color: colors.textSecondary,

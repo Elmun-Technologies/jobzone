@@ -805,5 +805,14 @@
   "promoTop30Name": "30 kun TOP",
   "promoTop30Desc": "Roʻyxat tepasida 30 kun",
   "promoAiName": "AI saralash",
-  "promoAiDesc": "Nomzodlarni AI tartiblash (tez orada)"
+  "promoAiDesc": "Nomzodlarni AI tartiblash (tez orada)",
+  "clear": "Tozalash",
+  "remove": "Olib tashlash",
+  "ratingStar": "{n} yulduz",
+  "showPassword": "Parolni koʻrsatish",
+  "hidePassword": "Parolni yashirish",
+  "mdBold": "Qalin",
+  "mdItalic": "Kursiv",
+  "mdBulletList": "Belgili roʻyxat",
+  "mdNumberList": "Raqamli roʻyxat"
 }
