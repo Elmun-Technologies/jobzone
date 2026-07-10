@@ -6,15 +6,12 @@ import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/providers/app_flags.dart';
+import 'widgets/onboarding_art.dart';
 
 class _Slide {
-  const _Slide(this.title, this.body, this.art);
+  const _Slide(this.title, this.body);
   final String title;
   final String body;
-
-  /// On-brand illustration for the slide. A raster photo can be dropped in
-  /// later by swapping the asset here (see [_OnboardingArt]).
-  final String art;
 }
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -46,8 +43,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       _finish();
     } else {
       _controller.nextPage(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
       );
     }
   }
@@ -57,9 +54,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final l = context.l10n;
     final colors = context.colors;
     final slides = [
-      _Slide(l.onboard1Title, l.onboard1Body, 'assets/onboarding/step_1.svg'),
-      _Slide(l.onboard2Title, l.onboard2Body, 'assets/onboarding/step_2.svg'),
-      _Slide(l.onboard3Title, l.onboard3Body, 'assets/onboarding/step_3.svg'),
+      _Slide(l.onboard1Title, l.onboard1Body),
+      _Slide(l.onboard2Title, l.onboard2Body),
+      _Slide(l.onboard3Title, l.onboard3Body),
     ];
     final isLast = _index == slides.length - 1;
 
@@ -79,7 +76,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: Text(
                       l.skip,
                       style: context.text.titleMedium?.copyWith(
-                        color: colors.primary,
+                        color: colors.textSecondary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -101,7 +98,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: Column(
                       children: [
                         const Spacer(flex: 2),
-                        Expanded(flex: 8, child: _OnboardingArt(s.art)),
+                        Expanded(
+                          flex: 9,
+                          child: _Parallax(
+                            controller: _controller,
+                            page: i,
+                            child: OnboardingArt(i),
+                          ),
+                        ),
                         const Spacer(),
                         HighlightText(
                           s.title,
@@ -117,6 +121,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           s.body,
                           style: context.text.bodyMedium?.copyWith(
                             color: colors.textSecondary,
+                            height: 1.4,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -134,25 +139,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 AppSpacing.xl,
                 AppSpacing.xl,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  if (_index > 0)
-                    _NavButton(
-                      icon: Icons.arrow_back_rounded,
-                      filled: false,
-                      onTap: () => _controller.previousPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeOut,
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 56),
                   _Dots(count: slides.length, index: _index),
-                  _NavButton(
-                    icon: Icons.arrow_forward_rounded,
-                    filled: true,
-                    onTap: () => _next(isLast),
+                  const SizedBox(height: AppSpacing.xl),
+                  JzPrimaryButton(
+                    label: isLast ? l.getStarted : l.continueLabel,
+                    icon: isLast ? null : Icons.arrow_forward_rounded,
+                    onPressed: () => _next(isLast),
                   ),
                 ],
               ),
@@ -164,22 +158,35 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 }
 
-/// The per-slide illustration. Ships a brand-matched SVG (ink line-art + volt
-/// accents on a soft self-framed panel, so it reads on both light and dark
-/// app backgrounds). To use a photo instead, point [asset] at a bundled raster
-/// (`assets/onboarding/*.png`) — [JzSvgAsset] handles SVGs; swap to
-/// `Image.asset` here if you move to raster art.
-class _OnboardingArt extends StatelessWidget {
-  const _OnboardingArt(this.asset);
-  final String asset;
+/// Gives the hero art a subtle horizontal drift as the pager scrolls, for depth.
+class _Parallax extends StatelessWidget {
+  const _Parallax({
+    required this.controller,
+    required this.page,
+    required this.child,
+  });
+  final PageController controller;
+  final int page;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    // Fixed intrinsic size scaled to the slide via FittedBox, so it never
-    // overflows on small screens (matches the old device-frame sizing).
-    return FittedBox(
-      fit: BoxFit.contain,
-      child: JzSvgAsset(asset, width: 320, height: 300),
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        double delta = 0;
+        if (controller.hasClients && controller.position.haveDimensions) {
+          delta = (controller.page ?? page.toDouble()) - page;
+        }
+        return Transform.translate(
+          offset: Offset(-delta * 60, 0),
+          child: Opacity(
+            opacity: (1 - delta.abs()).clamp(0.0, 1.0),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -209,37 +216,6 @@ class _Dots extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _NavButton extends StatelessWidget {
-  const _NavButton({
-    required this.icon,
-    required this.filled,
-    required this.onTap,
-  });
-  final IconData icon;
-  final bool filled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Material(
-      color: filled ? colors.primary : colors.surface,
-      shape: CircleBorder(
-        side: filled ? BorderSide.none : BorderSide(color: colors.border),
-      ),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 56,
-          height: 56,
-          child: Icon(icon, color: filled ? colors.onPrimary : colors.primary),
-        ),
-      ),
     );
   }
 }

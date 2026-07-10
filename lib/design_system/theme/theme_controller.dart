@@ -13,7 +13,13 @@ class ThemeModeController extends Notifier<ThemeMode> {
     return switch (stored) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      // Default to LIGHT, not system. Yolla is a light-first brand (paper
+      // background, ink primary) and the dark theme isn't fully audited yet —
+      // several screens hardcode light-on-`primary` colors that invert to
+      // white-on-near-white in dark mode ("washed out"). Until dark mode is
+      // hardened + a real in-app toggle ships, everyone gets the polished
+      // light design regardless of the device setting.
+      _ => ThemeMode.light,
     };
   }
 

@@ -864,5 +864,7 @@
   "mdBold": "Bold",
   "mdItalic": "Italic",
   "mdBulletList": "Bulleted list",
-  "mdNumberList": "Numbered list"
+  "mdNumberList": "Numbered list",
+  "vacancyCount": "{n} jobs",
+  "@vacancyCount": {"placeholders": {"n": {"type": "int"}}}
 }
