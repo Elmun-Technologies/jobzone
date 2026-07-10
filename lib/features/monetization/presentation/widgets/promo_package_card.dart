@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/options/option_lists.dart';
 import '../../domain/promotion.dart';
 
 /// A selectable promotion package card (gamified). Gold accent for TOP tiers,
@@ -24,6 +25,8 @@ class PromoPackageCard extends StatelessWidget {
     final colors = context.colors;
     final disabled = product.isComingSoon;
     final accent = product.isTop ? colors.gold : colors.primary;
+    final name = promotionName(l, product.code, fallback: product.name);
+    final desc = promotionDesc(l, product.code) ?? product.description;
 
     final priceText = product.isComingSoon
         ? l.comingSoon
@@ -58,14 +61,14 @@ class PromoPackageCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product.name,
+                        name,
                         style: context.text.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (product.description != null)
+                      if (desc != null)
                         Text(
-                          product.description!,
+                          desc,
                           style: context.text.bodySmall?.copyWith(
                             color: colors.textSecondary,
                           ),

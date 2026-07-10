@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/config/flavors.dart';
@@ -47,6 +48,14 @@ class YollaApp extends ConsumerWidget {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
+      builder: (context, child) {
+        // Keep intl's DateFormat (CV periods, "posted on", chat/notification
+        // timestamps) in sync with the resolved in-app language so dates render
+        // in uz/ru/en — not the device default. This is the single root-cause
+        // fix for every bare DateFormat.* call across the app.
+        Intl.defaultLocale = Localizations.localeOf(context).toString();
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }

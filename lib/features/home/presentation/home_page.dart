@@ -176,7 +176,7 @@ class _HomeHeader extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.xs),
                         Flexible(
                           child: Text(
-                            'Tashkent, Uzbekistan',
+                            context.l10n.homeLocationDefault,
                             style: context.text.titleSmall?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,

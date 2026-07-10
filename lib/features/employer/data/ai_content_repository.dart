@@ -75,24 +75,65 @@ class AiContentRepository {
         benefits: (m['benefits'] ?? '') as String,
       );
     }
-    return _localDraft(title, skills);
+    return _localDraft(title, skills, locale);
   }
 
-  JobDraft _localDraft(String title, List<String> skills) {
-    final t = title.trim().isEmpty ? 'this role' : title.trim();
-    final sk = skills.isEmpty ? 'the required skills' : skills.join(', ');
-    return JobDraft(
-      description:
-          "We're hiring a $t. You'll join a growing team and make an "
-          'immediate impact — a great opportunity to grow your career.',
-      responsibilities:
-          'Deliver high-quality work as a $t. Collaborate with the team. '
-          'Use $sk day to day.',
-      requirements:
-          'Proven experience relevant to a $t. Skills: $sk. Reliable and a '
-          'good communicator.',
-      benefits: 'Competitive pay. Supportive team. Room to grow.',
-    );
+  /// Offline draft templates. The live path localizes via the edge function;
+  /// offline we branch on [locale] (uz default) so an employer never sees an
+  /// English draft baked into a published, uz-first vacancy.
+  JobDraft _localDraft(String title, List<String> skills, String locale) {
+    final t = title.trim();
+    switch (locale) {
+      case 'ru':
+        final role = t.isEmpty ? 'эта должность' : t;
+        final sk = skills.isEmpty ? 'необходимые навыки' : skills.join(', ');
+        return JobDraft(
+          description:
+              'Мы ищем сотрудника на позицию «$role». Вы присоединитесь к '
+              'растущей команде и сразу начнёте приносить пользу — отличная '
+              'возможность для карьерного роста.',
+          responsibilities:
+              'Качественно выполнять работу ($role). Взаимодействовать с '
+              'командой. Использовать $sk в ежедневной работе.',
+          requirements:
+              'Опыт, соответствующий позиции «$role». Навыки: $sk. '
+              'Ответственный, с хорошими коммуникативными навыками.',
+          benefits:
+              'Достойная оплата. Поддерживающая команда. Возможности для роста.',
+        );
+      case 'en':
+        final role = t.isEmpty ? 'this role' : t;
+        final sk = skills.isEmpty ? 'the required skills' : skills.join(', ');
+        return JobDraft(
+          description:
+              "We're hiring a $role. You'll join a growing team and make an "
+              'immediate impact — a great opportunity to grow your career.',
+          responsibilities:
+              'Deliver high-quality work as a $role. Collaborate with the '
+              'team. Use $sk day to day.',
+          requirements:
+              'Proven experience relevant to a $role. Skills: $sk. Reliable '
+              'and a good communicator.',
+          benefits: 'Competitive pay. Supportive team. Room to grow.',
+        );
+      default: // uz — the product's first language
+        final role = t.isEmpty ? 'bu lavozim' : t;
+        final sk = skills.isEmpty ? 'kerakli koʻnikmalar' : skills.join(', ');
+        return JobDraft(
+          description:
+              '$role lavozimiga xodim qidiryapmiz. Jamoamizga qoʻshilib, oʻz '
+              'ishingizda darhol natija koʻrsatasiz — martabangizni oʻstirish '
+              'uchun ajoyib imkoniyat.',
+          responsibilities:
+              '$role sifatida sifatli ish bajarish. Jamoa bilan hamkorlik '
+              'qilish. Kundalik ishda $sk dan foydalanish.',
+          requirements:
+              '$role lavozimiga mos tajriba. Koʻnikmalar: $sk. Ishonchli va '
+              'yaxshi muloqot qila oladigan.',
+          benefits:
+              'Munosib maosh. Qoʻllab-quvvatlovchi jamoa. Oʻsish imkoniyati.',
+        );
+    }
   }
 
   /// Scores how well a seeker fits a job. Live: the `match` action of the

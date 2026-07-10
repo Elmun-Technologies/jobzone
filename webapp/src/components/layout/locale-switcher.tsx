@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -15,6 +15,7 @@ const LOCALE_NAMES: Record<Locale, string> = {
 /** Switches locale while preserving the current path. */
 export function LocaleSwitcher() {
   const locale = useLocale();
+  const t = useTranslations("nav");
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
@@ -31,7 +32,7 @@ export function LocaleSwitcher() {
       value={locale}
       onChange={onChange}
       disabled={isPending}
-      aria-label="Language"
+      aria-label={t("language")}
       className="border-border bg-background text-foreground focus-visible:ring-ring h-9 rounded-full border px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
     >
       {routing.locales.map((l) => (

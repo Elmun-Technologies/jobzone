@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/options/option_lists.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../employer/data/employer_jobs_repository.dart';
 import '../../employer/data/wallet_repository.dart';
@@ -288,15 +289,16 @@ class _SummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            product.name,
+            promotionName(l, product.code, fallback: product.name),
             style: context.text.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
-          if (product.description != null) ...[
+          if (promotionDesc(l, product.code) ?? product.description
+              case final desc?) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              product.description!,
+              desc,
               style: context.text.bodySmall?.copyWith(
                 color: colors.textSecondary,
               ),

@@ -81,7 +81,7 @@ class MonetizationRepository {
         }
         _ref
             .read(walletRepositoryProvider)
-            .debitOffline(product.priceUzs, 'Reklama: ${product.name}');
+            .debitOffline(product.priceUzs, 'Koʻtarish: ${product.name}');
       }
       final order = PromotionOrder(
         id: 'ord-${now.microsecondsSinceEpoch}',

@@ -48,7 +48,7 @@ export function QuickApplyButton({
     start(async () => {
       const res = await quickApply(jobId);
       if (res.signedOut) {
-        router.push(`/sign-in?next=${encodeURIComponent(formHref)}`);
+        router.push(`/${locale}/sign-in?next=${encodeURIComponent(formHref)}`);
       } else if (res.needsResume) {
         router.push(
           `/${locale}/resumes/new?next=${encodeURIComponent(formHref)}`,

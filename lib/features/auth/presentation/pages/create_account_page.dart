@@ -41,7 +41,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     if (!_agree) {
       // The checkbox was inert before — unchecking it still let signup proceed.
       final l = context.l10n;
-      showInfoSnack(context, '${l.agreeWithTerms} ${l.termsAndConditions}');
+      showInfoSnack(context, l.mustAgreeToTerms);
       return;
     }
     final email = _email.text.trim();
@@ -96,7 +96,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
               const SizedBox(height: AppSpacing.lg),
               JzTextField(
                 label: l.email,
-                hint: 'example@gmail.com',
+                hint: context.l10n.emailHint,
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) =>

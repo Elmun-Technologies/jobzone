@@ -194,7 +194,7 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
                         // setState, so edits were lost and controllers leaked).
                         JzTextField(
                           label: l.email,
-                          hint: 'example@gmail.com',
+                          hint: context.l10n.emailHint,
                           controller: _email,
                           readOnly: true,
                         ),
