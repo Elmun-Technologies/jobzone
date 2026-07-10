@@ -7,23 +7,12 @@ import 'package:go_router/go_router.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/enums/enums.dart';
+import '../../../shared/options/option_lists.dart';
 import '../../jobs/presentation/util/job_labels.dart';
 import '../../preferences/presentation/widgets/preference_step.dart';
 import '../application/search_controller.dart';
 import '../data/search_repository.dart';
 import '../domain/search_filters.dart';
-
-const _cities = ['Tashkent', 'Samarkand', 'Remote'];
-const _jobTitles = <String>[
-  'Accountant',
-  'Business Development Manager',
-  'Content Writer',
-  'Data Analyst',
-  'Finance Manager',
-  'Graphic Designer',
-  'Software Engineer',
-  'UX/UI Designer',
-];
 
 class FilterPage extends ConsumerStatefulWidget {
   const FilterPage({super.key});
@@ -105,9 +94,11 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                     initialValue: _draft.city,
                     isExpanded: true,
                     hint: Text(l.searchLocationHint),
+                    // Localized city labels over stable wire values ("Remote"
+                    // was dropped — it's a working model, not a city).
                     items: [
-                      for (final c in _cities)
-                        DropdownMenuItem(value: c, child: Text(c)),
+                      for (final c in cityOptions(l).entries)
+                        DropdownMenuItem(value: c.key, child: Text(c.value)),
                     ],
                     onChanged: (v) =>
                         setState(() => _draft = _draft.copyWith(city: v)),
@@ -281,7 +272,7 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                   Text(l.fieldJobTitle, style: _sectionStyle(context)),
                   const SizedBox(height: AppSpacing.sm),
                   OptionCheckList(
-                    options: {for (final t in _jobTitles) t: t},
+                    options: jobTitleOptions(l),
                     selected: _draft.titles,
                     onToggle: (t) => setState(
                       () => _draft = _draft.copyWith(

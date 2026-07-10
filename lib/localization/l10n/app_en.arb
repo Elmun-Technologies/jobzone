@@ -782,5 +782,57 @@
   "sectionLocation": "Location",
   "sectionAboutJob": "About the job",
   "filterAll": "All",
-  "noApplicantsForStatus": "No applicants with this status"
+  "noApplicantsForStatus": "No applicants with this status",
+  "jobTitleChef": "Chef",
+  "jobTitleWaiter": "Waiter",
+  "jobTitleDriver": "Driver",
+  "jobTitleCourier": "Courier",
+  "jobTitleSalesperson": "Sales assistant",
+  "jobTitleCashier": "Cashier",
+  "jobTitleGuard": "Security guard",
+  "jobTitleCleaner": "Cleaner",
+  "jobTitleWarehouse": "Warehouse worker",
+  "jobTitleBuilder": "Construction worker",
+  "jobTitleAdministrator": "Administrator",
+  "jobTitleElectrician": "Electrician",
+  "cityTashkent": "Tashkent",
+  "citySamarkand": "Samarkand",
+  "cityBukhara": "Bukhara",
+  "cityAndijan": "Andijan",
+  "cityNamangan": "Namangan",
+  "cityFergana": "Fergana",
+  "cityNukus": "Nukus",
+  "countryUzbekistan": "Uzbekistan",
+  "nameHint": "e.g. Alisher Usmonov",
+  "relNow": "now",
+  "relMinutes": "{n}m",
+  "@relMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "relHours": "{n}h",
+  "@relHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "relDays": "{n}d",
+  "@relDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "welcomeTagChef": "#Chef",
+  "welcomeTagDriver": "#Driver",
+  "analyticsSoonTitle": "Detailed analytics coming soon",
+  "analyticsSoonBody": "Profile views and search appearances will appear here once tracking goes live.",
+  "inviteCopyLink": "Copy link",
+  "inviteShareMessage": "Join me on Yolla — jobs across Uzbekistan:"
 }

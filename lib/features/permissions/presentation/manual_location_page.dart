@@ -8,21 +8,9 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/options/option_lists.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../data/permission_service.dart';
-
-/// Sample location suggestions (city, descriptive line). Real geocoding can
-/// replace this list later; selecting one stores the city/country on the
-/// profile and continues onboarding.
-const _suggestions = <(String, String)>[
-  ('Tashkent', 'Toshkent shahri, Uzbekistan'),
-  ('Samarkand', 'Samarqand viloyati, Uzbekistan'),
-  ('Bukhara', 'Buxoro viloyati, Uzbekistan'),
-  ('Andijan', 'Andijon viloyati, Uzbekistan'),
-  ('Namangan', 'Namangan viloyati, Uzbekistan'),
-  ('Fergana', 'Fargʻona viloyati, Uzbekistan'),
-  ('Nukus', 'Qoraqalpogʻiston, Uzbekistan'),
-];
 
 class ManualLocationPage extends ConsumerStatefulWidget {
   const ManualLocationPage({super.key});
@@ -69,10 +57,19 @@ class _ManualLocationPageState extends ConsumerState<ManualLocationPage> {
     final l = context.l10n;
     final colors = context.colors;
     final q = _query.trim().toLowerCase();
+    // (wire value, localized label) — real geocoding can replace this later.
+    // The query matches BOTH forms, so "Toshkent" and "Tashkent" both hit.
+    final suggestions = [
+      for (final c in cityOptions(l).entries) (c.key, c.value),
+    ];
     final results = q.isEmpty
-        ? _suggestions
-        : _suggestions
-              .where((s) => s.$1.toLowerCase().contains(q))
+        ? suggestions
+        : suggestions
+              .where(
+                (s) =>
+                    s.$1.toLowerCase().contains(q) ||
+                    s.$2.toLowerCase().contains(q),
+              )
               .toList(growable: false);
 
     return Scaffold(
@@ -178,13 +175,13 @@ class _ManualLocationPageState extends ConsumerState<ManualLocationPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    r.$1,
+                                    r.$2,
                                     style: context.text.bodyLarge?.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   Text(
-                                    r.$2,
+                                    l.countryUzbekistan,
                                     style: context.text.bodySmall?.copyWith(
                                       color: colors.textSecondary,
                                     ),

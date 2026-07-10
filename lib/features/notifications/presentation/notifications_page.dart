@@ -202,7 +202,7 @@ class _NotificationTile extends ConsumerWidget {
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Text(
-                        _relativeTime(notification.createdAt),
+                        _relativeTime(context, notification.createdAt),
                         style: context.text.labelSmall?.copyWith(
                           color: colors.textSecondary,
                         ),
@@ -266,12 +266,13 @@ class _NotificationTile extends ConsumerWidget {
     NotificationType.system => Icons.person_outline_rounded,
   };
 
-  String _relativeTime(DateTime t) {
+  String _relativeTime(BuildContext context, DateTime t) {
+    final l = context.l10n;
     final diff = DateTime.now().difference(t);
-    if (diff.inMinutes < 1) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    if (diff.inDays < 7) return '${diff.inDays}d';
+    if (diff.inMinutes < 1) return l.relNow;
+    if (diff.inMinutes < 60) return l.relMinutes(diff.inMinutes);
+    if (diff.inHours < 24) return l.relHours(diff.inHours);
+    if (diff.inDays < 7) return l.relDays(diff.inDays);
     return DateFormat.MMMd().format(t);
   }
 }

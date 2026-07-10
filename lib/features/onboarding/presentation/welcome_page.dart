@@ -109,10 +109,12 @@ class _WelcomeArt extends StatelessWidget {
             right: -40,
             child: _Blob(160, blob.withValues(alpha: 0.7)),
           ),
+          // Blue-collar, localized tags — the first screen should speak the
+          // product's language, not "#Developer/#Designer".
           Align(
             alignment: const Alignment(0.15, -0.35),
             child: _Tag(
-              '#Developer',
+              context.l10n.welcomeTagChef,
               bg: context.colors.primary,
               fg: Colors.white,
             ),
@@ -120,7 +122,7 @@ class _WelcomeArt extends StatelessWidget {
           Align(
             alignment: const Alignment(-0.25, 0.45),
             child: _Tag(
-              '#Designer',
+              context.l10n.welcomeTagDriver,
               bg: context.colors.gold,
               fg: context.colors.onGold,
             ),

@@ -46,10 +46,12 @@ class YourProfilePage extends ConsumerWidget {
   }
 }
 
-String _period(DateTime? start, DateTime? end, {bool current = false}) {
+/// Formats a date range; pass [present] (the localized "Present") for an
+/// ongoing entry instead of an end date.
+String _period(DateTime? start, DateTime? end, {String? present}) {
   String f(DateTime d) => DateFormat.yMMM().format(d);
   final from = start == null ? '' : f(start);
-  final to = current ? 'Present' : (end == null ? '' : f(end));
+  final to = present ?? (end == null ? '' : f(end));
   if (from.isEmpty && to.isEmpty) return '';
   return '$from - $to';
 }
@@ -185,7 +187,7 @@ class _ProfileCards extends ConsumerWidget {
                   meta: _period(
                     experiences.first.startDate,
                     experiences.first.endDate,
-                    current: experiences.first.isCurrent,
+                    present: experiences.first.isCurrent ? l.present : null,
                   ),
                   onEdit: () => context.push(Routes.profileExperience),
                 ),
