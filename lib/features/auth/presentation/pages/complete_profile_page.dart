@@ -167,7 +167,7 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
               const SizedBox(height: AppSpacing.xl),
               JzTextField(
                 label: l.fullName,
-                hint: 'Ex. John Doe',
+                hint: l.nameHint,
                 controller: _name,
                 validator: (v) =>
                     Validators.isNotBlank(v) ? null : l.valRequired,
@@ -247,7 +247,9 @@ class _PhoneField extends StatelessWidget {
           keyboardType: TextInputType.phone,
           validator: validator,
           decoration: InputDecoration(
-            hintText: 'Enter Phone Number',
+            // Locale-neutral example number (an instruction here would need
+            // translating; a sample format doesn't).
+            hintText: '90 123 45 67',
             prefixIcon: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Row(

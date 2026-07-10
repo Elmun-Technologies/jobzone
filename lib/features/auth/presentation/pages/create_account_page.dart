@@ -90,7 +90,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
               const SizedBox(height: AppSpacing.xxl),
               JzTextField(
                 label: l.fullName,
-                hint: 'John Doe',
+                hint: l.nameHint,
                 controller: _name,
               ),
               const SizedBox(height: AppSpacing.lg),

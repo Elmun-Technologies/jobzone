@@ -7,17 +7,10 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/options/option_lists.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../profile/data/cv_repository.dart';
 import '../../profile/data/profile_repository.dart';
-
-const _positions = [
-  'UI/UX Designer',
-  'Software Engineer',
-  'Product Manager',
-  'Data Analyst',
-  'Marketing Manager',
-];
 
 class PersonalInfoPage extends ConsumerStatefulWidget {
   const PersonalInfoPage({super.key});
@@ -209,14 +202,18 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
                         _Dropdown(
                           label: l.gender,
                           value: _gender,
-                          items: const ['Male', 'Female', 'Other'],
+                          items: {
+                            'Male': l.genderMale,
+                            'Female': l.genderFemale,
+                            'Other': l.genderOther,
+                          },
                           onChanged: (v) => setState(() => _gender = v),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         _Dropdown(
                           label: l.currentPosition,
                           value: _position,
-                          items: _positions,
+                          items: jobTitleOptions(l),
                           onChanged: (v) => setState(() => _position = v),
                         ),
                       ],
@@ -257,7 +254,9 @@ class _Dropdown extends StatelessWidget {
   });
   final String label;
   final String? value;
-  final List<String> items;
+
+  /// Stable wire value → localized display label.
+  final Map<String, String> items;
   final ValueChanged<String?> onChanged;
 
   @override
@@ -272,7 +271,8 @@ class _Dropdown extends StatelessWidget {
           isExpanded: true,
           hint: Text(context.l10n.selectOption),
           items: [
-            for (final i in items) DropdownMenuItem(value: i, child: Text(i)),
+            for (final e in items.entries)
+              DropdownMenuItem(value: e.key, child: Text(e.value)),
           ],
           onChanged: onChanged,
         ),

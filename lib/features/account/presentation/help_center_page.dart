@@ -250,13 +250,15 @@ class _ContactTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    // Real channels only — the old list carried a US phone number and fake
+    // social handles. Extend as official accounts are registered.
     final items = [
-      (Icons.headset_mic_rounded, l.customerService, 'support@jobzone.app'),
-      (Icons.chat_bubble_outline_rounded, 'WhatsApp', '(480) 555-0103'),
-      (Icons.language_rounded, l.websiteLabel, 'https://jobzone.app'),
-      (Icons.facebook_rounded, 'Facebook', 'facebook.com/jobzone'),
-      (Icons.tag_rounded, 'Twitter', '@jobzoneapp'),
-      (Icons.camera_alt_rounded, 'Instagram', '@jobzone'),
+      (Icons.headset_mic_rounded, l.customerService, 'support@yolla.uz'),
+      (
+        Icons.language_rounded,
+        l.websiteLabel,
+        'https://jobzone-virid.vercel.app',
+      ),
     ];
     return ListView(
       padding: const EdgeInsets.symmetric(

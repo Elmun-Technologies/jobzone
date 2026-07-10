@@ -4,27 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/options/option_lists.dart';
 import '../application/preferences_controller.dart';
 import 'widgets/preference_step.dart';
-
-/// Predefined job titles shown as a multi-select checklist (matches the
-/// Figma "What Job Title Are You Seeking?" screen).
-const _jobTitles = <String>[
-  'Accountant',
-  'Business Development Manager',
-  'Content Writer',
-  'Data Analyst',
-  'Finance Manager',
-  'Graphic Designer',
-  'HR Specialist',
-  'Human Resources Manager',
-  'Marketing Manager',
-  'Product Manager',
-  'Project Manager',
-  'Sales Manager',
-  'Software Engineer',
-  'UX/UI Designer',
-];
 
 class JobTitlePage extends ConsumerWidget {
   const JobTitlePage({super.key});
@@ -45,8 +27,10 @@ class JobTitlePage extends ConsumerWidget {
         await notifier.persist();
         router.push(Routes.permLocation);
       },
+      // Localized blue-collar keywords (wire = the Uzbek keyword matched
+      // against real job titles) — see shared/options/option_lists.dart.
       child: OptionCheckList(
-        options: {for (final t in _jobTitles) t: t},
+        options: jobTitleOptions(l),
         selected: selected,
         onToggle: notifier.toggleTitle,
       ),

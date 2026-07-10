@@ -183,7 +183,7 @@ class _ConversationCard extends StatelessWidget {
                 children: [
                   if (convo.lastMessageAt != null)
                     Text(
-                      chatListTime(convo.lastMessageAt!),
+                      chatListTime(context, convo.lastMessageAt!),
                       style: context.text.labelSmall?.copyWith(
                         color: colors.textSecondary,
                       ),
