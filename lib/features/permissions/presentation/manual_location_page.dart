@@ -106,6 +106,7 @@ class _ManualLocationPageState extends ConsumerState<ManualLocationPage> {
                   suffixIcon: _query.isEmpty
                       ? null
                       : IconButton(
+                          tooltip: l.clear,
                           icon: Icon(Icons.cancel, color: colors.primary),
                           onPressed: () {
                             _search.clear();

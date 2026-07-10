@@ -83,6 +83,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                         suffixIcon: _query.isEmpty
                             ? null
                             : IconButton(
+                                tooltip: l.clear,
                                 icon: Icon(Icons.cancel, color: colors.primary),
                                 onPressed: () {
                                   _controller.clear();

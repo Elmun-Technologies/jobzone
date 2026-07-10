@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../localization/l10n_extension.dart';
 import 'jz_text_field.dart';
 
 /// Password field with a built-in show/hide eye toggle, matching the Figma
@@ -41,6 +42,9 @@ class _JzPasswordFieldState extends State<JzPasswordField> {
       obscureText: _obscure,
       suffixIcon: IconButton(
         splashRadius: 20,
+        tooltip: _obscure
+            ? context.l10n.showPassword
+            : context.l10n.hidePassword,
         icon: Icon(
           _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
         ),

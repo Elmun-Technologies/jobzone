@@ -854,5 +854,15 @@
   "promoTop30Name": "30-day TOP",
   "promoTop30Desc": "30 days at the top of the list",
   "promoAiName": "AI screening",
-  "promoAiDesc": "AI-ranked candidates (coming soon)"
+  "promoAiDesc": "AI-ranked candidates (coming soon)",
+  "clear": "Clear",
+  "remove": "Remove",
+  "ratingStar": "Rate {n} stars",
+  "@ratingStar": {"placeholders": {"n": {"type": "int"}}},
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "mdBold": "Bold",
+  "mdItalic": "Italic",
+  "mdBulletList": "Bulleted list",
+  "mdNumberList": "Numbered list"
 }

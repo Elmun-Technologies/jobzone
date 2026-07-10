@@ -805,5 +805,14 @@
   "promoTop30Name": "ТОП на 30 дней",
   "promoTop30Desc": "30 дней в начале списка",
   "promoAiName": "AI-отбор",
-  "promoAiDesc": "AI-ранжирование кандидатов (скоро)"
+  "promoAiDesc": "AI-ранжирование кандидатов (скоро)",
+  "clear": "Очистить",
+  "remove": "Удалить",
+  "ratingStar": "Оценка: {n}",
+  "showPassword": "Показать пароль",
+  "hidePassword": "Скрыть пароль",
+  "mdBold": "Жирный",
+  "mdItalic": "Курсив",
+  "mdBulletList": "Маркированный список",
+  "mdNumberList": "Нумерованный список"
 }

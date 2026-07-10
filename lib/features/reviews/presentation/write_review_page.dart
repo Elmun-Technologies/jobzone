@@ -133,6 +133,7 @@ class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
                     children: [
                       for (var i = 1; i <= 5; i++)
                         IconButton(
+                          tooltip: l.ratingStar(i),
                           onPressed: () => setState(() => _rating = i),
                           icon: Icon(
                             Icons.star_rounded,
