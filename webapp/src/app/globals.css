@@ -174,3 +174,22 @@ body {
 .leaflet-container a.leaflet-popup-close-button:hover {
   color: var(--foreground);
 }
+
+/* Map job pins (Leaflet divIcons + Yandex template layouts): a gentle lift on
+   hover so the tag under the cursor reads as clickable and separates from its
+   neighbours. Transform only — the tag's shadow stays inline. */
+.yolla-pin {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.yolla-pin:hover {
+  transform: scale(1.07);
+}
+@media (prefers-reduced-motion: reduce) {
+  .yolla-pin {
+    transition: none;
+  }
+  .yolla-pin:hover {
+    transform: none;
+  }
+}

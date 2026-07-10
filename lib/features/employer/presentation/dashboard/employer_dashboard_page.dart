@@ -211,8 +211,13 @@ class _StatGrid extends StatelessWidget {
         mainAxisExtent: 80,
       ),
       children: [
-        for (final (label, value, icon) in cards)
-          _StatCard(label: label, value: value, icon: icon),
+        // Cards cascade in; the numbers themselves count up (in _StatCard).
+        for (final (i, (label, value, icon)) in cards.indexed)
+          JzFadeSlideIn(
+            delay: Duration(milliseconds: 70 * i),
+            dy: 12,
+            child: _StatCard(label: label, value: value, icon: icon),
+          ),
       ],
     );
   }
@@ -256,13 +261,11 @@ class _StatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '$value',
+                JzCountUp(
+                  value: value,
                   style: context.text.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   label,

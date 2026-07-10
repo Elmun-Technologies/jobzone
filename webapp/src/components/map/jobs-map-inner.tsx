@@ -19,7 +19,6 @@ import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import type { Job } from "@/lib/data/types";
 import {
   formatDistanceMeters,
-  salaryPill,
   salaryText,
   schedulePatternLabel,
 } from "@/lib/format";
@@ -41,9 +40,18 @@ const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 type Located = Job & { lat: number; lng: number; distance: number | null };
 
-/** A Joyme-style salary price-tag pin (bubble + pointer), or a dot when the
- * job has no salary. Every pin is volt on ink — high-contrast on any tile
- * (white pins washed out on light Yandex tiles); a boosted job gets a ★. */
+/** Escape raw employer text before injecting it into the divIcon HTML. */
+function escHtml(v: string): string {
+  return v
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** A job-title tag pin (bubble + pointer), or a dot when there's no label.
+ * Every pin is volt on ink — high-contrast on any tile; a boosted job gets a
+ * ★; long titles truncate with an ellipsis. */
 function pinIcon(label: string | null, boosted: boolean): L.DivIcon {
   if (!label) {
     return L.divIcon({
@@ -55,13 +63,14 @@ function pinIcon(label: string | null, boosted: boolean): L.DivIcon {
       iconAnchor: [0, 0],
     });
   }
-  const text = boosted ? `★ ${label}` : label;
+  const text = escHtml(boosted ? `★ ${label}` : label);
   return L.divIcon({
     className: "",
     html: `<div style="position:relative;transform:translate(-50%,-100%)">
-      <div style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
-        padding:5px 11px;font:800 13px/1 var(--font-mono,ui-monospace,monospace);
-        white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.35)">${text}</div>
+      <div class="yolla-pin" style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
+        padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;
+        white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;
+        box-shadow:0 4px 12px rgba(0,0,0,.35)">${text}</div>
       <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
         border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
     </div>`,
@@ -91,14 +100,13 @@ function Recenter({ to, zoom }: { to: LatLng | null; zoom: number }) {
 export default function JobsMapInner({
   jobs,
   ratings,
-  height = "70vh",
   fullBleed = false,
 }: {
   jobs: Job[];
   ratings?: MapRatings;
-  height?: string;
-  /** Immersive mode: the map fills the viewport and the filters + near-me
-   * float over it (the /explore "map search" experience, Joyme-style). */
+  /** Immersive mode (the /explore "map search"): wheel-zoom stays enabled;
+   * the embedded landing map disables it so the page can scroll past. The
+   * sizing container lives in JobsMap. */
   fullBleed?: boolean;
 }) {
   const locale = useLocale();
@@ -196,16 +204,8 @@ export default function JobsMapInner({
   const selectCls =
     "border-border bg-background/95 text-foreground h-9 rounded-full border px-3 text-sm font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-  const mapHeight = fullBleed ? "calc(100dvh - 4rem)" : height;
-
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden",
-        fullBleed ? "" : "border-border rounded-2xl border",
-      )}
-      style={{ height: mapHeight }}
-    >
+    <div className="relative h-full w-full">
       {useYandex ? (
         <YandexMap
           jobs={shown}
@@ -249,7 +249,7 @@ export default function JobsMapInner({
             <Marker
               key={j.id}
               position={[j.lat, j.lng]}
-              icon={pinIcon(salaryPill(j), j.boostActive)}
+              icon={pinIcon(j.title, j.boostActive)}
             >
               <Popup>
                 <PinCard

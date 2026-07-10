@@ -128,7 +128,10 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: c.surface,
-        indicatorColor: Colors.transparent,
+        // A soft volt pill glides under the selected tab (Material animates
+        // the indicator between destinations) — a constant, branded cue of
+        // where you are.
+        indicatorColor: c.gold.withValues(alpha: 0.22),
         elevation: 0,
         height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,

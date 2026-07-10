@@ -21,7 +21,7 @@ class JzMapMarker {
   final LatLng point;
   final JzMarkerKind kind;
 
-  /// Optional short text shown on the marker (e.g. a salary). Mobile renders it
+  /// Optional short text shown on the marker (e.g. the job title). Mobile renders it
   /// into the pin bitmap as a pill; web shows it as a pill widget. Null → a
   /// plain pin.
   final String? label;

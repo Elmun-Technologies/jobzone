@@ -92,7 +92,7 @@ class _MapKitLifecycle with WidgetsBindingObserver {
 /// for web: `jz_map.dart` only exports this when `dart.library.io` exists.
 ///
 /// Feature parity with the OSM implementation: native clustering (green count
-/// bubbles), salary-pill / company-logo markers (rendered to bitmaps by
+/// bubbles), job-title-tag / company-logo markers (rendered to bitmaps by
 /// [MarkerBitmaps]), a "me" dot, tap-to-pick, and a [JzMapController] seam.
 class JzMapView extends StatefulWidget {
   const JzMapView({
@@ -311,7 +311,7 @@ class _JzMapViewState extends State<JzMapView> {
     final label = m.label;
     if (m.kind == JzMarkerKind.job && url != null && url.isNotEmpty) {
       // Logo marker; the provider itself fetches the logo and falls back to
-      // the salary pill (or the asset pin) if the fetch/decode fails.
+      // the title tag (or the asset pin) if the fetch/decode fails.
       placemark.setIconWithStyle(
         ymk_image.ImageProvider(() async {
           final logo = await _logoImage(url);
@@ -324,7 +324,7 @@ class _JzMapViewState extends State<JzMapView> {
             return img.clone();
           }
           if (label != null) {
-            return (await MarkerBitmaps.salaryPill(label)).clone();
+            return (await MarkerBitmaps.labelTag(label)).clone();
           }
           return _assetImage('assets/icon/pin_job.png');
         }, id: 'jz:logo:$url|${label ?? ''}'),
@@ -333,11 +333,11 @@ class _JzMapViewState extends State<JzMapView> {
       return;
     }
     if (label != null) {
-      // Tip-anchored: the volt price tag's tail points at the exact location.
+      // Tip-anchored: the volt title tag's tail points at the exact location.
       placemark.setIconWithStyle(
         ymk_image.ImageProvider(
-          () async => (await MarkerBitmaps.salaryPill(label)).clone(),
-          id: 'jz:pill:$label',
+          () async => (await MarkerBitmaps.labelTag(label)).clone(),
+          id: 'jz:tag:$label',
         ),
         _tipAnchored,
       );
