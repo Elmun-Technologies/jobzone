@@ -1,5 +1,9 @@
 # Yolla (repo: jobzone) — project guide
 
+> New here? Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first — the full developer
+> onboarding guide (setup, run each app, architecture, admin, testing, deploy).
+> This file is the terse map for day-to-day work.
+
 **Yolla** is a trusted, mobile-first **job marketplace for Uzbekistan**, aimed at
 blue-collar / mass hiring (the apna.co / enbek.kz gap that hh.uz and OLX don't
 fill locally). One shared **Supabase** backend serves two deliberately different
@@ -128,10 +132,19 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 - **Employer web:** onboarding (creating a company promotes `profiles.role` to
   employer), post vacancy (guest-first), my jobs, applicants, company edit,
   wallet (Hamyon) with top-up form (records pending transactions only).
+- **Admin panel (`/admin`, web-only):** dashboard (aggregate stats RPC), jobs /
+  companies / reviews moderation, users, orders, finance (top-ups, promotion
+  orders, pricing), category CMS, broadcast (one notification to an audience),
+  audit log, platform settings + site-wide banner. Gated by `is_admin()`
+  (JWT `app_metadata.role='admin'`); every write goes through an admin definer
+  RPC that calls `admin_audit()`. Cross-owner reads need a server-only
+  `SUPABASE_SERVICE_ROLE_KEY` (`hasAdminSupabase()`); without it the panel runs
+  degraded on the anon client. Code: readers `src/lib/admin/data/*`, mutations
+  `src/lib/actions/admin/*`, UI `src/components/admin/*`.
 
 ## Backend (`supabase/`)
 
-- **Schema domains** (36 migrations): profiles/CV (experiences, educations,
+- **Schema domains** (57 migrations, 0001–0057): profiles/CV (experiences, educations,
   skills, resumes…), companies (+people/gallery/reviews), job_categories
   (seeded blue-collar set incl. Foreign-jobs), jobs (rich blue-collar fields +
   screening_questions jsonb + boost + expiry + publish_at), applications
@@ -139,7 +152,10 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   Realtime), notifications (+settings), devices, monetization
   (promotion_products/orders, wallet_transactions + wallet_balances view),
   verification (companies + workers), worker_reviews + reliability,
-  interview_confirmations, telegram_links, saved_searches (+ alert watermark).
+  interview_confirmations, telegram_links, saved_searches (+ alert watermark),
+  recommendations (recommended_candidates/jobs), dismissed_jobs, and the
+  **admin foundation** (0037–0057: audit log, moderation, admin grants, finance,
+  broadcast, category CMS, platform settings).
 - **`job_feed` view — the one feed contract** (0034/0036 era): jobs ⋈ companies
   ⋈ categories, `boost_active` computed, **filters expiry only**; RLS
   (`status='open'` readable by all, owners see their own everything) plus the
@@ -231,18 +247,22 @@ assist, web in-app notifications, mobile category-label localization
 posting via `recommended_candidates`, seeker sees jobs matched to their résumé
 via `recommended_jobs` — one shared scoring algorithm per side, both clients
 call the same RPC), one-tap apply from any job card (web + mobile), a seeker's
-"archive" control over their browse feed, a map-first mobile Home, and the
-go-live runbook (`docs/go-live-checklist.md`).
+"archive" control over their browse feed, a map-first mobile Home on the
+**official Yandex MapKit SDK**, **Firebase push wired**, the **web admin panel**
+(moderation/finance/categories/broadcast/audit/settings), and the go-live
+runbook (`docs/go-live-checklist.md`).
 
-**Go-live is ops, not code** (user's side): `supabase db push` (→0052),
+**Go-live is ops, not code** (user's side): `supabase db push` (→0057),
 secrets (`EDGE_SHARED_SECRET`, `TELEGRAM_GATEWAY_TOKEN`, `SEND_SMS_HOOK_SECRET`,
-`TELEGRAM_BOT_TOKEN`…), deploy edge fns, enable Phone auth + register the
-Send-SMS hook, schedule the cron (§5), Vercel envs, store submission.
+`TELEGRAM_BOT_TOKEN`…, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), deploy
+edge fns, enable Phone auth + register the Send-SMS hook, schedule the cron (§5),
+Vercel envs, store submission.
 
 **Queued next (genuinely needs third-party ops, not just code):** real
-payments via `payment-webhook` (Click/Payme merchant accounts), FCM native
-config (a real Firebase project + `google-services.json`/`GoogleService-
-Info.plist`), Agora calls (a real Agora project + app credentials).
+payments via `payment-webhook` (Click/Payme merchant accounts), FCM runtime
+(the code + Firebase config are wired — needs a live Firebase project's
+`google-services.json`/`GoogleService-Info.plist` to send real pushes), Agora
+calls (a real Agora project + app credentials).
 
 **Docs to read when relevant:** `docs/go-live-checklist.md` (ops),
 `docs/phase-8-realtime-and-push.md` (calls/FCM wiring),
