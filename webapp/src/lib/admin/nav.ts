@@ -38,6 +38,12 @@ export const adminNav: AdminNavGroup[] = [
     label: n.groups.content,
     items: [
       { key: "categories", label: n.categories, href: "/admin/categories", enabled: true },
+      {
+        key: "telegram",
+        label: n.telegramChannels,
+        href: "/admin/telegram-channels",
+        enabled: true,
+      },
       { key: "products", label: n.products, href: "/admin/products", enabled: false },
       { key: "blog", label: n.blog, href: "/admin/blog", enabled: false },
     ],

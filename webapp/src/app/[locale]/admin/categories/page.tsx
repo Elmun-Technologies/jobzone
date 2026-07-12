@@ -82,6 +82,10 @@ export default async function AdminCategoriesPage({
               className={inputClass}
             />
           </label>
+          <label className="flex flex-col gap-1 text-xs sm:col-span-2">
+            <span className="text-muted-foreground">{s.bannerUrl}</span>
+            <input name="bannerUrl" type="url" className={inputClass} />
+          </label>
           <button
             type="submit"
             className="border-border bg-background text-foreground hover:bg-muted h-9 rounded-full border px-4 text-xs font-semibold"
@@ -126,7 +130,7 @@ export default async function AdminCategoriesPage({
                   <td className="px-4 py-3" colSpan={4}>
                     <form
                       action={upsertCategory}
-                      className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:items-end"
+                      className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:items-end"
                     >
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="id" value={c.id} />
@@ -134,6 +138,15 @@ export default async function AdminCategoriesPage({
                       <input name="name" defaultValue={c.name} required className={inputClass} />
                       <input name="slug" defaultValue={c.slug} required className={inputClass} />
                       <input name="icon" defaultValue={c.icon ?? ""} className={inputClass} />
+                      <label className="flex flex-col gap-1 text-xs">
+                        <span className="text-muted-foreground">{s.bannerUrl}</span>
+                        <input
+                          name="bannerUrl"
+                          type="url"
+                          defaultValue={c.bannerUrl ?? ""}
+                          className={inputClass}
+                        />
+                      </label>
                       <div className="flex items-center gap-2">
                         <input
                           name="sortOrder"

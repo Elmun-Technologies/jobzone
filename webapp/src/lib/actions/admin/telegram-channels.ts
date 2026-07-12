@@ -7,11 +7,9 @@ import { hasSupabase } from "@/lib/data/supabase-env";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Category CMS actions. Both RPCs (0053) are `is_admin()`-gated SECURITY
- * DEFINER functions called with the user's own cookie client, mirroring
- * `actions/admin/moderation.ts`. In mock mode (no Supabase env) actions are
- * demo no-ops. On RPC failure the admin lands back on the page with
- * ?notice=err.
+ * Telegram channel CMS actions (0058). Both RPCs are `is_admin()`-gated
+ * SECURITY DEFINER functions called with the user's own cookie client,
+ * mirroring `actions/admin/categories.ts`.
  */
 
 function field(formData: FormData, name: string): string {
@@ -21,7 +19,7 @@ function field(formData: FormData, name: string): string {
 
 function backPath(formData: FormData): string {
   const locale = field(formData, "locale") || "uz";
-  return `/${locale}/admin/categories`;
+  return `/${locale}/admin/telegram-channels`;
 }
 
 async function runAdminRpc(
@@ -42,35 +40,34 @@ async function runAdminRpc(
   revalidatePath(backTo);
 }
 
-export async function upsertCategory(formData: FormData): Promise<void> {
+export async function upsertTelegramChannel(formData: FormData): Promise<void> {
   const backTo = backPath(formData);
   const id = field(formData, "id");
-  const name = field(formData, "name");
-  const slug = field(formData, "slug");
-  if (!name || !slug) redirect(`${backTo}?notice=err`);
+  const categoryId = field(formData, "categoryId");
+  const chatId = field(formData, "chatId");
+  if (!categoryId || !chatId) redirect(`${backTo}?notice=err`);
 
   await runAdminRpc(
-    "admin_upsert_category",
+    "admin_upsert_telegram_channel",
     {
       p_id: id || null,
-      p_name: name,
-      p_slug: slug,
-      p_icon: field(formData, "icon") || null,
-      p_sort_order: Number(field(formData, "sortOrder")) || 0,
+      p_category_id: categoryId,
+      p_region: field(formData, "region") || null,
+      p_chat_id: chatId,
+      p_title: field(formData, "title") || null,
       p_is_active: field(formData, "isActive") !== "0",
-      p_banner_url: field(formData, "bannerUrl") || null,
     },
     backTo,
   );
 }
 
-export async function setCategoryActive(formData: FormData): Promise<void> {
+export async function setTelegramChannelActive(formData: FormData): Promise<void> {
   const backTo = backPath(formData);
   const id = field(formData, "id");
   if (!id) redirect(`${backTo}?notice=err`);
 
   await runAdminRpc(
-    "admin_set_category_active",
+    "admin_set_telegram_channel_active",
     { p_id: id, p_active: field(formData, "active") === "1" },
     backTo,
   );
