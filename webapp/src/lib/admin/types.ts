@@ -111,6 +111,19 @@ export interface AdminCategoryRow {
   icon: string | null;
   sortOrder: number;
   isActive: boolean;
+  bannerUrl: string | null;
+}
+
+/** category+region -> Telegram channel mapping (0058); region null = catch-all. */
+export interface AdminTelegramChannelRow {
+  id: string;
+  categoryId: string;
+  categoryName: string;
+  region: string | null;
+  chatId: string;
+  title: string | null;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface AdminWalletTxRow {

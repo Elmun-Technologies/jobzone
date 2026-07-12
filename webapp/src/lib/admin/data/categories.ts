@@ -16,7 +16,7 @@ export async function getAdminCategories(): Promise<AdminCategoryRow[] | null> {
   try {
     const { data, error } = await client
       .from("job_categories")
-      .select("id, name, slug, icon, sort_order, is_active")
+      .select("id, name, slug, icon, sort_order, is_active, banner_url")
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
     if (error) throw error;
@@ -29,6 +29,7 @@ export async function getAdminCategories(): Promise<AdminCategoryRow[] | null> {
         icon: r.icon ? String(r.icon) : null,
         sortOrder: Number(r.sort_order ?? 0),
         isActive: Boolean(r.is_active ?? true),
+        bannerUrl: r.banner_url ? String(r.banner_url) : null,
       };
     });
   } catch (e) {

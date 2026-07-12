@@ -64,6 +64,7 @@ export const adminStrings = {
     jobs: "E'lonlar",
     reviews: "Sharhlar",
     categories: "Kategoriyalar",
+    telegramChannels: "Telegram kanallar",
     products: "Mahsulotlar",
     blog: "Blog",
     wallet: "Hamyon",
@@ -85,6 +86,26 @@ export const adminStrings = {
     deactivate: "Faolsizlantirish",
     add: "Qo'shish",
     saveChanges: "Saqlash",
+    bannerUrl: "Banner rasm havolasi",
+  },
+  telegramChannels: {
+    newTitle: "Yangi kanal biriktirish",
+    editTitle: "Tahrirlash",
+    category: "Kategoriya",
+    region: "Viloyat",
+    allRegions: "Barcha viloyatlar",
+    chatId: "Kanal (@username yoki chat_id)",
+    title: "Nomi (ixtiyoriy)",
+    active: "Faol",
+    inactive: "Faol emas",
+    activate: "Faollashtirish",
+    deactivate: "Faolsizlantirish",
+    add: "Qo'shish",
+    saveChanges: "Saqlash",
+    hint:
+      "Botni kanalga admin qilib qo'shing, so'ng shu yerda kategoriya va viloyat bo'yicha " +
+      "biriktiring — yangi vakansiya ochilganda avtomatik shu kanalga post qilinadi. " +
+      "Viloyat tanlanmasa, bu kategoriyaning barcha viloyatlari uchun zaxira kanal bo'ladi.",
   },
   settings: {
     bannerTitle: "Sayt e'loni (banner)",

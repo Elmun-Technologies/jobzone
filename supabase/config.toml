@@ -83,3 +83,8 @@ verify_jwt = false
 # fail-closed EDGE_SHARED_SECRET instead.
 [functions.saved-search-alerts]
 verify_jwt = false
+
+# Invoked by the jobs AFTER-INSERT/UPDATE trigger (pg_net, migration 0058)
+# with no user JWT; gated by the fail-closed EDGE_SHARED_SECRET instead.
+[functions.telegram-channel-post]
+verify_jwt = false

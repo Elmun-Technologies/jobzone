@@ -7,6 +7,7 @@ import type {
   AdminOrderRow,
   AdminProductRow,
   AdminReviewRow,
+  AdminTelegramChannelRow,
   AdminUserRow,
   AdminWalletTxRow,
   DashboardStats,
@@ -157,16 +158,39 @@ const MOCK_WORKER_REVIEWS: AdminReviewRow[] = [
 ];
 
 const MOCK_CATEGORIES: AdminCategoryRow[] = [
-  { id: "cat-01", name: "Qurilish", slug: "construction", icon: "🏗️", sortOrder: 0, isActive: true },
-  { id: "cat-02", name: "Haydovchilar", slug: "driver", icon: "🚗", sortOrder: 1, isActive: true },
-  { id: "cat-03", name: "Restoran va mehmonxona", slug: "horeca", icon: "🍽️", sortOrder: 2, isActive: true },
-  { id: "cat-04", name: "Savdo", slug: "retail", icon: "🛍️", sortOrder: 3, isActive: true },
-  { id: "cat-05", name: "Logistika va yetkazib berish", slug: "logistics-delivery", icon: "🚚", sortOrder: 4, isActive: true },
-  { id: "cat-06", name: "Ombor", slug: "warehouse", icon: "📦", sortOrder: 5, isActive: true },
-  { id: "cat-07", name: "Xavfsizlik", slug: "security", icon: "🛡️", sortOrder: 6, isActive: true },
-  { id: "cat-08", name: "Tozalash", slug: "cleaning", icon: "🧹", sortOrder: 7, isActive: true },
-  { id: "cat-09", name: "Ishlab chiqarish", slug: "manufacturing", icon: "🏭", sortOrder: 8, isActive: true },
-  { id: "cat-10", name: "Chet elda ish", slug: "foreign-jobs", icon: "✈️", sortOrder: 9, isActive: false },
+  { id: "cat-01", name: "Qurilish", slug: "construction", icon: "🏗️", sortOrder: 0, isActive: true, bannerUrl: null },
+  { id: "cat-02", name: "Haydovchilar", slug: "driver", icon: "🚗", sortOrder: 1, isActive: true, bannerUrl: null },
+  { id: "cat-03", name: "Restoran va mehmonxona", slug: "horeca", icon: "🍽️", sortOrder: 2, isActive: true, bannerUrl: null },
+  { id: "cat-04", name: "Savdo", slug: "retail", icon: "🛍️", sortOrder: 3, isActive: true, bannerUrl: null },
+  { id: "cat-05", name: "Logistika va yetkazib berish", slug: "logistics-delivery", icon: "🚚", sortOrder: 4, isActive: true, bannerUrl: null },
+  { id: "cat-06", name: "Ombor", slug: "warehouse", icon: "📦", sortOrder: 5, isActive: true, bannerUrl: null },
+  { id: "cat-07", name: "Xavfsizlik", slug: "security", icon: "🛡️", sortOrder: 6, isActive: true, bannerUrl: null },
+  { id: "cat-08", name: "Tozalash", slug: "cleaning", icon: "🧹", sortOrder: 7, isActive: true, bannerUrl: null },
+  { id: "cat-09", name: "Ishlab chiqarish", slug: "manufacturing", icon: "🏭", sortOrder: 8, isActive: true, bannerUrl: null },
+  { id: "cat-10", name: "Chet elda ish", slug: "foreign-jobs", icon: "✈️", sortOrder: 9, isActive: false, bannerUrl: null },
+];
+
+const MOCK_TELEGRAM_CHANNELS: AdminTelegramChannelRow[] = [
+  {
+    id: "tg-01",
+    categoryId: "cat-02",
+    categoryName: "Haydovchilar",
+    region: "Toshkent shahri",
+    chatId: "@yolla_haydovchilar_toshkent",
+    title: "Yolla — Haydovchilar (Toshkent)",
+    isActive: true,
+    createdAt: "2026-06-15T09:00:00Z",
+  },
+  {
+    id: "tg-02",
+    categoryId: "cat-01",
+    categoryName: "Qurilish",
+    region: null,
+    chatId: "@yolla_qurilish",
+    title: "Yolla — Qurilish (barcha viloyatlar)",
+    isActive: true,
+    createdAt: "2026-06-10T09:00:00Z",
+  },
 ];
 
 const MOCK_WALLET_TX: AdminWalletTxRow[] = [
@@ -216,6 +240,9 @@ export function mockAdminAudit(): AdminList<AdminAuditRow> {
 }
 export function mockAdminCategories(): AdminCategoryRow[] {
   return MOCK_CATEGORIES;
+}
+export function mockAdminTelegramChannels(): AdminTelegramChannelRow[] {
+  return MOCK_TELEGRAM_CHANNELS;
 }
 export function mockAdminWalletTx(q: string): AdminList<AdminWalletTxRow> {
   return filtered(MOCK_WALLET_TX, q, (r) => `${r.companyName} ${r.description ?? ""}`);
