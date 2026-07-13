@@ -810,6 +810,7 @@
   "promoAiDesc": "Nomzodlarni AI tartiblash (tez orada)",
   "clear": "Tozalash",
   "remove": "Olib tashlash",
+  "confirmRemoveTitle": "Olib tashlansinmi?",
   "ratingStar": "{n} yulduz",
   "showPassword": "Parolni koʻrsatish",
   "hidePassword": "Parolni yashirish",

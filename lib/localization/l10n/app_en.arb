@@ -859,6 +859,7 @@
   "promoAiDesc": "AI-ranked candidates (coming soon)",
   "clear": "Clear",
   "remove": "Remove",
+  "confirmRemoveTitle": "Remove?",
   "ratingStar": "Rate {n} stars",
   "@ratingStar": {"placeholders": {"n": {"type": "int"}}},
   "showPassword": "Show password",

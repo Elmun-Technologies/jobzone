@@ -810,6 +810,7 @@
   "promoAiDesc": "AI-ранжирование кандидатов (скоро)",
   "clear": "Очистить",
   "remove": "Удалить",
+  "confirmRemoveTitle": "Удалить?",
   "ratingStar": "Оценка: {n}",
   "showPassword": "Показать пароль",
   "hidePassword": "Скрыть пароль",
