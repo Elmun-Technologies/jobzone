@@ -13,6 +13,13 @@ import '../domain/application.dart';
 final List<Application> _offlineStore = [];
 bool _seeded = false;
 
+/// Thrown by [ApplicationsRepository.apply] when the session has no signed-in
+/// user (e.g. expired between page load and submit) — the caller must not
+/// treat this as a successful application.
+class NotSignedIn implements Exception {
+  const NotSignedIn();
+}
+
 /// Creates, lists and tracks the current user's job applications. Uses the
 /// `applications` table when Supabase is configured; otherwise an in-memory
 /// store seeded with a demo application.
@@ -122,7 +129,7 @@ class ApplicationsRepository {
       return;
     }
     final uid = _client.auth.currentUser?.id;
-    if (uid == null) return;
+    if (uid == null) throw const NotSignedIn();
     await _client.from('applications').insert({
       'job_id': job.id,
       'applicant_id': uid,
@@ -130,6 +137,34 @@ class ApplicationsRepository {
       'answers': answers ?? <String, dynamic>{},
       'resume_id': ?resumeId,
     });
+  }
+
+  /// Withdraws the caller's own application. Applicants can no longer UPDATE
+  /// `applications` directly (0027 locked that to the job owner to close the
+  /// self-promotion hole), so this calls the `withdraw_application` SECURITY
+  /// DEFINER RPC (0059), which only allows the applicant to move their own
+  /// row to `withdrawn`.
+  Future<void> withdraw(String applicationId) async {
+    if (!_live) {
+      final idx = _offlineStore.indexWhere((a) => a.id == applicationId);
+      if (idx != -1) {
+        final a = _offlineStore[idx];
+        _offlineStore[idx] = Application(
+          id: a.id,
+          job: a.job,
+          status: ApplicationStatus.withdrawn,
+          appliedAt: a.appliedAt,
+          coverLetter: a.coverLetter,
+          answers: a.answers,
+          history: a.history,
+        );
+      }
+      return;
+    }
+    await _client.rpc(
+      'withdraw_application',
+      params: {'p_application_id': applicationId},
+    );
   }
 
   Future<List<StatusEvent>> statusHistory(String applicationId) async {

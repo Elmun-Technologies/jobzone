@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/enums/enums.dart';
+import '../../../shared/widgets/snackbars.dart';
 import '../../jobs/presentation/util/job_labels.dart';
+import '../application/applications_controller.dart';
 import '../data/applications_repository.dart';
 import '../domain/application.dart';
 import 'util/status_label.dart';
@@ -216,12 +219,13 @@ class ApplicationStatusPage extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    JzPrimaryButton(
-                      label: l.withdrawApplication,
-                      onPressed: () => ScaffoldMessenger.of(context)
-                        ..hideCurrentSnackBar()
-                        ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
-                    ),
+                    if (app.status != ApplicationStatus.withdrawn &&
+                        app.status != ApplicationStatus.hired &&
+                        app.status != ApplicationStatus.rejected)
+                      JzPrimaryButton(
+                        label: l.withdrawApplication,
+                        onPressed: () => _confirmWithdraw(context, ref, app),
+                      ),
                     const SizedBox(height: AppSpacing.xs),
                     TextButton(
                       onPressed: () => context.push(Routes.jobDetails(job.id)),
@@ -241,6 +245,40 @@ class ApplicationStatusPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmWithdraw(
+    BuildContext context,
+    WidgetRef ref,
+    Application app,
+  ) async {
+    final l = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.withdrawApplicationConfirmTitle),
+        content: Text(l.withdrawApplicationConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.withdrawApplication),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await ref.read(applicationsControllerProvider.notifier).withdraw(app.id);
+      if (context.mounted) {
+        showInfoSnack(context, l.applicationWithdrawn);
+      }
+    } catch (_) {
+      if (context.mounted) showErrorSnack(context, l.errUnknown);
+    }
   }
 }
 
