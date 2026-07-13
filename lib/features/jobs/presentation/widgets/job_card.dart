@@ -121,7 +121,7 @@ class JobCard extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      if (tierBadge != null) tierBadge,
+                      ?tierBadge,
                       const Spacer(),
                       _IconToggle(
                         active: bookmarked,
