@@ -12,7 +12,7 @@ Work top-to-bottom; each section notes how to verify it.
 ## 1. Database — apply migrations
 
 ```bash
-supabase db push        # applies every migration through 0052
+supabase db push        # applies every migration through 0063
 ```
 
 Most recent, most likely un-applied:

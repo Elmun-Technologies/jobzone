@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_REF: wajotaeoulizhveparhz
+  PROJECT_REF: nzxdnsxwxrstcrumwzwu
 
 jobs:
   setup:
