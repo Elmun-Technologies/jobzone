@@ -90,3 +90,12 @@ verify_jwt = false
 # with no user JWT; gated by the fail-closed EDGE_SHARED_SECRET instead.
 [functions.telegram-channel-post]
 verify_jwt = false
+
+# Payment gateways (Payme / Click) call these with no user JWT — each is gated
+# by its own provider credential (Payme Basic key / Click MD5 sign_string), which
+# fails closed until the merchant secrets are configured. See docs/payments-setup.md.
+[functions.payme-merchant]
+verify_jwt = false
+
+[functions.click-merchant]
+verify_jwt = false
