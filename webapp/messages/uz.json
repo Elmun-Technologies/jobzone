@@ -756,25 +756,25 @@
       "standard": {
         "name": "Standard",
         "price": "99 000",
-        "unit": "so'm · vakansiya · 30 kun",
-        "f1": "Qidiruvda ustunlik",
+        "unit": "so'm · oyiga",
+        "f1": "2–10 faol vakansiya",
         "f2": "Barcha asosiy funksiyalar"
       },
       "highlight": {
         "name": "Highlight",
         "price": "199 000",
-        "unit": "so'm · vakansiya · 30 kun",
-        "tag": "Eng ko'rinarli",
-        "f1": "Xaritada yorqin volt-belgi",
-        "f2": "Ro'yxat boshida"
+        "unit": "so'm · oyiga",
+        "tag": "Ommabop",
+        "f1": "10–50 faol vakansiya",
+        "f2": "Qidiruv va xaritada ustunlik"
       },
       "business": {
         "name": "Business",
         "price": "499 000",
         "unit": "so'm · oyiga",
-        "f1": "10 tagacha vakansiya",
+        "f1": "50+ faol vakansiya",
         "f2": "Kompaniya logotipi xaritada",
-        "f3": "Arizalar statistikasi"
+        "f3": "Analitika va ustuvor qo'llab-quvvatlash"
       },
       "note": "Faqat ish beruvchilar to'laydi. Ish izlovchilarga — doim bepul.",
       "footnote": "Tariflar — startdagi mo'ljal, aniqlashtiriladi"
@@ -934,11 +934,34 @@
     "title": "Narxlar",
     "heroTitle": "Ishga eng tez va arzon yo'l",
     "heroSubtitle": "Minglab ishchi Yolla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
-    "firstPost": "Birinchi vakansiya",
     "free": "Bepul",
-    "firstPostHint": "To'lovsiz, darhol e'lon qilinadi va ikkala ilovada ko'rinadi.",
-    "nextPosts": "Keyingi vakansiyalar",
-    "nextPostsHint": "Har bir qo'shimcha vakansiya uchun — Hamyondan yechiladi.",
+    "tiers": {
+      "heading": "Tariflar",
+      "subheading": "Bir vaqtda nechta faol vakansiya kerak — shunga qarab to'lang. Birinchisi doim bepul.",
+      "popular": "Ommabop",
+      "cta": "Tanlash",
+      "ctaFree": "Bepul boshlash",
+      "free": {
+        "name": "Free",
+        "cap": "1 faol vakansiya",
+        "desc": "Boshlash uchun — 1 ta faol vakansiya, mutlaqo bepul."
+      },
+      "standard": {
+        "name": "Standard",
+        "cap": "10 tagacha vakansiya",
+        "desc": "O'sayotgan jamoalar uchun — bir vaqtda 10 tagacha faol vakansiya."
+      },
+      "highlight": {
+        "name": "Highlight",
+        "cap": "50 tagacha vakansiya",
+        "desc": "Faol yollovchilar uchun — bir vaqtda 50 tagacha faol vakansiya."
+      },
+      "business": {
+        "name": "Business",
+        "cap": "50+ faol vakansiya",
+        "desc": "Yirik kompaniyalar uchun — cheksiz vakansiya va ustuvor qo'llab-quvvatlash."
+      }
+    },
     "promoTitle": "Reklama paketlari",
     "promoSubtitle": "Vakansiyangizni ro'yxat tepasiga chiqaring — 3 barobar ko'proq nomzod.",
     "bestValue": "Eng foydali",

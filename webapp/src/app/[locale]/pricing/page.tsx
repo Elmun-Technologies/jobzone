@@ -4,7 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { buttonVariants } from "@/components/ui/button";
-import { getPromotionProducts, getJobPostPrice } from "@/lib/data/pricing";
+import { getPromotionProducts } from "@/lib/data/pricing";
+import { PLAN_TIERS } from "@/lib/pricing-tiers";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -30,10 +31,11 @@ export async function generateMetadata({
 // page isn't a primary organic-search surface, unlike the job/category pages.
 export const dynamic = "force-dynamic";
 
-/** Public "Narxlar" (pricing) marketing page — the employer offer: first
- * vacancy free, then a flat post fee, plus the visibility (reklama) packages.
- * Prices come from the live catalog (fallback offline), so this never drifts
- * from what checkout actually charges. */
+/** Public "Narxlar" (pricing) marketing page — the employer offer: plans priced
+ * by how many active vacancies you run (first one free), plus the per-vacancy
+ * visibility (reklama) packages as add-ons. The plan tiers are the single
+ * source of truth in `pricing-tiers.ts`; the boost prices come from the live
+ * catalog (fallback offline) so they never drift from what checkout charges. */
 export default async function PricingPage({
   params,
 }: {
@@ -42,12 +44,10 @@ export default async function PricingPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, postPrice, products] = await Promise.all([
+  const [t, products] = await Promise.all([
     getTranslations("pricing"),
-    getJobPostPrice(),
     getPromotionProducts(),
   ]);
-  const price = postPrice > 0 ? postPrice : 99000;
   const perDay = (p: (typeof products)[number]) =>
     p.priceUzs / Math.max(p.durationDays, 1);
   const bestCode = products.length
@@ -81,38 +81,76 @@ export default async function PricingPage({
         </p>
       </div>
 
-      {/* Posting: first free, then flat fee */}
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div
-          className="rise-in border-primary/40 from-accent to-card relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br p-6"
-          style={{ animationDelay: "60ms" }}
-        >
-          <div className="bg-primary/15 absolute -top-8 -right-8 size-28 rounded-full blur-2xl" />
-          <span className="text-muted-foreground text-sm font-medium">
-            {t("firstPost")}
-          </span>
-          <p className="text-foreground mt-1 text-4xl font-bold">{t("free")}</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            {t("firstPostHint")}
+      {/* Plans priced by how many active vacancies you run — first one free */}
+      <div className="mt-10">
+        <div className="mb-5 text-center">
+          <h2 className="text-foreground text-2xl font-bold">
+            {t("tiers.heading")}
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t("tiers.subheading")}
           </p>
         </div>
-        <div
-          className="rise-in border-border bg-card rounded-3xl border p-6"
-          style={{ animationDelay: "120ms" }}
-        >
-          <span className="text-muted-foreground text-sm font-medium">
-            {t("nextPosts")}
-          </span>
-          <p className="text-foreground mt-1 font-mono text-4xl font-bold tabular-nums">
-            {groupNumber(price)}{" "}
-            <span className="text-muted-foreground text-xl font-semibold">
-              so&apos;m
-            </span>
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            {t("nextPostsHint")}
-          </p>
-        </div>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {PLAN_TIERS.map((tier, i) => {
+            const isFree = tier.priceUzs <= 0;
+            return (
+              <li
+                key={tier.code}
+                className={cn(
+                  "rise-in relative flex flex-col rounded-3xl border p-6",
+                  tier.featured
+                    ? "border-primary ring-primary/20 bg-accent ring-2"
+                    : "border-border bg-card",
+                )}
+                style={{ animationDelay: `${60 + i * 70}ms` }}
+              >
+                {tier.featured ? (
+                  <span className="bg-primary text-primary-foreground absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-0.5 text-[11px] font-bold tracking-wide uppercase">
+                    {t("tiers.popular")}
+                  </span>
+                ) : null}
+                <span className="text-foreground text-lg font-bold">
+                  {t(`tiers.${tier.code}.name`)}
+                </span>
+                <span className="text-muted-foreground mt-0.5 text-sm">
+                  {t(`tiers.${tier.code}.cap`)}
+                </span>
+                <p className="mt-4">
+                  {isFree ? (
+                    <span className="text-foreground text-3xl font-bold">
+                      {t("free")}
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-foreground font-mono text-3xl font-bold tabular-nums">
+                        {groupNumber(tier.priceUzs)}
+                      </span>
+                      <span className="text-muted-foreground ml-1 text-sm font-semibold">
+                        so&apos;m
+                      </span>
+                    </>
+                  )}
+                </p>
+                <p className="text-muted-foreground mt-3 flex-1 text-sm">
+                  {t(`tiers.${tier.code}.desc`)}
+                </p>
+                <Link
+                  href="/employer/jobs/new"
+                  className={cn(
+                    buttonVariants({
+                      variant: tier.featured ? "primary" : "outline",
+                      size: "sm",
+                    }),
+                    "mt-5 w-full",
+                  )}
+                >
+                  {isFree ? t("tiers.ctaFree") : t("tiers.cta")}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       {/* Promotion packages */}

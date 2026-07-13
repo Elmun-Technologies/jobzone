@@ -756,25 +756,25 @@
       "standard": {
         "name": "Standard",
         "price": "99 000",
-        "unit": "UZS · vacancy · 30 days",
-        "f1": "Priority in results",
+        "unit": "UZS · per month",
+        "f1": "2–10 active vacancies",
         "f2": "All core features"
       },
       "highlight": {
         "name": "Highlight",
         "price": "199 000",
-        "unit": "UZS · vacancy · 30 days",
-        "tag": "Most visible",
-        "f1": "A bright volt pin on the map",
-        "f2": "Top of the vacancy list"
+        "unit": "UZS · per month",
+        "tag": "Popular",
+        "f1": "10–50 active vacancies",
+        "f2": "Priority in search and on the map"
       },
       "business": {
         "name": "Business",
         "price": "499 000",
         "unit": "UZS · per month",
-        "f1": "Up to 10 vacancies",
+        "f1": "50+ active vacancies",
         "f2": "Company logo on the map",
-        "f3": "Application analytics"
+        "f3": "Analytics and priority support"
       },
       "note": "Only employers pay. For job seekers — free forever.",
       "footnote": "Prices are a launch estimate, subject to refinement"
@@ -934,11 +934,34 @@
     "title": "Pricing",
     "heroTitle": "The fastest, cheapest way to hire",
     "heroSubtitle": "Thousands of workers search on Yolla. Your first vacancy is free.",
-    "firstPost": "First vacancy",
     "free": "Free",
-    "firstPostHint": "No charge, published instantly and shown in both apps.",
-    "nextPosts": "Further vacancies",
-    "nextPostsHint": "Each additional vacancy is charged from your Hamyon wallet.",
+    "tiers": {
+      "heading": "Plans",
+      "subheading": "Pay for how many active vacancies you run at once. Your first one is always free.",
+      "popular": "Popular",
+      "cta": "Choose",
+      "ctaFree": "Start free",
+      "free": {
+        "name": "Free",
+        "cap": "1 active vacancy",
+        "desc": "To get started — 1 active vacancy, completely free."
+      },
+      "standard": {
+        "name": "Standard",
+        "cap": "up to 10 vacancies",
+        "desc": "For growing teams — up to 10 active vacancies at once."
+      },
+      "highlight": {
+        "name": "Highlight",
+        "cap": "up to 50 vacancies",
+        "desc": "For active hiring — up to 50 active vacancies at once."
+      },
+      "business": {
+        "name": "Business",
+        "cap": "50+ vacancies",
+        "desc": "For large companies — unlimited vacancies and priority support."
+      }
+    },
     "promoTitle": "Promotion packages",
     "promoSubtitle": "Push your vacancy to the top — 3× more candidates.",
     "bestValue": "Best value",

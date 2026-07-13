@@ -127,6 +127,7 @@ abstract final class Routes {
   static const employerCompanyPeople = '/employer/company/people';
   static const employerCompanyGallery = '/employer/company/gallery';
   static const employerPromotions = '/employer/promotions';
+  static const employerPlans = '/employer/plans';
   static const employerWallet = '/employer/wallet';
   static String checkout(String jobId, String code) =>
       '/employer/checkout/$jobId/$code';
