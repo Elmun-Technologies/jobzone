@@ -25,13 +25,18 @@ class ChatDetailPage extends ConsumerStatefulWidget {
 class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
+  int? _lastMessageCount;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(chatRepositoryProvider).markRead(widget.conversationId),
-    );
+    Future.microtask(() async {
+      try {
+        await ref.read(chatRepositoryProvider).markRead(widget.conversationId);
+      } catch (_) {
+        // Best-effort — a failed read receipt shouldn't disrupt the chat.
+      }
+    });
   }
 
   @override
@@ -96,7 +101,21 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
                     ref.invalidate(messagesProvider(widget.conversationId)),
               ),
               data: (messages) {
-                _scrollToBottom();
+                // Only auto-scroll on genuinely new messages (not every
+                // rebuild/stream re-emit), and only when the user was already
+                // near the bottom (or this is the first load) — otherwise a
+                // new message while reading history yanks them back down.
+                final isNewMessage =
+                    _lastMessageCount == null ||
+                    messages.length > _lastMessageCount!;
+                final nearBottom =
+                    !_scroll.hasClients ||
+                    _scroll.position.maxScrollExtent - _scroll.position.pixels <
+                        120;
+                if (isNewMessage && (nearBottom || _lastMessageCount == null)) {
+                  _scrollToBottom();
+                }
+                _lastMessageCount = messages.length;
                 if (messages.isEmpty) {
                   return JzEmptyState(
                     icon: Icons.chat_bubble_outline_rounded,
