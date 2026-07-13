@@ -125,43 +125,111 @@ class _WalletPageState extends ConsumerState<WalletPage> {
   }
 }
 
+/// The balance shown as a branded "bank card": a fixed ink surface (so it reads
+/// the same in light and dark) with a volt wallet chip, a decorative volt disc,
+/// and the amount in large white type. Gives the wallet a confident centrepiece
+/// instead of a plain grey box.
 class _BalanceCard extends StatelessWidget {
   const _BalanceCard({required this.wallet});
   final Wallet wallet;
+
+  static const _ink = Color(0xFF0F0F0F);
+  static const _inkTop = Color(0xFF1C1C1C);
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.border),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_inkTop, _ink],
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.20),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
         children: [
-          Text(
-            l.walletBalanceLabel,
-            style: context.text.bodySmall?.copyWith(
-              color: colors.textSecondary,
+          // Decorative volt disc bleeding off the top-right corner.
+          Positioned(
+            right: -34,
+            top: -34,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primary.withValues(alpha: 0.16),
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            formatUzs(wallet.balanceUzs),
-            style: context.text.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l.walletBalanceHint,
-            style: context.text.bodySmall?.copyWith(
-              color: colors.textSecondary,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colors.primary,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet_rounded,
+                      size: 20,
+                      color: colors.onPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    l.walletTitle,
+                    style: context.text.titleSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                l.walletBalanceLabel,
+                style: context.text.bodySmall?.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              // Scale down rather than overflow when the balance is large
+              // (e.g. "100 000 000 so'm").
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  formatUzs(wallet.balanceUzs),
+                  maxLines: 1,
+                  style: context.text.displayMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                l.walletBalanceHint,
+                style: context.text.bodySmall?.copyWith(color: Colors.white70),
+              ),
+            ],
           ),
         ],
       ),
