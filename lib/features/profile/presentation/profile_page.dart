@@ -176,6 +176,11 @@ class ProfilePage extends ConsumerWidget {
             ),
             _MenuTile(
               icon: Icons.notifications_none_rounded,
+              label: l.subscriptions,
+              onTap: () => context.push(Routes.subscriptions),
+            ),
+            _MenuTile(
+              icon: Icons.bookmark_border_rounded,
               label: l.savedSearches,
               onTap: () => context.push(Routes.savedSearches),
             ),

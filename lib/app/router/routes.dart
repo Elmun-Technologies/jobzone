@@ -92,6 +92,7 @@ abstract final class Routes {
   static String applicationStatus(String id) => '/account/my-applications/$id';
   static const accountSeekingStatus = '/account/seeking-status';
   static const savedSearches = '/account/saved-searches';
+  static const subscriptions = '/account/subscriptions';
   static const accountSettings = '/account/settings';
   static const accountNotificationSettings = '/account/notification-settings';
   static const accountLanguage = '/account/language';
