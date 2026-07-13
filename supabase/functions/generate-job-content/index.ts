@@ -51,11 +51,22 @@ const LANG: Record<string, string> = {
   en: "English",
 };
 
+// Caps on every free-text/array input reaching the model prompt — an
+// authenticated caller (this function requires a Supabase JWT — see
+// config.toml, it's not in the verify_jwt=false list) could otherwise still
+// pump oversized payloads to run up the Anthropic bill or pad the prompt for
+// injection attempts.
+const MAX_TITLE_LEN = 120;
+const MAX_SKILLS = 20;
+const MAX_SKILL_LEN = 40;
+
 async function claudeDraft(input: Record<string, unknown>): Promise<Draft> {
-  const title = String(input.title ?? "").trim();
-  const category = String(input.category ?? "").trim();
-  const jobType = String(input.jobType ?? "").trim();
-  const skills = Array.isArray(input.skills) ? input.skills.map(String) : [];
+  const title = String(input.title ?? "").trim().slice(0, MAX_TITLE_LEN);
+  const category = String(input.category ?? "").trim().slice(0, MAX_TITLE_LEN);
+  const jobType = String(input.jobType ?? "").trim().slice(0, MAX_TITLE_LEN);
+  const skills = (Array.isArray(input.skills) ? input.skills.map(String) : [])
+    .slice(0, MAX_SKILLS)
+    .map((s) => s.slice(0, MAX_SKILL_LEN));
   const lang = LANG[String(input.locale ?? "uz")] ?? LANG.uz;
 
   const facts = [
@@ -181,13 +192,17 @@ function matchScore(input: Record<string, unknown>) {
 }
 
 async function claudeMatch(input: Record<string, unknown>) {
-  const title = String(input.title ?? "").trim();
+  const title = String(input.title ?? "").trim().slice(0, MAX_TITLE_LEN);
   const jobSkills = (Array.isArray(input.jobSkills) ? input.jobSkills : [])
-    .map(String);
+    .map(String)
+    .slice(0, MAX_SKILLS)
+    .map((s) => s.slice(0, MAX_SKILL_LEN));
   const description = String(input.description ?? "").trim();
   const mySkills = (Array.isArray(input.mySkills) ? input.mySkills : [])
-    .map(String);
-  const myHeadline = String(input.myHeadline ?? "").trim();
+    .map(String)
+    .slice(0, MAX_SKILLS)
+    .map((s) => s.slice(0, MAX_SKILL_LEN));
+  const myHeadline = String(input.myHeadline ?? "").trim().slice(0, MAX_TITLE_LEN);
   const lang = LANG[String(input.locale ?? "uz")] ?? LANG.uz;
 
   const facts = [
