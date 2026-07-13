@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../companies/domain/company.dart';
+import 'employer_jobs_repository.dart' show NoCompanyError;
 import 'mock_employer.dart';
 
 /// Write-side companion to [CompaniesRepository]: lets an employer create and
@@ -135,8 +136,9 @@ class CompanyAdminRepository {
       return;
     }
     final company = await myCompany();
+    if (company == null) throw const NoCompanyError();
     await _ref.read(supabaseClientProvider).from('company_people').insert({
-      'company_id': company?.id,
+      'company_id': company.id,
       'name': name,
       'is_recruiter': isRecruiter,
       if (title != null && title.isNotEmpty) 'title': title,
@@ -187,8 +189,9 @@ class CompanyAdminRepository {
       return;
     }
     final company = await myCompany();
+    if (company == null) throw const NoCompanyError();
     await _ref.read(supabaseClientProvider).from('company_gallery').insert({
-      'company_id': company?.id,
+      'company_id': company.id,
       'media_url': mediaUrl,
       'media_type': 'image',
       if (caption != null && caption.isNotEmpty) 'caption': caption,

@@ -181,6 +181,32 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       showInfoSnack(context, context.l10n.aiNeedTitle);
       return;
     }
+    final hasExisting =
+        _description.text.trim().isNotEmpty ||
+        _responsibilities.text.trim().isNotEmpty ||
+        _requirements.text.trim().isNotEmpty ||
+        _benefits.text.trim().isNotEmpty;
+    if (hasExisting) {
+      final l = context.l10n;
+      final replace = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l.aiOverwriteConfirmTitle),
+          content: Text(l.aiOverwriteConfirmBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l.aiGenerate),
+            ),
+          ],
+        ),
+      );
+      if (replace != true || !mounted) return;
+    }
     setState(() => _generating = true);
     try {
       final skills = _skills.text
@@ -279,6 +305,19 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
   Future<void> _submit(String status) async {
     if (!_formKey.currentState!.validate()) return;
+    if (_salaryDisplay == 'exact') {
+      final min = num.tryParse(_min.text);
+      final max = num.tryParse(_max.text);
+      if (min != null && max != null && max < min) {
+        showErrorSnack(context, context.l10n.valSalaryMaxLessMin);
+        return;
+      }
+    }
+    if (_scheduleOn &&
+        (_publishAt == null || !_publishAt!.isAfter(DateTime.now()))) {
+      showErrorSnack(context, context.l10n.scheduleDateRequired);
+      return;
+    }
     setState(() => _saving = true);
     final repo = ref.read(employerJobsRepositoryProvider);
     final skills = _skills.text
