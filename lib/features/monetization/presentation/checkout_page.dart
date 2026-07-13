@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/options/option_lists.dart';
-import '../../../shared/widgets/snackbars.dart';
-import '../../employer/data/employer_jobs_repository.dart';
-import '../../employer/data/wallet_repository.dart';
 import '../data/monetization_repository.dart';
 import '../domain/promotion.dart';
 
-/// Self-serve checkout for a promotion tariff, paid from the employer's
-/// Hamyon balance: an order summary + the current balance, then either
-/// "Confirm & pay" (enough funds — spends immediately, both offline and live)
-/// or "Top up Hamyon" (not enough — sends them to add funds first, same as
-/// the web promote page).
-class CheckoutPage extends ConsumerStatefulWidget {
+/// Self-serve checkout for a promotion tariff. The plan and its price are shown
+/// in full (tariffs stay), but the actual payment (Click / Payme) is still
+/// being connected — there is no wallet and no fake charge here. Once the
+/// gateway is live this screen gains the real pay action.
+class CheckoutPage extends ConsumerWidget {
   const CheckoutPage({
     super.key,
     required this.jobId,
@@ -28,42 +23,10 @@ class CheckoutPage extends ConsumerStatefulWidget {
   final String productCode;
 
   @override
-  ConsumerState<CheckoutPage> createState() => _CheckoutPageState();
-}
-
-class _CheckoutPageState extends ConsumerState<CheckoutPage> {
-  bool _paying = false;
-
-  Future<void> _pay() async {
-    setState(() => _paying = true);
-    try {
-      final order = await ref
-          .read(monetizationRepositoryProvider)
-          .purchase(jobId: widget.jobId, productCode: widget.productCode);
-      ref.invalidate(myJobsProvider);
-      ref.invalidate(myOrdersProvider);
-      ref.invalidate(walletProvider);
-      if (!mounted) return;
-      showInfoSnack(
-        context,
-        order.isPaid
-            ? context.l10n.promotedToast
-            : context.l10n.orderPendingToast,
-      );
-      context.pop();
-    } catch (e) {
-      if (mounted) showErrorSnack(context, localizedError(context, e));
-    } finally {
-      if (mounted) setState(() => _paying = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final colors = context.colors;
     final productsAsync = ref.watch(promotionProductsProvider);
-    final walletAsync = ref.watch(walletProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -76,9 +39,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             onRetry: () => ref.invalidate(promotionProductsProvider),
           ),
           data: (products) {
-            final product = products
-                .where((p) => p.code == widget.productCode)
-                .firstOrNull;
+            final product =
+                products.where((p) => p.code == productCode).firstOrNull;
             if (product == null) {
               return JzErrorState(
                 title: l.errorTitle,
@@ -87,8 +49,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 onRetry: () => context.pop(),
               );
             }
-            final balance = walletAsync.value?.balanceUzs;
-            final affordable = balance != null && balance >= product.priceUzs;
 
             return Column(
               children: [
@@ -107,11 +67,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     children: [
                       _SummaryCard(product: product),
                       const SizedBox(height: AppSpacing.lg),
-                      _BalanceRow(balanceUzs: balance),
-                      if (balance != null && !affordable) ...[
-                        const SizedBox(height: AppSpacing.lg),
-                        _InsufficientFundsNotice(needed: product.priceUzs),
-                      ],
+                      const _PaymentSoonNotice(),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         l.offerNote,
@@ -148,27 +104,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
+                        // No wallet/instant charge — the pay action is disabled
+                        // until the Click/Payme gateway is connected.
                         Expanded(
-                          // While the wallet is still loading, balance is null;
-                          // show a loading Pay button rather than flashing the
-                          // wrong "Top up" CTA to someone who can afford it.
-                          child: walletAsync.isLoading && balance == null
-                              ? const JzPrimaryButton(
-                                  label: '',
-                                  loading: true,
-                                  onPressed: null,
-                                )
-                              : affordable
-                              ? JzPrimaryButton(
-                                  label: l.payCta,
-                                  loading: _paying,
-                                  onPressed: _pay,
-                                )
-                              : JzPrimaryButton(
-                                  label: l.topUpWalletCta,
-                                  onPressed: () =>
-                                      context.push(Routes.employerWallet),
-                                ),
+                          child: JzPrimaryButton(
+                            label: l.comingSoon,
+                            onPressed: null,
+                          ),
                         ),
                       ],
                     ),
@@ -183,9 +125,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   }
 }
 
-class _BalanceRow extends StatelessWidget {
-  const _BalanceRow({required this.balanceUzs});
-  final num? balanceUzs;
+/// Honest placeholder for the payment step while Click / Payme is being wired.
+class _PaymentSoonNotice extends StatelessWidget {
+  const _PaymentSoonNotice();
 
   @override
   Widget build(BuildContext context) {
@@ -194,69 +136,27 @@ class _BalanceRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.primary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.border),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            l.walletBalanceLabel,
-            style: context.text.bodyMedium?.copyWith(
-              color: colors.textSecondary,
-            ),
-          ),
-          balanceUzs == null
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(
-                  formatUzs(balanceUzs!),
-                  style: context.text.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InsufficientFundsNotice extends StatelessWidget {
-  const _InsufficientFundsNotice({required this.needed});
-  final num needed;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.gold.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.gold.withValues(alpha: 0.4)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline_rounded, size: 18, color: colors.gold),
+          Icon(Icons.credit_card_rounded, size: 18, color: colors.primary),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l.insufficientFundsTitle,
+                  l.comingSoon,
                   style: context.text.bodySmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  l.insufficientFundsHint(formatUzs(needed)),
+                  l.checkoutPaymentSoon,
                   style: context.text.bodySmall?.copyWith(
                     color: colors.textSecondary,
                   ),

@@ -65,8 +65,6 @@ abstract final class Routes {
 
   // Chat
   static String chatDetail(String id) => '/chat/$id';
-  static String videoCall(String id) => '/chat/$id/call/video';
-  static String voiceCall(String id) => '/chat/$id/call/voice';
 
   // Misc
   static const notifications = '/notifications';
@@ -126,7 +124,6 @@ abstract final class Routes {
   static const employerCompanyPeople = '/employer/company/people';
   static const employerCompanyGallery = '/employer/company/gallery';
   static const employerPromotions = '/employer/promotions';
-  static const employerWallet = '/employer/wallet';
   static String checkout(String jobId, String code) =>
       '/employer/checkout/$jobId/$code';
 }

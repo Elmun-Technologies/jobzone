@@ -631,6 +631,7 @@
   "valSalaryMaxLessMin": "Maksimal maosh minimal maoshdan katta bo'lishi kerak",
   "scheduleDateRequired": "Rejalashtirish uchun kelajakdagi sana va vaqtni tanlang yoki rejalashtirishni o'chiring",
   "checkoutTitle": "Rasmiylashtirish",
+  "checkoutPaymentSoon": "Onlayn to'lov (Click, Payme) ulanmoqda. Tarifni hozir tanlang — ishga tushishi bilan xabar beramiz.",
   "payCta": "To'lash",
   "offerNote": "To'lash bilan siz oferta shartlarini qabul qilasiz.",
   "orderPendingToast": "Buyurtma yaratildi — to'lov kutilmoqda",
