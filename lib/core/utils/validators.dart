@@ -19,4 +19,14 @@ abstract final class Validators {
     if (!v.startsWith('+') && v.length >= 11) v = '+$v';
     return RegExp(r'^\+\d{9,15}$').hasMatch(v) ? v : null;
   }
+
+  /// E.164 for a phone entered with a fixed "+998" prefix: the caller passes
+  /// only the national part (any spacing), and it must be exactly nine digits.
+  /// Returns "+998901234567" or null. Used by the phone sign-in screen, where
+  /// the "+998" is shown outside the field so the visitor types only their
+  /// number.
+  static String? uzLocalPhoneE164(String localPart) {
+    final digits = localPart.replaceAll(RegExp(r'\D'), '');
+    return digits.length == 9 ? '+998$digits' : null;
+  }
 }
