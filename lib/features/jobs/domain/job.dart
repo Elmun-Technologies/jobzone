@@ -170,6 +170,15 @@ class Job {
   bool get isBoosted =>
       boostedUntil != null && boostedUntil!.isAfter(DateTime.now());
 
+  /// Listing-tier visuals derived from [boostKind]. The per-listing tiers are
+  /// 'brand' (logo lights up) and 'premium' (the whole listing stands out and
+  /// tops the list); the legacy boosts map to the nearest tier ('featured' →
+  /// brand-style glow, 'top' → premium-style standout) so older boosted jobs
+  /// still read sensibly.
+  bool get tierGlowLogo =>
+      boostKind == 'brand' || boostKind == 'premium' || boostKind == 'featured';
+  bool get tierStandout => boostKind == 'premium' || boostKind == 'top';
+
   String get locationText =>
       location ??
       [city, country].where((e) => e != null && e.isNotEmpty).join(', ');

@@ -621,7 +621,9 @@
       "ru": "Русский",
       "en": "Английский"
     },
-    "langLevelNative": "родной"
+    "langLevelNative": "родной",
+    "tierBrand": "Бренд",
+    "tierPremium": "Премиум"
   },
   "company": {
     "about": "О компании",

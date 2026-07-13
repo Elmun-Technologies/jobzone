@@ -621,7 +621,9 @@
       "ru": "Rus",
       "en": "Ingliz"
     },
-    "langLevelNative": "ona tili"
+    "langLevelNative": "ona tili",
+    "tierBrand": "Brend",
+    "tierPremium": "Premium"
   },
   "company": {
     "about": "Kompaniya haqida",

@@ -24,6 +24,12 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
   const nowMs = useNow();
   const salary = salaryText(job);
   const loc = locationText(job);
+  // Listing-tier visuals from boostKind (legacy boosts map to the nearest tier).
+  const glow =
+    job.boostKind === "brand" ||
+    job.boostKind === "premium" ||
+    job.boostKind === "featured";
+  const standout = job.boostKind === "premium" || job.boostKind === "top";
 
   const typeLabel =
     job.jobType && t.has(`type.${job.jobType}`)
@@ -48,7 +54,11 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="border-border bg-card hover:border-primary/40 hover:bg-muted/30 block rounded-xl border p-4 transition-colors"
+      className={`block rounded-xl border p-4 transition-colors hover:bg-muted/30 ${
+        standout
+          ? "border-primary bg-primary/[0.04] shadow-[0_6px_28px_-8px_rgba(199,251,0,0.55)] ring-2 ring-primary/20"
+          : "border-border bg-card hover:border-primary/40"
+      }`}
     >
       <div className="flex gap-3">
         {/* Company logo or initial */}
@@ -59,10 +69,18 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
             alt={job.companyName}
             width={48}
             height={48}
-            className="size-12 shrink-0 rounded-lg object-cover"
+            className={`size-12 shrink-0 rounded-lg object-cover ${
+              glow
+                ? "ring-2 ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)]"
+                : ""
+            }`}
           />
         ) : (
-          <div className="bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg font-bold">
+          <div
+            className={`bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg font-bold ${
+              glow ? "shadow-[0_0_12px_rgba(199,251,0,0.55)]" : ""
+            }`}
+          >
             {job.companyName.charAt(0).toUpperCase()}
           </div>
         )}
@@ -74,7 +92,15 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
                 <h3 className="text-foreground truncate font-semibold">
                   {job.title}
                 </h3>
-                {job.boostActive ? (
+                {standout ? (
+                  <span className="bg-primary text-primary-foreground shrink-0 rounded-full px-2 py-0.5 text-xs font-bold">
+                    {job.boostKind === "premium" ? t("tierPremium") : "TOP"}
+                  </span>
+                ) : glow ? (
+                  <span className="border-primary text-foreground shrink-0 rounded-full border px-2 py-0.5 text-xs font-bold">
+                    {t("tierBrand")}
+                  </span>
+                ) : job.boostActive ? (
                   <span className="bg-primary text-primary-foreground shrink-0 rounded-full px-2 py-0.5 text-xs font-bold">
                     TOP
                   </span>
