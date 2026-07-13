@@ -356,21 +356,21 @@ export default async function AboutPage({
               features={[t("pricing.standard.f1"), t("pricing.standard.f2")]}
             />
             <PriceCard
-              name={t("pricing.highlight.name")}
-              price={t("pricing.highlight.price")}
-              unit={t("pricing.highlight.unit")}
-              tag={t("pricing.highlight.tag")}
-              features={[t("pricing.highlight.f1"), t("pricing.highlight.f2")]}
+              name={t("pricing.brand.name")}
+              price={t("pricing.brand.price")}
+              unit={t("pricing.brand.unit")}
+              tag={t("pricing.brand.tag")}
+              features={[t("pricing.brand.f1"), t("pricing.brand.f2")]}
               featured
             />
             <PriceCard
-              name={t("pricing.business.name")}
-              price={t("pricing.business.price")}
-              unit={t("pricing.business.unit")}
+              name={t("pricing.premium.name")}
+              price={t("pricing.premium.price")}
+              unit={t("pricing.premium.unit")}
               features={[
-                t("pricing.business.f1"),
-                t("pricing.business.f2"),
-                t("pricing.business.f3"),
+                t("pricing.premium.f1"),
+                t("pricing.premium.f2"),
+                t("pricing.premium.f3"),
               ]}
             />
           </div>

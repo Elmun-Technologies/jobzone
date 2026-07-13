@@ -46,6 +46,7 @@ import '../../features/employer/presentation/dashboard/employer_dashboard_page.d
 import '../../features/employer/presentation/employer_shell.dart';
 import '../../features/monetization/presentation/checkout_page.dart';
 import '../../features/monetization/presentation/promotions_history_page.dart';
+import '../../features/monetization/presentation/tiers_page.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
 import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
@@ -346,6 +347,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.employerPromotions,
         builder: (c, s) => const PromotionsHistoryPage(),
       ),
+      GoRoute(path: Routes.employerTiers, builder: (c, s) => const TiersPage()),
       GoRoute(
         path: Routes.employerWallet,
         builder: (c, s) => const WalletPage(),
