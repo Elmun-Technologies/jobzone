@@ -749,32 +749,32 @@
       "free": {
         "name": "Free",
         "price": "0",
-        "unit": "UZS · to get started",
-        "f1": "1 active vacancy",
-        "f2": "A plain pin on the map"
+        "unit": "UZS · first vacancy",
+        "f1": "1 free vacancy",
+        "f2": "Shown in both apps"
       },
       "standard": {
         "name": "Standard",
-        "price": "99 000",
-        "unit": "UZS · vacancy · 30 days",
-        "f1": "Priority in results",
-        "f2": "All core features"
+        "price": "39 900",
+        "unit": "UZS · vacancy",
+        "f1": "AI-assisted fill",
+        "f2": "Unlimited applications"
       },
-      "highlight": {
-        "name": "Highlight",
-        "price": "199 000",
-        "unit": "UZS · vacancy · 30 days",
-        "tag": "Most visible",
-        "f1": "A bright volt pin on the map",
-        "f2": "Top of the vacancy list"
+      "brand": {
+        "name": "Brand",
+        "price": "79 900",
+        "unit": "UZS · vacancy",
+        "tag": "Most popular",
+        "f1": "Logo lights up",
+        "f2": "Trust badge + higher in search"
       },
-      "business": {
-        "name": "Business",
-        "price": "499 000",
-        "unit": "UZS · per month",
-        "f1": "Up to 10 vacancies",
-        "f2": "Company logo on the map",
-        "f3": "Application analytics"
+      "premium": {
+        "name": "Premium",
+        "price": "99 900",
+        "unit": "UZS · vacancy",
+        "f1": "Stands out completely",
+        "f2": "Top of list and map",
+        "f3": "~3× more candidates"
       },
       "note": "Only employers pay. For job seekers — free forever.",
       "footnote": "Prices are a launch estimate, subject to refinement"
@@ -934,16 +934,38 @@
     "title": "Pricing",
     "heroTitle": "The fastest, cheapest way to hire",
     "heroSubtitle": "Thousands of workers search on Yolla. Your first vacancy is free.",
-    "firstPost": "First vacancy",
-    "free": "Free",
-    "firstPostHint": "No charge, published instantly and shown in both apps.",
-    "nextPosts": "Further vacancies",
-    "nextPostsHint": "Each additional vacancy is charged from your Hamyon wallet.",
-    "promoTitle": "Promotion packages",
-    "promoSubtitle": "Push your vacancy to the top — 3× more candidates.",
-    "bestValue": "Best value",
-    "duration": "{days} days",
-    "perDay": "≈{price}/day",
+    "tiers": {
+      "heading": "Every vacancy — with its own visibility",
+      "sub": "Your first vacancy is free. For the rest, choose the visibility — the more it stands out, the more candidates.",
+      "firstFree": "First vacancy — free",
+      "cta": "Post a vacancy",
+      "standard": {
+        "name": "Standard",
+        "tagline": "Your vacancy gets published",
+        "f1": "Shown in both apps",
+        "f2": "Fill it in 5 minutes with AI",
+        "f3": "Unlimited applications",
+        "angle": "Cheaper than one day of downtime."
+      },
+      "brand": {
+        "name": "Brand",
+        "badge": "Most popular",
+        "tagline": "Your logo lights up",
+        "f1": "Everything in Standard",
+        "f2": "A bright logo — on cards and the map",
+        "f3": "Trust badge + higher in search",
+        "angle": "A familiar brand earns more trust — ~2× more clicks."
+      },
+      "premium": {
+        "name": "Premium",
+        "badge": "Fastest results",
+        "tagline": "Stand out from everyone",
+        "f1": "Everything in Brand",
+        "f2": "A volt-highlighted listing",
+        "f3": "Top of the list and the map",
+        "angle": "Grabs attention on sight — ~3× more candidates."
+      }
+    },
     "benefit1Title": "Fast",
     "benefit1Desc": "Post in minutes — fill it in with AI.",
     "benefit2Title": "Targeted",
@@ -952,7 +974,6 @@
     "benefit3Desc": "No hidden fees — you pay for what you see.",
     "ctaTitle": "Start today",
     "ctaText": "First vacancy is free — post it in a couple of minutes.",
-    "ctaButton": "Post a vacancy",
-    "cheaper": "{pct}% cheaper"
+    "ctaButton": "Post a vacancy"
   }
 }
