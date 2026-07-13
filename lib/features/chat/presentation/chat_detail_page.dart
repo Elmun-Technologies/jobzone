@@ -1,9 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
@@ -89,7 +87,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
     return Scaffold(
       body: Column(
         children: [
-          _Header(conversationId: widget.conversationId, convo: convo),
+          _Header(convo: convo),
           Expanded(
             child: async.when(
               loading: () => const JzLoader(),
@@ -147,8 +145,7 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.conversationId, required this.convo});
-  final String conversationId;
+  const _Header({required this.convo});
   final Conversation? convo;
 
   @override
@@ -207,19 +204,6 @@ class _Header extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          PopupMenuButton<String>(
-            iconColor: Colors.white,
-            onSelected: (v) {
-              final route = v == 'video'
-                  ? Routes.videoCall(conversationId)
-                  : Routes.voiceCall(conversationId);
-              context.push(route, extra: convo);
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(value: 'voice', child: Text(l.voiceCall)),
-              PopupMenuItem(value: 'video', child: Text(l.videoCall)),
-            ],
           ),
         ],
       ),

@@ -25,7 +25,6 @@ import '../../features/auth/presentation/pages/phone_sign_in_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
 import '../../features/auth/presentation/pages/verify_code_page.dart';
 import '../../features/chat/domain/chat_models.dart';
-import '../../features/chat/presentation/call_page.dart';
 import '../../features/chat/presentation/chat_detail_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/companies/domain/company.dart';
@@ -50,7 +49,6 @@ import '../../features/monetization/presentation/tiers_page.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
 import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
-import '../../features/employer/presentation/wallet/wallet_page.dart';
 import '../../features/jobs/domain/job.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/jobs/presentation/bookmarks_page.dart';
@@ -349,10 +347,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.employerTiers, builder: (c, s) => const TiersPage()),
       GoRoute(
-        path: Routes.employerWallet,
-        builder: (c, s) => const WalletPage(),
-      ),
-      GoRoute(
         path: '/employer/checkout/:jobId/:code',
         builder: (c, s) => CheckoutPage(
           jobId: s.pathParameters['jobId']!,
@@ -424,28 +418,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
 
-      // Chat detail + calls
+      // Chat detail
       GoRoute(
         path: '/chat/:id',
         builder: (c, s) => ChatDetailPage(
           conversationId: s.pathParameters['id']!,
           preview: s.extra as Conversation?,
-        ),
-      ),
-      GoRoute(
-        path: '/chat/:id/call/video',
-        builder: (c, s) => CallPage(
-          conversationId: s.pathParameters['id']!,
-          isVideo: true,
-          peer: s.extra as Conversation?,
-        ),
-      ),
-      GoRoute(
-        path: '/chat/:id/call/voice',
-        builder: (c, s) => CallPage(
-          conversationId: s.pathParameters['id']!,
-          isVideo: false,
-          peer: s.extra as Conversation?,
         ),
       ),
 

@@ -687,6 +687,7 @@
   "valSalaryMaxLessMin": "Max salary must be greater than min salary",
   "scheduleDateRequired": "Pick a future date and time to schedule, or turn scheduling off",
   "checkoutTitle": "Checkout",
+  "checkoutPaymentSoon": "Online payment (Click, Payme) is being connected. Pick a plan now — we'll notify you the moment it goes live.",
   "payCta": "Pay",
   "offerNote": "By paying you accept the offer agreement.",
   "orderPendingToast": "Order created — awaiting payment",

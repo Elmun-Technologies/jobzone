@@ -15,6 +15,11 @@ import {
 import { formatDate } from "@/lib/format";
 import { organizationJsonLd, siteUrl } from "@/lib/seo";
 
+// Auth/session-dependent, per-request. Without this the page can be
+// full-route-cached (getCurrentUser swallows cookies() so Next never sees
+// the dynamic signal) and one visitor's render could be served to another.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
