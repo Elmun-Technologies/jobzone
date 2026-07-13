@@ -38,7 +38,7 @@ class ApplicationsController extends AsyncNotifier<List<Application>> {
 /// Whether the current user has already applied to [jobId] — drives the
 /// job-details Apply button's disabled "Applied" state.
 final hasAppliedProvider = Provider.family<bool, String>((ref, jobId) {
-  final apps = ref.watch(applicationsControllerProvider).valueOrNull;
+  final apps = ref.watch(applicationsControllerProvider).value;
   return apps?.any((a) => a.job.id == jobId) ?? false;
 });
 
