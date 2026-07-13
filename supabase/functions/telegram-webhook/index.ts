@@ -2,15 +2,23 @@
 // `/start <token>` handshake, then confirms in-chat. Notification fan-out to
 // Telegram is sent from here too (later); cleanly no-ops until the bot exists.
 //
-// Required secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN
+// Required secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN,
+//                    TELEGRAM_WEBHOOK_SECRET (also set as the `secret_token` on
+//                    the bot's setWebhook call — see docs/go-live-checklist.md)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
+import { requireTelegramSecret } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  // Telegram sends no Supabase JWT; authenticity is the secret_token echoed
+  // back on every update. Fail closed.
+  const denied = requireTelegramSecret(req);
+  if (denied) return denied;
+
   const update = await req.json().catch(() => ({}));
   const msg = update?.message;
   const text: string = msg?.text ?? "";
