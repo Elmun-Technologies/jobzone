@@ -13,6 +13,12 @@
 -- statement in the migration history — no columns have been dropped or
 -- renamed). Same WHERE clause as 0039 (expiry + blocked-job/company filter).
 
+-- recommended_jobs() is declared `returns setof public.job_feed` (0051, then
+-- replaced in 0052), so it depends on this view's composite type and makes
+-- `drop view job_feed` fail with 2BP01. Drop the function first, then recreate
+-- it (with its latest, dismissed-jobs-aware body) after the view is rebuilt.
+drop function if exists public.recommended_jobs();
+
 drop view if exists public.job_feed;
 create view public.job_feed
   with (security_invoker = true) as
@@ -89,3 +95,61 @@ create view public.job_feed
   where (j.expires_at is null or j.expires_at > now())
     and j.blocked_at is null
     and c.blocked_at is null;
+
+-- Recreate recommended_jobs() against the rebuilt view (dropped above so the
+-- view could be replaced). Body is identical to 0052 (its latest definition);
+-- `select jf.*` / `returns setof job_feed` pick up the new column list
+-- automatically. Grants restored (a fresh function starts with none).
+create or replace function public.recommended_jobs()
+returns setof public.job_feed
+language sql stable
+set search_path = public as $$
+  with me as (
+    select p.id as uid, p.city, p.headline
+    from public.profiles p
+    where p.id = auth.uid()
+  )
+  select jf.*
+  from public.job_feed jf
+  cross join me
+  cross join lateral (
+    select (
+        (case when (jf.city is not null and me.city is not null
+                    and lower(trim(jf.city)) = lower(trim(me.city)))
+              then 3 else 0 end)
+      + (case when (length(coalesce(trim(me.headline), '')) >= 3
+                    and jf.title ilike '%' || trim(me.headline) || '%')
+              then 3 else 0 end)
+      + (case when exists (
+            select 1 from public.experiences e
+            where e.profile_id = me.uid
+              and length(coalesce(trim(e.title), '')) >= 3
+              and jf.title ilike '%' || trim(e.title) || '%'
+          ) then 2 else 0 end)
+      + least((
+            select count(*) from public.profile_skills ps
+            join public.skills s on s.id = ps.skill_id
+            where ps.profile_id = me.uid
+              and exists (
+                select 1 from unnest(jf.skills_required) req
+                where lower(trim(req)) = lower(trim(s.name))
+              )
+          )::int, 3)
+    ) as score
+  ) sc
+  where jf.status = 'open'
+    and sc.score > 0
+    and not exists (
+      select 1 from public.applications a
+      where a.job_id = jf.id and a.applicant_id = me.uid
+    )
+    and not exists (
+      select 1 from public.dismissed_jobs d
+      where d.job_id = jf.id and d.profile_id = me.uid
+    )
+  order by sc.score desc, jf.boost_active desc, jf.posted_at desc nulls last
+  limit 30;
+$$;
+
+revoke all on function public.recommended_jobs() from anon;
+grant execute on function public.recommended_jobs() to authenticated;
