@@ -89,6 +89,15 @@ flutter run --dart-define-from-file=env/dev.json
 `Env` (`lib/core/config/env.dart`) reads these via `--dart-define`;
 `Env.hasSupabase` flips the whole app from mock to live.
 
+> **Release/profile builds default to the live demo backend.** In a *debug*
+> build (`flutter run`, `flutter test`) an absent `SUPABASE_URL` keeps the app
+> in offline/mock mode, as above. In a *release* or *profile* build (a shipped
+> iOS/Android/web build), if no `--dart-define` was passed, `Env` falls back to
+> the public, RLS-protected publishable key baked into the CI workflows — so a
+> bare Xcode iOS build behaves the same as the Android APK instead of silently
+> showing offline mock data. Pass explicit `--dart-define`s to target a
+> different backend.
+
 ### 3.3 Run the web app
 
 ```bash
