@@ -60,18 +60,33 @@ class ChatRepository {
         .limit(1)
         .maybeSingle();
     final profile = other?['profiles_public'] as Map<String, dynamic>?;
+    // This participant's own last_read_at drives the unread count below.
+    final mine = await client
+        .from('conversation_participants')
+        .select('last_read_at')
+        .eq('conversation_id', id)
+        .eq('profile_id', uid)
+        .maybeSingle();
+    final lastReadAt = DateTime.tryParse('${mine?['last_read_at']}');
     final convo = await client
         .from('conversations')
-        .select('last_message_at, messages(content, created_at)')
+        .select('last_message_at, messages(content, created_at, sender_id)')
         .eq('id', id)
         .maybeSingle();
     String? lastText;
     DateTime? lastAt;
+    var unread = 0;
     final msgs = convo?['messages'];
     if (msgs is List && msgs.isNotEmpty) {
       msgs.sort((a, b) => '${b['created_at']}'.compareTo('${a['created_at']}'));
       lastText = msgs.first['content'] as String?;
       lastAt = DateTime.tryParse('${msgs.first['created_at']}')?.toLocal();
+      for (final m in msgs) {
+        if (m['sender_id'] == uid) continue;
+        final createdAt = DateTime.tryParse('${m['created_at']}');
+        if (createdAt == null) continue;
+        if (lastReadAt == null || createdAt.isAfter(lastReadAt)) unread++;
+      }
     }
     return Conversation(
       id: id,
@@ -80,6 +95,7 @@ class ChatRepository {
       subtitle: profile?['headline'] as String?,
       lastMessage: lastText,
       lastMessageAt: lastAt,
+      unreadCount: unread,
     );
   }
 
