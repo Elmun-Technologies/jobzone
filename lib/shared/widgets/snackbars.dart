@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -33,5 +34,25 @@ String localizedError(BuildContext context, Object error) {
         return l.notAllowed;
     }
   }
+  // The real reason (undefined column from an un-applied migration → 42703 /
+  // PGRST204, a check/enum violation, a function 500…) is intentionally not
+  // shown to users, but log it so it's visible in Logcat during dev/debug —
+  // otherwise "something went wrong" is undiagnosable from the screen.
+  _logError(error);
   return l.errUnknown;
+}
+
+/// Dev-only breadcrumb for errors we deliberately show as a generic message.
+/// Includes the Postgrest code/details when present so a failed publish/write
+/// can be traced without exposing raw DB internals to the user.
+void _logError(Object error) {
+  if (!kDebugMode) return;
+  if (error is PostgrestException) {
+    debugPrint(
+      'jobzone error → PostgrestException '
+      'code=${error.code} message=${error.message} details=${error.details}',
+    );
+  } else {
+    debugPrint('jobzone error → $error');
+  }
 }

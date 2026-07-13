@@ -53,27 +53,43 @@ class AiContentRepository {
     String locale = 'uz',
   }) async {
     if (_live) {
-      final res = await _ref
-          .read(supabaseClientProvider)
-          .functions
-          .invoke(
-            'generate-job-content',
-            body: {
-              'action': 'draft',
-              'title': title,
-              'category': category,
-              'jobType': jobType,
-              'skills': skills,
-              'locale': locale,
-            },
-          );
-      final m = (res.data as Map?)?.cast<String, dynamic>() ?? const {};
-      return JobDraft(
-        description: (m['description'] ?? '') as String,
-        responsibilities: (m['responsibilities'] ?? '') as String,
-        requirements: (m['requirements'] ?? '') as String,
-        benefits: (m['benefits'] ?? '') as String,
-      );
+      // Mirror matchJob: never let a missing/failed edge function (not deployed,
+      // rate-limited, 500…) leave the "AI генерация" button dead. Fall back to
+      // the same local templates so the employer always gets usable draft text.
+      try {
+        final res = await _ref
+            .read(supabaseClientProvider)
+            .functions
+            .invoke(
+              'generate-job-content',
+              body: {
+                'action': 'draft',
+                'title': title,
+                'category': category,
+                'jobType': jobType,
+                'skills': skills,
+                'locale': locale,
+              },
+            );
+        final m = (res.data as Map?)?.cast<String, dynamic>() ?? const {};
+        final draft = JobDraft(
+          description: (m['description'] ?? '') as String,
+          responsibilities: (m['responsibilities'] ?? '') as String,
+          requirements: (m['requirements'] ?? '') as String,
+          benefits: (m['benefits'] ?? '') as String,
+        );
+        // An empty payload (misconfigured function) is as useless as a throw —
+        // treat it the same and use the local templates instead.
+        if (draft.description.trim().isEmpty &&
+            draft.responsibilities.trim().isEmpty &&
+            draft.requirements.trim().isEmpty &&
+            draft.benefits.trim().isEmpty) {
+          return _localDraft(title, skills, locale);
+        }
+        return draft;
+      } catch (_) {
+        return _localDraft(title, skills, locale);
+      }
     }
     return _localDraft(title, skills, locale);
   }
