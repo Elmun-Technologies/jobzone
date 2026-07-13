@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
+import '../../data/company_follow_repository.dart';
 import '../../domain/company.dart';
 
 /// Company Details header (Figma): a soft grey bar with back + "Company
@@ -44,7 +46,9 @@ class CompanyHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 48),
+              // Follow / subscribe toggle — a filled bell means "following", so
+              // this company's new jobs show up under Подписки.
+              _FollowButton(companyId: company.id),
             ],
           ),
         ),
@@ -160,6 +164,40 @@ class _LogoCircle extends StatelessWidget {
               errorWidget: (_, _, _) =>
                   const Icon(Icons.business_rounded, color: Colors.white),
             ),
+    );
+  }
+}
+
+/// Bell toggle in the header: subscribes the seeker to a company so its new
+/// vacancies surface under Подписки. Filled (volt) while following.
+class _FollowButton extends ConsumerWidget {
+  const _FollowButton({required this.companyId});
+
+  final String companyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final following =
+        ref.watch(isFollowingCompanyProvider(companyId)).value ?? false;
+    return JzCircleButton(
+      icon: following
+          ? Icons.notifications_active_rounded
+          : Icons.notifications_none_rounded,
+      filled: following,
+      onTap: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        final message = following
+            ? l.companyUnfollowedToast
+            : l.companyFollowedToast;
+        await ref.read(companyFollowRepositoryProvider).toggle(companyId);
+        ref.invalidate(isFollowingCompanyProvider(companyId));
+        ref.invalidate(followedCompaniesProvider);
+        ref.invalidate(followedCompanyJobsProvider);
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      },
     );
   }
 }

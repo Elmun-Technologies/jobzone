@@ -30,6 +30,7 @@ import '../../features/chat/presentation/chat_detail_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/companies/domain/company.dart';
 import '../../features/companies/presentation/company_details_page.dart';
+import '../../features/companies/presentation/subscriptions_page.dart';
 import '../../features/companies/presentation/gallery_page.dart';
 import '../../features/companies/presentation/intro_video_page.dart';
 import '../../features/employer/domain/applicant.dart';
@@ -531,6 +532,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.savedSearches,
         builder: (c, s) => const SavedSearchesPage(),
+      ),
+      GoRoute(
+        path: Routes.subscriptions,
+        builder: (c, s) => const SubscriptionsPage(),
       ),
       GoRoute(
         path: Routes.accountSettings,
