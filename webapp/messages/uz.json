@@ -407,7 +407,9 @@
       "paymentBalance": "Joriy balans: {balance}",
       "paymentInsufficientTitle": "Hamyoningizda mablag' yetarli emas",
       "paymentInsufficientHint": "Nashr qilish uchun {price} kerak. Hamyonni to'ldiring.",
-      "paymentTopUp": "Hamyonga o'tish"
+      "paymentTopUp": "Hamyonga o'tish",
+      "publishAndPay": "E’lon qilish va to‘lash",
+      "paymentTierNext": "Bu pullik vakansiya. Keyingi bosqichda tarifni tanlang ({price} dan) va Payme yoki Click orqali to‘lang — to‘lovdan so‘ng darhol efirga chiqadi."
     },
     "jobPromoted": "Reklama yoqildi! Vakansiyangiz ajratib ko'rsatiladi.",
     "viewResume": "Rezyumeni ko'rish",
@@ -428,7 +430,23 @@
     "issued": "Berilgan",
     "expires": "Amal qiladi",
     "backToApplicants": "Barcha nomzodlar",
-    "noResumeYet": "Bu nomzod hali batafsil rezyume to'ldirmagan."
+    "noResumeYet": "Bu nomzod hali batafsil rezyume to'ldirmagan.",
+    "pay": {
+      "title": "Vakansiyani e’lon qiling",
+      "subtitle": "«{title}» uchun tarifni tanlang va e’lon qilish uchun to‘lang.",
+      "payWith": "{provider} orqali to‘lash",
+      "unconfigured": "Onlayn to‘lov hali sozlanmagan. Iltimos, qo‘llab-quvvatlashga murojaat qiling.",
+      "error": "Xatolik yuz berdi. Qayta urinib ko‘ring.",
+      "note": "Payme yoki Click orqali xavfsiz to‘lov. To‘lov tasdiqlangan zahoti vakansiya efirga chiqadi."
+    },
+    "paid": {
+      "publishedTitle": "To‘lov qabul qilindi — vakansiyangiz efirda!",
+      "publishedSub": "Endi u nomzodlarga ilovada ham, vebda ham ko‘rinadi.",
+      "viewListing": "Vakansiyani ochish",
+      "myJobs": "Mening vakansiyalarim",
+      "confirmingTitle": "To‘lovingiz tasdiqlanmoqda…",
+      "confirmingSub": "Bu bir necha soniya olishi mumkin. Sahifa avtomatik yangilanadi."
+    }
   },
   "wallet": {
     "title": "Hamyon",
