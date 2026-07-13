@@ -130,6 +130,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                             // sheet that opens on tap.
                             label: job.title,
                             imageUrl: job.companyLogoUrl,
+                            tier: job.tierStandout
+                                ? JzMarkerTier.premium
+                                : job.tierGlowLogo
+                                ? JzMarkerTier.brand
+                                : JzMarkerTier.none,
                             onTap: () => _showJobPreview(job),
                           ),
                     ],
