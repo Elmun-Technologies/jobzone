@@ -71,6 +71,7 @@ function job(p: Partial<Job> & Pick<Job, "id" | "title" | "companyId">): Job {
     postedAt: "2026-06-20T09:00:00Z",
     expiresAt: null,
     boostActive: false,
+    boostKind: null,
     applicantsCount: 0,
     screeningQuestions: [],
     ...p,
@@ -93,6 +94,7 @@ export const mockJobs: Job[] = [
     skills: ["Dart", "Flutter", "Riverpod", "Supabase"],
     postedAt: "2026-06-30T07:00:00Z",
     boostActive: true,
+    boostKind: "premium",
   }),
   job({
     id: "mock-2",
@@ -115,6 +117,8 @@ export const mockJobs: Job[] = [
       { code: "ru", level: "b1" },
     ],
     postedAt: "2026-06-29T15:00:00Z",
+    boostActive: true,
+    boostKind: "brand",
   }),
   job({
     id: "mock-3",

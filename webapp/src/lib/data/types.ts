@@ -63,6 +63,10 @@ export interface Job {
   postedAt: string | null;
   expiresAt: string | null;
   boostActive: boolean;
+  /** The listing tier — 'brand' (logo lights up) or 'premium' (whole listing
+   * stands out) — or a legacy boost kind ('featured' | 'top'), or null. Drives
+   * the tier visuals on cards and the map. */
+  boostKind: string | null;
   /** How many seekers have applied (bumped by the applications trigger). Powers
    * the apply page's "N already applied" social proof. */
   applicantsCount: number;

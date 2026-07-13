@@ -621,7 +621,9 @@
       "ru": "Russian",
       "en": "English"
     },
-    "langLevelNative": "native"
+    "langLevelNative": "native",
+    "tierBrand": "Brand",
+    "tierPremium": "Premium"
   },
   "company": {
     "about": "About",

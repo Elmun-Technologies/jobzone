@@ -24,6 +24,40 @@ class JobCard extends ConsumerWidget {
   final Job job;
   final double? width;
 
+  /// The listing-tier badge shown top-left: a gold "Premium"/"TOP" pill for a
+  /// standout tier, a volt-outline "Brend" tag for the logo-glow tier (where the
+  /// glowing logo is the main signal), or nothing for a plain listing.
+  Widget? _tierBadge(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    if (job.tierStandout) {
+      return JzTopBadge(
+        label: job.boostKind == 'premium' ? l.tierPremiumName : 'TOP',
+      );
+    }
+    if (job.tierGlowLogo) {
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 3,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: colors.primary, width: 1.4),
+        ),
+        child: Text(
+          l.tierBrandName,
+          style: context.text.labelSmall?.copyWith(
+            color: colors.textPrimary,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.3,
+          ),
+        ),
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
@@ -46,6 +80,7 @@ class JobCard extends ConsumerWidget {
     // JzPressable: the whole card eases down slightly while pressed — tactile
     // feedback on the app's most-tapped surface (raw Listener, so it never
     // steals the InkWell's tap or the toggles' taps).
+    final tierBadge = _tierBadge(context);
     return JzPressable(
       child: Container(
         width: width,
@@ -53,15 +88,25 @@ class JobCard extends ConsumerWidget {
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: colors.border),
-          // A soft lift so the card reads as tappable (no-op in dark, where
-          // the border carries separation instead).
+          border: Border.all(
+            color: job.tierStandout ? colors.primary : colors.border,
+            width: job.tierStandout ? 1.6 : 1,
+          ),
+          // A soft lift so the card reads as tappable (no-op in dark, where the
+          // border carries separation instead); a Premium standout listing gets
+          // a volt glow so it visibly pops off the feed.
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
+            job.tierStandout
+                ? BoxShadow(
+                    color: colors.primary.withValues(alpha: 0.28),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  )
+                : BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
           ],
         ),
         child: Material(
@@ -76,7 +121,7 @@ class JobCard extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      if (job.isBoosted) const JzTopBadge(),
+                      ?tierBadge,
                       const Spacer(),
                       _IconToggle(
                         active: bookmarked,
@@ -120,7 +165,11 @@ class JobCard extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
-                      _Logo(name: job.companyName, url: job.companyLogoUrl),
+                      _Logo(
+                        name: job.companyName,
+                        url: job.companyLogoUrl,
+                        glow: job.tierGlowLogo,
+                      ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(
@@ -368,9 +417,12 @@ class _IconToggle extends StatelessWidget {
 }
 
 class _Logo extends StatelessWidget {
-  const _Logo({required this.name, this.url});
+  const _Logo({required this.name, this.url, this.glow = false});
   final String name;
   final String? url;
+
+  /// Brand/Premium listings light the logo up with a volt ring + glow.
+  final bool glow;
 
   static const _palette = [
     Color(0xFF0A0A0A),
@@ -396,7 +448,7 @@ class _Logo extends StatelessWidget {
         ),
       ),
     );
-    return ClipRRect(
+    final logo = ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: SizedBox(
         height: 52,
@@ -409,6 +461,23 @@ class _Logo extends StatelessWidget {
                 errorWidget: (_, _, _) => fallback,
               ),
       ),
+    );
+    if (!glow) return logo;
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.md + 2),
+        border: Border.all(color: colors.primary, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: colors.primary.withValues(alpha: 0.5),
+            blurRadius: 10,
+            spreadRadius: 0.5,
+          ),
+        ],
+      ),
+      child: logo,
     );
   }
 }
