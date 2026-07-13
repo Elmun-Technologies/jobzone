@@ -4,6 +4,10 @@ import 'package:latlong2/latlong.dart';
 /// Marker kind → pin colour/icon. Keeps call-sites free of platform details.
 enum JzMarkerKind { job, applicant, picked }
 
+/// Listing-tier visual for a job marker: `brand` / `premium` make the marker
+/// stand out (a volt ring/glow round the logo); `none` is a plain marker.
+enum JzMarkerTier { none, brand, premium }
+
 /// A pin on a [JzMapView]. Uses the app-wide `latlong2` [LatLng]; the platform
 /// implementations convert to their native point type.
 class JzMapMarker {
@@ -11,6 +15,7 @@ class JzMapMarker {
     required this.id,
     required this.point,
     this.kind = JzMarkerKind.job,
+    this.tier = JzMarkerTier.none,
     this.label,
     this.imageUrl,
     this.onTap,
@@ -20,6 +25,9 @@ class JzMapMarker {
   final String id;
   final LatLng point;
   final JzMarkerKind kind;
+
+  /// Paid listing tier — brand/premium markers get a volt ring/glow.
+  final JzMarkerTier tier;
 
   /// Optional short text shown on the marker (e.g. the job title). Mobile renders it
   /// into the pin bitmap as a pill; web shows it as a pill widget. Null → a

@@ -17,6 +17,8 @@ import {
 
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import type { Job } from "@/lib/data/types";
+
+import { mapTier } from "./tier";
 import {
   formatDistanceMeters,
   salaryText,
@@ -50,27 +52,33 @@ function escHtml(v: string): string {
 }
 
 /** A job-title tag pin (bubble + pointer), or a dot when there's no label.
- * Every pin is volt on ink — high-contrast on any tile; a boosted job gets a
- * ★; long titles truncate with an ellipsis. */
-function pinIcon(label: string | null, boosted: boolean): L.DivIcon {
+ * Every pin is volt on ink — high-contrast on any tile; a brand/premium tier
+ * gets a volt glow (premium also a ★); long titles truncate with an ellipsis. */
+function pinIcon(
+  label: string | null,
+  tier: "brand" | "premium" | null,
+): L.DivIcon {
   if (!label) {
     return L.divIcon({
       className: "",
       html: `<span style="display:block;width:15px;height:15px;border-radius:9999px;
         transform:translate(-50%,-50%);background:#C7FB00;border:2px solid #0A0A0A;
-        box-shadow:0 2px 7px rgba(0,0,0,.4)"></span>`,
+        box-shadow:${tier ? "0 0 10px 2px rgba(199,251,0,.85)" : "0 2px 7px rgba(0,0,0,.4)"}"></span>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0],
     });
   }
-  const text = escHtml(boosted ? `★ ${label}` : label);
+  const text = escHtml(tier === "premium" ? `★ ${label}` : label);
+  const shadow = tier
+    ? "0 0 0 2px rgba(199,251,0,.55),0 4px 16px rgba(199,251,0,.55)"
+    : "0 4px 12px rgba(0,0,0,.35)";
   return L.divIcon({
     className: "",
     html: `<div style="position:relative;transform:translate(-50%,-100%)">
       <div class="yolla-pin" style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
         padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;
         white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;
-        box-shadow:0 4px 12px rgba(0,0,0,.35)">${text}</div>
+        box-shadow:${shadow}">${text}</div>
       <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
         border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
     </div>`,
@@ -249,7 +257,7 @@ export default function JobsMapInner({
             <Marker
               key={j.id}
               position={[j.lat, j.lng]}
-              icon={pinIcon(j.title, j.boostActive)}
+              icon={pinIcon(j.title, mapTier(j.boostKind))}
             >
               <Popup>
                 <PinCard

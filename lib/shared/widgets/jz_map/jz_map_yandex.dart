@@ -320,6 +320,7 @@ class _JzMapViewState extends State<JzMapView> {
               cacheKey: '$url|${label ?? ''}',
               logo: logo,
               label: label,
+              tier: m.tier,
             );
             return img.clone();
           }
@@ -327,7 +328,7 @@ class _JzMapViewState extends State<JzMapView> {
             return (await MarkerBitmaps.labelTag(label)).clone();
           }
           return _assetImage('assets/icon/pin_job.png');
-        }, id: 'jz:logo:$url|${label ?? ''}'),
+        }, id: 'jz:logo:$url|${label ?? ''}|${m.tier.name}'),
         _centered,
       );
       return;
