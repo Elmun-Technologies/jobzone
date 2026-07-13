@@ -303,6 +303,12 @@ class _SelectableTierCard extends StatelessWidget {
       ListingTier.brand => l.tierBrandTagline,
       ListingTier.premium => l.tierPremiumTagline,
     };
+    // The nudge badges from the pricing page, kept on the picker too.
+    final badge = switch (info.tier) {
+      ListingTier.standard => null,
+      ListingTier.brand => l.tierPopular,
+      ListingTier.premium => l.tierBestResult,
+    };
 
     return InkWell(
       onTap: onTap,
@@ -330,11 +336,37 @@ class _SelectableTierCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: context.text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          style: context.text.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      if (badge != null) ...[
+                        const SizedBox(width: AppSpacing.sm),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.primary,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            badge,
+                            style: context.text.labelSmall?.copyWith(
+                              color: colors.onPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(
