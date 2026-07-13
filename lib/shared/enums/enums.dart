@@ -84,7 +84,8 @@ enum ApplicationStatus {
   interview('interview'),
   offer('offer'),
   rejected('rejected'),
-  hired('hired');
+  hired('hired'),
+  withdrawn('withdrawn');
 
   const ApplicationStatus(this.wire);
   final String wire;

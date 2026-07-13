@@ -14,6 +14,7 @@ import '../../jobs/domain/job.dart';
 import '../../jobs/domain/screening_question.dart';
 import '../../profile/data/cv_repository.dart';
 import '../application/applications_controller.dart';
+import '../data/applications_repository.dart' show NotSignedIn;
 
 class ApplyJobPage extends ConsumerStatefulWidget {
   const ApplyJobPage({super.key, required this.jobId});
@@ -90,7 +91,17 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
             answers: _answers.isEmpty ? null : _answers,
             resumeId: resumeId,
           );
-      if (mounted) context.go(Routes.applySuccess(widget.jobId));
+      // pushReplacement (not go) so the stack behind this page (home ->
+      // jobDetails -> apply) survives — otherwise the success screen's back
+      // button has nothing to pop.
+      if (mounted) {
+        context.pushReplacement(Routes.applySuccess(widget.jobId));
+      }
+    } on NotSignedIn {
+      if (mounted) {
+        showErrorSnack(context, context.l10n.errUnknown);
+        context.go(Routes.signIn);
+      }
     } on PostgrestException catch (e) {
       // 23505 = unique_violation on (job_id, applicant_id): already applied.
       if (mounted) {

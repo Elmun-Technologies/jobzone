@@ -27,7 +27,20 @@ class ApplicationsController extends AsyncNotifier<List<Application>> {
     ref.invalidateSelf();
     await future;
   }
+
+  Future<void> withdraw(String applicationId) async {
+    await ref.read(applicationsRepositoryProvider).withdraw(applicationId);
+    ref.invalidateSelf();
+    await future;
+  }
 }
+
+/// Whether the current user has already applied to [jobId] — drives the
+/// job-details Apply button's disabled "Applied" state.
+final hasAppliedProvider = Provider.family<bool, String>((ref, jobId) {
+  final apps = ref.watch(applicationsControllerProvider).valueOrNull;
+  return apps?.any((a) => a.job.id == jobId) ?? false;
+});
 
 final applicationsControllerProvider =
     AsyncNotifierProvider<ApplicationsController, List<Application>>(
