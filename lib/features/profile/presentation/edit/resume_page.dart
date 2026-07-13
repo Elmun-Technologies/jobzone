@@ -9,7 +9,9 @@ import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../application/cv_providers.dart';
 import '../../data/cv_repository.dart';
+import '../../data/resume_ai_repository.dart';
 import '../../domain/cv_models.dart';
+import 'resume_review_page.dart';
 
 /// Upload Resume/CV editor (Figma): an upload box + the uploaded files, with a
 /// sticky Save.
@@ -33,8 +35,11 @@ class _ResumePageState extends ConsumerState<ResumePage> {
     // file_picker 12: read bytes on demand (from the path on mobile, the blob
     // on web) rather than the deprecated withData/bytes.
     final bytes = await file.readAsBytes();
+    final isPdf = file.extension == 'pdf';
+    final mimeType = isPdf ? 'application/pdf' : 'application/octet-stream';
 
     setState(() => _uploading = true);
+    var uploaded = false;
     try {
       await ref
           .read(cvRepositoryProvider)
@@ -42,17 +47,68 @@ class _ResumePageState extends ConsumerState<ResumePage> {
             title: file.name,
             fileName: file.name,
             bytes: bytes,
-            mimeType: file.extension == 'pdf'
-                ? 'application/pdf'
-                : 'application/octet-stream',
+            mimeType: mimeType,
           );
       ref.invalidate(resumesControllerProvider);
+      uploaded = true;
       if (mounted) showInfoSnack(context, context.l10n.resumeUploaded);
     } catch (e) {
       if (mounted) showErrorSnack(context, localizedError(context, e));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
+
+    // A PDF can be read by the AI — offer to fill the profile from it.
+    if (!uploaded || !isPdf || !mounted) return;
+    final l = context.l10n;
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.resumeAutofillPromptTitle),
+        content: Text(l.resumeAutofillPromptBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.maybeLater),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.resumeAutofillCta),
+          ),
+        ],
+      ),
+    );
+    if (go == true) await _autofill(bytes, mimeType);
+  }
+
+  /// Sends the CV to the AI parser and opens the review screen. A blocking
+  /// spinner covers the round-trip; if parsing isn't available (no AI key,
+  /// unreadable file) we tell the user to fill it in manually.
+  Future<void> _autofill(Uint8List bytes, String mimeType) async {
+    final l = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: JzLoader()),
+    );
+    ParsedResume? parsed;
+    try {
+      parsed = await ref
+          .read(resumeAiRepositoryProvider)
+          .parseResume(bytes: bytes, mimeType: mimeType, locale: locale);
+    } catch (_) {
+      parsed = null;
+    }
+    if (!mounted) return;
+    Navigator.of(context).pop(); // dismiss the spinner
+    if (parsed == null) {
+      showInfoSnack(context, l.resumeAutofillUnavailable);
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ResumeReviewPage(parsed: parsed!)),
+    );
   }
 
   Future<void> _delete(Resume r) async {
