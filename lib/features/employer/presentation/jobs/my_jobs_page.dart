@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
+import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/presentation/util/job_labels.dart';
 import '../../../monetization/presentation/promote_sheet.dart';
@@ -24,8 +25,12 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
   String? _status;
 
   Future<void> _setStatus(Job job, String status) async {
-    await ref.read(employerJobsRepositoryProvider).setStatus(job.id, status);
-    ref.invalidate(myJobsProvider);
+    try {
+      await ref.read(employerJobsRepositoryProvider).setStatus(job.id, status);
+      ref.invalidate(myJobsProvider);
+    } catch (e) {
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+    }
   }
 
   @override
