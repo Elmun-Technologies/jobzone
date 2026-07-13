@@ -30,6 +30,24 @@ class NotificationsRepository {
         .toList();
   }
 
+  /// Live notifications for the signed-in user (0005 publishes `notifications`
+  /// to `supabase_realtime`) — a new incoming notification (message,
+  /// application update, job match) appears immediately instead of only after
+  /// the user manually reopens/reloads the screen. Offline mode has nothing to
+  /// stream, so it emits the seeded list once.
+  Stream<List<AppNotification>> stream() {
+    if (!_online) return Stream.value(List.unmodifiable(_offline.items));
+    final uid = _uid;
+    if (uid == null) return Stream.value(const []);
+    return _ref
+        .read(supabaseClientProvider)
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('recipient_id', uid)
+        .order('created_at', ascending: false)
+        .map((rows) => rows.map((r) => AppNotification.fromMap(r)).toList());
+  }
+
   Future<void> markAllRead() async {
     if (!_online) {
       _offline.markAllRead();

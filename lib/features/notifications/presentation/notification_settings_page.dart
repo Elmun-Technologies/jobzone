@@ -23,15 +23,25 @@ class NotificationSettingsPage extends ConsumerStatefulWidget {
 
 class _NotificationSettingsPageState
     extends ConsumerState<NotificationSettingsPage> {
+  // Optimistic overlay on top of the provider value, reconciled with the
+  // reloaded server value after every save (or reverted on failure) — never
+  // left stuck on a stale local copy, unlike the previous `_settings ??=`
+  // pattern which cached the first load forever and ignored later reloads.
   NotificationSettings? _settings;
 
   Future<void> _update(NotificationSettings next) async {
+    final previous = _settings;
     setState(() => _settings = next);
     try {
       await ref.read(notificationsRepositoryProvider).saveSettings(next);
       ref.invalidate(notificationSettingsProvider);
+      final reloaded = await ref.read(notificationSettingsProvider.future);
+      if (mounted) setState(() => _settings = reloaded);
     } catch (e) {
-      if (mounted) showErrorSnack(context, localizedError(context, e));
+      if (mounted) {
+        setState(() => _settings = previous);
+        showErrorSnack(context, localizedError(context, e));
+      }
     }
   }
 
@@ -58,7 +68,7 @@ class _NotificationSettingsPageState
                   onRetry: () => ref.invalidate(notificationSettingsProvider),
                 ),
                 data: (loaded) {
-                  final s = _settings ??= loaded;
+                  final s = _settings ?? loaded;
                   return ListView(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
@@ -81,12 +91,12 @@ class _NotificationSettingsPageState
                             _update(s.copyWith(pushApplication: v)),
                       ),
                       _Toggle(
-                        title: l.notifAppUpdates,
+                        title: l.notifReviews,
                         value: s.pushReviews,
                         onChanged: (v) => _update(s.copyWith(pushReviews: v)),
                       ),
                       _Toggle(
-                        title: l.notifJobStatus,
+                        title: l.notifEmailApplicationUpdates,
                         value: s.emailApplication,
                         onChanged: (v) =>
                             _update(s.copyWith(emailApplication: v)),

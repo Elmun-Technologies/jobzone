@@ -69,7 +69,11 @@ class _TabbedApplications extends StatelessWidget {
     ApplicationStatus.offer,
   };
   static const _underReview = {ApplicationStatus.shortlisted};
-  static const _archive = {ApplicationStatus.rejected, ApplicationStatus.hired};
+  static const _archive = {
+    ApplicationStatus.rejected,
+    ApplicationStatus.hired,
+    ApplicationStatus.withdrawn,
+  };
 
   @override
   Widget build(BuildContext context) {

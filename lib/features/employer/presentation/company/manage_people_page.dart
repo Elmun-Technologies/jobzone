@@ -24,24 +24,51 @@ class ManagePeoplePage extends ConsumerWidget {
     if (added == true) ref.invalidate(companyPeopleAdminProvider);
   }
 
-  Future<void> _remove(WidgetRef ref, String id) async {
-    await ref.read(companyAdminRepositoryProvider).removePerson(id);
-    ref.invalidate(companyPeopleAdminProvider);
+  Future<void> _remove(BuildContext context, WidgetRef ref, String id) async {
+    final l = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.confirmRemoveTitle),
+        content: Text(l.confirmRemovePersonBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.remove),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      await ref.read(companyAdminRepositoryProvider).removePerson(id);
+      ref.invalidate(companyPeopleAdminProvider);
+    } catch (e) {
+      if (context.mounted) showErrorSnack(context, localizedError(context, e));
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
+    final company = ref.watch(myCompanyProvider);
+    final hasCompany = company.value != null;
     final async = ref.watch(companyPeopleAdminProvider);
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _add(context, ref),
-        backgroundColor: context.colors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l.addPersonCta),
-      ),
+      floatingActionButton: hasCompany
+          ? FloatingActionButton.extended(
+              onPressed: () => _add(context, ref),
+              backgroundColor: context.colors.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l.addPersonCta),
+            )
+          : null,
       body: SafeArea(
         child: Column(
           children: [
@@ -50,37 +77,46 @@ class ManagePeoplePage extends ConsumerWidget {
               child: JzTopBar(title: l.managePeopleTitle),
             ),
             Expanded(
-              child: async.when(
-                loading: () => const JzLoader(),
-                error: (_, _) => JzErrorState(
-                  title: l.errorTitle,
-                  message: l.errUnknown,
-                  retryLabel: l.retry,
-                  onRetry: () => ref.invalidate(companyPeopleAdminProvider),
-                ),
-                data: (people) {
-                  if (people.isEmpty) {
-                    return JzEmptyState(
-                      icon: Icons.people_outline_rounded,
-                      title: l.noPeopleTitle,
-                    );
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      0,
-                      AppSpacing.lg,
-                      96,
+              child: company.isLoading
+                  ? const JzLoader()
+                  : !hasCompany
+                  ? JzEmptyState(
+                      icon: Icons.business_outlined,
+                      title: l.noCompanyTitle,
+                      message: l.noCompanyBody,
+                    )
+                  : async.when(
+                      loading: () => const JzLoader(),
+                      error: (_, _) => JzErrorState(
+                        title: l.errorTitle,
+                        message: l.errUnknown,
+                        retryLabel: l.retry,
+                        onRetry: () =>
+                            ref.invalidate(companyPeopleAdminProvider),
+                      ),
+                      data: (people) {
+                        if (people.isEmpty) {
+                          return JzEmptyState(
+                            icon: Icons.people_outline_rounded,
+                            title: l.noPeopleTitle,
+                          );
+                        }
+                        return ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            0,
+                            AppSpacing.lg,
+                            96,
+                          ),
+                          itemCount: people.length,
+                          separatorBuilder: (_, _) => const Divider(height: 1),
+                          itemBuilder: (context, i) => _PersonRow(
+                            person: people[i],
+                            onRemove: () => _remove(context, ref, people[i].id),
+                          ),
+                        );
+                      },
                     ),
-                    itemCount: people.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (context, i) => _PersonRow(
-                      person: people[i],
-                      onRemove: () => _remove(ref, people[i].id),
-                    ),
-                  );
-                },
-              ),
             ),
           ],
         ),

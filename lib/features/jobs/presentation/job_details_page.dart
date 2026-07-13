@@ -9,6 +9,7 @@ import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
+import '../../applications/application/applications_controller.dart';
 import '../../employer/data/ai_content_repository.dart';
 import '../../profile/data/profile_repository.dart';
 import '../../reviews/presentation/widgets/company_reviews_view.dart';
@@ -1098,14 +1099,15 @@ class _CompanyTab extends StatelessWidget {
 /// Sticky footer: the salary (the decision the seeker is making) above a
 /// full-width apply CTA. A top border + shadow separate it from the scrolling
 /// content.
-class _ApplyBar extends StatelessWidget {
+class _ApplyBar extends ConsumerWidget {
   const _ApplyBar({required this.job});
   final Job job;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final colors = context.colors;
+    final applied = ref.watch(hasAppliedProvider(job.id));
     final salary = job.salaryText;
     final period = salaryPeriodLabel(context, job.salaryPeriod);
     return DecoratedBox(
@@ -1169,8 +1171,10 @@ class _ApplyBar extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
               ],
               JzPrimaryButton(
-                label: l.applyForJob,
-                onPressed: () => context.push(Routes.applyJob(job.id)),
+                label: applied ? l.appliedLabel : l.applyForJob,
+                onPressed: applied
+                    ? null
+                    : () => context.push(Routes.applyJob(job.id)),
               ),
             ],
           ),

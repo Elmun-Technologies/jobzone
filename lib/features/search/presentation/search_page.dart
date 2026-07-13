@@ -194,7 +194,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         title: l.errorTitle,
         message: l.errUnknown,
         retryLabel: l.retry,
-        onRetry: () => ref.invalidate(searchControllerProvider),
+        onRetry: () => ref.read(searchControllerProvider.notifier).retry(),
       ),
       data: (jobs) => jobs.isEmpty
           ? JzEmptyState(

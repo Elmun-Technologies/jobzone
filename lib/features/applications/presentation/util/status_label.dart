@@ -13,12 +13,13 @@ String applicationStatusLabel(BuildContext c, ApplicationStatus s) =>
       ApplicationStatus.offer => c.l10n.statusOffer,
       ApplicationStatus.rejected => c.l10n.statusRejected,
       ApplicationStatus.hired => c.l10n.statusHired,
+      ApplicationStatus.withdrawn => c.l10n.statusWithdrawn,
     };
 
 Color applicationStatusColor(BuildContext c, ApplicationStatus s) {
   final colors = c.colors;
   return switch (s) {
-    ApplicationStatus.rejected => colors.danger,
+    ApplicationStatus.rejected || ApplicationStatus.withdrawn => colors.danger,
     ApplicationStatus.offer || ApplicationStatus.hired => colors.success,
     ApplicationStatus.interview ||
     ApplicationStatus.shortlisted => colors.primary,

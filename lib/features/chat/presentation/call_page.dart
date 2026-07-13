@@ -81,7 +81,11 @@ class _CallPageState extends ConsumerState<CallPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            if (widget.isVideo) ...[
+            // Driven by the live session's videoEnabled (not the immutable
+            // widget.isVideo) so toggling the video control actually shows or
+            // hides the video surfaces instead of flipping the icon with no
+            // visible effect.
+            if (_session.videoEnabled) ...[
               const Positioned(
                 top: AppSpacing.sm,
                 left: AppSpacing.lg,

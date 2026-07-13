@@ -53,6 +53,8 @@ verify_jwt = false
 [functions.meili-reindex]
 verify_jwt = false
 
+# Legacy Meili proxy, not called by any shipping client; gated by the
+# fail-closed EDGE_SHARED_SECRET instead (see supabase/functions/_shared/auth.ts).
 [functions.search-jobs]
 verify_jwt = false
 

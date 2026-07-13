@@ -152,7 +152,24 @@ class ApplicantsMapPage extends ConsumerWidget {
           ),
           if (async.isLoading)
             const Positioned.fill(child: Center(child: JzLoader())),
-          if (!async.isLoading && located.isEmpty)
+          if (async.hasError)
+            Positioned.fill(
+              child: Center(
+                child: JzErrorState(
+                  title: l.errorTitle,
+                  message: l.errUnknown,
+                  retryLabel: l.retry,
+                  onRetry: () {
+                    if (jobId == null) {
+                      ref.invalidate(allApplicantsProvider);
+                    } else {
+                      ref.invalidate(jobApplicantsProvider(jobId!));
+                    }
+                  },
+                ),
+              ),
+            ),
+          if (!async.isLoading && !async.hasError && located.isEmpty)
             Positioned(
               left: AppSpacing.xl,
               right: AppSpacing.xl,

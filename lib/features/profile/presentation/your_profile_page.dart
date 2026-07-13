@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/config/env.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../application/cv_providers.dart';
 import '../data/profile_repository.dart';
 import '../domain/cv_models.dart';
 import '../domain/user_profile.dart';
+import 'widgets/phone_verify_sheet.dart';
 import 'widgets/worker_card.dart';
 
 class YourProfilePage extends ConsumerWidget {
@@ -105,13 +107,21 @@ class _ProfileCards extends ConsumerWidget {
             profile: p,
             skills: skills,
             onVerifyPhone: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              try {
-                await ref.read(profileRepositoryProvider).confirmPhone();
-                ref.invalidate(currentProfileProvider);
-              } catch (_) {
-                messenger.showSnackBar(SnackBar(content: Text(l.errUnknown)));
+              // Offline demo has no real Auth to confirm against — flip the
+              // badge directly. Live: run the phone → Telegram OTP → confirm
+              // flow in a sheet, then refresh the profile on success.
+              if (!Env.hasSupabase) {
+                final messenger = ScaffoldMessenger.of(context);
+                try {
+                  await ref.read(profileRepositoryProvider).confirmPhone();
+                  ref.invalidate(currentProfileProvider);
+                } catch (_) {
+                  messenger.showSnackBar(SnackBar(content: Text(l.errUnknown)));
+                }
+                return;
               }
+              final ok = await showPhoneVerifySheet(context);
+              if (ok == true) ref.invalidate(currentProfileProvider);
             },
           ),
           const SizedBox(height: AppSpacing.lg),

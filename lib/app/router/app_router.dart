@@ -136,7 +136,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.verifyCode,
-        builder: (c, s) => VerifyCodePage(args: s.extra as VerifyCodeArgs),
+        // `extra` is untyped router state — a deep link, browser refresh, or
+        // a future caller reaching this route without the typed args must not
+        // crash with a TypeError.
+        builder: (c, s) {
+          final args = s.extra as VerifyCodeArgs?;
+          return args == null ? const SignInPage() : VerifyCodePage(args: args);
+        },
       ),
       GoRoute(
         path: Routes.newPassword,
