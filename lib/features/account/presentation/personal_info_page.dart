@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
-import '../../../shared/options/option_lists.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../profile/data/cv_repository.dart';
 import '../../profile/data/profile_repository.dart';
@@ -24,8 +23,6 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
   final _name = TextEditingController();
   final _phone = TextEditingController();
   final _email = TextEditingController();
-  String? _gender;
-  String? _position;
   Uint8List? _avatar;
   bool _saving = false;
   bool _initialized = false;
@@ -57,6 +54,7 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
           .savePersonalInfo(
             fullName: _name.text.trim(),
             phone: _phone.text.trim().isEmpty ? null : _phone.text.trim(),
+            avatarBytes: _avatar,
           );
       ref.invalidate(currentProfileProvider);
       if (mounted) context.pop();
@@ -198,24 +196,6 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
                           controller: _email,
                           readOnly: true,
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _Dropdown(
-                          label: l.gender,
-                          value: _gender,
-                          items: {
-                            'Male': l.genderMale,
-                            'Female': l.genderFemale,
-                            'Other': l.genderOther,
-                          },
-                          onChanged: (v) => setState(() => _gender = v),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _Dropdown(
-                          label: l.currentPosition,
-                          value: _position,
-                          items: jobTitleOptions(l),
-                          onChanged: (v) => setState(() => _position = v),
-                        ),
                       ],
                     ),
                   );
@@ -241,42 +221,6 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Dropdown extends StatelessWidget {
-  const _Dropdown({
-    required this.label,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
-  final String label;
-  final String? value;
-
-  /// Stable wire value → localized display label.
-  final Map<String, String> items;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: context.text.labelLarge),
-        const SizedBox(height: AppSpacing.sm),
-        DropdownButtonFormField<String>(
-          initialValue: value,
-          isExpanded: true,
-          hint: Text(context.l10n.selectOption),
-          items: [
-            for (final e in items.entries)
-              DropdownMenuItem(value: e.key, child: Text(e.value)),
-          ],
-          onChanged: onChanged,
-        ),
-      ],
     );
   }
 }
