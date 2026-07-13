@@ -10,6 +10,7 @@ import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../application/auth_controller.dart';
 import '../util/auth_failure_message.dart';
+import '../util/uz_phone_input_formatter.dart';
 import '../widgets/auth_header.dart';
 
 /// Phone sign-in/up. The one-time code is delivered as a **Telegram message**
@@ -40,7 +41,8 @@ class _PhoneSignInPageState extends ConsumerState<PhoneSignInPage> {
 
   Future<void> _sendCode() async {
     final l = context.l10n;
-    final normalized = Validators.e164Phone(_phone.text);
+    // The field holds only the national part; "+998" is fixed in the UI.
+    final normalized = Validators.uzLocalPhoneE164(_phone.text);
     if (normalized == null) {
       showErrorSnack(context, l.valPhoneRequired);
       return;
@@ -128,9 +130,26 @@ class _PhoneSignInPageState extends ConsumerState<PhoneSignInPage> {
                   const SizedBox(height: AppSpacing.xxl),
                   JzTextField(
                     label: l.phoneNumber,
-                    hint: '+998 90 123 45 67',
+                    hint: '90 123 45 67',
                     controller: _phone,
                     keyboardType: TextInputType.phone,
+                    autofillHints: const [
+                      AutofillHints.telephoneNumberNational,
+                    ],
+                    inputFormatters: const [UzLocalPhoneFormatter()],
+                    prefix: Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.lg,
+                        right: AppSpacing.sm,
+                      ),
+                      child: Text(
+                        '+998',
+                        style: context.text.bodyLarge?.copyWith(
+                          color: colors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   JzPrimaryButton(
