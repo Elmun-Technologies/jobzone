@@ -78,6 +78,7 @@
   "phoneSignInSubtitle": "We'll send a one-time code to your Telegram",
   "phoneCodeSubtitle": "Enter the code we sent to your Telegram",
   "changePhoneNumber": "Change number",
+  "phoneVerifiedToast": "Phone verified ✓",
   "newPasswordTitle": "New Password",
   "newPasswordSubtitle": "Your new password must be different from previously used passwords.",
   "createNewPassword": "Create New Password",

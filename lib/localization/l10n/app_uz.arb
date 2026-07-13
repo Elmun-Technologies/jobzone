@@ -78,6 +78,7 @@
   "phoneSignInSubtitle": "Bir martalik kodni Telegramingizga yuboramiz",
   "phoneCodeSubtitle": "Telegramingizga yuborilgan kodni kiriting",
   "changePhoneNumber": "Raqamni o'zgartirish",
+  "phoneVerifiedToast": "Telefon tasdiqlandi ✓",
   "newPasswordTitle": "Yangi parol",
   "newPasswordSubtitle": "Yangi parol avval ishlatilganlaridan farq qilishi kerak.",
   "createNewPassword": "Yangi parol yaratish",

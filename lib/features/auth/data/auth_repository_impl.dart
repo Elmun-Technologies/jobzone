@@ -76,6 +76,25 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> startPhoneChange(String phone) async {
+    // Attaches a pending phone to the signed-in user and triggers the OTP
+    // (delivered to Telegram by the send-sms hook), without minting a session.
+    await _auth.updateUser(UserAttributes(phone: phone));
+  }
+
+  @override
+  Future<void> verifyPhoneChange({
+    required String phone,
+    required String token,
+  }) async {
+    await _auth.verifyOTP(
+      phone: phone,
+      token: token,
+      type: OtpType.phoneChange,
+    );
+  }
+
+  @override
   Future<void> resetPasswordForEmail(String email) async {
     await _auth.resetPasswordForEmail(email);
   }
