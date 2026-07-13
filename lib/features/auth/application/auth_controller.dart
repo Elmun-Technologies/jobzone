@@ -55,6 +55,16 @@ class AuthController extends AsyncNotifier<void> {
   Future<bool> verifyPhoneOtp({required String phone, required String token}) =>
       _run(() => _repo.verifyPhoneOtp(phone: phone, token: token));
 
+  /// Attaches + verifies a phone for the already-signed-in user (profile phone
+  /// verification), as opposed to the sign-in OTP flow above.
+  Future<bool> startPhoneChange(String phone) =>
+      _run(() => _repo.startPhoneChange(phone));
+
+  Future<bool> verifyPhoneChange({
+    required String phone,
+    required String token,
+  }) => _run(() => _repo.verifyPhoneChange(phone: phone, token: token));
+
   Future<bool> sendPasswordReset(String email) =>
       _run(() => _repo.resetPasswordForEmail(email));
 

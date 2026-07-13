@@ -36,6 +36,19 @@ abstract interface class AuthRepository {
   /// Verifies the phone code; Supabase mints the session on success.
   Future<void> verifyPhoneOtp({required String phone, required String token});
 
+  /// Starts verifying a phone for the CURRENTLY signed-in user (e.g. a Google
+  /// account adding its number): sets a pending phone change and sends the OTP
+  /// via the Telegram Send-SMS hook. Unlike [sendPhoneOtp] this never creates a
+  /// new session — it attaches the phone to the existing account.
+  Future<void> startPhoneChange(String phone);
+
+  /// Confirms the pending phone change with [token]; on success the user's
+  /// phone is confirmed in Supabase Auth (`phone_confirmed_at`).
+  Future<void> verifyPhoneChange({
+    required String phone,
+    required String token,
+  });
+
   Future<void> resetPasswordForEmail(String email);
 
   Future<void> updatePassword(String newPassword);
