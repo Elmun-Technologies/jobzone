@@ -405,6 +405,8 @@
   "notifJobInvitation": "Notify when there is Job Invitation",
   "notifAppUpdates": "App Updates",
   "notifJobStatus": "Job Status Update",
+  "notifReviews": "Reviews",
+  "notifEmailApplicationUpdates": "Email: application status updates",
   "pushNotifications": "Push notifications",
   "emailNotifications": "Email notifications",
   "notifMessages": "Messages",

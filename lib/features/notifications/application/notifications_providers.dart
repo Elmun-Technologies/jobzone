@@ -1,13 +1,41 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/notifications_repository.dart';
 import '../domain/notification.dart';
 
 /// The signed-in user's notifications (newest first), with read mutations.
+/// Subscribes directly to the repository's realtime stream (0005 publishes
+/// `notifications` to `supabase_realtime`) so a new alert or the unread badge
+/// updates live, without a manual reopen/reload.
 class NotificationsController extends AsyncNotifier<List<AppNotification>> {
+  StreamSubscription<List<AppNotification>>? _sub;
+
   @override
-  Future<List<AppNotification>> build() =>
-      ref.read(notificationsRepositoryProvider).list();
+  Future<List<AppNotification>> build() {
+    final repo = ref.read(notificationsRepositoryProvider);
+    final completer = Completer<List<AppNotification>>();
+    _sub?.cancel();
+    _sub = repo.stream().listen(
+      (rows) {
+        if (!completer.isCompleted) {
+          completer.complete(rows);
+        } else {
+          state = AsyncData(rows);
+        }
+      },
+      onError: (Object e, StackTrace st) {
+        if (!completer.isCompleted) {
+          completer.completeError(e, st);
+        } else {
+          state = AsyncError(e, st);
+        }
+      },
+    );
+    ref.onDispose(() => _sub?.cancel());
+    return completer.future;
+  }
 
   Future<void> markAllRead() async {
     await ref.read(notificationsRepositoryProvider).markAllRead();
