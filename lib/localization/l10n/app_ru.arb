@@ -404,6 +404,8 @@
   "notifJobInvitation": "Уведомлять о приглашениях",
   "notifAppUpdates": "Обновления приложения",
   "notifJobStatus": "Обновление статуса отклика",
+  "notifReviews": "Отзывы",
+  "notifEmailApplicationUpdates": "Эл. почта: обновления статуса отклика",
   "pushNotifications": "Push-уведомления",
   "emailNotifications": "Email-уведомления",
   "notifMessages": "Сообщения",

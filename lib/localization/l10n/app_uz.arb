@@ -404,6 +404,8 @@
   "notifJobInvitation": "Taklif boʻlsa xabar berish",
   "notifAppUpdates": "Ilova yangilanishlari",
   "notifJobStatus": "Ariza holati yangilanishi",
+  "notifReviews": "Sharhlar",
+  "notifEmailApplicationUpdates": "Email: ariza holati yangilanishi",
   "pushNotifications": "Push bildirishnomalar",
   "emailNotifications": "Email bildirishnomalar",
   "notifMessages": "Xabarlar",
