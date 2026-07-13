@@ -136,7 +136,8 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                     carousel: jobs,
                     onMyLocation: _goToMyLocation,
                     status: results,
-                    onRetry: () => ref.invalidate(searchControllerProvider),
+                    onRetry: () =>
+                        ref.read(searchControllerProvider.notifier).retry(),
                   ),
                   _ListTab(results: results),
                 ],

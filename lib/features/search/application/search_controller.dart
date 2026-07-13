@@ -21,6 +21,12 @@ class SearchController extends AsyncNotifier<List<Job>> {
 
   Future<void> reset() => _update(const SearchFilters());
 
+  /// Re-runs the search with the CURRENT filters — unlike
+  /// `ref.invalidate(searchControllerProvider)`, which disposes this
+  /// notifier and recreates it with `_filters` reset to the default,
+  /// silently discarding whatever query/filters the user had applied.
+  Future<void> retry() => _update(_filters);
+
   Future<void> _update(SearchFilters filters) async {
     _filters = filters;
     state = const AsyncLoading();
