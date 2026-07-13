@@ -13,7 +13,7 @@ import {
 } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
-import { canAffordJobPost, willChargeForJobPost } from "@/lib/job-post-pricing";
+import { LISTING_TIERS } from "@/lib/listing-tiers";
 import { PROFESSIONS, suggestCategorySlug } from "@/lib/professions";
 import { cn } from "@/lib/utils";
 
@@ -255,16 +255,12 @@ export function PostJobForm({
   companyName = null,
   categories,
   hasPublishedBefore,
-  jobPostPriceUzs,
-  walletBalanceUzs,
   editJob = null,
 }: {
   companyId: string | null;
   companyName?: string | null;
   categories: JobCategory[];
   hasPublishedBefore: boolean;
-  jobPostPriceUzs: number;
-  walletBalanceUzs: number;
   /** Edit mode: the job's id + its current values to pre-fill; submits to
    * updateJob (free, keeps status) instead of createJob. */
   editJob?: { id: string; draft: JobDraft } | null;
@@ -383,10 +379,11 @@ export function PostJobForm({
     tp("stepPreview"),
   ];
   const last = steps.length - 1;
-  const willCharge = willChargeForJobPost(hasPublishedBefore, jobPostPriceUzs);
-  const canAfford = canAffordJobPost(walletBalanceUzs, jobPostPriceUzs);
-  const blockedByFunds =
-    (willCharge && !canAfford) || !!state.insufficientFunds;
+  // Direct pay-per-listing: the first vacancy is free; the 2nd+ is charged, but
+  // the charge happens on the NEXT step (pick a tier → Payme/Click). So here we
+  // never block Publish on funds — clicking Publish just creates the draft and
+  // sends them to the pay page.
+  const willCharge = hasPublishedBefore;
 
   function buildPreview(): PreviewData {
     const fd = new FormData(formRef.current!);
@@ -939,15 +936,7 @@ export function PostJobForm({
                 showLess: tp("previewShowLess"),
               }}
             />
-            {isEdit ? null : (
-              <PaymentPanel
-                willCharge={willCharge}
-                blockedByFunds={blockedByFunds}
-                priceUzs={jobPostPriceUzs}
-                balanceUzs={walletBalanceUzs}
-                locale={locale}
-              />
-            )}
+            {isEdit ? null : <PaymentPanel willCharge={willCharge} />}
           </>
         ) : null}
       </div>
@@ -1011,10 +1000,10 @@ export function PostJobForm({
               type="submit"
               name="status"
               value="open"
-              disabled={pending || blockedByFunds}
+              disabled={pending}
               className="bg-primary text-primary-foreground h-11 rounded-lg px-6 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {t("publishJob")}
+              {willCharge ? tp("publishAndPay") : t("publishJob")}
             </button>
           </div>
         )}
@@ -1213,21 +1202,11 @@ function JobPreview({
   );
 }
 
-/** The "before Publish" payment step: free-first-job note, or the Hamyon
- * price + balance — with a top-up link when the balance won't cover it. */
-function PaymentPanel({
-  willCharge,
-  blockedByFunds,
-  priceUzs,
-  balanceUzs,
-  locale,
-}: {
-  willCharge: boolean;
-  blockedByFunds: boolean;
-  priceUzs: number;
-  balanceUzs: number;
-  locale: string;
-}) {
+/** The "before Publish" note: the free-first-vacancy badge, or — for a paid
+ * (2nd+) vacancy — a heads-up that the next step is picking a tier and paying
+ * with Payme/Click. No wallet: the charge is direct, per listing, on the pay
+ * page reached right after Publish. */
+function PaymentPanel({ willCharge }: { willCharge: boolean }) {
   const tp = useTranslations("employer.post");
 
   if (!willCharge) {
@@ -1238,39 +1217,13 @@ function PaymentPanel({
     );
   }
 
+  // The cheapest tier — the "from" price shown before the picker on the pay page.
+  const fromUzs = Math.min(...LISTING_TIERS.map((t) => t.priceUzs));
   return (
-    <div
-      className={cn(
-        "mt-4 rounded-2xl border p-4 text-sm",
-        blockedByFunds
-          ? "border-destructive/40 bg-destructive/5"
-          : "border-border bg-card",
-      )}
-    >
-      <p className="text-foreground font-medium">
-        {tp("paymentDue", { price: `${groupNumber(priceUzs)} so'm` })}
+    <div className="border-primary/40 bg-accent mt-4 rounded-2xl border p-4 text-sm">
+      <p className="text-accent-foreground font-medium">
+        {tp("paymentTierNext", { price: `${groupNumber(fromUzs)} so'm` })}
       </p>
-      <p className="text-muted-foreground mt-1">
-        {tp("paymentBalance", { balance: `${groupNumber(balanceUzs)} so'm` })}
-      </p>
-      {blockedByFunds ? (
-        <div className="mt-3">
-          <p className="text-destructive font-medium">
-            {tp("paymentInsufficientTitle")}
-          </p>
-          <p className="text-muted-foreground mt-0.5">
-            {tp("paymentInsufficientHint", {
-              price: `${groupNumber(priceUzs)} so'm`,
-            })}
-          </p>
-          <a
-            href={`/${locale}/employer/wallet`}
-            className="bg-primary text-primary-foreground mt-2 inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold hover:opacity-90"
-          >
-            {tp("paymentTopUp")}
-          </a>
-        </div>
-      ) : null}
     </div>
   );
 }

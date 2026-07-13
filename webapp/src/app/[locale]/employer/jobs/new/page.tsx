@@ -5,8 +5,6 @@ import { PostJobForm } from "@/components/employer/post-job-form";
 import { Container } from "@/components/ui/container";
 import { getCategories } from "@/lib/data/categories";
 import { getEmployerStats, getMyCompany } from "@/lib/data/employer";
-import { getJobPostPrice } from "@/lib/data/pricing";
-import { getWallet } from "@/lib/data/wallet";
 
 export async function generateMetadata({
   params,
@@ -38,9 +36,8 @@ export default async function PostJobPage({
 
   const company = await getMyCompany();
   const t = await getTranslations("employer");
-  const [categories, jobPostPriceUzs, stats, wallet] = await Promise.all([
+  const [categories, stats] = await Promise.all([
     getCategories(),
-    getJobPostPrice(),
     company
       ? getEmployerStats(company.id)
       : Promise.resolve({
@@ -49,9 +46,6 @@ export default async function PostJobPage({
           totalApplicants: 0,
           hasPublishedBefore: false,
         }),
-    company
-      ? getWallet(company.id)
-      : Promise.resolve({ balanceUzs: 0, transactions: [] }),
   ]);
 
   return (
@@ -64,8 +58,6 @@ export default async function PostJobPage({
         companyName={company?.name ?? null}
         categories={categories}
         hasPublishedBefore={stats.hasPublishedBefore}
-        jobPostPriceUzs={jobPostPriceUzs}
-        walletBalanceUzs={wallet.balanceUzs}
       />
     </Container>
   );

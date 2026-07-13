@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { safeNext } from "@/lib/auth/safe-next";
 import { getEmployerStats } from "@/lib/data/employer";
-import { getJobPostPrice } from "@/lib/data/pricing";
-import { willChargeForJobPost } from "@/lib/job-post-pricing";
+import { clickCheckoutUrl, paymeCheckoutUrl } from "@/lib/payments/checkout-url";
 import { createClient } from "@/lib/supabase/server";
 
 export interface CompanyFormState {
@@ -21,6 +21,10 @@ export interface JobFormState {
   noCompany?: boolean;
   insufficientFunds?: boolean;
   requiredUzs?: number;
+}
+
+export interface PayListingState {
+  error?: "unconfigured" | "unknown" | "signedOut" | "notDraft";
 }
 
 /** A short, safe one-liner from a Supabase error for surfacing to the employer
@@ -227,20 +231,17 @@ export async function createJob(
     screening = [];
   }
 
-  // The employer's first published vacancy is free; every one after that is
-  // charged from Hamyon. Drafts are always free — they never reach the market,
-  // so they neither cost nor count toward "first". Decide whether to charge
-  // BEFORE inserting (so the new row doesn't skew the "has published before"
-  // count), but charge AFTER — insert-then-charge means the only wallet call
-  // is a debit, so `adjust_wallet` can be locked to spend-only (a client can't
-  // mint a credit via the refund path).
-  let willCharge = false;
-  let price = 0;
+  // Direct pay-per-listing: the employer's first published vacancy is free and
+  // goes live immediately; the 2nd+ is created as a DRAFT and paid per listing
+  // (a tier + Payme/Click) on the next step, which publishes it. Drafts never
+  // reach the market, so they neither cost nor count toward "first". Decide
+  // BEFORE inserting so the new row doesn't skew the "has published before" count.
+  let charged = false;
   if (status === "open") {
     const stats = await getEmployerStats(companyId);
-    price = await getJobPostPrice();
-    willCharge = willChargeForJobPost(stats.hasPublishedBefore, price);
+    charged = stats.hasPublishedBefore;
   }
+  const effectiveStatus = charged ? "draft" : status;
 
   const payload: Record<string, unknown> = {
     company_id: companyId,
@@ -271,7 +272,7 @@ export async function createJob(
     women_friendly: bool("womenFriendly"),
     disability_friendly: bool("disabilityFriendly"),
     screening_questions: Array.isArray(screening) ? screening : [],
-    status,
+    status: effectiveStatus,
   };
 
   const {
@@ -293,27 +294,87 @@ export async function createJob(
   }
   const inserted = { id: insertedId };
 
-  if (willCharge) {
-    const { error: payError } = await supabase.rpc("adjust_wallet", {
-      p_company_id: companyId,
-      p_amount_uzs: -price,
-      p_kind: "spend",
-      p_description: `Vakansiya: ${title}`,
-    });
-    if (payError) {
-      // Roll the job back so an unpaid vacancy never stays live (the owner
-      // can delete their own row under RLS).
-      await supabase.from("jobs").delete().eq("id", inserted.id);
-      if (payError.message.includes("insufficient_funds")) {
-        return { insufficientFunds: true, requiredUzs: price };
-      }
-      console.error("createJob payment (adjust_wallet) failed", payError);
-      return { error: "unknown", detail: dbDetail(payError) };
-    }
+  // A charged (2nd+) post is a draft awaiting payment → send the employer to
+  // pick a tier and pay; paying publishes it. A free first post is already live.
+  if (charged) {
+    redirect(`/${locale}/employer/jobs/${inserted.id}/pay`);
   }
-
   // ?posted signals the "My jobs" page to confirm the post (draft vs open).
   redirect(`/${locale}/employer/jobs?posted=${status}`);
+}
+
+/**
+ * Direct pay-per-listing: create the tier order for a draft vacancy and send the
+ * employer to the Payme/Click checkout. The tier PRICE is resolved server-side
+ * by `create_listing_order` (a tampered client amount can never under-pay); the
+ * gateway's callback flips the order to paid, which publishes the vacancy with
+ * its tier. Merchant ids are public (only the webhook secret keys are private);
+ * with none set the checkout can't be built and we report `unconfigured`.
+ */
+export async function payListing(
+  _prev: PayListingState,
+  formData: FormData,
+): Promise<PayListingState> {
+  const locale = field(formData, "locale") || "uz";
+  const jobId = field(formData, "jobId");
+  const tierRaw = field(formData, "tier");
+  const provider = field(formData, "provider");
+  if (!jobId) return { error: "unknown" };
+  const tier = ["standard", "brand", "premium"].includes(tierRaw)
+    ? tierRaw
+    : "standard";
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "signedOut" };
+
+  const { data, error } = await supabase.rpc("create_listing_order", {
+    p_job_id: jobId,
+    p_tier_code: `tier_${tier}`,
+  });
+  const row = Array.isArray(data) ? (data[0] as OrderRow | undefined) : undefined;
+  if (error || !row) {
+    return { error: error?.message.includes("not_draft") ? "notDraft" : "unknown" };
+  }
+
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host") ?? ""}`;
+  const returnUrl = `${origin}/${locale}/employer/jobs/${jobId}/paid`;
+  const amountUzs = Number(row.amount_uzs);
+
+  let url: string | null = null;
+  if (provider === "click") {
+    const serviceId = process.env.NEXT_PUBLIC_CLICK_SERVICE_ID;
+    const merchantId = process.env.NEXT_PUBLIC_CLICK_MERCHANT_ID;
+    if (serviceId && merchantId) {
+      url = clickCheckoutUrl({
+        serviceId,
+        merchantId,
+        orderId: row.order_id,
+        amountUzs,
+        returnUrl,
+      });
+    }
+  } else {
+    const merchantId = process.env.NEXT_PUBLIC_PAYME_MERCHANT_ID;
+    if (merchantId) {
+      url = paymeCheckoutUrl({
+        merchantId,
+        orderId: row.order_id,
+        amountUzs,
+        returnUrl,
+      });
+    }
+  }
+  if (!url) return { error: "unconfigured" };
+  redirect(url);
+}
+
+interface OrderRow {
+  order_id: string;
+  amount_uzs: number;
 }
 
 /**
@@ -355,20 +416,12 @@ export async function updateJobStatus(formData: FormData): Promise<void> {
   if (action === "close" && j.status === "open") newStatus = "closed";
   else if (action === "reopen" && j.status === "closed") newStatus = "open";
   else if (action === "publish" && j.status === "draft") {
-    // A draft becoming live is a new market entry — charge like createJob.
+    // A draft becoming live is a new market entry. The first is free; a 2nd+
+    // draft is paid per listing → send the employer to pick a tier + pay, which
+    // publishes it. Only a first-time poster publishes straight to open here.
     const stats = await getEmployerStats(j.company_id);
-    const price = await getJobPostPrice();
-    if (willChargeForJobPost(stats.hasPublishedBefore, price)) {
-      const { error: payError } = await supabase.rpc("adjust_wallet", {
-        p_company_id: j.company_id,
-        p_amount_uzs: -price,
-        p_kind: "spend",
-        p_description: `Vakansiya: ${j.title}`,
-      });
-      if (payError) {
-        // Not enough balance → send them to top up; the draft stays a draft.
-        redirect(`/${locale}/employer/wallet`);
-      }
+    if (stats.hasPublishedBefore) {
+      redirect(`/${locale}/employer/jobs/${jobId}/pay`);
     }
     newStatus = "open";
   }

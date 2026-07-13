@@ -56,8 +56,6 @@ export default async function EditJobPage({
         companyName={company.name}
         categories={categories}
         hasPublishedBefore={stats.hasPublishedBefore}
-        jobPostPriceUzs={0}
-        walletBalanceUzs={0}
         editJob={{ id, draft }}
       />
     </Container>

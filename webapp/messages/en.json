@@ -407,7 +407,9 @@
       "paymentBalance": "Current balance: {balance}",
       "paymentInsufficientTitle": "Not enough balance in Hamyon",
       "paymentInsufficientHint": "Publishing needs {price}. Top up your Hamyon balance.",
-      "paymentTopUp": "Go to Hamyon"
+      "paymentTopUp": "Go to Hamyon",
+      "publishAndPay": "Publish & pay",
+      "paymentTierNext": "This is a paid vacancy. On the next step, choose a plan (from {price}) and pay with Payme or Click — it goes live right after payment."
     },
     "jobPromoted": "Promotion enabled! Your vacancy will be highlighted.",
     "viewResume": "View résumé",
@@ -428,7 +430,23 @@
     "issued": "Issued",
     "expires": "Expires",
     "backToApplicants": "All applicants",
-    "noResumeYet": "This candidate hasn't filled in a detailed résumé yet."
+    "noResumeYet": "This candidate hasn't filled in a detailed résumé yet.",
+    "pay": {
+      "title": "Publish your vacancy",
+      "subtitle": "Choose a plan for “{title}” and pay to publish it.",
+      "payWith": "Pay with {provider}",
+      "unconfigured": "Online payment isn’t set up yet. Please contact support.",
+      "error": "Something went wrong. Please try again.",
+      "note": "Secure payment via Payme or Click. Your vacancy goes live the moment payment is confirmed."
+    },
+    "paid": {
+      "publishedTitle": "Payment received — your vacancy is live!",
+      "publishedSub": "It’s now visible to candidates in both the app and on the web.",
+      "viewListing": "View listing",
+      "myJobs": "My vacancies",
+      "confirmingTitle": "Confirming your payment…",
+      "confirmingSub": "This can take a few seconds. This page will update automatically."
+    }
   },
   "wallet": {
     "title": "Wallet",
