@@ -130,6 +130,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                             // sheet that opens on tap.
                             label: job.title,
                             imageUrl: job.companyLogoUrl,
+                            tier: job.tierStandout
+                                ? JzMarkerTier.premium
+                                : job.tierGlowLogo
+                                ? JzMarkerTier.brand
+                                : JzMarkerTier.none,
                             onTap: () => _showJobPreview(job),
                           ),
                     ],
@@ -214,9 +219,11 @@ class _MapTab extends StatelessWidget {
           right: 0,
           bottom: AppSpacing.lg,
           child: SizedBox(
-            // Tall enough for a boosted card with a two-line tag wrap (~241px);
-            // the old 210 clipped those into RenderFlex overflow stripes.
-            height: 244,
+            // Tall enough for the fullest card — TOP badge + a two-line meta
+            // wrap + the salary/apply row + an applicants-count line — which
+            // runs to ~267px. 244 clipped that into RenderFlex overflow stripes
+            // ("BOTTOM OVERFLOWED"); the extra margin keeps every card clear.
+            height: 280,
             child: carousel.isEmpty
                 ? const SizedBox.shrink()
                 : ListView.separated(

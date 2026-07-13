@@ -54,30 +54,17 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context) async {
+  // Account deletion isn't implemented yet (it needs a service-role edge
+  // function to remove the auth user). Showing the real "this permanently
+  // deletes your data" confirm copy here — and then silently doing nothing —
+  // would mislead the user into thinking the action succeeded. Say plainly
+  // that it isn't available instead of presenting a destructive dialog with
+  // no effect.
+  void _confirmDelete(BuildContext context) {
     final l = context.l10n;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l.deleteAccount),
-        content: Text(l.deleteAccountConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c, false),
-            child: Text(l.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(c, true),
-            child: Text(l.delete),
-          ),
-        ],
-      ),
-    );
-    if (ok == true && context.mounted) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l.comingSoon)));
-    }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l.deleteAccountUnavailable)));
   }
 }
 

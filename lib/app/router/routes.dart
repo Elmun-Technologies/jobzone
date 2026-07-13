@@ -90,6 +90,7 @@ abstract final class Routes {
   static String applicationStatus(String id) => '/account/my-applications/$id';
   static const accountSeekingStatus = '/account/seeking-status';
   static const savedSearches = '/account/saved-searches';
+  static const subscriptions = '/account/subscriptions';
   static const accountSettings = '/account/settings';
   static const accountNotificationSettings = '/account/notification-settings';
   static const accountLanguage = '/account/language';
@@ -124,6 +125,7 @@ abstract final class Routes {
   static const employerCompanyPeople = '/employer/company/people';
   static const employerCompanyGallery = '/employer/company/gallery';
   static const employerPromotions = '/employer/promotions';
+  static const employerTiers = '/employer/tiers';
   static String checkout(String jobId, String code) =>
       '/employer/checkout/$jobId/$code';
 }

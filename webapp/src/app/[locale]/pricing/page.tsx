@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { buttonVariants } from "@/components/ui/button";
-import { getPromotionProducts, getJobPostPrice } from "@/lib/data/pricing";
+import { LISTING_TIERS } from "@/lib/listing-tiers";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -30,10 +30,11 @@ export async function generateMetadata({
 // page isn't a primary organic-search surface, unlike the job/category pages.
 export const dynamic = "force-dynamic";
 
-/** Public "Narxlar" (pricing) marketing page — the employer offer: first
- * vacancy free, then a flat post fee, plus the visibility (reklama) packages.
- * Prices come from the live catalog (fallback offline), so this never drifts
- * from what checkout actually charges. */
+/** Public "Narxlar" (pricing) marketing page — the employer offer: the first
+ * vacancy is free, then every listing picks one of three per-listing
+ * visibility tiers (Standart / Brend / Premium). The copy leans employers
+ * toward the two paid-up tiers; the tier prices are the single source of truth
+ * in `listing-tiers.ts`, matched by the post-time picker + catalog. */
 export default async function PricingPage({
   params,
 }: {
@@ -42,26 +43,7 @@ export default async function PricingPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, postPrice, products] = await Promise.all([
-    getTranslations("pricing"),
-    getJobPostPrice(),
-    getPromotionProducts(),
-  ]);
-  const price = postPrice > 0 ? postPrice : 99000;
-  const perDay = (p: (typeof products)[number]) =>
-    p.priceUzs / Math.max(p.durationDays, 1);
-  const bestCode = products.length
-    ? products.reduce((a, b) => (perDay(b) < perDay(a) ? b : a)).code
-    : "";
-  // Per-day discount of each TOP tier vs the priciest TOP tier — the longer,
-  // the cheaper (featured is a different benefit, excluded).
-  const maxTopPerDay = products
-    .filter((p) => p.kind === "top")
-    .reduce((m, p) => Math.max(m, perDay(p)), 0);
-  const savingsOf = (p: (typeof products)[number]) =>
-    p.kind === "top" && maxTopPerDay > 0
-      ? Math.round((1 - perDay(p) / maxTopPerDay) * 100)
-      : 0;
+  const t = await getTranslations("pricing");
 
   const benefits = [
     { Icon: Zap, title: t("benefit1Title"), desc: t("benefit1Desc") },
@@ -70,7 +52,7 @@ export default async function PricingPage({
   ];
 
   return (
-    <Container className="max-w-4xl py-12">
+    <Container className="max-w-5xl py-12">
       {/* Hero */}
       <div className="rise-in text-center">
         <h1 className="text-foreground text-3xl font-bold sm:text-4xl">
@@ -79,100 +61,95 @@ export default async function PricingPage({
         <p className="text-muted-foreground mx-auto mt-3 max-w-xl text-base sm:text-lg">
           {t("heroSubtitle")}
         </p>
-      </div>
-
-      {/* Posting: first free, then flat fee */}
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div
-          className="rise-in border-primary/40 from-accent to-card relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br p-6"
-          style={{ animationDelay: "60ms" }}
-        >
-          <div className="bg-primary/15 absolute -top-8 -right-8 size-28 rounded-full blur-2xl" />
-          <span className="text-muted-foreground text-sm font-medium">
-            {t("firstPost")}
-          </span>
-          <p className="text-foreground mt-1 text-4xl font-bold">{t("free")}</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            {t("firstPostHint")}
-          </p>
-        </div>
-        <div
-          className="rise-in border-border bg-card rounded-3xl border p-6"
-          style={{ animationDelay: "120ms" }}
-        >
-          <span className="text-muted-foreground text-sm font-medium">
-            {t("nextPosts")}
-          </span>
-          <p className="text-foreground mt-1 font-mono text-4xl font-bold tabular-nums">
-            {groupNumber(price)}{" "}
-            <span className="text-muted-foreground text-xl font-semibold">
-              so&apos;m
-            </span>
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            {t("nextPostsHint")}
-          </p>
-        </div>
-      </div>
-
-      {/* Promotion packages */}
-      <div className="mt-12">
-        <h2 className="text-foreground text-2xl font-bold">
-          {t("promoTitle")}
-        </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {t("promoSubtitle")}
+        <p className="border-primary/40 bg-accent text-foreground mt-5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold">
+          <Sparkles className="text-primary size-4" />
+          {t("tiers.firstFree")}
         </p>
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((p, i) => {
-            const isBest = p.code === bestCode;
-            const Icon = p.kind === "featured" ? Sparkles : TrendingUp;
+      </div>
+
+      {/* Per-listing tiers */}
+      <div className="mt-10">
+        <div className="mb-6 text-center">
+          <h2 className="text-foreground text-2xl font-bold">
+            {t("tiers.heading")}
+          </h2>
+          <p className="text-muted-foreground mx-auto mt-1 max-w-xl text-sm">
+            {t("tiers.sub")}
+          </p>
+        </div>
+        <ul className="grid items-stretch gap-4 lg:grid-cols-3">
+          {LISTING_TIERS.map((tier, i) => {
+            const isPremium = tier.code === "premium";
+            const isBrand = tier.code === "brand";
+            const emphasized = isBrand || isPremium;
             return (
               <li
-                key={p.code}
+                key={tier.code}
                 className={cn(
-                  "rise-in relative flex flex-col gap-1 overflow-hidden rounded-2xl border p-4",
-                  isBest
-                    ? "border-primary ring-primary/20 bg-accent ring-2"
-                    : "border-border bg-card",
+                  "rise-in relative flex flex-col overflow-hidden rounded-3xl border p-6",
+                  isPremium
+                    ? "border-primary from-primary/10 to-card bg-gradient-to-br"
+                    : isBrand
+                      ? "border-primary ring-primary/20 bg-accent ring-2"
+                      : "border-border bg-card",
                 )}
-                style={{ animationDelay: `${150 + i * 70}ms` }}
+                style={{ animationDelay: `${60 + i * 80}ms` }}
               >
-                {isBest ? (
+                {isPremium ? (
+                  <div className="bg-primary/20 absolute -top-10 -right-10 size-32 rounded-full blur-2xl" />
+                ) : null}
+                {emphasized ? (
                   <span className="bg-primary text-primary-foreground absolute top-0 right-0 rounded-bl-xl px-2.5 py-0.5 text-[11px] font-bold tracking-wide uppercase">
-                    {t("bestValue")}
+                    {t(`tiers.${tier.code}.badge`)}
                   </span>
                 ) : null}
-                <span className="flex items-center gap-2">
-                  <Icon className="text-primary size-4 shrink-0" />
-                  <span className="text-foreground font-semibold">
-                    {p.name}
-                  </span>
+                <span className="text-foreground text-lg font-bold">
+                  {t(`tiers.${tier.code}.name`)}
                 </span>
-                {p.description ? (
-                  <span className="text-muted-foreground text-sm">
-                    {p.description}
+                <span className="text-muted-foreground mt-0.5 text-sm">
+                  {t(`tiers.${tier.code}.tagline`)}
+                </span>
+                <p className="mt-4">
+                  <span className="text-foreground font-mono text-3xl font-bold tabular-nums">
+                    {groupNumber(tier.priceUzs)}
                   </span>
-                ) : null}
-                <span className="text-foreground mt-1 font-mono text-2xl font-bold tabular-nums">
-                  {groupNumber(p.priceUzs)}
                   <span className="text-muted-foreground ml-1 text-sm font-semibold">
                     so&apos;m
                   </span>
-                </span>
-                <span className="text-muted-foreground flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-1.5">
-                    {t("duration", { days: p.durationDays })}
-                    {savingsOf(p) > 0 ? (
-                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                        {t("cheaper", { pct: savingsOf(p) })}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="font-medium">
-                    {t("perDay", { price: groupNumber(Math.round(perDay(p))) })}
-                  </span>
-                </span>
+                </p>
+                <ul className="mt-4 flex flex-col gap-2">
+                  {["f1", "f2", "f3"].map((f) => (
+                    <li
+                      key={f}
+                      className="text-foreground flex items-start gap-2 text-sm"
+                    >
+                      <Check className="text-primary mt-0.5 size-4 shrink-0" />
+                      {t(`tiers.${tier.code}.${f}`)}
+                    </li>
+                  ))}
+                </ul>
+                <p
+                  className={cn(
+                    "mt-4 rounded-xl px-3 py-2 text-xs font-medium",
+                    emphasized
+                      ? "bg-primary/15 text-foreground"
+                      : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {t(`tiers.${tier.code}.angle`)}
+                </p>
+                <Link
+                  href="/employer/jobs/new"
+                  className={cn(
+                    buttonVariants({
+                      variant: emphasized ? "primary" : "outline",
+                      size: "sm",
+                    }),
+                    "mt-5 w-full",
+                  )}
+                >
+                  {t("tiers.cta")}
+                </Link>
               </li>
             );
           })}

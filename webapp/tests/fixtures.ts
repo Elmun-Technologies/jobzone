@@ -46,6 +46,7 @@ export function makeJob(overrides: Partial<Job> = {}): Job {
     postedAt: null,
     expiresAt: null,
     boostActive: false,
+    boostKind: null,
     applicantsCount: 0,
     screeningQuestions: [],
     ...overrides,

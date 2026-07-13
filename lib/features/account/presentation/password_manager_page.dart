@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/env.dart';
+import '../../../core/supabase/supabase_providers.dart';
 import '../../../core/utils/validators.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
@@ -40,6 +41,22 @@ class _PasswordManagerPageState extends ConsumerState<PasswordManagerPage> {
     setState(() => _saving = true);
     try {
       if (Env.hasSupabase) {
+        // Prove knowledge of the current password before changing it —
+        // Supabase's updateUser() doesn't check the old password itself, so
+        // without this an already-unlocked device could change the password
+        // with no verification at all.
+        final email = ref.read(supabaseClientProvider).auth.currentUser?.email;
+        if (email != null) {
+          final reauthed = await ref
+              .read(authControllerProvider.notifier)
+              .signIn(email: email, password: _current.text);
+          if (!reauthed) {
+            if (mounted) {
+              showErrorSnack(context, context.l10n.wrongCurrentPassword);
+            }
+            return;
+          }
+        }
         final ok = await ref
             .read(authControllerProvider.notifier)
             .updatePassword(_password.text);
@@ -86,6 +103,8 @@ class _PasswordManagerPageState extends ConsumerState<PasswordManagerPage> {
                     JzPasswordField(
                       label: l.currentPassword,
                       controller: _current,
+                      validator: (v) =>
+                          Validators.isNotBlank(v) ? null : l.valRequired,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Align(

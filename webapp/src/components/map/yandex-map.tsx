@@ -8,6 +8,7 @@ import { salaryText, schedulePatternLabel } from "@/lib/format";
 import { loadYmaps, type YmapsMap } from "@/lib/yandex-maps-loader";
 
 import type { MapRatings } from "./jobs-map-inner";
+import { mapTier } from "./tier";
 
 const TASHKENT: [number, number] = [41.3111, 69.2797];
 
@@ -116,7 +117,7 @@ export function YandexMap({
         // lives in the balloon that opens on click.)
         const PinLayout = ymaps.templateLayoutFactory.createClass(
           `<div style="position:relative;transform:translate(-50%,-100%)">
-            <div class="yolla-pin" style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px rgba(0,0,0,.35)">$[properties.label]</div>
+            <div class="yolla-pin" style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;box-shadow:$[properties.pinShadow]">$[properties.label]</div>
             <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
           </div>`,
         );
@@ -139,10 +140,14 @@ export function YandexMap({
           // The marker shows the JOB TITLE (salary is in the balloon). Yandex's
           // $[properties.label] template substitution HTML-escapes it.
           const title = job.title || "•";
+          const tier = mapTier(job.boostKind);
           return new ymaps.Placemark(
             [job.lat, job.lng],
             {
-              label: job.boostActive ? `★ ${title}` : title,
+              label: tier === "premium" ? `★ ${title}` : title,
+              pinShadow: tier
+                ? "0 0 0 2px rgba(199,251,0,.55),0 4px 16px rgba(199,251,0,.55)"
+                : "0 4px 12px rgba(0,0,0,.35)",
               balloonContent: balloonHtml(
                 job,
                 locale,

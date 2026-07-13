@@ -103,9 +103,11 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
                 // rebuild/stream re-emit), and only when the user was already
                 // near the bottom (or this is the first load) — otherwise a
                 // new message while reading history yanks them back down.
-                final isNewMessage = _lastMessageCount == null ||
+                final isNewMessage =
+                    _lastMessageCount == null ||
                     messages.length > _lastMessageCount!;
-                final nearBottom = !_scroll.hasClients ||
+                final nearBottom =
+                    !_scroll.hasClients ||
                     _scroll.position.maxScrollExtent - _scroll.position.pixels <
                         120;
                 if (isNewMessage && (nearBottom || _lastMessageCount == null)) {
@@ -174,8 +176,8 @@ class _Header extends StatelessWidget {
             backgroundColor: Colors.white24,
             backgroundImage:
                 (convo?.avatarUrl != null && convo!.avatarUrl!.isNotEmpty)
-                    ? CachedNetworkImageProvider(convo!.avatarUrl!)
-                    : null,
+                ? CachedNetworkImageProvider(convo!.avatarUrl!)
+                : null,
             child: (convo?.avatarUrl == null || convo!.avatarUrl!.isEmpty)
                 ? const Icon(Icons.person_rounded, color: Colors.white)
                 : null,
@@ -254,8 +256,9 @@ class _MessageItem extends StatelessWidget {
     final meta = Padding(
       padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.lg),
       child: Row(
-        mainAxisAlignment:
-            mine ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: mine
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: mine
             ? [
                 Text(
@@ -297,8 +300,9 @@ class _MessageItem extends StatelessWidget {
     );
 
     return Column(
-      crossAxisAlignment:
-          mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: mine
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Align(
           alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -430,11 +434,11 @@ class _VoiceBubble extends StatelessWidget {
 }
 
 BorderRadius _bubbleRadius(bool mine) => BorderRadius.only(
-      topLeft: const Radius.circular(AppRadius.lg),
-      topRight: const Radius.circular(AppRadius.lg),
-      bottomLeft: Radius.circular(mine ? AppRadius.lg : AppRadius.xs),
-      bottomRight: Radius.circular(mine ? AppRadius.xs : AppRadius.lg),
-    );
+  topLeft: const Radius.circular(AppRadius.lg),
+  topRight: const Radius.circular(AppRadius.lg),
+  bottomLeft: Radius.circular(mine ? AppRadius.lg : AppRadius.xs),
+  bottomRight: Radius.circular(mine ? AppRadius.xs : AppRadius.lg),
+);
 
 class _Composer extends StatelessWidget {
   const _Composer({required this.controller, required this.onSend});
@@ -477,8 +481,8 @@ class _Composer extends StatelessWidget {
                   onTap: hasText
                       ? onSend
                       : () => ScaffoldMessenger.of(context)
-                        ..hideCurrentSnackBar()
-                        ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
                 );
               },
             ),

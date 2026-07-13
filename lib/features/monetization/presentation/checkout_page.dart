@@ -39,8 +39,9 @@ class CheckoutPage extends ConsumerWidget {
             onRetry: () => ref.invalidate(promotionProductsProvider),
           ),
           data: (products) {
-            final product =
-                products.where((p) => p.code == productCode).firstOrNull;
+            final product = products
+                .where((p) => p.code == productCode)
+                .firstOrNull;
             if (product == null) {
               return JzErrorState(
                 title: l.errorTitle,

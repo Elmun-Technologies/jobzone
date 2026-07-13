@@ -186,11 +186,14 @@ class CvRepository {
   }
 
   /// Personal Information screen — name + contact basics on the profile row.
+  /// [avatarBytes], when set, is uploaded to the `avatars` bucket first and
+  /// `avatar_url` is updated alongside the other fields in the same write.
   Future<void> savePersonalInfo({
     String? fullName,
     String? phone,
     String? city,
     String? country,
+    Uint8List? avatarBytes,
   }) async {
     if (!_online) {
       offlineProfile
@@ -202,14 +205,30 @@ class CvRepository {
     }
     final uid = _uid;
     if (uid == null) return;
-    await _ref
-        .read(supabaseClientProvider)
+    final client = _ref.read(supabaseClientProvider);
+    String? avatarUrl;
+    if (avatarBytes != null) {
+      final path = '$uid/avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      await client.storage
+          .from('avatars')
+          .uploadBinary(
+            path,
+            avatarBytes,
+            fileOptions: const FileOptions(
+              upsert: true,
+              contentType: 'image/jpeg',
+            ),
+          );
+      avatarUrl = client.storage.from('avatars').getPublicUrl(path);
+    }
+    await client
         .from('profiles')
         .update({
           'full_name': fullName,
           'phone': phone,
           'city': city,
           'country': country,
+          'avatar_url': ?avatarUrl,
         })
         .eq('id', uid);
   }
@@ -405,11 +424,59 @@ class CvRepository {
     return inserted['id'] as String?;
   }
 
-  Future<void> deleteResume(String id) => _delete(
-    'resumes',
-    id,
-    () => _offline.resumes.removeWhere((e) => e.id == id),
-  );
+  /// Deletes a resume row, its uploaded file, and — if it was the default —
+  /// promotes the next most recent remaining resume so the profile always
+  /// has a default when one exists (the applications flow attaches CVs by
+  /// looking up the default).
+  Future<void> deleteResume(String id) async {
+    if (!_online) {
+      final wasDefault = _offline.resumes.any((r) => r.id == id && r.isDefault);
+      _offline.resumes.removeWhere((e) => e.id == id);
+      if (wasDefault && _offline.resumes.isNotEmpty) {
+        final first = _offline.resumes.first;
+        _offline.resumes[0] = Resume(
+          id: first.id,
+          title: first.title,
+          filePath: first.filePath,
+          fileSize: first.fileSize,
+          mimeType: first.mimeType,
+          isDefault: true,
+          uploadedAt: first.uploadedAt,
+        );
+      }
+      return;
+    }
+    final uid = _uid;
+    if (uid == null) return;
+    final client = _ref.read(supabaseClientProvider);
+    final row = await client
+        .from('resumes')
+        .select('file_path, is_default')
+        .eq('id', id)
+        .maybeSingle();
+    if (row == null) return;
+    final path = row['file_path'] as String?;
+    if (path != null && path.isNotEmpty) {
+      await client.storage.from('resumes').remove([path]);
+    }
+    await client.from('resumes').delete().eq('id', id);
+    if (row['is_default'] == true) {
+      final remaining = await client
+          .from('resumes')
+          .select('id')
+          .eq('profile_id', uid)
+          .order('uploaded_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      final nextId = remaining?['id'] as String?;
+      if (nextId != null) {
+        await client
+            .from('resumes')
+            .update({'is_default': true})
+            .eq('id', nextId);
+      }
+    }
+  }
 
   Future<void> setDefaultResume(String id) async {
     if (!_online) {

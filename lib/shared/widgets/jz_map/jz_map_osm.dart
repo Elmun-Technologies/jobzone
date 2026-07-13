@@ -169,7 +169,7 @@ class _MarkerChild extends StatelessWidget {
       final content = Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (hasLogo) _LogoAvatar(url: marker.imageUrl!),
+          if (hasLogo) _LogoAvatar(url: marker.imageUrl!, tier: marker.tier),
           if (hasLogo && marker.label != null) const SizedBox(height: 3),
           if (marker.label != null) _LabelTag(label: marker.label!),
         ],
@@ -215,8 +215,9 @@ class _LabelTag extends StatelessWidget {
 }
 
 class _LogoAvatar extends StatelessWidget {
-  const _LogoAvatar({required this.url});
+  const _LogoAvatar({required this.url, this.tier = JzMarkerTier.none});
   final String url;
+  final JzMarkerTier tier;
 
   @override
   Widget build(BuildContext context) {
@@ -224,16 +225,35 @@ class _LogoAvatar extends StatelessWidget {
       color: Color(0xFF0A0A0A),
       child: Icon(Icons.business_rounded, color: Colors.white, size: 20),
     );
+    const volt = Color(0xFFC7FB00);
+    final tiered = tier != JzMarkerTier.none;
     return Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
-        ],
+        border: Border.all(
+          color: tiered ? volt : Colors.white,
+          width: tiered ? 2.5 : 2,
+        ),
+        boxShadow: tiered
+            ? [
+                BoxShadow(
+                  color: volt.withValues(
+                    alpha: tier == JzMarkerTier.premium ? 0.9 : 0.7,
+                  ),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ]
+            : const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
       ),
       child: ClipOval(
         child: CachedNetworkImage(

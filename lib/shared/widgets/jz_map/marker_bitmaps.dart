@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'jz_map_types.dart';
+
 /// Renders small marker images for the Yandex map, which needs raster icons
 /// rather than widgets. Pure `dart:ui` Canvas drawing (no widget tree); results
 /// are cached by content so each distinct label/count is drawn once. Used only
@@ -51,7 +53,11 @@ class MarkerBitmaps {
     required String cacheKey,
     required ui.Image logo,
     String? label,
-  }) => _cached('logo:$cacheKey', () => _withLogo(logo, label));
+    JzMarkerTier tier = JzMarkerTier.none,
+  }) => _cached(
+    'logo:$cacheKey:${tier.name}',
+    () => _withLogo(logo, label, tier),
+  );
 
   static Future<ui.Image> _cached(
     String key,
@@ -140,10 +146,20 @@ class MarkerBitmaps {
     return rec.endRecording().toImage(w, h);
   }
 
-  /// Circular [logo] (white ring) with the [label] in a volt pill below it.
-  static Future<ui.Image> _withLogo(ui.Image logo, String? label) async {
+  /// Circular [logo] with the [label] in a volt pill below it. A plain listing
+  /// gets a white ring; a brand/premium [tier] gets a volt ring plus a blurred
+  /// volt halo behind the logo (premium burns brighter) so it glows on the map.
+  static Future<ui.Image> _withLogo(
+    ui.Image logo,
+    String? label,
+    JzMarkerTier tier,
+  ) async {
     final logoD = 44 * _dpr;
     final ring = 2.5 * _dpr;
+    // The halo needs breathing room, so the canvas grows by [glow] on the top
+    // and both sides for a tiered marker.
+    final glow = tier == JzMarkerTier.none ? 0.0 : 6 * _dpr;
+    final ringColor = tier == JzMarkerTier.none ? _white : _volt;
 
     TextPainter? tp;
     var pillW = 0.0, pillH = 0.0;
@@ -165,14 +181,26 @@ class MarkerBitmaps {
       pillH = tp.height + 8 * _dpr;
     }
     final gap = pillH == 0 ? 0.0 : 3 * _dpr;
-    final w = logoD > pillW ? logoD : pillW;
-    final h = logoD + gap + pillH;
+    final logoBox = logoD + glow * 2;
+    final w = logoBox > pillW ? logoBox : pillW;
+    final h = glow + logoD + gap + pillH;
 
     final rec = ui.PictureRecorder();
     final canvas = Canvas(rec);
-    final logoCenter = Offset(w / 2, logoD / 2);
+    final logoCenter = Offset(w / 2, glow + logoD / 2);
 
-    canvas.drawCircle(logoCenter, logoD / 2, Paint()..color = _white);
+    if (glow > 0) {
+      canvas.drawCircle(
+        logoCenter,
+        logoD / 2 + glow * 0.5,
+        Paint()
+          ..color = _volt.withValues(
+            alpha: tier == JzMarkerTier.premium ? 0.9 : 0.65,
+          )
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, glow * 0.7),
+      );
+    }
+    canvas.drawCircle(logoCenter, logoD / 2, Paint()..color = ringColor);
     canvas.save();
     canvas.clipPath(
       Path()..addOval(
@@ -200,7 +228,7 @@ class MarkerBitmaps {
     if (tp != null) {
       final pillRect = Rect.fromLTWH(
         (w - pillW) / 2,
-        logoD + gap,
+        glow + logoD + gap,
         pillW,
         pillH,
       );

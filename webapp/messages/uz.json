@@ -621,7 +621,9 @@
       "ru": "Rus",
       "en": "Ingliz"
     },
-    "langLevelNative": "ona tili"
+    "langLevelNative": "ona tili",
+    "tierBrand": "Brend",
+    "tierPremium": "Premium"
   },
   "company": {
     "about": "Kompaniya haqida",
@@ -747,34 +749,34 @@
       "eyebrow": "Tariflar",
       "title": "Bir kunlik bo'sh joydan arzon",
       "free": {
-        "name": "Free",
+        "name": "Bepul",
         "price": "0",
-        "unit": "so'm · start uchun",
-        "f1": "1 faol vakansiya",
-        "f2": "Xaritada oddiy belgi"
+        "unit": "so'm · birinchi e'lon",
+        "f1": "1 ta bepul e'lon",
+        "f2": "Ikkala ilovada ko'rinadi"
       },
       "standard": {
-        "name": "Standard",
-        "price": "99 000",
-        "unit": "so'm · vakansiya · 30 kun",
-        "f1": "Qidiruvda ustunlik",
-        "f2": "Barcha asosiy funksiyalar"
+        "name": "Standart",
+        "price": "39 900",
+        "unit": "so'm · e'lon",
+        "f1": "AI bilan to'ldirish",
+        "f2": "Cheksiz nomzod arizasi"
       },
-      "highlight": {
-        "name": "Highlight",
-        "price": "199 000",
-        "unit": "so'm · vakansiya · 30 kun",
-        "tag": "Eng ko'rinarli",
-        "f1": "Xaritada yorqin volt-belgi",
-        "f2": "Ro'yxat boshida"
+      "brand": {
+        "name": "Brend",
+        "price": "79 900",
+        "unit": "so'm · e'lon",
+        "tag": "Eng ommabop",
+        "f1": "Logotip yonib turadi",
+        "f2": "Ishonch belgisi + qidiruvda yuqori"
       },
-      "business": {
-        "name": "Business",
-        "price": "499 000",
-        "unit": "so'm · oyiga",
-        "f1": "10 tagacha vakansiya",
-        "f2": "Kompaniya logotipi xaritada",
-        "f3": "Arizalar statistikasi"
+      "premium": {
+        "name": "Premium",
+        "price": "99 900",
+        "unit": "so'm · e'lon",
+        "f1": "Butunlay ajralib turadi",
+        "f2": "Ro'yxat va xarita tepasida",
+        "f3": "~3× ko'proq nomzod"
       },
       "note": "Faqat ish beruvchilar to'laydi. Ish izlovchilarga — doim bepul.",
       "footnote": "Tariflar — startdagi mo'ljal, aniqlashtiriladi"
@@ -934,16 +936,38 @@
     "title": "Narxlar",
     "heroTitle": "Ishga eng tez va arzon yo'l",
     "heroSubtitle": "Minglab ishchi Yolla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
-    "firstPost": "Birinchi vakansiya",
-    "free": "Bepul",
-    "firstPostHint": "To'lovsiz, darhol e'lon qilinadi va ikkala ilovada ko'rinadi.",
-    "nextPosts": "Keyingi vakansiyalar",
-    "nextPostsHint": "Har bir qo'shimcha vakansiya uchun — Hamyondan yechiladi.",
-    "promoTitle": "Reklama paketlari",
-    "promoSubtitle": "Vakansiyangizni ro'yxat tepasiga chiqaring — 3 barobar ko'proq nomzod.",
-    "bestValue": "Eng foydali",
-    "duration": "{days} kun",
-    "perDay": "≈{price} so'm/kun",
+    "tiers": {
+      "heading": "Har bir e'lon — o'z ko'rinishi bilan",
+      "sub": "Birinchi e'lon bepul. Keyingilari uchun ko'rinishni tanlang — qancha ko'rinsa, shuncha ko'p nomzod.",
+      "firstFree": "Birinchi e'lon — bepul",
+      "cta": "E'lon joylash",
+      "standard": {
+        "name": "Standart",
+        "tagline": "E'loningiz e'lon qilinadi",
+        "f1": "Ikkala ilovada (mobil + web) ko'rinadi",
+        "f2": "AI bilan 5 daqiqada to'ldiring",
+        "f3": "Cheksiz nomzod arizasi",
+        "angle": "Bir kunlik bo'sh ish o'rnidan arzon."
+      },
+      "brand": {
+        "name": "Brend",
+        "badge": "Eng ommabop",
+        "tagline": "Logotipingiz yonib turadi",
+        "f1": "Standart'dagi hamma narsa",
+        "f2": "Yaltiroq logotip — kartada va xaritada",
+        "f3": "Ishonch belgisi + qidiruvda yuqori",
+        "angle": "Tanish brendga ko'proq ishonch — ~2× ko'proq bosiladi."
+      },
+      "premium": {
+        "name": "Premium",
+        "badge": "Eng tez natija",
+        "tagline": "Hammadan ajralib turing",
+        "f1": "Brend'dagi hamma narsa",
+        "f2": "Volt bilan ajratilgan e'lon",
+        "f3": "Ro'yxat va xarita tepasida",
+        "angle": "Kirgan zahoti e'tiborni tortadi — ~3× ko'proq nomzod."
+      }
+    },
     "benefit1Title": "Tez",
     "benefit1Desc": "Bir necha daqiqada e'lon — AI yordamida to'ldiring.",
     "benefit2Title": "Maqsadli",
@@ -952,7 +976,6 @@
     "benefit3Desc": "Yashirin to'lovlar yo'q — nima to'lasangiz, shuni ko'rasiz.",
     "ctaTitle": "Bugun boshlang",
     "ctaText": "Birinchi vakansiya bepul — bir necha daqiqada e'lon qiling.",
-    "ctaButton": "Vakansiya joylash",
-    "cheaper": "{pct}% arzon"
+    "ctaButton": "Vakansiya joylash"
   }
 }

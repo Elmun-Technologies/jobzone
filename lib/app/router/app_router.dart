@@ -29,6 +29,7 @@ import '../../features/chat/presentation/chat_detail_page.dart';
 import '../../features/chat/presentation/chat_list_page.dart';
 import '../../features/companies/domain/company.dart';
 import '../../features/companies/presentation/company_details_page.dart';
+import '../../features/companies/presentation/subscriptions_page.dart';
 import '../../features/companies/presentation/gallery_page.dart';
 import '../../features/companies/presentation/intro_video_page.dart';
 import '../../features/employer/domain/applicant.dart';
@@ -44,6 +45,7 @@ import '../../features/employer/presentation/dashboard/employer_dashboard_page.d
 import '../../features/employer/presentation/employer_shell.dart';
 import '../../features/monetization/presentation/checkout_page.dart';
 import '../../features/monetization/presentation/promotions_history_page.dart';
+import '../../features/monetization/presentation/tiers_page.dart';
 import '../../features/employer/presentation/jobs/my_jobs_page.dart';
 import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
@@ -343,6 +345,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.employerPromotions,
         builder: (c, s) => const PromotionsHistoryPage(),
       ),
+      GoRoute(path: Routes.employerTiers, builder: (c, s) => const TiersPage()),
       GoRoute(
         path: '/employer/checkout/:jobId/:code',
         builder: (c, s) => CheckoutPage(
@@ -367,7 +370,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/collection/:key',
         builder: (c, s) => CollectionResultsPage(
-          collection: JobCollection.fromKey(s.pathParameters['key']) ??
+          collection:
+              JobCollection.fromKey(s.pathParameters['key']) ??
               JobCollection.freshers,
         ),
       ),
@@ -508,6 +512,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.savedSearches,
         builder: (c, s) => const SavedSearchesPage(),
+      ),
+      GoRoute(
+        path: Routes.subscriptions,
+        builder: (c, s) => const SubscriptionsPage(),
       ),
       GoRoute(
         path: Routes.accountSettings,
