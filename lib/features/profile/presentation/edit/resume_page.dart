@@ -57,8 +57,31 @@ class _ResumePageState extends ConsumerState<ResumePage> {
 
   Future<void> _delete(Resume r) async {
     if (r.id == null) return;
-    await ref.read(cvRepositoryProvider).deleteResume(r.id!);
-    ref.invalidate(resumesControllerProvider);
+    final l = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.confirmRemoveTitle),
+        content: Text(r.title),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref.read(cvRepositoryProvider).deleteResume(r.id!);
+      ref.invalidate(resumesControllerProvider);
+    } catch (e) {
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+    }
   }
 
   @override
