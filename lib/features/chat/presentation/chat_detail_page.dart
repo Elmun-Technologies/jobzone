@@ -208,19 +208,6 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          PopupMenuButton<String>(
-            iconColor: Colors.white,
-            onSelected: (v) {
-              final route = v == 'video'
-                  ? Routes.videoCall(conversationId)
-                  : Routes.voiceCall(conversationId);
-              context.push(route, extra: convo);
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(value: 'voice', child: Text(l.voiceCall)),
-              PopupMenuItem(value: 'video', child: Text(l.videoCall)),
-            ],
-          ),
         ],
       ),
     );
