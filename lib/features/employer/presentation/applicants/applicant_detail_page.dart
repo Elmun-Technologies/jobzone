@@ -9,6 +9,7 @@ import '../../../../shared/enums/enums.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../applications/domain/application.dart';
 import '../../../applications/presentation/util/status_label.dart';
+import '../../../chat/data/chat_repository.dart';
 import '../../../chat/domain/chat_models.dart';
 import '../../../reviews/data/worker_reviews_repository.dart';
 import '../../../reviews/domain/worker_review.dart';
@@ -30,6 +31,7 @@ class ApplicantDetailPage extends ConsumerStatefulWidget {
 
 class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
   late Applicant _applicant = widget.applicant;
+  bool _openingChat = false;
 
   Future<void> _pickStatus() async {
     final l = context.l10n;
@@ -89,15 +91,30 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
     showInfoSnack(context, context.l10n.statusUpdatedToast);
   }
 
-  /// Opens a chat with the candidate, reusing the existing chat stack. The
-  /// conversation is keyed off the application id; real provisioning between
-  /// employer and candidate is a later Supabase-activation item.
-  void _message() {
+  /// Opens a chat with the candidate. Provisions a REAL direct conversation
+  /// (the candidate's seeker profile id is `Applicant.workerId`), then navigates
+  /// to it — never a synthetic id, so the first message survives the FK/RLS
+  /// check. Offline this resolves to a deterministic mock thread.
+  Future<void> _message() async {
+    if (_openingChat) return;
     final a = _applicant;
+    setState(() => _openingChat = true);
+    String conversationId;
+    try {
+      conversationId = await ref
+          .read(chatRepositoryProvider)
+          .getOrCreateDirectConversation(a.workerId);
+    } catch (e) {
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+      return;
+    } finally {
+      if (mounted) setState(() => _openingChat = false);
+    }
+    if (!mounted) return;
     context.push(
-      Routes.chatDetail('applicant-${a.id}'),
+      Routes.chatDetail(conversationId),
       extra: Conversation(
-        id: 'applicant-${a.id}',
+        id: conversationId,
         title: a.name,
         avatarUrl: a.avatarUrl,
         subtitle: a.jobTitle,
@@ -386,7 +403,7 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: _message,
+                        onPressed: _openingChat ? null : _message,
                         style: OutlinedButton.styleFrom(
                           shape: const StadiumBorder(),
                           padding: const EdgeInsets.symmetric(
@@ -394,10 +411,18 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                           ),
                           side: BorderSide(color: context.colors.border),
                         ),
-                        icon: const Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          size: 18,
-                        ),
+                        icon: _openingChat
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 18,
+                              ),
                         label: Text(l.messageCandidate),
                       ),
                     ),

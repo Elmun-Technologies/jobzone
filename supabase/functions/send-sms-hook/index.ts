@@ -53,6 +53,13 @@ async function verifySignature(req: Request, rawBody: string): Promise<boolean> 
   const sigHeader = req.headers.get("webhook-signature");
   if (!id || !timestamp || !sigHeader) return false;
 
+  // Reject stale/future timestamps to close the replay window (Standard-Webhooks
+  // recommends a tolerance check; OTP messages are time-sensitive anyway).
+  const ts = Number.parseInt(timestamp, 10);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) {
+    return false;
+  }
+
   const secretB64 = secret.replace(/^v1,?\s*whsec_/, "");
   const key = await crypto.subtle.importKey(
     "raw",

@@ -147,6 +147,23 @@ class ChatRepository {
 
   Conversation? offlineConversation(String id) =>
       _online ? null : _offline.byId(id);
+
+  /// Returns a REAL direct-conversation id between the current user and
+  /// [otherProfileId], creating one if needed. Online this calls the
+  /// `get_or_create_direct_conversation` security-definer RPC (migration 0065)
+  /// so the conversation + both participant rows exist before the chat opens —
+  /// without it the first send fails the FK/RLS check. Offline it returns a
+  /// deterministic id so the mock chat still opens (an empty on-demand thread).
+  Future<String> getOrCreateDirectConversation(String otherProfileId) async {
+    if (!_online) return 'direct-$otherProfileId';
+    final id = await _ref
+        .read(supabaseClientProvider)
+        .rpc(
+          'get_or_create_direct_conversation',
+          params: {'p_other': otherProfileId},
+        );
+    return id as String;
+  }
 }
 
 final chatRepositoryProvider = Provider<ChatRepository>(
