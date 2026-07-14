@@ -1,5 +1,6 @@
 import { BadgeCheck, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -187,12 +188,12 @@ export default async function JobDetailsPage({
         <div className="lg:col-span-2">
           <div className="flex gap-4">
             {job.companyLogoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={job.companyLogoUrl}
                 alt={job.companyName}
                 width={64}
                 height={64}
+                unoptimized
                 className="size-16 shrink-0 rounded-xl object-cover"
               />
             ) : (

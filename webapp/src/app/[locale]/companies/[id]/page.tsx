@@ -1,5 +1,6 @@
 import { BadgeCheck, Globe, MapPin, Star } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -79,12 +80,12 @@ export default async function CompanyPage({
       {/* Header */}
       <div className="flex gap-4">
         {company.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={company.logoUrl}
             alt={company.name}
             width={72}
             height={72}
+            unoptimized
             className="size-[72px] shrink-0 rounded-xl object-cover"
           />
         ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Clock, MapPin } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -63,12 +64,14 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
       <div className="flex gap-3">
         {/* Company logo or initial */}
         {job.companyLogoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={job.companyLogoUrl}
             alt={job.companyName}
             width={48}
             height={48}
+            // Small logo — no LCP candidate; unoptimized keeps it cheap while
+            // Next still emits width/height so layout doesn't shift.
+            unoptimized
             className={`size-12 shrink-0 rounded-lg object-cover ${
               glow
                 ? "ring-2 ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)]"

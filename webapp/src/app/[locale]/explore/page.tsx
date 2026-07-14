@@ -44,6 +44,10 @@ export default async function ExplorePage({
 
   return (
     <div className="relative">
+      {/* The map fills the viewport, so the H1 is visually hidden but stays
+          in the DOM — SEO + a11y (screen readers announce the page purpose)
+          without a header bar competing with the map for space. */}
+      <h1 className="sr-only">{t("title")}</h1>
       <JobsMap jobs={jobs} ratings={ratings} fullBleed />
       {/* Floating "list view" escape hatch (bottom-left, clear of near-me). */}
       <Link
