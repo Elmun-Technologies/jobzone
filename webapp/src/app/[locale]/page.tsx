@@ -4,15 +4,16 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CompanyCard } from "@/components/companies/company-card";
 import { EmployerCta } from "@/components/landing/employer-cta";
 import { HowItWorks } from "@/components/landing/how-it-works";
+import { LandingMap } from "@/components/landing/landing-map";
+import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { ReputationTeaser } from "@/components/landing/reputation-teaser";
 import { JobCard } from "@/components/jobs/job-card";
-import { JobsMap } from "@/components/map/jobs-map";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
-import { getCompanies, getCompanyRatings } from "@/lib/data/companies";
+import { getCompanies } from "@/lib/data/companies";
 import {
   getCities,
   getJobCount,
@@ -40,11 +41,11 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations("home");
   const tj = await getTranslations("jobs");
+  const tm = await getTranslations("explore.map");
 
   const [
     recent,
     mapJobs,
-    ratings,
     categories,
     total,
     cities,
@@ -52,8 +53,9 @@ export default async function HomePage({
     topCompanies,
   ] = await Promise.all([
     getRecentJobs(6),
-    getOpenJobs({ limit: 100 }),
-    getCompanyRatings(),
+    // The landing showcase pins up to 8 jobs — fetch a small salaried set so
+    // pins actually populate; the full pannable feed lives on /explore.
+    getOpenJobs({ limit: 24 }),
     getCategoriesWithCounts(),
     getJobCount(),
     getCities(),
@@ -154,7 +156,25 @@ export default async function HomePage({
               {t("exploreCta")}
             </Link>
           </div>
-          <JobsMap jobs={mapJobs} ratings={ratings} height="64vh" />
+          {(() => {
+            const pinned = pickLandingMapJobs(mapJobs);
+            return (
+              <LandingMap
+                jobs={pinned}
+                labels={{
+                  chipNearMe: tm("nearMe"),
+                  chipSalary: tm("salaryFrom"),
+                  chipSchedule: tm("schedule22"),
+                  results: tm("results", { count: pinned.length }),
+                  nearMeCta: tm("nearMe"),
+                  youAreHere: tm("youAreHere"),
+                  pinHint: t("mapLead"),
+                  cityLabel: "TOSHKENT",
+                  negotiable: tj("negotiable"),
+                }}
+              />
+            );
+          })()}
         </Container>
       </section>
 
