@@ -3,6 +3,8 @@ import { Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { SiteBanner } from "@/components/layout/site-banner";
@@ -143,6 +145,11 @@ export default async function LocaleLayout({
           <SiteFooter />
         </NextIntlClientProvider>
         <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+        {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
+            Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
+            banner needed, no third-party host. Both no-op in dev. */}
+        <VercelAnalytics />
+        <SpeedInsights />
       </body>
     </html>
   );
