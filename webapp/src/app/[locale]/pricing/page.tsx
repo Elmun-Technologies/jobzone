@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { LISTING_TIERS } from "@/lib/listing-tiers";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+import { localeAlternates } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -19,7 +20,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("heroSubtitle"),
-    alternates: { canonical: `/${locale}/pricing` },
+    alternates: localeAlternates(locale, "pricing"),
   };
 }
 

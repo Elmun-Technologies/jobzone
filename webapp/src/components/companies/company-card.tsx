@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Briefcase, MapPin } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -19,12 +20,12 @@ export function CompanyCard({ company }: { company: CompanyWithJobs }) {
     >
       <div className="flex items-center gap-3">
         {company.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={company.logoUrl}
             alt={company.name}
             width={48}
             height={48}
+            unoptimized
             className="size-12 shrink-0 rounded-lg object-cover"
           />
         ) : (

@@ -536,6 +536,25 @@
     "exploreCta": "Xaritani to'liq ochish",
     "learnMore": "Batafsil"
   },
+  "landingPage": {
+    "titleCategory": "{category} ishi O'zbekistonda",
+    "titleCategoryCity": "{city}da {category} ishi",
+    "metaTitleCategory": "{category} ishi — O'zbekiston",
+    "metaTitleCategoryCity": "{city}da {category} ishi",
+    "metaDescriptionCategory": "Bugun {category} sohasidagi ochiq vakansiyalar — maosh, jadval va tez ariza bilan. Yolla — O'zbekistondagi ishonchli ish bozori.",
+    "metaDescriptionCategoryCity": "{city} shahridagi {category} vakansiyalari — maosh, jadval va tez ariza. Yolla'da yangi e'lonlar har kuni.",
+    "introCategory": "Bugun {category} sohasidagi ochiq vakansiyalarni ko'ring. Maosh, jadval, formalizatsiya — hammasi kartaning ustida. Ariza — ikki klikda, ro'yxatdan o'tmasdan.",
+    "introCategoryCity": "{city}dagi {category} ishlariga tez ariza. Yaqin ishlar, aniq maosh, ishonchli ish beruvchilar — Yolla'da.",
+    "resultsCount": "{count} ta vakansiya topildi",
+    "empty": "Hozircha bu bo'yicha ochiq vakansiya yo'q — tez orada shu yerda paydo bo'ladi.",
+    "byCity": "Shaharlar bo'yicha",
+    "byCategory": "Sohalar bo'yicha",
+    "seeAll": "Barcha ishlar",
+    "breadcrumbHome": "Bosh sahifa",
+    "breadcrumbJobs": "Ishlar",
+    "seoBlockTitle": "{category} bo'yicha ish — nima muhim",
+    "seoBlockBody": "Yolla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling."
+  },
   "jobs": {
     "title": "Ishlar",
     "searchPlaceholder": "Lavozim yoki kompaniya",

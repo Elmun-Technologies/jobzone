@@ -1,0 +1,161 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { JobCard } from "@/components/jobs/job-card";
+import { JsonLd } from "@/components/seo/json-ld";
+import { Container } from "@/components/ui/container";
+import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
+import { getCategoryBySlug } from "@/lib/data/categories";
+import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
+import { Link } from "@/i18n/navigation";
+import { groupNumber } from "@/lib/format";
+import {
+  breadcrumbJsonLd,
+  jobsItemListJsonLd,
+  localeAlternates,
+  siteUrl,
+} from "@/lib/seo";
+import { slugify } from "@/lib/slug";
+
+// Live feed — new postings must show here immediately (invariant #3).
+export const dynamic = "force-dynamic";
+// Cap: enough to satisfy the ItemList schema without blowing up TTFB when a
+// hot category has thousands of postings. Deeper browsing goes through /jobs.
+const LANDING_LIMIT = 30;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; category: string }>;
+}): Promise<Metadata> {
+  const { locale, category } = await params;
+  const cat = await getCategoryBySlug(category);
+  if (!cat) return { title: "404" };
+  const t = await getTranslations({ locale, namespace: "landingPage" });
+  const title = t("metaTitleCategory", { category: cat.name });
+  const description = t("metaDescriptionCategory", { category: cat.name });
+  return {
+    title,
+    description,
+    alternates: localeAlternates(locale, `ish/${category}`),
+    openGraph: { title, description, type: "website" },
+  };
+}
+
+export default async function CategoryLandingPage({
+  params,
+}: {
+  params: Promise<{ locale: string; category: string }>;
+}) {
+  const { locale, category } = await params;
+  setRequestLocale(locale);
+  const cat = await getCategoryBySlug(category);
+  if (!cat) notFound();
+
+  const t = await getTranslations("landingPage");
+
+  const [jobs, count, cities, savedIds] = await Promise.all([
+    getOpenJobs({ category: cat.name, limit: LANDING_LIMIT }),
+    getJobCount({ category: cat.name }),
+    // Every city already has at least one job on the platform (getCities()
+    // is derived from postings), so the internal-links row on this landing
+    // shows only cities that actually resolve to jobs somewhere on Yolla —
+    // filtering to "cities with this category" would require N extra head
+    // counts and doesn't move the SEO needle.
+    getCities(),
+    getBookmarkedJobIds(),
+  ]);
+
+  const base = siteUrl();
+  const localePath = `${base}/${locale}`;
+
+  return (
+    <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: t("breadcrumbHome"), url: `${localePath}` },
+          { name: t("breadcrumbJobs"), url: `${localePath}/jobs` },
+          { name: cat.name, url: `${localePath}/ish/${category}` },
+        ])}
+      />
+      {jobs.length > 0 ? (
+        <JsonLd data={jobsItemListJsonLd(jobs, locale)} />
+      ) : null}
+
+      <Container className="py-10 sm:py-14">
+        {/* Breadcrumb strip (visual). Mirrors the JSON-LD above; text is
+            short so it doesn't compete with the H1 for attention. */}
+        <nav
+          aria-label="breadcrumb"
+          className="text-muted-foreground mb-4 flex flex-wrap items-center gap-1 text-sm"
+        >
+          <Link href="/" className="hover:text-foreground">
+            {t("breadcrumbHome")}
+          </Link>
+          <span aria-hidden>/</span>
+          <Link href="/jobs" className="hover:text-foreground">
+            {t("breadcrumbJobs")}
+          </Link>
+          <span aria-hidden>/</span>
+          <span className="text-foreground font-medium">{cat.name}</span>
+        </nav>
+
+        <h1 className="text-foreground text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+          {t("titleCategory", { category: cat.name })}
+        </h1>
+        <p className="text-muted-foreground mt-3 max-w-2xl text-lg text-pretty">
+          {t("introCategory", { category: cat.name })}
+        </p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          {t("resultsCount", { count: groupNumber(count) })}
+        </p>
+
+        {jobs.length > 0 ? (
+          <ul className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {jobs.map((job) => (
+              <li key={job.id}>
+                <JobCard job={job} saved={savedIds.has(job.id)} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="border-border bg-muted/30 mt-8 rounded-xl border p-6 text-center text-sm">
+            {t("empty")}
+          </p>
+        )}
+
+        {/* Internal linking: every city gets a link to /ish/[category]/[city].
+            This is the mesh Google crawls to discover the deep landing set. */}
+        {cities.length > 0 ? (
+          <section className="mt-14">
+            <h2 className="text-foreground text-xl font-bold">
+              {t("byCity")}
+            </h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {cities.map((c) => (
+                <li key={c}>
+                  <Link
+                    href={`/ish/${category}/${slugify(c)}`}
+                    className="border-border bg-card hover:border-primary/40 inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors"
+                  >
+                    {t("titleCategoryCity", { city: c, category: cat.name })}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <section className="mt-14 max-w-3xl">
+          <h2 className="text-foreground text-xl font-bold">
+            {t("seoBlockTitle", { category: cat.name })}
+          </h2>
+          <p className="text-muted-foreground mt-3 text-pretty">
+            {t("seoBlockBody", { category: cat.name })}
+          </p>
+        </section>
+      </Container>
+    </>
+  );
+}

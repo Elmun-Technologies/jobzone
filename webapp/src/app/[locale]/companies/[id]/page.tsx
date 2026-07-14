@@ -1,5 +1,6 @@
 import { BadgeCheck, Globe, MapPin, Star } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -13,7 +14,12 @@ import {
   getCompanyReviews,
 } from "@/lib/data/companies";
 import { formatDate } from "@/lib/format";
-import { organizationJsonLd, siteUrl } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  localeAlternates,
+  organizationJsonLd,
+  siteUrl,
+} from "@/lib/seo";
 
 // Auth/session-dependent, per-request. Without this the page can be
 // full-route-cached (getCurrentUser swallows cookies() so Next never sees
@@ -34,7 +40,7 @@ export async function generateMetadata({
   return {
     title: company.name,
     description,
-    alternates: { canonical: url },
+    alternates: localeAlternates(locale, `companies/${id}`),
     openGraph: { title: company.name, description, url, type: "website" },
   };
 }
@@ -56,19 +62,30 @@ export default async function CompanyPage({
     getBookmarkedJobIds(),
   ]);
 
+  const tb = await getTranslations("landingPage");
+  const base = siteUrl();
+  const localePath = `${base}/${locale}`;
+
   return (
     <Container className="py-8">
       <JsonLd data={organizationJsonLd(company)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: tb("breadcrumbHome"), url: localePath },
+          { name: t("directoryTitle"), url: `${localePath}/companies` },
+          { name: company.name, url: `${localePath}/companies/${id}` },
+        ])}
+      />
 
       {/* Header */}
       <div className="flex gap-4">
         {company.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={company.logoUrl}
             alt={company.name}
             width={72}
             height={72}
+            unoptimized
             className="size-[72px] shrink-0 rounded-xl object-cover"
           />
         ) : (

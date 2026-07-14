@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
+
+import { routing } from "@/i18n/routing";
 import type { Company, Job } from "@/lib/data/types";
 
-/** Canonical site origin, e.g. https://jobzone.uz (no trailing slash). */
+/** Canonical site origin, e.g. https://www.yollla.uz (no trailing slash).
+ * Every absolute URL the crawler sees — metadataBase, canonical, og:url,
+ * sitemap entries, robots' Sitemap: line — resolves through this one call, so
+ * a domain change is a single-file swap. Vercel Production/Preview MUST set
+ * NEXT_PUBLIC_SITE_URL for the correct origin; the default is the brand
+ * apex used at launch and is what the sitemap serves when the env is unset. */
 export function siteUrl(): string {
   return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://jobzone.uz"
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+    "https://www.yollla.uz"
   );
 }
 
@@ -101,4 +110,117 @@ export function organizationJsonLd(company: Company): Record<string, unknown> {
 /** Renders a JSON-LD <script>. Strips undefined via JSON.stringify. */
 export function jsonLdScript(data: Record<string, unknown>): string {
   return JSON.stringify(data);
+}
+
+/** schema.org Organization for the Yolla brand — cements the "sameAs"
+ * knowledge graph link once socials are live and gives Google the logo/URL
+ * pair it shows in the search sidebar. Embed once, on the home page. */
+export function orgJsonLd(): Record<string, unknown> {
+  const base = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Yolla",
+    alternateName: ["Yollla", "Yolla.uz", "Yollla.uz"],
+    url: base,
+    logo: `${base}/icon.svg`,
+    description:
+      "O'zbekistondagi ishonchli ish bozori — Yolla. Maosh, jadval, masofa va ikki klikda ariza.",
+  };
+}
+
+/** schema.org BreadcrumbList — Google renders a friendlier URL breadcrumb
+ * in the search result instead of the raw URL when this is present. Each
+ * item's URL must be absolute (metadataBase doesn't apply to JSON-LD). */
+export function breadcrumbJsonLd(
+  items: { name: string; url: string }[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: it.url,
+    })),
+  };
+}
+
+/** schema.org ItemList of JobPosting URLs — the /ish/[category][/city]
+ * landing pages carry this so Google understands they are curated jobs
+ * indexes, not just plain content pages. Absolute URLs only. */
+export function jobsItemListJsonLd(
+  jobs: Job[],
+  locale: string,
+): Record<string, unknown> {
+  const base = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: jobs.map((j, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${base}/${locale}/jobs/${j.id}`,
+      name: j.title,
+    })),
+  };
+}
+
+/** schema.org WebSite with a SearchAction — enables the "Sitelinks
+ * search box" rich result and tells Google how our site search is called.
+ * `search_term_string` maps into ?q= on /jobs, matching the existing form. */
+export function websiteJsonLd(locale: string): Record<string, unknown> {
+  const base = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    url: base,
+    name: "Yolla",
+    inLanguage: locale,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${base}/${locale}/jobs?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+/** A locale-prefixed path like "/uz/jobs/abc" — used to build canonical +
+ * hreflang alternate URLs from a single input. Empty path → the locale root. */
+function localePath(locale: string, path: string): string {
+  const clean = path.replace(/^\/+/, "").replace(/\/+$/, "");
+  return clean ? `/${locale}/${clean}` : `/${locale}`;
+}
+
+/**
+ * `alternates` block for a page that has a URL in every supported locale.
+ *
+ * - `canonical`: the current locale's absolute URL (self-referencing — no
+ *   duplicate-content signal to Google when a page is reachable via a
+ *   trailing slash, a lowercased path, etc.).
+ * - `languages`: uz/ru/en alternates + an `x-default` pointing at the default
+ *   locale (uz) — how Google picks the right locale for each searcher.
+ *
+ * Pass an unprefixed path ("jobs", "companies/abc", "" for root). Every
+ * `generateMetadata` in the app should call this so alternates stay in sync
+ * as new locales are added.
+ */
+export function localeAlternates(
+  locale: string,
+  path: string,
+): NonNullable<Metadata["alternates"]> {
+  const base = siteUrl();
+  const languages: Record<string, string> = {};
+  for (const loc of routing.locales) {
+    languages[loc] = `${base}${localePath(loc, path)}`;
+  }
+  languages["x-default"] = `${base}${localePath(routing.defaultLocale, path)}`;
+  return {
+    canonical: `${base}${localePath(locale, path)}`,
+    languages,
+  };
 }

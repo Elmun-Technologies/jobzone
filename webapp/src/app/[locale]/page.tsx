@@ -8,6 +8,7 @@ import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { ReputationTeaser } from "@/components/landing/reputation-teaser";
 import { JobCard } from "@/components/jobs/job-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
@@ -22,6 +23,7 @@ import {
 } from "@/lib/data/jobs";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+import { orgJsonLd, websiteJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 // Reads per-user bookmarks + the auth-aware header and the live job feed, but
@@ -78,6 +80,12 @@ export default async function HomePage({
 
   return (
     <>
+      {/* Organization + WebSite (with SearchAction) — enables the Sitelinks
+          search box and cements the brand knowledge panel. Rendered once on
+          the home page; the layout adds nothing global to keep this scoped. */}
+      <JsonLd data={orgJsonLd()} />
+      <JsonLd data={websiteJsonLd(locale)} />
+
       {/* Hero */}
       <Container className="py-14 sm:py-20">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
@@ -192,7 +200,11 @@ export default async function HomePage({
             {categories.map((c) => (
               <li key={c.id}>
                 <Link
-                  href={`/jobs?category=${encodeURIComponent(c.name)}`}
+                  // Deep-link into the SEO landing (/ish/[category]) instead
+                  // of a faceted /jobs?category= URL — the landing has its
+                  // own H1, canonical, and JSON-LD, and inbound internal
+                  // links from the home page are how Google ranks it.
+                  href={`/ish/${c.slug}`}
                   className="border-border bg-card hover:border-primary/40 flex h-full flex-col gap-2 rounded-xl border p-4 transition-all hover:shadow-sm"
                 >
                   <span className="text-3xl leading-none">
