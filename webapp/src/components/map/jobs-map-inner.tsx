@@ -15,19 +15,16 @@ import {
   useMap,
 } from "react-leaflet";
 
-import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
+import { useRouter } from "@/i18n/navigation";
 import type { Job } from "@/lib/data/types";
-
-import { mapTier } from "./tier";
-import {
-  formatDistanceMeters,
-  salaryText,
-  schedulePatternLabel,
-} from "@/lib/format";
+import { salaryPill } from "@/lib/format";
 import { haversineMeters, useUserLocation, type LatLng } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 import { jobLatLng } from "@/lib/uz-geo";
 
+import { PinCardOverlay, usePinHover } from "./job-pin-card";
+import { salaryPinIcon } from "./pin-icon";
+import { mapTier } from "./tier";
 import { YandexMap } from "./yandex-map";
 
 /** Average rating + review count per company id (map "by rating" facet). */
@@ -41,51 +38,6 @@ const TOP_RATED_MIN = 4; // avg rating for the "gullar" / top-rated facet
 const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 type Located = Job & { lat: number; lng: number; distance: number | null };
-
-/** Escape raw employer text before injecting it into the divIcon HTML. */
-function escHtml(v: string): string {
-  return v
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/** A job-title tag pin (bubble + pointer), or a dot when there's no label.
- * Every pin is volt on ink — high-contrast on any tile; a brand/premium tier
- * gets a volt glow (premium also a ★); long titles truncate with an ellipsis. */
-function pinIcon(
-  label: string | null,
-  tier: "brand" | "premium" | null,
-): L.DivIcon {
-  if (!label) {
-    return L.divIcon({
-      className: "",
-      html: `<span style="display:block;width:15px;height:15px;border-radius:9999px;
-        transform:translate(-50%,-50%);background:#C7FB00;border:2px solid #0A0A0A;
-        box-shadow:${tier ? "0 0 10px 2px rgba(199,251,0,.85)" : "0 2px 7px rgba(0,0,0,.4)"}"></span>`,
-      iconSize: [0, 0],
-      iconAnchor: [0, 0],
-    });
-  }
-  const text = escHtml(tier === "premium" ? `★ ${label}` : label);
-  const shadow = tier
-    ? "0 0 0 2px rgba(199,251,0,.55),0 4px 16px rgba(199,251,0,.55)"
-    : "0 4px 12px rgba(0,0,0,.35)";
-  return L.divIcon({
-    className: "",
-    html: `<div style="position:relative;transform:translate(-50%,-100%)">
-      <div class="yolla-pin" style="background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
-        padding:5px 12px;font-weight:700;font-size:12.5px;line-height:1.2;
-        white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;
-        box-shadow:${shadow}">${text}</div>
-      <div style="position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
-        border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #0A0A0A"></div>
-    </div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-  });
-}
 
 const meIcon = L.divIcon({
   className: "",
@@ -119,6 +71,13 @@ export default function JobsMapInner({
 }) {
   const locale = useLocale();
   const t = useTranslations("explore");
+  const tj = useTranslations("jobs");
+  const router = useRouter();
+  // Hover preview card + click-through, via DOM delegation over the pins'
+  // data-job-id — engine-agnostic (works for Yandex and Leaflet alike).
+  const { wrapRef, hover, handlers } = usePinHover((id) =>
+    router.push(`/jobs/${id}`),
+  );
   const { loc, status, request } = useUserLocation();
   const [nearMe, setNearMe] = useState(false);
   const [query, setQuery] = useState("");
@@ -213,15 +172,14 @@ export default function JobsMapInner({
     "border-border bg-background/95 text-foreground h-9 rounded-full border px-3 text-sm font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
-    <div className="relative h-full w-full">
+    <div ref={wrapRef} {...handlers} className="relative h-full w-full">
       {useYandex ? (
         <YandexMap
           jobs={shown}
           loc={loc}
           locale={locale}
-          applyLabel={t("map.apply")}
           youAreHere={t("map.youAreHere")}
-          ratings={ratings}
+          negotiable={tj("negotiable")}
           // Only the immersive /explore map wheel-zooms; the embedded landing
           // map must let the page scroll past it (no scroll-zoom trap).
           wheelZoom={fullBleed}
@@ -243,7 +201,6 @@ export default function JobsMapInner({
               is off (embedded landing map) or on touch devices. */}
           <ZoomControl position="bottomright" />
 
-
           {loc ? (
             <>
               <Recenter to={loc} zoom={13} />
@@ -257,19 +214,32 @@ export default function JobsMapInner({
             <Marker
               key={j.id}
               position={[j.lat, j.lng]}
-              icon={pinIcon(j.title, mapTier(j.boostKind))}
-            >
-              <Popup>
-                <PinCard
-                  job={j}
-                  locale={locale}
-                  rating={ratings?.[j.companyId]}
-                />
-              </Popup>
-            </Marker>
+              icon={salaryPinIcon(
+                salaryPill(j) ?? tj("negotiable"),
+                j.id,
+                mapTier(j.boostKind),
+              )}
+            />
           ))}
         </MapContainer>
       )}
+
+      {/* Hover preview — the mockup's card: logo, title, live rating, salary
+          chip and one-tap apply. Positioned at the hovered pin, shared by
+          both engines. */}
+      {hover
+        ? (() => {
+            const j = shown.find((x) => x.id === hover.jobId);
+            return j ? (
+              <PinCardOverlay
+                hover={hover}
+                job={j}
+                rating={ratings?.[j.companyId]}
+                distance={j.distance}
+              />
+            ) : null;
+          })()
+        : null}
 
       {/* Search-on-map bar (Joyme-style: a full-width search row sits above
           the filter-chip row) — searches title/company/category over the jobs
@@ -424,58 +394,5 @@ function Chip({
     >
       {label}
     </button>
-  );
-}
-
-function PinCard({
-  job,
-  locale,
-  rating,
-}: {
-  job: Located;
-  locale: string;
-  rating?: { avg: number; count: number };
-}) {
-  const meta = [
-    job.categoryName,
-    job.distance != null ? formatDistanceMeters(job.distance) : null,
-    schedulePatternLabel(job.schedulePattern),
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  const salary = salaryText(job);
-
-  return (
-    <div className="min-w-[190px]">
-      <a
-        href={`/${locale}/jobs/${job.id}`}
-        className="text-foreground hover:text-primary block font-bold"
-      >
-        {job.title}
-      </a>
-      <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-        {job.companyName}
-        {rating && rating.count > 0 ? (
-          <span className="text-foreground font-medium">
-            · ⭐ {rating.avg.toFixed(1)}
-          </span>
-        ) : null}
-      </div>
-      {salary ? (
-        <div className="text-foreground mt-0.5 font-mono text-sm font-semibold">
-          {salary}
-        </div>
-      ) : null}
-      {meta ? (
-        <div className="text-muted-foreground text-xs">{meta}</div>
-      ) : null}
-      {/* One-tap apply straight from the pin — the map's core promise. Falls
-          back to the full form for a job with required screening. */}
-      <QuickApplyButton
-        jobId={job.id}
-        needsForm={job.screeningQuestions.some((q) => q.required)}
-        className="mt-2 px-3 py-1.5 text-sm"
-      />
-    </div>
   );
 }
