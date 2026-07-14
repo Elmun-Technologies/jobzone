@@ -316,3 +316,33 @@ export async function getAllJobIds(limit = 1000): Promise<string[]> {
     return [];
   }
 }
+
+/** All open job (id, postedAt) pairs — for sitemap `lastmod`. Capped for
+ * the same reason as getAllJobIds (bounded sitemap). */
+export async function getAllJobsForSitemap(
+  limit = 1000,
+): Promise<{ id: string; postedAt: string | null }[]> {
+  if (!hasSupabase()) {
+    return mockJobs.map((j) => ({ id: j.id, postedAt: j.postedAt }));
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("job_feed")
+      .select("id, posted_at")
+      .eq("status", "open")
+      .order("posted_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((r) => {
+      const row = r as { id: unknown; posted_at: unknown };
+      return {
+        id: String(row.id),
+        postedAt: row.posted_at == null ? null : String(row.posted_at),
+      };
+    });
+  } catch (e) {
+    console.error("getAllJobsForSitemap failed", e);
+    return [];
+  }
+}
