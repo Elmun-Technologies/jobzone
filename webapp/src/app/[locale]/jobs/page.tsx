@@ -15,12 +15,33 @@ const PAGE_SIZE = 20;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const sp = await searchParams;
   const t = await getTranslations({ locale, namespace: "jobs" });
-  return { title: t("title"), alternates: localeAlternates(locale, "jobs") };
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+  const category = pick(sp.category);
+  const city = pick(sp.city);
+  const q = pick(sp.q);
+  // Compose a keyword-rich title from the active filters — searchers land on
+  // /jobs?category=Kassir&city=Toshkent from a "toshkentda kassir ishi"
+  // query, and the tab title should echo it back rather than staying "Ishlar".
+  const filterBits = [q, category, city].filter(Boolean).join(" · ");
+  const title = filterBits ? `${filterBits} — ${t("title")}` : t("title");
+  const description = filterBits
+    ? `${filterBits} — ${tm("description")}`
+    : tm("description");
+  return {
+    title,
+    description,
+    alternates: localeAlternates(locale, "jobs"),
+  };
 }
 
 export default async function JobsPage({

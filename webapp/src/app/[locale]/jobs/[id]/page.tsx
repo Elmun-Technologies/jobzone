@@ -35,10 +35,27 @@ export async function generateMetadata({
   const job = await getJobById(id);
   if (!job) return { title: "Job" };
   const loc = locationText(job);
-  const title = `${job.title} — ${job.companyName}`;
-  const description =
+  const salary = salaryText(job);
+  // "Kassir — Toshkent | 4 000 000 so'm | Yolla" — the exact query shape
+  // seekers type into Google. City goes right after the job title so the
+  // "toshkentda kassir" tail matches; salary joins when we have it. Yolla
+  // is appended by the layout template so it isn't duplicated here.
+  const titleParts = [job.title, loc, salary].filter(Boolean).join(" — ");
+  const title = titleParts || job.title;
+  // Description leads with the raw posting when we have one; otherwise a
+  // synthesized one liner in the seeker's language stays keyword-rich.
+  const description = (
     job.description?.slice(0, 155) ??
-    `${job.title} at ${job.companyName}${loc ? ` · ${loc}` : ""}`;
+    [
+      job.title,
+      job.companyName,
+      loc,
+      salary,
+      schedulePatternLabel(job.schedulePattern),
+    ]
+      .filter(Boolean)
+      .join(" · ")
+  ).slice(0, 160);
   const url = `${siteUrl()}/${locale}/jobs/${id}`;
   return {
     title,
