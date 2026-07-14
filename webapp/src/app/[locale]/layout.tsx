@@ -7,6 +7,7 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { YandexMetrica } from "@/components/analytics/yandex-metrica";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -73,6 +74,9 @@ const GA_MEASUREMENT_ID =
 // unset in env to skip (dev/preview).
 const YANDEX_METRICA_ID =
   process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "110738388";
+// Meta (Facebook) Pixel id — public. Empty until an ad account is wired,
+// at which point Vercel env NEXT_PUBLIC_META_PIXEL_ID lights it up.
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
 
 export async function generateMetadata({
   params,
@@ -151,6 +155,7 @@ export default async function LocaleLayout({
         </NextIntlClientProvider>
         <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
         <YandexMetrica counterId={YANDEX_METRICA_ID} />
+        <MetaPixel pixelId={META_PIXEL_ID} />
         {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
             Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
             banner needed, no third-party host. Both no-op in dev. */}
