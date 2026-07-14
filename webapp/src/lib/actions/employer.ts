@@ -357,6 +357,25 @@ export async function payListing(
         returnUrl,
       });
     }
+  } else if (provider === "rahmat") {
+    // Rahmat is Multicard's hosted-checkout rail — unlike Payme/Click the URL
+    // isn't static; the `rahmat-invoice` edge fn authenticates to Multicard
+    // and asks for a fresh checkout URL for our order. The user JWT is
+    // forwarded automatically by `functions.invoke`; server-side price and
+    // ownership are re-checked inside the function.
+    if (process.env.NEXT_PUBLIC_RAHMAT_ENABLED === "1") {
+      const { data: inv, error: invErr } = await supabase.functions.invoke<{
+        ok: boolean;
+        checkout_url?: string;
+        error?: string;
+      }>("rahmat-invoice", {
+        body: { order_id: row.order_id, return_url: returnUrl },
+      });
+      if (invErr || !inv?.ok || !inv?.checkout_url) {
+        return { error: "unconfigured" };
+      }
+      url = inv.checkout_url;
+    }
   } else {
     const merchantId = process.env.NEXT_PUBLIC_PAYME_MERCHANT_ID;
     if (merchantId) {

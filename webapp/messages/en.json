@@ -437,7 +437,7 @@
       "payWith": "Pay with {provider}",
       "unconfigured": "Online payment isn’t set up yet. Please contact support.",
       "error": "Something went wrong. Please try again.",
-      "note": "Secure payment via Payme or Click. Your vacancy goes live the moment payment is confirmed."
+      "note": "Secure payment via Rahmat, Payme or Click. Your vacancy goes live the moment payment is confirmed."
     },
     "paid": {
       "publishedTitle": "Payment received — your vacancy is live!",

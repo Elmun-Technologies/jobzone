@@ -937,11 +937,12 @@
       }
     }
   },
+  "payWithRahmat": "Pay with Rahmat",
   "payWithPayme": "Pay with Payme",
   "payWithClick": "Pay with Click",
   "payUnconfigured": "Online payment isn’t set up yet. Please contact support.",
   "payError": "Payment couldn’t be started. Please try again.",
-  "payNote": "Secure payment via Payme or Click. Your vacancy goes live the moment payment is confirmed.",
+  "payNote": "Secure payment via Rahmat, Payme or Click. Your vacancy goes live the moment payment is confirmed.",
   "payConfirmingTitle": "Confirming your payment…",
   "payConfirmingSubtitle": "Finish the payment in the opened window. This screen updates automatically.",
   "payCheckStatus": "I’ve paid — check status",

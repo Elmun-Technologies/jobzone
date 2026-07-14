@@ -50,8 +50,9 @@ class _ListingPaymentPageState extends ConsumerState<ListingPaymentPage> {
 
   String get _locale => Localizations.localeOf(context).languageCode;
 
-  /// Opens the gateway for [provider] ("payme" | "click"): creates the order,
-  /// builds the checkout URL, launches it externally, then starts polling.
+  /// Opens the gateway for [provider] ("payme" | "click" | "rahmat"): creates
+  /// the order, obtains the checkout URL (Payme/Click build it inline; Rahmat
+  /// asks the `rahmat-invoice` edge fn), launches it externally, then polls.
   Future<void> _pay(String provider) async {
     setState(() => _busy = true);
     final repo = ref.read(employerJobsRepositoryProvider);
@@ -64,20 +65,28 @@ class _ListingPaymentPageState extends ConsumerState<ListingPaymentPage> {
       );
       final returnUrl =
           '${Env.webBaseUrl}/$locale/employer/jobs/${widget.jobId}/paid';
-      final url = provider == 'click'
-          ? clickCheckoutUrl(
-              serviceId: Env.clickServiceId,
-              merchantId: Env.clickMerchantId,
-              orderId: order.orderId,
-              amountUzs: order.amountUzs,
-              returnUrl: returnUrl,
-            )
-          : paymeCheckoutUrl(
-              merchantId: Env.paymeMerchantId,
-              orderId: order.orderId,
-              amountUzs: order.amountUzs,
-              returnUrl: returnUrl,
-            );
+      final String url;
+      if (provider == 'rahmat') {
+        url = await repo.createRahmatCheckout(
+          orderId: order.orderId,
+          returnUrl: returnUrl,
+        );
+      } else if (provider == 'click') {
+        url = clickCheckoutUrl(
+          serviceId: Env.clickServiceId,
+          merchantId: Env.clickMerchantId,
+          orderId: order.orderId,
+          amountUzs: order.amountUzs,
+          returnUrl: returnUrl,
+        );
+      } else {
+        url = paymeCheckoutUrl(
+          merchantId: Env.paymeMerchantId,
+          orderId: order.orderId,
+          amountUzs: order.amountUzs,
+          returnUrl: returnUrl,
+        );
+      }
       final launched = await launchUrl(
         Uri.parse(url),
         mode: LaunchMode.externalApplication,
@@ -180,13 +189,34 @@ class _ListingPaymentPageState extends ConsumerState<ListingPaymentPage> {
             ),
           )
         else ...[
-          if (Env.hasPayme)
+          // Rahmat is the primary CTA when enabled — its hosted checkout gives
+          // the payer every rail (Uzcard/Humo/Visa/MC/Payme/Click/Uzum) in one
+          // sheet. Payme/Click stay below as direct-provider fallbacks.
+          if (Env.hasRahmat)
             JzPrimaryButton(
-              label: l.payWithPayme,
-              icon: Icons.account_balance_wallet_rounded,
+              label: l.payWithRahmat,
+              icon: Icons.qr_code_2_rounded,
               loading: _busy,
-              onPressed: _busy ? null : () => _pay('payme'),
+              onPressed: _busy ? null : () => _pay('rahmat'),
             ),
+          if (Env.hasRahmat && (Env.hasPayme || Env.hasClick))
+            const SizedBox(height: AppSpacing.sm),
+          if (Env.hasPayme)
+            Env.hasRahmat
+                ? OutlinedButton.icon(
+                    onPressed: _busy ? null : () => _pay('payme'),
+                    icon: const Icon(
+                      Icons.account_balance_wallet_rounded,
+                      size: 20,
+                    ),
+                    label: Text(l.payWithPayme),
+                  )
+                : JzPrimaryButton(
+                    label: l.payWithPayme,
+                    icon: Icons.account_balance_wallet_rounded,
+                    loading: _busy,
+                    onPressed: _busy ? null : () => _pay('payme'),
+                  ),
           if (Env.hasPayme && Env.hasClick)
             const SizedBox(height: AppSpacing.sm),
           if (Env.hasClick)

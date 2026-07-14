@@ -331,6 +331,32 @@ class EmployerJobsRepository {
     );
   }
 
+  /// Rahmat (Multicard) hosted-checkout URL for an existing pending order.
+  /// Unlike Payme/Click's static URL shape, Rahmat is a per-invoice URL minted
+  /// by Multicard — the `rahmat-invoice` edge function authenticates to
+  /// Multicard on our behalf and returns the URL to open. The user's JWT is
+  /// forwarded automatically by `functions.invoke`; server-side price and
+  /// ownership are re-checked inside the function.
+  Future<String> createRahmatCheckout({
+    required String orderId,
+    required String returnUrl,
+  }) async {
+    final client = _ref.read(supabaseClientProvider);
+    final res = await client.functions.invoke(
+      'rahmat-invoice',
+      body: {'order_id': orderId, 'return_url': returnUrl},
+    );
+    final data = res.data;
+    if (data is! Map || data['ok'] != true) {
+      throw StateError('rahmat_invoice_failed');
+    }
+    final url = data['checkout_url'];
+    if (url is! String || url.isEmpty) {
+      throw StateError('rahmat_no_checkout_url');
+    }
+    return url;
+  }
+
   /// The current lifecycle status of one of the employer's jobs — polled by the
   /// pay screen to detect when the gateway callback has published the draft.
   Future<String?> jobStatus(String jobId) async {

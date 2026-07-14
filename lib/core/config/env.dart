@@ -85,6 +85,12 @@ class Env {
     'CLICK_MERCHANT_ID',
   );
 
+  /// Rahmat (Multicard) is on-off — the client holds no merchant credentials.
+  /// The `rahmat-invoice` edge fn authenticates to Multicard and returns a
+  /// hosted checkout URL when this flag is set. Toggle at build time with
+  /// `--dart-define=RAHMAT_ENABLED=1`.
+  static const bool rahmatEnabled = bool.fromEnvironment('RAHMAT_ENABLED');
+
   /// True only when Supabase credentials are present.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
@@ -92,9 +98,10 @@ class Env {
   /// True when an Agora App ID is configured (enables real calls).
   static bool get hasAgora => agoraAppId.isNotEmpty;
 
-  /// True when at least one gateway (Payme or full Click) can build a checkout.
+  /// True when at least one gateway (Payme, Click, or Rahmat) can be used.
   static bool get hasPayme => paymeMerchantId.isNotEmpty;
   static bool get hasClick =>
       clickServiceId.isNotEmpty && clickMerchantId.isNotEmpty;
-  static bool get hasPaymentGateway => hasPayme || hasClick;
+  static bool get hasRahmat => rahmatEnabled && hasSupabase;
+  static bool get hasPaymentGateway => hasPayme || hasClick || hasRahmat;
 }

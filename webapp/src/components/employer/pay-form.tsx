@@ -81,25 +81,49 @@ export function PayForm({ jobId }: { jobId: string }) {
         </p>
       ) : null}
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <button
-          type="submit"
-          name="provider"
-          value="payme"
-          disabled={pending}
-          className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
-        >
-          {t("payWith", { provider: "Payme" })}
-        </button>
-        <button
-          type="submit"
-          name="provider"
-          value="click"
-          disabled={pending}
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-        >
-          {t("payWith", { provider: "Click" })}
-        </button>
+      <div className="mt-6 grid gap-3">
+        {process.env.NEXT_PUBLIC_RAHMAT_ENABLED === "1" ? (
+          // Rahmat is the primary CTA when enabled — one button opens Rahmat's
+          // hosted checkout where the payer picks Uzcard/Humo/Visa/MC/Payme/
+          // Click/Uzum. Payme + Click stay below as direct-provider fallbacks.
+          <button
+            type="submit"
+            name="provider"
+            value="rahmat"
+            disabled={pending}
+            className={cn(buttonVariants({ variant: "primary", size: "lg" }))}
+          >
+            {t("payWith", { provider: "Rahmat" })}
+          </button>
+        ) : null}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="submit"
+            name="provider"
+            value="payme"
+            disabled={pending}
+            className={cn(
+              buttonVariants({
+                variant:
+                  process.env.NEXT_PUBLIC_RAHMAT_ENABLED === "1"
+                    ? "outline"
+                    : "primary",
+                size: "lg",
+              }),
+            )}
+          >
+            {t("payWith", { provider: "Payme" })}
+          </button>
+          <button
+            type="submit"
+            name="provider"
+            value="click"
+            disabled={pending}
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+          >
+            {t("payWith", { provider: "Click" })}
+          </button>
+        </div>
       </div>
       <p className="text-muted-foreground mt-3 text-center text-xs">
         {t("note")}

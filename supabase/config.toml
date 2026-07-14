@@ -91,11 +91,19 @@ verify_jwt = false
 [functions.telegram-channel-post]
 verify_jwt = false
 
-# Payment gateways (Payme / Click) call these with no user JWT — each is gated
-# by its own provider credential (Payme Basic key / Click MD5 sign_string), which
-# fails closed until the merchant secrets are configured. See docs/payments-setup.md.
+# Payment gateways (Payme / Click / Rahmat) call these with no user JWT — each is
+# gated by its own provider credential (Payme Basic key / Click MD5 sign_string /
+# Rahmat sha1|md5 callback signature), which fails closed until the merchant
+# secrets are configured. See docs/payments-setup.md.
 [functions.payme-merchant]
 verify_jwt = false
 
 [functions.click-merchant]
+verify_jwt = false
+
+# Rahmat (Multicard mesh) — callback endpoint. Multicard posts here with a
+# signed payload; the Multicard signature is the gate. Sibling `rahmat-invoice`
+# creates invoices and keeps verify_jwt = true (default) so a user JWT is
+# required — see supabase/functions/rahmat-invoice/index.ts.
+[functions.rahmat-merchant]
 verify_jwt = false
