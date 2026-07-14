@@ -15,6 +15,7 @@ import { groupNumber, salaryRangeUzsText } from "@/lib/format";
 import { latestPostedAt, uzsSalaryRange } from "@/lib/geo-stats";
 import {
   breadcrumbJsonLd,
+  collectionPageJsonLd,
   jobsItemListJsonLd,
   localeAlternates,
   siteUrl,
@@ -82,14 +83,27 @@ export default async function CategoryLandingPage({
   const base = siteUrl();
   const localePath = `${base}/${locale}`;
 
+  const canonicalUrl = `${localePath}/ish/${category}`;
+
   return (
     <>
       <JsonLd
         data={breadcrumbJsonLd([
           { name: t("breadcrumbHome"), url: `${localePath}` },
           { name: t("breadcrumbJobs"), url: `${localePath}/jobs` },
-          { name: cat.name, url: `${localePath}/ish/${category}` },
+          { name: cat.name, url: canonicalUrl },
         ])}
+      />
+      <JsonLd
+        data={collectionPageJsonLd({
+          url: canonicalUrl,
+          name: t("titleCategory", { category: cat.name }),
+          description: t("introCategory", { category: cat.name }),
+          categoryName: cat.name,
+          inLanguage: locale,
+          itemCount: count,
+          dateModified: latestPostedAt(jobs) ?? undefined,
+        })}
       />
       {jobs.length > 0 ? (
         <JsonLd data={jobsItemListJsonLd(jobs, locale)} />
