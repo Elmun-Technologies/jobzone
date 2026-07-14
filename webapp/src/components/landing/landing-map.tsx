@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 
 import type { Job } from "@/lib/data/types";
 
+import type { PinRating } from "../map/job-pin-card";
 import type { LandingMapLabels } from "./landing-map-inner";
 
 // Leaflet touches `window`, so the map is client-only (no SSR). The skeleton
@@ -18,6 +19,10 @@ const Inner = dynamic(() => import("./landing-map-inner"), {
   ),
 });
 
-export function LandingMap(props: { jobs: Job[]; labels: LandingMapLabels }) {
+export function LandingMap(props: {
+  jobs: Job[];
+  labels: LandingMapLabels;
+  ratings?: Record<string, PinRating>;
+}) {
   return <Inner {...props} />;
 }

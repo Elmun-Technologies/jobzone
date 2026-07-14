@@ -13,7 +13,7 @@ import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
-import { getCompanies } from "@/lib/data/companies";
+import { getCompanies, getCompanyRatings } from "@/lib/data/companies";
 import {
   getCities,
   getJobCount,
@@ -46,6 +46,7 @@ export default async function HomePage({
   const [
     recent,
     mapJobs,
+    ratings,
     categories,
     total,
     cities,
@@ -56,6 +57,8 @@ export default async function HomePage({
     // The landing showcase pins up to 8 jobs — fetch a small salaried set so
     // pins actually populate; the full pannable feed lives on /explore.
     getOpenJobs({ limit: 24 }),
+    // Live company ratings for the pins' hover cards.
+    getCompanyRatings(),
     getCategoriesWithCounts(),
     getJobCount(),
     getCities(),
@@ -161,6 +164,7 @@ export default async function HomePage({
             return (
               <LandingMap
                 jobs={pinned}
+                ratings={ratings}
                 labels={{
                   chipNearMe: tm("nearMe"),
                   chipSalary: tm("salaryFrom"),

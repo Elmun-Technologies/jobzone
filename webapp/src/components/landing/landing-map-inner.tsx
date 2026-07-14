@@ -4,15 +4,21 @@ import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
 import { Minus, Navigation, Plus } from "lucide-react";
-import { useLocale } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { Job } from "@/lib/data/types";
-import { salaryPill, schedulePatternLabel } from "@/lib/format";
+import { salaryPill } from "@/lib/format";
 import { jobLatLng } from "@/lib/uz-geo";
 
+import {
+  PinCardOverlay,
+  usePinHover,
+  type PinRating,
+} from "../map/job-pin-card";
+import { salaryPinIcon } from "../map/pin-icon";
+import { mapTier } from "../map/tier";
 import { LANDING_MAP_PIN_COUNT } from "./landing-map-shared";
 import { LandingYandexMap } from "./landing-yandex-map";
 
@@ -38,48 +44,31 @@ type Labels = {
   negotiable: string;
 };
 
-function escHtml(v: string): string {
-  return v
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/** Volt salary bubble (like the mockup): rounded pill + downward pointer.
- * `iconSize:[0,0]` collapses Leaflet's wrapper so its own bounding box never
- * clips the pill — instead the pill is an inline-block that sizes to its
- * content, translated up-and-left so the tip sits on the marker anchor. */
-function salaryIcon(pill: string): L.DivIcon {
-  const text = escHtml(pill);
-  return L.divIcon({
-    className: "yolla-landing-pin",
-    html: `<div style="position:relative;display:inline-block;white-space:nowrap;transform:translate(-50%,-100%);will-change:transform">
-      <span style="display:inline-block;background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;
-        padding:4px 10px;font-weight:700;font-size:12px;line-height:1.15;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-        box-shadow:0 6px 14px rgba(0,0,0,.28)">${text}</span>
-      <span style="position:absolute;left:50%;top:100%;transform:translate(-50%,-1px);width:0;height:0;
-        border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #0A0A0A"></span>
-    </div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-  });
-}
-
 export type LandingMapLabels = Labels;
 
 export default function LandingMapInner({
   jobs,
   labels,
+  ratings,
 }: {
   /** Already trimmed by pickLandingMapJobs on the server. */
   jobs: Job[];
   labels: Labels;
+  /** Live average rating + review count per company id (hover card). */
+  ratings?: Record<string, PinRating>;
 }) {
-  const locale = useLocale();
+  const router = useRouter();
   const [yandexFailed, setYandexFailed] = useState(false);
   const useYandex = !!YANDEX_KEY && !yandexFailed;
-  const pinned = jobs.slice(0, LANDING_MAP_PIN_COUNT);
+  // Hover preview card + click-through over the pins' data-job-id — the same
+  // engine-agnostic delegation the /explore map uses.
+  const { wrapRef, hover, handlers } = usePinHover((id) =>
+    router.push(`/jobs/${id}`),
+  );
+  // Stable identity: a fresh array every render would re-run the Yandex
+  // marker effect on each hover re-render, recreating the hovered pin's DOM
+  // under the cursor (and swallowing its mouseout — the card never closes).
+  const pinned = useMemo(() => jobs.slice(0, LANDING_MAP_PIN_COUNT), [jobs]);
 
   // Frame every pin comfortably inside the viewport — with only a few
   // salaried jobs, centering on Tashkent at a fixed zoom leaves the map
@@ -99,7 +88,12 @@ export default function LandingMapInner({
 
   return (
     <div className="border-border relative overflow-hidden rounded-2xl border">
-      <div className="relative w-full" style={{ aspectRatio: "16 / 10" }}>
+      <div
+        ref={wrapRef}
+        {...handlers}
+        className="relative w-full"
+        style={{ aspectRatio: "16 / 10" }}
+      >
         {useYandex ? (
           <LandingYandexMap
             jobs={pinned}
@@ -131,32 +125,35 @@ export default function LandingMapInner({
             />
             {pinned.map((job) => {
               const pos = jobLatLng(job);
-              const pill = salaryPill(job) ?? labels.negotiable;
-              const meta = [
-                job.categoryName,
-                schedulePatternLabel(job.schedulePattern),
-              ]
-                .filter(Boolean)
-                .join(" · ");
               return (
                 <Marker
                   key={job.id}
                   position={[pos.lat, pos.lng]}
-                  icon={salaryIcon(pill)}
-                  // Route through the app's job page rather than opening a
-                  // Leaflet popup — every pin should feel like a link to
-                  // the real posting on the landing surface.
-                  eventHandlers={{
-                    click: () => {
-                      window.location.href = `/${locale}/jobs/${job.id}`;
-                    },
-                  }}
-                  title={`${job.title} · ${job.companyName}${meta ? " · " + meta : ""}`}
+                  icon={salaryPinIcon(
+                    salaryPill(job) ?? labels.negotiable,
+                    job.id,
+                    mapTier(job.boostKind),
+                  )}
                 />
               );
             })}
           </MapContainer>
         )}
+
+        {/* Hover preview — the mockup's card: logo, title, live rating,
+            salary chip and one-tap apply. Shared with /explore. */}
+        {hover
+          ? (() => {
+              const j = pinned.find((x) => x.id === hover.jobId);
+              return j ? (
+                <PinCardOverlay
+                  hover={hover}
+                  job={j}
+                  rating={ratings?.[j.companyId]}
+                />
+              ) : null;
+            })()
+          : null}
 
         {/* "You are here" — DOM overlay so it always sits at the visual
             center regardless of how the map is framed. Blue dot + soft ring

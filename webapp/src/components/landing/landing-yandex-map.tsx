@@ -4,22 +4,21 @@ import { useLocale } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import type { Job } from "@/lib/data/types";
-import { salaryPill, schedulePatternLabel } from "@/lib/format";
+import { salaryPill } from "@/lib/format";
 import { jobLatLng } from "@/lib/uz-geo";
 import { loadYmaps, type YmapsMap } from "@/lib/yandex-maps-loader";
+
+import {
+  pinLabel,
+  pinShadow,
+  SALARY_PIN_SHAPE,
+  salaryPinMarkup,
+} from "../map/pin-markup";
+import { mapTier } from "../map/tier";
 
 // Tashkent — fallback framing when no pin resolves to a point.
 const TASHKENT: [number, number] = [41.3111, 69.2797];
 const LANDING_ZOOM = 12;
-
-/** Escape a value before it lands in a Yandex hint's HTML string. */
-function esc(v: string): string {
-  return v
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * Yandex-tiles engine for the landing showcase — the same volt salary pills
@@ -76,51 +75,35 @@ export function LandingYandexMap({
           }
         }
 
-        // Volt salary bubble (like the mockup): rounded pill + downward
-        // pointer, tip on the point. $[properties.pill] is HTML-escaped by
-        // Yandex's template substitution.
+        // The shared volt salary bubble (see ../map/pin-markup.ts). Per-pin
+        // text arrives via properties, which Yandex's template substitution
+        // HTML-escapes. Hover (preview card) and click (job page) are handled
+        // by the parent's DOM delegation over `data-job-id`.
         const PillLayout = ymaps.templateLayoutFactory.createClass(
-          `<div style="position:relative;display:inline-block;white-space:nowrap;transform:translate(-50%,-100%)">
-            <span style="display:inline-block;background:#C7FB00;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:9999px;padding:4px 10px;font-weight:700;font-size:12px;line-height:1.15;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 6px 14px rgba(0,0,0,.28)">$[properties.pill]</span>
-            <span style="position:absolute;left:50%;top:100%;transform:translate(-50%,-1px);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #0A0A0A"></span>
-          </div>`,
+          salaryPinMarkup({
+            pill: "$[properties.pill]",
+            jobId: "$[properties.jobId]",
+            shadow: "$[properties.pinShadow]",
+          }),
         );
-        // Clickable hit area matching the pill's box (above the anchor point).
-        const pinShape = {
-          type: "Rectangle" as const,
-          coordinates: [
-            [-50, -40],
-            [50, 2],
-          ],
-        };
 
         map.current.geoObjects.removeAll();
         const points: [number, number][] = [];
         for (const job of jobs) {
           const pos = jobLatLng(job);
           points.push([pos.lat, pos.lng]);
-          const meta = [
-            job.categoryName,
-            schedulePatternLabel(job.schedulePattern),
-          ]
-            .filter(Boolean)
-            .join(" · ");
-          const placemark = new ymaps.Placemark(
-            [pos.lat, pos.lng],
-            {
-              pill: salaryPill(job) ?? negotiable,
-              hintContent: esc(
-                `${job.title} · ${job.companyName}${meta ? " · " + meta : ""}`,
-              ),
-            },
-            { iconLayout: PillLayout, iconShape: pinShape },
+          const tier = mapTier(job.boostKind);
+          map.current.geoObjects.add(
+            new ymaps.Placemark(
+              [pos.lat, pos.lng],
+              {
+                pill: pinLabel(salaryPill(job) ?? negotiable, tier),
+                jobId: job.id,
+                pinShadow: pinShadow(tier),
+              },
+              { iconLayout: PillLayout, iconShape: SALARY_PIN_SHAPE },
+            ),
           );
-          // Route through the app's job page rather than opening a balloon —
-          // every pin should feel like a link to the real posting.
-          placemark.events.add("click", () => {
-            window.location.href = `/${locale}/jobs/${job.id}`;
-          });
-          map.current.geoObjects.add(placemark);
         }
 
         // Frame every pin comfortably inside the viewport (parity with the
@@ -144,7 +127,7 @@ export function LandingYandexMap({
     return () => {
       cancelled = true;
     };
-  }, [jobs, lang, locale, negotiable]);
+  }, [jobs, lang, negotiable]);
 
   useEffect(() => {
     return () => {
