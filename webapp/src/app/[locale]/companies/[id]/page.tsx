@@ -13,7 +13,12 @@ import {
   getCompanyReviews,
 } from "@/lib/data/companies";
 import { formatDate } from "@/lib/format";
-import { localeAlternates, organizationJsonLd, siteUrl } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  localeAlternates,
+  organizationJsonLd,
+  siteUrl,
+} from "@/lib/seo";
 
 // Auth/session-dependent, per-request. Without this the page can be
 // full-route-cached (getCurrentUser swallows cookies() so Next never sees
@@ -56,9 +61,20 @@ export default async function CompanyPage({
     getBookmarkedJobIds(),
   ]);
 
+  const tb = await getTranslations("landingPage");
+  const base = siteUrl();
+  const localePath = `${base}/${locale}`;
+
   return (
     <Container className="py-8">
       <JsonLd data={organizationJsonLd(company)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: tb("breadcrumbHome"), url: localePath },
+          { name: t("directoryTitle"), url: `${localePath}/companies` },
+          { name: company.name, url: `${localePath}/companies/${id}` },
+        ])}
+      />
 
       {/* Header */}
       <div className="flex gap-4">

@@ -19,7 +19,12 @@ import {
   schedulePatternLabel,
 } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
-import { jobPostingJsonLd, localeAlternates, siteUrl } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  jobPostingJsonLd,
+  localeAlternates,
+  siteUrl,
+} from "@/lib/seo";
 
 // Auth/session-dependent, per-request. Without this the page can be
 // full-route-cached (getCurrentUser swallows cookies() so Next never sees
@@ -162,9 +167,20 @@ export default async function JobDetailsPage({
   // QuickApplyButton routes an unauthenticated tap to sign-in and back.
   const needsForm = job.screeningQuestions.some((q) => q.required);
 
+  const tb = await getTranslations("landingPage");
+  const base = siteUrl();
+  const localePath = `${base}/${locale}`;
+
   return (
     <Container className="py-8">
       <JsonLd data={jobPostingJsonLd(job)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: tb("breadcrumbHome"), url: localePath },
+          { name: tb("breadcrumbJobs"), url: `${localePath}/jobs` },
+          { name: job.title, url: `${localePath}/jobs/${id}` },
+        ])}
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Main column */}
