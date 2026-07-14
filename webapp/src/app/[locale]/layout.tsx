@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -34,6 +34,22 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+// theme-color is a Viewport field in Next 13.2+ (the old metadata.themeColor
+// is deprecated). Bind it to the same volt-on-ink pair the design tokens use
+// so mobile browsers tint the address bar to match the app.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
+const OG_LOCALE: Record<string, string> = {
+  uz: "uz_UZ",
+  ru: "ru_RU",
+  en: "en_US",
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -43,14 +59,34 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
   // metadataBase resolves every relative canonical/og:url/twitter:image below
   // it — without it Next warns and drops relative URLs at build time.
+  const primary = OG_LOCALE[locale] ?? OG_LOCALE.uz;
   return {
     metadataBase: new URL(siteUrl()),
     title: { default: t("title"), template: "%s · Yolla" },
     description: t("description"),
+    applicationName: "Yolla",
     // Alternates on the layout only cover the localized root (/uz, /ru, /en).
     // Every child page redeclares its own alternates via localeAlternates(...)
     // so canonicals + hreflang are self-referencing on every URL Google finds.
     alternates: localeAlternates(locale, ""),
+    openGraph: {
+      type: "website",
+      siteName: "Yolla",
+      title: t("title"),
+      description: t("description"),
+      // Locale + alternates match how Google/Facebook expect them. Pages that
+      // set their own openGraph.title/description override these; siteName
+      // and locale keep inheriting.
+      locale: primary,
+      alternateLocale: Object.values(OG_LOCALE).filter((l) => l !== primary),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+    },
+    manifest: "/manifest.webmanifest",
+    icons: { icon: "/icon.svg" },
   };
 }
 
