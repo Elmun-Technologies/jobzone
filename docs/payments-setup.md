@@ -40,8 +40,18 @@ the secret keys):
 NEXT_PUBLIC_PAYME_MERCHANT_ID   = <Payme merchant id>        # webapp (Vercel env)
 NEXT_PUBLIC_CLICK_SERVICE_ID    = <Click service id>
 NEXT_PUBLIC_CLICK_MERCHANT_ID   = <Click merchant id>
-# Mobile passes the same three via --dart-define at build time.
 ```
+Mobile (Flutter) takes the same public ids via `--dart-define` at build time
+(plus the public web origin the gateway returns to):
+```
+flutter build apk \
+  --dart-define=PAYME_MERCHANT_ID=<Payme merchant id> \
+  --dart-define=CLICK_SERVICE_ID=<Click service id> \
+  --dart-define=CLICK_MERCHANT_ID=<Click merchant id> \
+  --dart-define=WEB_BASE_URL=https://yolla.uz
+```
+Until these are set, the mobile pay screen shows "online payment isn't set up
+yet" and the web checkout reports `unconfigured` — nothing is charged.
 
 ## 2. Deploy the functions
 ```

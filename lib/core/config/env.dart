@@ -64,10 +64,37 @@ class Env {
     defaultValue: 'dev',
   );
 
+  /// Public web origin the mobile pay flow sends the gateway back to (the Payme/
+  /// Click `return_url` lands on the web `/employer/jobs/:id/paid` page). Only
+  /// the landing page differs by build; the app polls the order itself.
+  static const String webBaseUrl = String.fromEnvironment(
+    'WEB_BASE_URL',
+    defaultValue: 'https://yolla.uz',
+  );
+
+  /// Direct pay-per-listing (Payme/Click) merchant ids. PUBLIC — they only
+  /// address the checkout; the secret webhook keys live server-side in the edge
+  /// functions. Empty → the pay screen reports "online payment not set up yet".
+  static const String paymeMerchantId = String.fromEnvironment(
+    'PAYME_MERCHANT_ID',
+  );
+  static const String clickServiceId = String.fromEnvironment(
+    'CLICK_SERVICE_ID',
+  );
+  static const String clickMerchantId = String.fromEnvironment(
+    'CLICK_MERCHANT_ID',
+  );
+
   /// True only when Supabase credentials are present.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   /// True when an Agora App ID is configured (enables real calls).
   static bool get hasAgora => agoraAppId.isNotEmpty;
+
+  /// True when at least one gateway (Payme or full Click) can build a checkout.
+  static bool get hasPayme => paymeMerchantId.isNotEmpty;
+  static bool get hasClick =>
+      clickServiceId.isNotEmpty && clickMerchantId.isNotEmpty;
+  static bool get hasPaymentGateway => hasPayme || hasClick;
 }

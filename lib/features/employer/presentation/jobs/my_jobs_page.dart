@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
+import '../../../../core/config/env.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
@@ -10,6 +11,7 @@ import '../../../jobs/domain/job.dart';
 import '../../../jobs/presentation/util/job_labels.dart';
 import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/employer_jobs_repository.dart';
+import 'listing_payment_page.dart';
 
 /// The employer's posted jobs, filterable by lifecycle status, with create /
 /// edit / close / reopen actions.
@@ -27,6 +29,31 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
   Future<void> _setStatus(Job job, String status) async {
     try {
       await ref.read(employerJobsRepositoryProvider).setStatus(job.id, status);
+      ref.invalidate(myJobsProvider);
+    } catch (e) {
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+    }
+  }
+
+  /// Publishing a draft runs the SAME charge gate as a fresh post — so "save
+  /// draft, then publish from the list" can't bypass the first-free/then-paid
+  /// rule. First-time (or offline) publishes directly; otherwise the draft goes
+  /// through the tier picker + Payme/Click, which publishes it on payment.
+  Future<void> _publishDraft(Job job) async {
+    final repo = ref.read(employerJobsRepositoryProvider);
+    try {
+      final charged = Env.hasSupabase && await repo.hasPublishedBefore();
+      if (!mounted) return;
+      if (charged) {
+        await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) =>
+                ListingPaymentPage(jobId: job.id, jobTitle: job.title),
+          ),
+        );
+      } else {
+        await repo.setStatus(job.id, 'open');
+      }
       ref.invalidate(myJobsProvider);
     } catch (e) {
       if (mounted) showErrorSnack(context, localizedError(context, e));
@@ -120,6 +147,7 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
                       ),
                       onClose: () => _setStatus(jobs[i], 'closed'),
                       onReopen: () => _setStatus(jobs[i], 'open'),
+                      onPublish: () => _publishDraft(jobs[i]),
                       onPromote: () =>
                           showPromoteSheet(context, jobId: jobs[i].id),
                       onDuplicate: () => context.push(
@@ -179,6 +207,7 @@ class _MyJobCard extends StatelessWidget {
     required this.onEdit,
     required this.onClose,
     required this.onReopen,
+    required this.onPublish,
     required this.onPromote,
     required this.onDuplicate,
   });
@@ -188,6 +217,7 @@ class _MyJobCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onClose;
   final VoidCallback onReopen;
+  final VoidCallback onPublish;
   final VoidCallback onPromote;
   final VoidCallback onDuplicate;
 
@@ -237,10 +267,20 @@ class _MyJobCard extends StatelessWidget {
                     'duplicate' => onDuplicate(),
                     'close' => onClose(),
                     'reopen' => onReopen(),
+                    'publish' => onPublish(),
                     _ => null,
                   },
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: 'promote', child: Text(l.promoteCta)),
+                    // A draft's primary action is publishing it (through the
+                    // first-free / then-pay-per-listing gate); promoting only
+                    // makes sense once it's live.
+                    if (job.status == 'draft')
+                      PopupMenuItem(value: 'publish', child: Text(l.publishJob))
+                    else
+                      PopupMenuItem(
+                        value: 'promote',
+                        child: Text(l.promoteCta),
+                      ),
                     PopupMenuItem(value: 'edit', child: Text(l.jobEditAction)),
                     PopupMenuItem(
                       value: 'duplicate',
@@ -251,7 +291,7 @@ class _MyJobCard extends StatelessWidget {
                         value: 'reopen',
                         child: Text(l.jobReopenAction),
                       )
-                    else
+                    else if (job.status != 'draft')
                       PopupMenuItem(
                         value: 'close',
                         child: Text(l.jobCloseAction),

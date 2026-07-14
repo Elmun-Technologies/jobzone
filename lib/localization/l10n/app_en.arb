@@ -927,5 +927,25 @@
   "mdBulletList": "Bulleted list",
   "mdNumberList": "Numbered list",
   "vacancyCount": "{n} jobs",
-  "@vacancyCount": {"placeholders": {"n": {"type": "int"}}}
+  "@vacancyCount": {"placeholders": {"n": {"type": "int"}}},
+  "payListingTitle": "Publish your vacancy",
+  "payListingSubtitle": "Choose a plan and pay to publish “{title}”.",
+  "@payListingSubtitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "payWithPayme": "Pay with Payme",
+  "payWithClick": "Pay with Click",
+  "payUnconfigured": "Online payment isn’t set up yet. Please contact support.",
+  "payError": "Payment couldn’t be started. Please try again.",
+  "payNote": "Secure payment via Payme or Click. Your vacancy goes live the moment payment is confirmed.",
+  "payConfirmingTitle": "Confirming your payment…",
+  "payConfirmingSubtitle": "Finish the payment in the opened window. This screen updates automatically.",
+  "payCheckStatus": "I’ve paid — check status",
+  "payPublishedTitle": "Vacancy published!",
+  "payPublishedSubtitle": "It’s now visible to candidates in the app and on the web.",
+  "payViewMyJobs": "My vacancies"
 }

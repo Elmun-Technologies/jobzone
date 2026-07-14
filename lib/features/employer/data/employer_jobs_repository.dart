@@ -290,6 +290,65 @@ class EmployerJobsRepository {
     return Job.fromMap(_withCompany(row, company));
   }
 
+  /// Whether the employer's company has ever put a vacancy on the market
+  /// (any non-draft job — open or closed). Drives the "first free, then paid"
+  /// gate: the first published vacancy is free, the 2nd+ is paid per listing.
+  /// Offline has no charge path, so this is only consulted in live mode.
+  Future<bool> hasPublishedBefore() async {
+    if (!_live) return false;
+    final client = _ref.read(supabaseClientProvider);
+    final company = await _ownedCompany();
+    if (company == null) return false;
+    final rows = await client
+        .from('jobs')
+        .select('id')
+        .eq('company_id', company['id'])
+        .neq('status', 'draft')
+        .limit(1);
+    return (rows as List).isNotEmpty;
+  }
+
+  /// Opens a pending pay-per-listing order for a draft vacancy and returns its
+  /// id + the (server-derived) amount to charge. The tier PRICE is resolved by
+  /// `create_listing_order` server-side — a tampered client can never under-pay.
+  /// The gateway callback flips the order to paid, which publishes the draft
+  /// with its tier via the `apply_promotion` trigger.
+  Future<({String orderId, int amountUzs})> createListingOrder({
+    required String jobId,
+    required String tierCode,
+  }) async {
+    final client = _ref.read(supabaseClientProvider);
+    final data = await client.rpc(
+      'create_listing_order',
+      params: {'p_job_id': jobId, 'p_tier_code': tierCode},
+    );
+    final row = data is List
+        ? (data.first as Map<String, dynamic>)
+        : (data as Map<String, dynamic>);
+    return (
+      orderId: row['order_id'].toString(),
+      amountUzs: (row['amount_uzs'] as num).toInt(),
+    );
+  }
+
+  /// The current lifecycle status of one of the employer's jobs — polled by the
+  /// pay screen to detect when the gateway callback has published the draft.
+  Future<String?> jobStatus(String jobId) async {
+    if (!_live) {
+      for (final j in mockEmployer.jobs) {
+        if (j.id == jobId) return j.status;
+      }
+      return null;
+    }
+    final row = await _ref
+        .read(supabaseClientProvider)
+        .from('jobs')
+        .select('status')
+        .eq('id', jobId)
+        .maybeSingle();
+    return row == null ? null : row['status'] as String?;
+  }
+
   /// Flips a job's lifecycle status (`draft` / `open` / `closed`).
   Future<void> setStatus(String jobId, String status) async {
     if (!_live) {

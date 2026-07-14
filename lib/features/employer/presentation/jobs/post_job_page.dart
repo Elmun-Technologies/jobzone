@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/config/env.dart';
 import '../../../../core/utils/markdown_edit.dart';
 import '../../../../core/utils/uzbekistan_regions.dart';
 import '../../../../core/utils/validators.dart';
@@ -20,6 +21,7 @@ import '../../../jobs/presentation/job_details_page.dart';
 import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
+import 'listing_payment_page.dart';
 import 'widgets/job_location_picker.dart';
 
 /// Create or edit a job posting. Pass [job] (via the edit route's `extra`) to
@@ -333,6 +335,17 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     final effectiveStatus = status == 'open' && scheduled ? 'draft' : status;
     final publishAt = scheduled ? _publishAt : null;
     try {
+      // Direct pay-per-listing: the first published vacancy is free; a 2nd+
+      // one is created as a DRAFT and paid per listing (tier + Payme/Click) on
+      // the next screen, which publishes it. Offline has no charge path, so the
+      // demo always free-publishes. Scheduled posts are drafts until their time,
+      // so they're not charged here (they run the gate when they go live).
+      final charged =
+          !_isEdit &&
+          effectiveStatus == 'open' &&
+          Env.hasSupabase &&
+          await repo.hasPublishedBefore();
+      final createStatus = charged ? 'draft' : effectiveStatus;
       Job? created;
       if (_isEdit) {
         await repo.updateJob(
@@ -435,7 +448,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           screeningQuestions: _questions
               .where((q) => q.label.trim().isNotEmpty)
               .toList(),
-          status: effectiveStatus,
+          status: createStatus,
           publishAt: publishAt,
           educationRequired: _educationRequired,
           workHours: _workHours.text.trim().isEmpty
@@ -445,15 +458,31 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       }
       ref.invalidate(myJobsProvider);
       if (!mounted) return;
-      if (scheduled) {
+      if (charged && created != null) {
+        // 2nd+ vacancy: it's a draft awaiting payment → tier picker + gateway,
+        // which publishes it. Leaving the page after either outcome is fine —
+        // an unpaid draft simply waits in "My jobs" to be published later.
+        final createdJob = created;
+        await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => ListingPaymentPage(
+              jobId: createdJob.id,
+              jobTitle: createdJob.title,
+            ),
+          ),
+        );
+        if (mounted) context.pop();
+      } else if (scheduled) {
         showInfoSnack(context, context.l10n.jobScheduledToast);
+        if (mounted) context.pop();
       } else if (created != null && effectiveStatus == 'open') {
-        // Newly published job → offer the tariff/promote sheet before leaving.
+        // Newly published (free first) job → offer the promote sheet on the way.
         await showPromoteSheet(context, jobId: created.id);
+        if (mounted) context.pop();
       } else {
         showInfoSnack(context, context.l10n.jobSavedToast);
+        if (mounted) context.pop();
       }
-      if (mounted) context.pop();
     } catch (e) {
       if (!mounted) return;
       showErrorSnack(context, localizedError(context, e));

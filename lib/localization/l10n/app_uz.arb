@@ -876,5 +876,18 @@
   "mdItalic": "Kursiv",
   "mdBulletList": "Belgili roʻyxat",
   "mdNumberList": "Raqamli roʻyxat",
-  "vacancyCount": "{n} vakansiya"
+  "vacancyCount": "{n} vakansiya",
+  "payListingTitle": "Vakansiyani eʼlon qiling",
+  "payListingSubtitle": "Tarifni tanlang va «{title}» ni eʼlon qilish uchun toʻlang.",
+  "payWithPayme": "Payme orqali toʻlash",
+  "payWithClick": "Click orqali toʻlash",
+  "payUnconfigured": "Onlayn toʻlov hali sozlanmagan. Iltimos, qoʻllab-quvvatlashga murojaat qiling.",
+  "payError": "Toʻlovni boshlab boʻlmadi. Qayta urinib koʻring.",
+  "payNote": "Payme yoki Click orqali xavfsiz toʻlov. Toʻlov tasdiqlangan zahoti vakansiya efirga chiqadi.",
+  "payConfirmingTitle": "Toʻlovingiz tasdiqlanmoqda…",
+  "payConfirmingSubtitle": "Ochilgan oynada toʻlovni yakunlang. Bu ekran avtomatik yangilanadi.",
+  "payCheckStatus": "Toʻladim — holatni tekshirish",
+  "payPublishedTitle": "Vakansiya eʼlon qilindi!",
+  "payPublishedSubtitle": "Endi u nomzodlarga ilovada va vebda koʻrinadi.",
+  "payViewMyJobs": "Mening vakansiyalarim"
 }
