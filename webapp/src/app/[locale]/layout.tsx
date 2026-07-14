@@ -50,6 +50,16 @@ const OG_LOCALE: Record<string, string> = {
   en: "en_US",
 };
 
+// Google Search Console (URL-prefix) verification. The token is public — it
+// only proves control of the deployment — so shipping it in the bundle is
+// safe; env-backed so a future rotation is a Vercel change, not a deploy.
+const GOOGLE_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ??
+  "y__H-hpjfRt5Yl-VtnwEJJn3pNab4g-9CLeP3QOyPb0";
+// Yandex.Webmaster verification (empty until issued — Yandex dominates search
+// in UZ, so we want to be listed there as well).
+const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
+
 export async function generateMetadata({
   params,
 }: {
@@ -87,6 +97,10 @@ export async function generateMetadata({
     },
     manifest: "/manifest.webmanifest",
     icons: { icon: "/icon.svg" },
+    verification: {
+      google: GOOGLE_SITE_VERIFICATION,
+      ...(YANDEX_VERIFICATION ? { yandex: YANDEX_VERIFICATION } : {}),
+    },
   };
 }
 
