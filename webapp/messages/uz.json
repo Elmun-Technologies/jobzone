@@ -437,7 +437,7 @@
       "payWith": "{provider} orqali to‘lash",
       "unconfigured": "Onlayn to‘lov hali sozlanmagan. Iltimos, qo‘llab-quvvatlashga murojaat qiling.",
       "error": "Xatolik yuz berdi. Qayta urinib ko‘ring.",
-      "note": "Payme yoki Click orqali xavfsiz to‘lov. To‘lov tasdiqlangan zahoti vakansiya efirga chiqadi."
+      "note": "Rahmat, Payme yoki Click orqali xavfsiz to‘lov. To‘lov tasdiqlangan zahoti vakansiya efirga chiqadi."
     },
     "paid": {
       "publishedTitle": "To‘lov qabul qilindi — vakansiyangiz efirda!",
