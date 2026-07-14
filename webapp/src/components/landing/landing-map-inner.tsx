@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Minus, Navigation, Plus } from "lucide-react";
 import { useLocale } from "next-intl";
+import { useState } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 import { Link } from "@/i18n/navigation";
@@ -13,11 +14,15 @@ import { salaryPill, schedulePatternLabel } from "@/lib/format";
 import { jobLatLng } from "@/lib/uz-geo";
 
 import { LANDING_MAP_PIN_COUNT } from "./landing-map-shared";
+import { LandingYandexMap } from "./landing-yandex-map";
 
 // Tashkent — the map is anchored here and never panned (the whole spot is a
 // landing showcase; interaction lives on /explore).
 const TASHKENT: [number, number] = [41.3111, 69.2797];
 const LANDING_ZOOM = 12;
+// A *JavaScript API* key switches the engine to Yandex; empty → OSM/Leaflet
+// (same contract as the /explore map in components/map/jobs-map-inner.tsx).
+const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 type Labels = {
   chipNearMe: string;
@@ -72,16 +77,20 @@ export default function LandingMapInner({
   labels: Labels;
 }) {
   const locale = useLocale();
+  const [yandexFailed, setYandexFailed] = useState(false);
+  const useYandex = !!YANDEX_KEY && !yandexFailed;
   const pinned = jobs.slice(0, LANDING_MAP_PIN_COUNT);
 
   // Frame every pin comfortably inside the viewport — with only a few
   // salaried jobs, centering on Tashkent at a fixed zoom leaves the map
   // looking half-empty and stacks the pins under the "you are here" dot.
   const bounds = pinned.length
-    ? L.latLngBounds(pinned.map((j) => {
-        const p = jobLatLng(j);
-        return [p.lat, p.lng] as [number, number];
-      })).pad(0.35)
+    ? L.latLngBounds(
+        pinned.map((j) => {
+          const p = jobLatLng(j);
+          return [p.lat, p.lng] as [number, number];
+        }),
+      ).pad(0.35)
     : null;
 
   // The "you are here" dot lives at the DOM center rather than a real
@@ -91,55 +100,63 @@ export default function LandingMapInner({
   return (
     <div className="border-border relative overflow-hidden rounded-2xl border">
       <div className="relative w-full" style={{ aspectRatio: "16 / 10" }}>
-        <MapContainer
-          {...(bounds
-            ? { bounds, boundsOptions: { padding: [30, 30] } }
-            : { center: TASHKENT, zoom: LANDING_ZOOM })}
-          // Non-interactive on the landing surface — the map is a backdrop,
-          // not a driver. All exploration flows through the chips or the
-          // /explore link, which sidesteps the scroll-zoom trap for real.
-          scrollWheelZoom={false}
-          dragging={false}
-          doubleClickZoom={false}
-          touchZoom={false}
-          boxZoom={false}
-          keyboard={false}
-          zoomControl={false}
-          attributionControl={false}
-          className="h-full w-full"
-          style={{ background: "#F1F1EA" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap'
+        {useYandex ? (
+          <LandingYandexMap
+            jobs={pinned}
+            negotiable={labels.negotiable}
+            onError={() => setYandexFailed(true)}
           />
-          {pinned.map((job) => {
-            const pos = jobLatLng(job);
-            const pill = salaryPill(job) ?? labels.negotiable;
-            const meta = [
-              job.categoryName,
-              schedulePatternLabel(job.schedulePattern),
-            ]
-              .filter(Boolean)
-              .join(" · ");
-            return (
-              <Marker
-                key={job.id}
-                position={[pos.lat, pos.lng]}
-                icon={salaryIcon(pill)}
-                // Route through the app's job page rather than opening a
-                // Leaflet popup — every pin should feel like a link to
-                // the real posting on the landing surface.
-                eventHandlers={{
-                  click: () => {
-                    window.location.href = `/${locale}/jobs/${job.id}`;
-                  },
-                }}
-                title={`${job.title} · ${job.companyName}${meta ? " · " + meta : ""}`}
-              />
-            );
-          })}
-        </MapContainer>
+        ) : (
+          <MapContainer
+            {...(bounds
+              ? { bounds, boundsOptions: { padding: [30, 30] } }
+              : { center: TASHKENT, zoom: LANDING_ZOOM })}
+            // Non-interactive on the landing surface — the map is a backdrop,
+            // not a driver. All exploration flows through the chips or the
+            // /explore link, which sidesteps the scroll-zoom trap for real.
+            scrollWheelZoom={false}
+            dragging={false}
+            doubleClickZoom={false}
+            touchZoom={false}
+            boxZoom={false}
+            keyboard={false}
+            zoomControl={false}
+            attributionControl={false}
+            className="h-full w-full"
+            style={{ background: "#F1F1EA" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap"
+            />
+            {pinned.map((job) => {
+              const pos = jobLatLng(job);
+              const pill = salaryPill(job) ?? labels.negotiable;
+              const meta = [
+                job.categoryName,
+                schedulePatternLabel(job.schedulePattern),
+              ]
+                .filter(Boolean)
+                .join(" · ");
+              return (
+                <Marker
+                  key={job.id}
+                  position={[pos.lat, pos.lng]}
+                  icon={salaryIcon(pill)}
+                  // Route through the app's job page rather than opening a
+                  // Leaflet popup — every pin should feel like a link to
+                  // the real posting on the landing surface.
+                  eventHandlers={{
+                    click: () => {
+                      window.location.href = `/${locale}/jobs/${job.id}`;
+                    },
+                  }}
+                  title={`${job.title} · ${job.companyName}${meta ? " · " + meta : ""}`}
+                />
+              );
+            })}
+          </MapContainer>
+        )}
 
         {/* "You are here" — DOM overlay so it always sits at the visual
             center regardless of how the map is framed. Blue dot + soft ring
