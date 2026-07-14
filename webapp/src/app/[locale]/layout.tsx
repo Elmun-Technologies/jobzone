@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -59,6 +60,12 @@ const GOOGLE_SITE_VERIFICATION =
 // Yandex.Webmaster verification (empty until issued — Yandex dominates search
 // in UZ, so we want to be listed there as well).
 const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
+
+// Google Analytics 4 measurement id. Public — appears in every page's HTML;
+// env-backed so preview envs can point at a separate stream (or leave empty
+// to skip). Default is the currently issued Yolla Web stream.
+const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-6DZDQYHJMX";
 
 export async function generateMetadata({
   params,
@@ -135,6 +142,7 @@ export default async function LocaleLayout({
           <main className="flex-1">{children}</main>
           <SiteFooter />
         </NextIntlClientProvider>
+        <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
       </body>
     </html>
   );
