@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { generateJobContent } from "@/lib/actions/ai-content";
+import { track } from "@/lib/analytics/track";
 import {
   createJob,
   updateJob,
@@ -294,6 +295,12 @@ export function PostJobForm({
   const [addressText, setAddressText] = useState("");
 
   useEffect(() => {
+    // Only fire the "started composing a vacancy" event on new-post loads.
+    // Edit sessions aren't a top-of-funnel acquisition signal.
+    if (!isEdit) track("vacancy_post_start");
+  }, [isEdit]);
+
+  useEffect(() => {
     // In edit mode the draft is seeded from the job itself — never overwrite
     // it with a leftover "post a job" stash.
     if (isEdit) return;
@@ -548,6 +555,13 @@ export function PostJobForm({
       key={restored ? "restored" : "initial"}
       ref={formRef}
       action={action}
+      onSubmit={() => {
+        // Post-vacancy is the top employer conversion. Fire only on new
+        // postings (edits aren't acquisition events). The server may still
+        // 4xx (auth expired, missing company) — "employer clicked publish"
+        // is the funnel signal that matters for acquisition reporting.
+        if (!isEdit) track("vacancy_post_complete");
+      }}
       className="mx-auto max-w-2xl"
     >
       <input type="hidden" name="locale" value={locale} />

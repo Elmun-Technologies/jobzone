@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageEvent } from "@/components/analytics/page-event";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
@@ -181,6 +182,16 @@ export default async function JobDetailsPage({
           { name: tb("breadcrumbJobs"), url: `${localePath}/jobs` },
           { name: job.title, url: `${localePath}/jobs/${id}` },
         ])}
+      />
+      <PageEvent
+        name="job_view"
+        props={{
+          job_id: job.id,
+          company_id: job.companyId,
+          category: job.categoryName ?? null,
+          city: job.city ?? null,
+          salary_max: job.salaryMax ?? null,
+        }}
       />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">

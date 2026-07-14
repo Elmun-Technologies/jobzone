@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageEvent } from "@/components/analytics/page-event";
 import { JobFilters } from "@/components/jobs/job-filters";
 import { JobResults } from "@/components/jobs/job-results";
 import { JobToolbar } from "@/components/jobs/job-toolbar";
@@ -87,8 +88,26 @@ export default async function JobsPage({
   const view = pick(sp.view) === "grid" ? "grid" : "list";
   const title = query.category ?? t("title");
 
+  // Only fire when the seeker actually searched or filtered — the bare
+  // /jobs page load is captured by autocapture (GA/PostHog page views).
+  const searched = Boolean(
+    query.q || query.category || query.city || query.jobType,
+  );
+
   return (
     <Container className="py-8">
+      {searched ? (
+        <PageEvent
+          name="search_performed"
+          props={{
+            q: query.q ?? null,
+            category: query.category ?? null,
+            city: query.city ?? null,
+            job_type: query.jobType ?? null,
+            results: count,
+          }}
+        />
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Filters — top on mobile, right column on desktop */}
         <aside className="lg:col-start-2 lg:row-start-1">
