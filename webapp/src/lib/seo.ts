@@ -129,6 +129,28 @@ export function orgJsonLd(): Record<string, unknown> {
   };
 }
 
+/** schema.org FAQPage — a Q&A list Google can render as an FAQ rich
+ * result and, more importantly today, an LLM can quote verbatim. Every
+ * question/answer must also render as visible text on the page (Google's
+ * policy; also the reason it works for GEO — models parse what humans
+ * see, not just structured data). */
+export function faqPageJsonLd(
+  items: { question: string; answer: string }[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((it) => ({
+      "@type": "Question",
+      name: it.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: it.answer,
+      },
+    })),
+  };
+}
+
 /** schema.org BreadcrumbList — Google renders a friendlier URL breadcrumb
  * in the search result instead of the raw URL when this is present. Each
  * item's URL must be absolute (metadataBase doesn't apply to JSON-LD). */

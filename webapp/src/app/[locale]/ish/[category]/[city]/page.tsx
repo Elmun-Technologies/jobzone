@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobCard } from "@/components/jobs/job-card";
+import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
@@ -67,6 +68,16 @@ export default async function CategoryCityLandingPage({
   if (!cat || !cityName) notFound();
 
   const t = await getTranslations("landingPage");
+  const tfaq = await getTranslations("landingFaq");
+  // City-scoped FAQ reuses the category FAQ but binds {category} to
+  // the current category name. The city context is embedded in the
+  // surrounding page copy (H1 / intro), which is what an LLM will
+  // read alongside the FAQ answer.
+  const faqItems = Array.from({ length: 7 }, (_, i) => ({
+    question: tfaq(`q${i + 1}`, { category: cat.name }),
+    answer: tfaq(`a${i + 1}`, { category: cat.name }),
+  }));
+  const faqHeading = tfaq("heading", { category: cat.name });
 
   const [jobs, count, cities, savedIds] = await Promise.all([
     getOpenJobs({
@@ -183,6 +194,8 @@ export default async function CategoryCityLandingPage({
           </p>
         </section>
       </Container>
+
+      <FaqSection heading={faqHeading} items={faqItems} />
     </>
   );
 }

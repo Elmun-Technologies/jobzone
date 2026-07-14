@@ -8,6 +8,7 @@ import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { ReputationTeaser } from "@/components/landing/reputation-teaser";
 import { JobCard } from "@/components/jobs/job-card";
+import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -44,6 +45,15 @@ export default async function HomePage({
   const t = await getTranslations("home");
   const tj = await getTranslations("jobs");
   const tm = await getTranslations("explore.map");
+  const tfaq = await getTranslations("homeFaq");
+
+  // Compact FAQ set (7 Q/A) — visible HTML + FAQPage JSON-LD via
+  // FaqSection. Kept in the messages catalog so uz/ru/en can drift as
+  // needed; the message-parity test blocks a locale skipping a key.
+  const faqItems = Array.from({ length: 7 }, (_, i) => ({
+    question: tfaq(`q${i + 1}`),
+    answer: tfaq(`a${i + 1}`),
+  }));
 
   const [
     recent,
@@ -300,6 +310,11 @@ export default async function HomePage({
 
       {/* Reputation teaser (shared with /about) */}
       <ReputationTeaser background="bg-muted/30" moreLabel={t("learnMore")} />
+
+      {/* FAQ — visible + FAQPage JSON-LD. GEO signal: LLMs (ChatGPT /
+          Claude / Perplexity / Gemini) quote FAQ answers verbatim, and
+          Google may render this as a rich result on the SERP. */}
+      <FaqSection heading={tfaq("heading")} items={faqItems} />
 
       {/* Employer CTA (shared with /about) */}
       <EmployerCta />
