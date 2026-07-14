@@ -3,15 +3,19 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobCard } from "@/components/jobs/job-card";
+import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
+import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoryBySlug } from "@/lib/data/categories";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
-import { groupNumber } from "@/lib/format";
+import { groupNumber, salaryRangeUzsText } from "@/lib/format";
+import { latestPostedAt, uzsSalaryRange } from "@/lib/geo-stats";
 import {
   breadcrumbJsonLd,
+  collectionPageJsonLd,
   jobsItemListJsonLd,
   localeAlternates,
   siteUrl,
@@ -67,6 +71,16 @@ export default async function CategoryCityLandingPage({
   if (!cat || !cityName) notFound();
 
   const t = await getTranslations("landingPage");
+  const tfaq = await getTranslations("landingFaq");
+  // City-scoped FAQ reuses the category FAQ but binds {category} to
+  // the current category name. The city context is embedded in the
+  // surrounding page copy (H1 / intro), which is what an LLM will
+  // read alongside the FAQ answer.
+  const faqItems = Array.from({ length: 7 }, (_, i) => ({
+    question: tfaq(`q${i + 1}`, { category: cat.name }),
+    answer: tfaq(`a${i + 1}`, { category: cat.name }),
+  }));
+  const faqHeading = tfaq("heading", { category: cat.name });
 
   const [jobs, count, cities, savedIds] = await Promise.all([
     getOpenJobs({
@@ -81,6 +95,7 @@ export default async function CategoryCityLandingPage({
 
   const base = siteUrl();
   const localePath = `${base}/${locale}`;
+  const canonicalUrl = `${localePath}/ish/${category}/${city}`;
 
   return (
     <>
@@ -89,11 +104,26 @@ export default async function CategoryCityLandingPage({
           { name: t("breadcrumbHome"), url: `${localePath}` },
           { name: t("breadcrumbJobs"), url: `${localePath}/jobs` },
           { name: cat.name, url: `${localePath}/ish/${category}` },
-          {
-            name: cityName,
-            url: `${localePath}/ish/${category}/${city}`,
-          },
+          { name: cityName, url: canonicalUrl },
         ])}
+      />
+      <JsonLd
+        data={collectionPageJsonLd({
+          url: canonicalUrl,
+          name: t("titleCategoryCity", {
+            city: cityName,
+            category: cat.name,
+          }),
+          description: t("introCategoryCity", {
+            city: cityName,
+            category: cat.name,
+          }),
+          categoryName: cat.name,
+          city: cityName,
+          inLanguage: locale,
+          itemCount: count,
+          dateModified: latestPostedAt(jobs) ?? undefined,
+        })}
       />
       {jobs.length > 0 ? (
         <JsonLd data={jobsItemListJsonLd(jobs, locale)} />
@@ -131,9 +161,33 @@ export default async function CategoryCityLandingPage({
             category: cat.name,
           })}
         </p>
-        <p className="text-muted-foreground mt-2 text-sm">
-          {t("resultsCount", { count: groupNumber(count) })}
-        </p>
+
+        {/* GEO quick-facts strip — same shape as the category landing,
+            but the "Cities" slot is dropped (the page IS one city). */}
+        {(() => {
+          const range = uzsSalaryRange(jobs);
+          const updated = latestPostedAt(jobs);
+          return (
+            <QuickFacts
+              label={t("quickFactsLabel")}
+              items={[
+                {
+                  label: t("factVacancies"),
+                  value: groupNumber(count),
+                },
+                {
+                  label: t("factSalaryRange"),
+                  value: range
+                    ? salaryRangeUzsText(range.low, range.high)
+                    : t("factSalaryNa"),
+                },
+                { label: t("factCities"), value: cityName },
+              ]}
+              updatedIso={updated}
+              updatedLabel={t("factUpdated")}
+            />
+          );
+        })()}
 
         {jobs.length > 0 ? (
           <ul className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -183,6 +237,8 @@ export default async function CategoryCityLandingPage({
           </p>
         </section>
       </Container>
+
+      <FaqSection heading={faqHeading} items={faqItems} />
     </>
   );
 }

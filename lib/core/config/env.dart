@@ -91,6 +91,12 @@ class Env {
   /// `--dart-define=RAHMAT_ENABLED=1`.
   static const bool rahmatEnabled = bool.fromEnvironment('RAHMAT_ENABLED');
 
+  /// Sentry DSN — enables client-side crash + performance reporting when a
+  /// non-empty value is supplied via `--dart-define=SENTRY_DSN=…`. Empty →
+  /// bootstrap skips SentryFlutter.init entirely and the app runs raw, which
+  /// keeps the offline demo / test substrate free of network chatter.
+  static const String sentryDsn = String.fromEnvironment('SENTRY_DSN');
+
   /// True only when Supabase credentials are present.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
@@ -104,4 +110,8 @@ class Env {
       clickServiceId.isNotEmpty && clickMerchantId.isNotEmpty;
   static bool get hasRahmat => rahmatEnabled && hasSupabase;
   static bool get hasPaymentGateway => hasPayme || hasClick || hasRahmat;
+
+  /// True when a Sentry DSN is baked in — bootstrap only wires SentryFlutter
+  /// in that case, so debug/test/offline builds stay silent.
+  static bool get hasSentry => sentryDsn.isNotEmpty;
 }

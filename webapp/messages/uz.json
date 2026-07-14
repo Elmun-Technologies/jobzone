@@ -536,6 +536,40 @@
     "exploreCta": "Xaritani to'liq ochish",
     "learnMore": "Batafsil"
   },
+  "homeFaq": {
+    "heading": "Ko'p beriladigan savollar",
+    "q1": "Yolla nima?",
+    "a1": "Yolla — O'zbekistondagi mobil-birinchi ish bozori: har bir vakansiyada maosh, jadval va rasmiy shakl ochiq ko'rsatilgan, ariza ikki klikda topshiriladi. Blue-collar va ommaviy ishga yollashga qaratilgan.",
+    "q2": "Ish topish uchun ro'yxatdan o'tish shartmi?",
+    "a2": "Yo'q. Mehmon rejimida vakansiyalarni ko'rish, filtrlash va hatto ariza berishni boshlashingiz mumkin. Faqat oxirgi tugmada tizimga kirish so'raladi va yozgan matnlaringiz saqlanadi.",
+    "q3": "Ariza qanday beriladi?",
+    "a3": "Ish sahifasidagi «Ariza — 2 klik» tugmasini bosing. Agar sizda rezyume bo'lsa, u to'g'ridan-to'g'ri ish beruvchiga yuboriladi; bo'lmasa, avval qisqa rezyume yaratasiz. Ish beruvchi bir necha kun ichida javob beradi.",
+    "q4": "Qaysi shaharlarda vakansiyalar bor?",
+    "a4": "Toshkent, Samarqand, Andijon, Farg'ona, Namangan, Buxoro, Xorazm va boshqa viloyat markazlarida ochiq vakansiyalar bor. To'liq ro'yxatni bosh sahifadagi shahar bloklaridan yoki xaritadan ko'rishingiz mumkin.",
+    "q5": "Maoshlar qanday ko'rsatiladi?",
+    "a5": "Har bir e'londa maosh so'mda («2 500 000 – 4 000 000 so'm» kabi) va soliqdan oldingi/keyingi (gross/net) belgisi bilan ko'rinadi. Ba'zi ish beruvchilar «kelishiladi» deb qoldiradi — bunday hollarda maosh intervyuda muhokama qilinadi.",
+    "q6": "Rezyume qanday yarataman?",
+    "a6": "«Rezyume yaratish» tugmasi orqali qadam-baqadam forma to'ldirasiz: shaxsiy ma'lumot, tajriba, ta'lim, aloqa. AI yordamchi «O'zim haqimda» qismini avtomatik loyihalab beradi. Rezyume darhol saqlanadi va har bir arizada ish beruvchiga yuboriladi.",
+    "q7": "Yolla ish izlovchilar uchun bepulmi?",
+    "a7": "Ha, ish izlovchilar uchun to'liq bepul: qidirish, ariza berish, obuna qilish, xabar yozish — hammasi bepul. Ish beruvchilar uchun birinchi vakansiya ham bepul; keyingi e'lonlar tanlangan tarifga qarab to'lanadi (Standart / Brend / Premium)."
+  },
+  "landingFaq": {
+    "heading": "{category} bo'yicha savollar",
+    "q1": "{category} sohasidagi eng yaxshi vakansiyalarni qanday topaman?",
+    "a1": "Ushbu sahifadagi ro'yxat aynan {category} sohasidagi ochiq vakansiyalar. Har bir e'londa maosh, jadval va formalizatsiya ko'rinadi — mos bo'lganini bosing va «Ariza — 2 klik» tugmasidan foydalaning.",
+    "q2": "{category} ishida o'rtacha maosh qancha?",
+    "a2": "Maoshlar tajriba, joylashuv va ish beruvchiga qarab farq qiladi. Aniq raqamlarni yuqoridagi «Vakansiyalar» ro'yxatidan ko'ring — har bir e'londa haqiqiy diapazon ko'rsatilgan.",
+    "q3": "Tajribasiz {category} sohasida ish topsam bo'ladimi?",
+    "a3": "Ha, ko'p e'lonlarda «tajribasiz» va «kichik» toifasi ochiq. Filtrlarda «Tajriba: yo'q» yoki «Boshlang'ich» ni tanlab, faqat mos vakansiyalarni ko'rasiz.",
+    "q4": "Qaysi shaharlarda {category} vakansiyalari bor?",
+    "a4": "Ushbu sahifaning quyi qismidagi «Shaharlar bo'yicha» blokidan har shahar uchun alohida ro'yxatga o'tishingiz mumkin — Toshkent, Samarqand, Andijon va boshqalarda.",
+    "q5": "{category} uchun qanday hujjatlar kerak?",
+    "a5": "Odatda pasport nusxasi va (agar bo'lsa) diplom yoki sertifikat kifoya. Ba'zi lavozimlar uchun tibbiy ko'rikdan o'tish yoki haydovchilik guvohnomasi talab qilinadi — e'lon ostidagi «Talablar» bo'limida ko'rsatiladi.",
+    "q6": "Rasmiy ish (contract) va GPH farqi nima?",
+    "a6": "«Rasmiy ish» — mehnat kodeksi bo'yicha to'liq shartnoma (soliqlar, ta'til, ijtimoiy sug'urta). «GPH» (fuqarolik-huquqiy shartnoma) — soddaroq, mustaqil xodim bilan bir martalik ish uchun. Har e'londa formalizatsiya turi ko'rsatilgan.",
+    "q7": "{category} vakansiyalari qanchalik tez-tez yangilanadi?",
+    "a7": "Har kun. Ish beruvchi e'lon joylagan zahoti ushbu sahifada avtomatik chiqadi — hech qanday qo'lda tekshiruv yo'q. Yangi vakansiyalar uchun «Saqlangan qidiruvlar»ga obuna bo'lishingiz mumkin."
+  },
   "landingPage": {
     "titleCategory": "{category} ishi O'zbekistonda",
     "titleCategoryCity": "{city}da {category} ishi",
@@ -553,7 +587,14 @@
     "breadcrumbHome": "Bosh sahifa",
     "breadcrumbJobs": "Ishlar",
     "seoBlockTitle": "{category} bo'yicha ish — nima muhim",
-    "seoBlockBody": "Yolla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling."
+    "seoBlockBody": "Yolla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling.",
+    "quickFactsLabel": "Qisqacha faktlar",
+    "factVacancies": "Ochiq vakansiyalar",
+    "factSalaryRange": "Maosh diapazoni",
+    "factCities": "Shaharlar",
+    "factUpdated": "Yangilangan",
+    "factSalaryNa": "kelishiladi",
+    "factCitiesNa": "—"
   },
   "jobs": {
     "title": "Ishlar",

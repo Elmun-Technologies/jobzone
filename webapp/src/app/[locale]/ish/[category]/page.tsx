@@ -3,15 +3,19 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobCard } from "@/components/jobs/job-card";
+import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
+import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoryBySlug } from "@/lib/data/categories";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
-import { groupNumber } from "@/lib/format";
+import { groupNumber, salaryRangeUzsText } from "@/lib/format";
+import { latestPostedAt, uzsSalaryRange } from "@/lib/geo-stats";
 import {
   breadcrumbJsonLd,
+  collectionPageJsonLd,
   jobsItemListJsonLd,
   localeAlternates,
   siteUrl,
@@ -54,6 +58,15 @@ export default async function CategoryLandingPage({
   if (!cat) notFound();
 
   const t = await getTranslations("landingPage");
+  const tfaq = await getTranslations("landingFaq");
+  // Category-scoped FAQ (7 items). The {category} placeholder is filled
+  // on the server so the visible text and the FAQPage JSON-LD say the
+  // same thing — Google's rich-results policy requires the two to match.
+  const faqItems = Array.from({ length: 7 }, (_, i) => ({
+    question: tfaq(`q${i + 1}`, { category: cat.name }),
+    answer: tfaq(`a${i + 1}`, { category: cat.name }),
+  }));
+  const faqHeading = tfaq("heading", { category: cat.name });
 
   const [jobs, count, cities, savedIds] = await Promise.all([
     getOpenJobs({ category: cat.name, limit: LANDING_LIMIT }),
@@ -70,14 +83,27 @@ export default async function CategoryLandingPage({
   const base = siteUrl();
   const localePath = `${base}/${locale}`;
 
+  const canonicalUrl = `${localePath}/ish/${category}`;
+
   return (
     <>
       <JsonLd
         data={breadcrumbJsonLd([
           { name: t("breadcrumbHome"), url: `${localePath}` },
           { name: t("breadcrumbJobs"), url: `${localePath}/jobs` },
-          { name: cat.name, url: `${localePath}/ish/${category}` },
+          { name: cat.name, url: canonicalUrl },
         ])}
+      />
+      <JsonLd
+        data={collectionPageJsonLd({
+          url: canonicalUrl,
+          name: t("titleCategory", { category: cat.name }),
+          description: t("introCategory", { category: cat.name }),
+          categoryName: cat.name,
+          inLanguage: locale,
+          itemCount: count,
+          dateModified: latestPostedAt(jobs) ?? undefined,
+        })}
       />
       {jobs.length > 0 ? (
         <JsonLd data={jobsItemListJsonLd(jobs, locale)} />
@@ -107,9 +133,40 @@ export default async function CategoryLandingPage({
         <p className="text-muted-foreground mt-3 max-w-2xl text-lg text-pretty">
           {t("introCategory", { category: cat.name })}
         </p>
-        <p className="text-muted-foreground mt-2 text-sm">
-          {t("resultsCount", { count: groupNumber(count) })}
-        </p>
+
+        {/* GEO quick-facts strip — concrete numbers an LLM will quote
+            back verbatim, and a human skims in one glance. Salary range
+            is a 25th–75th percentile band across UZS-quoted jobs. */}
+        {(() => {
+          const range = uzsSalaryRange(jobs);
+          const updated = latestPostedAt(jobs);
+          return (
+            <QuickFacts
+              label={t("quickFactsLabel")}
+              items={[
+                {
+                  label: t("factVacancies"),
+                  value: groupNumber(count),
+                },
+                {
+                  label: t("factSalaryRange"),
+                  value: range
+                    ? salaryRangeUzsText(range.low, range.high)
+                    : t("factSalaryNa"),
+                },
+                {
+                  label: t("factCities"),
+                  value:
+                    cities.length > 0
+                      ? String(cities.length)
+                      : t("factCitiesNa"),
+                },
+              ]}
+              updatedIso={updated}
+              updatedLabel={t("factUpdated")}
+            />
+          );
+        })()}
 
         {jobs.length > 0 ? (
           <ul className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -156,6 +213,11 @@ export default async function CategoryLandingPage({
           </p>
         </section>
       </Container>
+
+      {/* Category-scoped FAQ — visible + FAQPage JSON-LD. Every answer
+          mentions the category name so an LLM can quote the exact
+          Q/A pair when a user asks about it. */}
+      <FaqSection heading={faqHeading} items={faqItems} />
     </>
   );
 }

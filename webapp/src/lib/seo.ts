@@ -114,7 +114,12 @@ export function jsonLdScript(data: Record<string, unknown>): string {
 
 /** schema.org Organization for the Yolla brand — cements the "sameAs"
  * knowledge graph link once socials are live and gives Google the logo/URL
- * pair it shows in the search sidebar. Embed once, on the home page. */
+ * pair it shows in the search sidebar. Embed once, on the home page.
+ *
+ * `areaServed` lists every UZ region we cover, and `knowsAbout` names the
+ * job domains we're indexed against; both are GEO signals models use to
+ * decide whether Yolla is a relevant citation for "job site in Uzbekistan"
+ * or "kassir ishi in Toshkent" queries. */
 export function orgJsonLd(): Record<string, unknown> {
   const base = siteUrl();
   return {
@@ -126,6 +131,106 @@ export function orgJsonLd(): Record<string, unknown> {
     logo: `${base}/icon.svg`,
     description:
       "O'zbekistondagi ishonchli ish bozori — Yolla. Maosh, jadval, masofa va ikki klikda ariza.",
+    // Uzbekistan + every oblast + Republic of Karakalpakstan + Tashkent city.
+    areaServed: [
+      { "@type": "Country", name: "Uzbekistan" },
+      { "@type": "City", name: "Toshkent" },
+      { "@type": "AdministrativeArea", name: "Andijon viloyati" },
+      { "@type": "AdministrativeArea", name: "Buxoro viloyati" },
+      { "@type": "AdministrativeArea", name: "Farg'ona viloyati" },
+      { "@type": "AdministrativeArea", name: "Jizzax viloyati" },
+      { "@type": "AdministrativeArea", name: "Xorazm viloyati" },
+      { "@type": "AdministrativeArea", name: "Namangan viloyati" },
+      { "@type": "AdministrativeArea", name: "Navoiy viloyati" },
+      { "@type": "AdministrativeArea", name: "Qashqadaryo viloyati" },
+      { "@type": "AdministrativeArea", name: "Samarqand viloyati" },
+      { "@type": "AdministrativeArea", name: "Sirdaryo viloyati" },
+      { "@type": "AdministrativeArea", name: "Surxondaryo viloyati" },
+      { "@type": "AdministrativeArea", name: "Toshkent viloyati" },
+      { "@type": "AdministrativeArea", name: "Qoraqalpog'iston Respublikasi" },
+    ],
+    knowsAbout: [
+      "ish qidirish",
+      "vakansiyalar",
+      "работа в Узбекистане",
+      "job search",
+      "employment",
+      "recruitment",
+      "blue-collar jobs",
+      "mass hiring",
+      "Toshkentda ish",
+      "Uzbekistan jobs",
+    ],
+  };
+}
+
+/** schema.org CollectionPage — signals to search + AI systems that the
+ * page is a curated list-of-items landing (rather than a plain article),
+ * scoped to a specific topic (`about`) and geography (`areaServed`).
+ * Used on the /ish/[category] and /ish/[category]/[city] landings. */
+export function collectionPageJsonLd(input: {
+  url: string;
+  name: string;
+  description: string;
+  categoryName: string;
+  /** Undefined → country-wide (Uzbekistan). Otherwise a specific city. */
+  city?: string;
+  inLanguage: string;
+  itemCount: number;
+  dateModified?: string;
+}): Record<string, unknown> {
+  const area = input.city
+    ? {
+        "@type": "City",
+        name: input.city,
+        containedInPlace: { "@type": "Country", name: "Uzbekistan" },
+      }
+    : { "@type": "Country", name: "Uzbekistan" };
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": input.url,
+    url: input.url,
+    name: input.name,
+    description: input.description,
+    inLanguage: input.inLanguage,
+    about: {
+      "@type": "Thing",
+      name: input.categoryName,
+    },
+    areaServed: area,
+    dateModified: input.dateModified,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Yolla",
+      url: siteUrl(),
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: input.itemCount,
+    },
+  };
+}
+
+/** schema.org FAQPage — a Q&A list Google can render as an FAQ rich
+ * result and, more importantly today, an LLM can quote verbatim. Every
+ * question/answer must also render as visible text on the page (Google's
+ * policy; also the reason it works for GEO — models parse what humans
+ * see, not just structured data). */
+export function faqPageJsonLd(
+  items: { question: string; answer: string }[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((it) => ({
+      "@type": "Question",
+      name: it.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: it.answer,
+      },
+    })),
   };
 }
 

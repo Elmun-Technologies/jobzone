@@ -118,6 +118,21 @@ export function groupNumber(n: number): string {
 }
 
 /**
+ * Compact UZS salary-range label — "3,5 – 5,7 mln so'm". Used on the
+ * landing "quick facts" strip, where fitting the range on one line
+ * matters more than absolute precision.
+ */
+export function salaryRangeUzsText(low: number, high: number): string {
+  const fmt = (n: number) => {
+    const mln = n / 1_000_000;
+    return (mln < 10 ? Math.round(mln * 10) / 10 : Math.round(mln))
+      .toString()
+      .replace(".", ",");
+  };
+  return `${fmt(low)} – ${fmt(high)} mln so'm`;
+}
+
+/**
  * Compact salary for a map marker: "4 mln" / "4,2 mln" (UZS) or "$1.5k" (USD);
  * null when no salary is set. Uses the upper bound (or the min if that's all).
  */

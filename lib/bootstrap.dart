@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -54,10 +55,29 @@ Future<void> bootstrap() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const YollaApp(),
-    ),
+  // Wrap runApp() with SentryFlutter.init when a DSN is baked in via
+  // --dart-define=SENTRY_DSN=…. Without a DSN we call runApp directly:
+  // the offline/mock demo and tests must not touch the network. The
+  // wrapper also captures uncaught Flutter/PlatformDispatcher errors and
+  // sends them to Sentry (SentryFlutter registers those hooks itself).
+  Widget appRoot() => ProviderScope(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    child: const YollaApp(),
   );
+
+  if (Env.hasSentry) {
+    await SentryFlutter.init((options) {
+      options.dsn = Env.sentryDsn;
+      // Same flavor label used by CI builds so a stray dev crash never
+      // shows up in the production Sentry inbox.
+      options.environment = Env.flavor;
+      // Full sampling at launch — dial down once traffic climbs so we
+      // don't burn the free-tier quota (10k perf events / month).
+      options.tracesSampleRate = 1.0;
+      // Session replay opt-in — off by default so salary/CV inputs are
+      // never captured; flip via options.replay.* when we're ready.
+    }, appRunner: () => runApp(appRoot()));
+  } else {
+    runApp(appRoot());
+  }
 }

@@ -3,8 +3,13 @@ import { Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { YandexMetrica } from "@/components/analytics/yandex-metrica";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -66,6 +71,13 @@ const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
 // to skip). Default is the currently issued Yolla Web stream.
 const GA_MEASUREMENT_ID =
   process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-6DZDQYHJMX";
+// Yandex.Metrica counter id — public. Default is the issued Yolla counter;
+// unset in env to skip (dev/preview).
+const YANDEX_METRICA_ID =
+  process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "110738388";
+// Meta (Facebook) Pixel id — public. Empty until an ad account is wired,
+// at which point Vercel env NEXT_PUBLIC_META_PIXEL_ID lights it up.
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
 
 export async function generateMetadata({
   params,
@@ -143,6 +155,16 @@ export default async function LocaleLayout({
           <SiteFooter />
         </NextIntlClientProvider>
         <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+        <YandexMetrica counterId={YANDEX_METRICA_ID} />
+        <MetaPixel pixelId={META_PIXEL_ID} />
+        {/* PostHog gates itself on NEXT_PUBLIC_POSTHOG_KEY — safe to
+            mount unconditionally, no-ops without the env. */}
+        <PostHogProvider />
+        {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
+            Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
+            banner needed, no third-party host. Both no-op in dev. */}
+        <VercelAnalytics />
+        <SpeedInsights />
       </body>
     </html>
   );

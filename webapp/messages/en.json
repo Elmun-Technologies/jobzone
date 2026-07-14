@@ -536,6 +536,40 @@
     "exploreCta": "Open the full map",
     "learnMore": "Learn more"
   },
+  "homeFaq": {
+    "heading": "Frequently asked questions",
+    "q1": "What is Yolla?",
+    "a1": "Yolla is a mobile-first job marketplace for Uzbekistan. Every posting shows salary, schedule, and contract type up front, and applications go through in two taps. The focus is blue-collar and mass-hiring roles.",
+    "q2": "Do I need to sign up to search for jobs?",
+    "a2": "No. As a guest you can browse listings, apply filters, and even start filling in an application. Sign-in is only requested at the final click, and anything you typed is restored afterwards.",
+    "q3": "How do I apply?",
+    "a3": "On any job page, tap \"Apply — 2 clicks\". If you already have a résumé it goes straight to the employer; if not, you'll create a short one first. Employers usually reply within a few days.",
+    "q4": "Which cities have openings?",
+    "a4": "Tashkent, Samarkand, Andijan, Fergana, Namangan, Bukhara, Khorezm, and other regional capitals. The full list is on the home page under \"By city\" and on the map view.",
+    "q5": "How is salary shown?",
+    "a5": "Every listing shows the salary in Uzbek som (\"2 500 000 – 4 000 000 so'm\") with a gross / net tag. Where an employer chose \"negotiable\", the number is discussed at the interview.",
+    "q6": "How do I create a résumé?",
+    "a6": "Use \"Create résumé\" — a step-by-step form covering personal details, experience, education, and contacts. An AI assistant can draft the \"About me\" section. The résumé is saved and attached to every application.",
+    "q7": "Is Yolla free for job seekers?",
+    "a7": "Yes — search, applications, saved searches, and messaging are all free for seekers. Employers also get their first vacancy free; further listings pick a per-listing tier (Standard / Brand / Premium)."
+  },
+  "landingFaq": {
+    "heading": "About {category} jobs",
+    "q1": "How do I find the best {category} openings?",
+    "a1": "The list on this page is the current set of open {category} vacancies. Each card shows salary, schedule, and contract type — pick one and use \"Apply — 2 clicks\".",
+    "q2": "What's the average salary for a {category}?",
+    "a2": "Pay varies by experience, city, and employer. See the exact numbers on each posting above — every card carries a real range.",
+    "q3": "Can I get a {category} job without prior experience?",
+    "a3": "Yes — many postings are open to \"no experience\" and entry-level candidates. Filter by \"Experience: none\" or \"Entry\" to see only those.",
+    "q4": "Which cities have {category} vacancies?",
+    "a4": "Scroll to the \"By city\" block below to open the city-specific list — Tashkent, Samarkand, Andijan and others.",
+    "q5": "What documents do I need for a {category} job?",
+    "a5": "Usually a passport copy plus, where relevant, a diploma or certificate. Some roles need a medical clearance or a driver's licence — that's listed under \"Requirements\" on the posting.",
+    "q6": "What's the difference between an official contract and a GPH?",
+    "a6": "An official contract is a full labour-code employment agreement (tax, leave, social insurance). GPH is a civil-law contract, simpler and good for one-off work. Every posting shows which type it is.",
+    "q7": "How often are {category} vacancies refreshed?",
+    "a7": "Every day. New postings appear on this page the moment an employer publishes them — no manual moderation. Subscribe via \"Saved searches\" to catch new ones early."
+  },
   "landingPage": {
     "titleCategory": "{category} jobs in Uzbekistan",
     "titleCategoryCity": "{category} jobs in {city}",
@@ -553,7 +587,14 @@
     "breadcrumbHome": "Home",
     "breadcrumbJobs": "Jobs",
     "seoBlockTitle": "{category} jobs — what to look at",
-    "seoBlockBody": "Yolla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply."
+    "seoBlockBody": "Yolla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply.",
+    "quickFactsLabel": "At a glance",
+    "factVacancies": "Open vacancies",
+    "factSalaryRange": "Salary range",
+    "factCities": "Cities",
+    "factUpdated": "Updated",
+    "factSalaryNa": "negotiable",
+    "factCitiesNa": "—"
   },
   "jobs": {
     "title": "Jobs",

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { quickApply } from "@/lib/actions/apply";
+import { track } from "@/lib/analytics/track";
 import { cn } from "@/lib/utils";
 
 /**
@@ -41,6 +42,9 @@ export function QuickApplyButton({
     "inline-flex items-center justify-center gap-1.5 rounded-full font-semibold transition-opacity hover:opacity-90 disabled:opacity-60";
 
   function onClick() {
+    // Fires the moment the seeker clicks "Apply" — the top-of-funnel signal
+    // regardless of which branch the intent resolves to below.
+    track("job_apply_click", { job_id: jobId, quick: !needsForm });
     if (needsForm) {
       router.push(formHref);
       return;
@@ -56,6 +60,14 @@ export function QuickApplyButton({
       } else if (res.needsForm) {
         router.push(formHref);
       } else if (res.ok || res.duplicate) {
+        // Quick path completed without a form — treat as a full apply submit,
+        // matching the full-form apply flow so the conversion count is
+        // comparable across the two paths.
+        track("job_apply_submit", {
+          job_id: jobId,
+          path: "quick",
+          duplicate: res.duplicate === true,
+        });
         setApplied(true);
       } else {
         // Unexpected failure — fall back to the full form.
