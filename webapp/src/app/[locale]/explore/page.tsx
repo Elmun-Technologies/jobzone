@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { getCompanyRatings } from "@/lib/data/companies";
 import { getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
+import { localeAlternates } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 // The map reads the live open-job feed; a static prerender would freeze the pins
@@ -21,7 +22,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "explore" });
-  return { title: t("title"), description: t("subtitle") };
+  return {
+    title: t("title"),
+    description: t("subtitle"),
+    alternates: localeAlternates(locale, "explore"),
+  };
 }
 
 export default async function ExplorePage({

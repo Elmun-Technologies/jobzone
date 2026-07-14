@@ -9,6 +9,7 @@ import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import type { JobQuery } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
+import { localeAlternates } from "@/lib/seo";
 
 const PAGE_SIZE = 20;
 
@@ -19,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "jobs" });
-  return { title: t("title") };
+  return { title: t("title"), alternates: localeAlternates(locale, "jobs") };
 }
 
 export default async function JobsPage({

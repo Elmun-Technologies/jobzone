@@ -8,7 +8,7 @@ import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
-import { siteUrl } from "@/lib/seo";
+import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
 
@@ -47,6 +47,10 @@ export async function generateMetadata({
     metadataBase: new URL(siteUrl()),
     title: { default: t("title"), template: "%s · Yolla" },
     description: t("description"),
+    // Alternates on the layout only cover the localized root (/uz, /ru, /en).
+    // Every child page redeclares its own alternates via localeAlternates(...)
+    // so canonicals + hreflang are self-referencing on every URL Google finds.
+    alternates: localeAlternates(locale, ""),
   };
 }
 

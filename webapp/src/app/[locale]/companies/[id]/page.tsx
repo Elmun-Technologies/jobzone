@@ -13,7 +13,7 @@ import {
   getCompanyReviews,
 } from "@/lib/data/companies";
 import { formatDate } from "@/lib/format";
-import { organizationJsonLd, siteUrl } from "@/lib/seo";
+import { localeAlternates, organizationJsonLd, siteUrl } from "@/lib/seo";
 
 // Auth/session-dependent, per-request. Without this the page can be
 // full-route-cached (getCurrentUser swallows cookies() so Next never sees
@@ -34,7 +34,7 @@ export async function generateMetadata({
   return {
     title: company.name,
     description,
-    alternates: { canonical: url },
+    alternates: localeAlternates(locale, `companies/${id}`),
     openGraph: { title: company.name, description, url, type: "website" },
   };
 }

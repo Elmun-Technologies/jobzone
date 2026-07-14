@@ -19,7 +19,7 @@ import {
   schedulePatternLabel,
 } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
-import { jobPostingJsonLd, siteUrl } from "@/lib/seo";
+import { jobPostingJsonLd, localeAlternates, siteUrl } from "@/lib/seo";
 
 // Auth/session-dependent, per-request. Without this the page can be
 // full-route-cached (getCurrentUser swallows cookies() so Next never sees
@@ -43,7 +43,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: localeAlternates(locale, `jobs/${id}`),
     // The `opengraph-image` file in this segment supplies og:image /
     // twitter:image automatically, so a shared job link renders a branded card.
     openGraph: { title, description, url, type: "website" },

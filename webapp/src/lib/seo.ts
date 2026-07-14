@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+
+import { routing } from "@/i18n/routing";
 import type { Company, Job } from "@/lib/data/types";
 
 /** Canonical site origin, e.g. https://www.yollla.uz (no trailing slash).
@@ -107,4 +110,40 @@ export function organizationJsonLd(company: Company): Record<string, unknown> {
 /** Renders a JSON-LD <script>. Strips undefined via JSON.stringify. */
 export function jsonLdScript(data: Record<string, unknown>): string {
   return JSON.stringify(data);
+}
+
+/** A locale-prefixed path like "/uz/jobs/abc" — used to build canonical +
+ * hreflang alternate URLs from a single input. Empty path → the locale root. */
+function localePath(locale: string, path: string): string {
+  const clean = path.replace(/^\/+/, "").replace(/\/+$/, "");
+  return clean ? `/${locale}/${clean}` : `/${locale}`;
+}
+
+/**
+ * `alternates` block for a page that has a URL in every supported locale.
+ *
+ * - `canonical`: the current locale's absolute URL (self-referencing — no
+ *   duplicate-content signal to Google when a page is reachable via a
+ *   trailing slash, a lowercased path, etc.).
+ * - `languages`: uz/ru/en alternates + an `x-default` pointing at the default
+ *   locale (uz) — how Google picks the right locale for each searcher.
+ *
+ * Pass an unprefixed path ("jobs", "companies/abc", "" for root). Every
+ * `generateMetadata` in the app should call this so alternates stay in sync
+ * as new locales are added.
+ */
+export function localeAlternates(
+  locale: string,
+  path: string,
+): NonNullable<Metadata["alternates"]> {
+  const base = siteUrl();
+  const languages: Record<string, string> = {};
+  for (const loc of routing.locales) {
+    languages[loc] = `${base}${localePath(loc, path)}`;
+  }
+  languages["x-default"] = `${base}${localePath(routing.defaultLocale, path)}`;
+  return {
+    canonical: `${base}${localePath(locale, path)}`,
+    languages,
+  };
 }
