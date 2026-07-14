@@ -5,7 +5,7 @@
 // which fires the DB trigger `apply_promotion` (migration 0063) that publishes
 // the draft vacancy and stamps its tier. Idempotency lives in
 // `payment_transactions` (migration 0064) keyed by Multicard's payment uuid;
-// the 'rahmat' provider is enabled by migration 0065.
+// the 'rahmat' provider is enabled by migration 0068.
 //
 // Auth: Multicard sends no JWT — the callback signature is the gate. Two
 // schemes are supported (select via RAHMAT_CALLBACK_SCHEME env, default

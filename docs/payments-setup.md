@@ -7,7 +7,7 @@ publishes the draft vacancy with its tier.
 
 All of the payment **code is in place** — four Supabase edge functions
 (`payme-merchant`, `click-merchant`, `rahmat-invoice`, `rahmat-merchant`), the
-order machinery (migrations `0063`, `0064`, `0065`), and the client checkout
+order machinery (migrations `0063`, `0064`, `0068`), and the client checkout
 flows. **The only thing left is credentials + registration** below. Until the
 secrets are set, every function **fails closed** (Payme returns an auth error,
 Click and Rahmat return "not configured").

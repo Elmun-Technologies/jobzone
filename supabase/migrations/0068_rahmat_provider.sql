@@ -1,4 +1,6 @@
--- 0065_rahmat_provider.sql
+-- 0068_rahmat_provider.sql
+-- (Was 0065 when first pushed; renumbered to avoid colliding with the
+--  0065_security_hardening migration that landed on main from a parallel PR.)
 -- Adds Rahmat (Multicard) as a third payment provider alongside Payme + Click.
 -- Rahmat is a white-label front for Multicard's mesh.multicard.uz acquiring rail;
 -- from Yolla's side it's the same shape as click-merchant/payme-merchant — an
