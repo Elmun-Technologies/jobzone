@@ -587,7 +587,14 @@
     "breadcrumbHome": "Home",
     "breadcrumbJobs": "Jobs",
     "seoBlockTitle": "{category} jobs — what to look at",
-    "seoBlockBody": "Yolla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply."
+    "seoBlockBody": "Yolla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply.",
+    "quickFactsLabel": "At a glance",
+    "factVacancies": "Open vacancies",
+    "factSalaryRange": "Salary range",
+    "factCities": "Cities",
+    "factUpdated": "Updated",
+    "factSalaryNa": "negotiable",
+    "factCitiesNa": "—"
   },
   "jobs": {
     "title": "Jobs",

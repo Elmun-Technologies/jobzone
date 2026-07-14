@@ -587,7 +587,14 @@
     "breadcrumbHome": "Bosh sahifa",
     "breadcrumbJobs": "Ishlar",
     "seoBlockTitle": "{category} bo'yicha ish — nima muhim",
-    "seoBlockBody": "Yolla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling."
+    "seoBlockBody": "Yolla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling.",
+    "quickFactsLabel": "Qisqacha faktlar",
+    "factVacancies": "Ochiq vakansiyalar",
+    "factSalaryRange": "Maosh diapazoni",
+    "factCities": "Shaharlar",
+    "factUpdated": "Yangilangan",
+    "factSalaryNa": "kelishiladi",
+    "factCitiesNa": "—"
   },
   "jobs": {
     "title": "Ishlar",
