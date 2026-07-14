@@ -8,6 +8,7 @@ import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
+import { siteUrl } from "@/lib/seo";
 
 import "../globals.css";
 
@@ -40,7 +41,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  // metadataBase resolves every relative canonical/og:url/twitter:image below
+  // it — without it Next warns and drops relative URLs at build time.
   return {
+    metadataBase: new URL(siteUrl()),
     title: { default: t("title"), template: "%s · Yolla" },
     description: t("description"),
   };

@@ -1,9 +1,15 @@
 import type { Company, Job } from "@/lib/data/types";
 
-/** Canonical site origin, e.g. https://jobzone.uz (no trailing slash). */
+/** Canonical site origin, e.g. https://www.yollla.uz (no trailing slash).
+ * Every absolute URL the crawler sees — metadataBase, canonical, og:url,
+ * sitemap entries, robots' Sitemap: line — resolves through this one call, so
+ * a domain change is a single-file swap. Vercel Production/Preview MUST set
+ * NEXT_PUBLIC_SITE_URL for the correct origin; the default is the brand
+ * apex used at launch and is what the sitemap serves when the env is unset. */
 export function siteUrl(): string {
   return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://jobzone.uz"
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+    "https://www.yollla.uz"
   );
 }
 
