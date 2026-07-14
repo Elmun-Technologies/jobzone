@@ -536,6 +536,25 @@
     "exploreCta": "Open the full map",
     "learnMore": "Learn more"
   },
+  "landingPage": {
+    "titleCategory": "{category} jobs in Uzbekistan",
+    "titleCategoryCity": "{category} jobs in {city}",
+    "metaTitleCategory": "{category} jobs — Uzbekistan",
+    "metaTitleCategoryCity": "{category} jobs in {city}",
+    "metaDescriptionCategory": "Open {category} vacancies with salary, schedule, and two-tap apply. Yolla — the trusted job marketplace of Uzbekistan.",
+    "metaDescriptionCategoryCity": "{category} vacancies in {city} — salary, schedule, and apply in two taps. New listings on Yolla every day.",
+    "introCategory": "Today's open {category} vacancies in one feed. Salary, schedule, contract type — all on the card. Apply in two taps, no signup.",
+    "introCategoryCity": "{category} jobs in {city}: nearby vacancies, clear pay, verified employers — on Yolla.",
+    "resultsCount": "{count} vacancies found",
+    "empty": "No open vacancies here yet — new listings will show up soon.",
+    "byCity": "By city",
+    "byCategory": "By category",
+    "seeAll": "All jobs",
+    "breadcrumbHome": "Home",
+    "breadcrumbJobs": "Jobs",
+    "seoBlockTitle": "{category} jobs — what to look at",
+    "seoBlockBody": "Yolla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply."
+  },
   "jobs": {
     "title": "Jobs",
     "searchPlaceholder": "Title or company",

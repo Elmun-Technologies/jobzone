@@ -129,6 +129,44 @@ export function orgJsonLd(): Record<string, unknown> {
   };
 }
 
+/** schema.org BreadcrumbList — Google renders a friendlier URL breadcrumb
+ * in the search result instead of the raw URL when this is present. Each
+ * item's URL must be absolute (metadataBase doesn't apply to JSON-LD). */
+export function breadcrumbJsonLd(
+  items: { name: string; url: string }[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: it.url,
+    })),
+  };
+}
+
+/** schema.org ItemList of JobPosting URLs — the /ish/[category][/city]
+ * landing pages carry this so Google understands they are curated jobs
+ * indexes, not just plain content pages. Absolute URLs only. */
+export function jobsItemListJsonLd(
+  jobs: Job[],
+  locale: string,
+): Record<string, unknown> {
+  const base = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: jobs.map((j, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${base}/${locale}/jobs/${j.id}`,
+      name: j.title,
+    })),
+  };
+}
+
 /** schema.org WebSite with a SearchAction — enables the "Sitelinks
  * search box" rich result and tells Google how our site search is called.
  * `search_term_string` maps into ?q= on /jobs, matching the existing form. */
