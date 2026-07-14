@@ -112,6 +112,45 @@ export function jsonLdScript(data: Record<string, unknown>): string {
   return JSON.stringify(data);
 }
 
+/** schema.org Organization for the Yolla brand — cements the "sameAs"
+ * knowledge graph link once socials are live and gives Google the logo/URL
+ * pair it shows in the search sidebar. Embed once, on the home page. */
+export function orgJsonLd(): Record<string, unknown> {
+  const base = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Yolla",
+    alternateName: ["Yollla", "Yolla.uz", "Yollla.uz"],
+    url: base,
+    logo: `${base}/icon.svg`,
+    description:
+      "O'zbekistondagi ishonchli ish bozori — Yolla. Maosh, jadval, masofa va ikki klikda ariza.",
+  };
+}
+
+/** schema.org WebSite with a SearchAction — enables the "Sitelinks
+ * search box" rich result and tells Google how our site search is called.
+ * `search_term_string` maps into ?q= on /jobs, matching the existing form. */
+export function websiteJsonLd(locale: string): Record<string, unknown> {
+  const base = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    url: base,
+    name: "Yolla",
+    inLanguage: locale,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${base}/${locale}/jobs?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
 /** A locale-prefixed path like "/uz/jobs/abc" — used to build canonical +
  * hreflang alternate URLs from a single input. Empty path → the locale root. */
 function localePath(locale: string, path: string): string {

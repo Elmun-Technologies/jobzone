@@ -8,6 +8,7 @@ import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { ReputationTeaser } from "@/components/landing/reputation-teaser";
 import { JobCard } from "@/components/jobs/job-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
@@ -22,6 +23,7 @@ import {
 } from "@/lib/data/jobs";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+import { orgJsonLd, websiteJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 // Reads per-user bookmarks + the auth-aware header and the live job feed, but
@@ -75,6 +77,12 @@ export default async function HomePage({
 
   return (
     <>
+      {/* Organization + WebSite (with SearchAction) — enables the Sitelinks
+          search box and cements the brand knowledge panel. Rendered once on
+          the home page; the layout adds nothing global to keep this scoped. */}
+      <JsonLd data={orgJsonLd()} />
+      <JsonLd data={websiteJsonLd(locale)} />
+
       {/* Hero */}
       <Container className="py-14 sm:py-20">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
