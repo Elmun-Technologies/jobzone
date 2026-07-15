@@ -4,11 +4,12 @@ import { ActionNote } from "@/components/admin/action-note";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { ModerationForm } from "@/components/admin/moderation-form";
 import { Pagination } from "@/components/admin/pagination";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { SearchInput } from "@/components/admin/search-input";
 import { StatusBadge } from "@/components/admin/status-badge";
-import { EmptyState } from "@/components/ui/states";
 import { getAdminOrders, getAdminProducts } from "@/lib/admin/data/finance";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import type { AdminOrderRow } from "@/lib/admin/types";
 import { setOrderStatus, setProductPrice } from "@/lib/actions/admin/finance";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -43,22 +44,14 @@ export default async function AdminOrdersPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const q = pick(sp.q) ?? "";
-  const page = Math.max(1, Number(pick(sp.page)) || 1);
+  const q = pickParam(sp.q) ?? "";
+  const page = Math.max(1, Number(pickParam(sp.page)) || 1);
 
   const [list, products] = await Promise.all([
     getAdminOrders(q, page),
     getAdminProducts(),
   ]);
-  if (!list || !products) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (!list || !products) return <ReadKeyMissing />;
 
   const columns: Column<AdminOrderRow>[] = [
     {
@@ -123,7 +116,7 @@ export default async function AdminOrdersPage({
         <h1 className="text-foreground text-2xl font-bold">{adminStrings.nav.orders}</h1>
         <SearchInput defaultValue={q} />
       </div>
-      {pick(sp.notice) === "err" ? <ActionNote error={adminStrings.actionFailed} /> : null}
+      {pickParam(sp.notice) === "err" ? <ActionNote error={adminStrings.actionFailed} /> : null}
       <DataTable columns={columns} rows={list.rows} rowKey={(o) => o.id} />
       <Pagination
         pathname="/admin/orders"

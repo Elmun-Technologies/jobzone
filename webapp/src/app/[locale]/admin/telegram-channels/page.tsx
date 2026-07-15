@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 
 import { ActionNote } from "@/components/admin/action-note";
 import { ModerationForm } from "@/components/admin/moderation-form";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { EmptyState } from "@/components/ui/states";
 import { getAdminCategories } from "@/lib/admin/data/categories";
 import { getAdminTelegramChannels } from "@/lib/admin/data/telegram-channels";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import {
   setTelegramChannelActive,
   upsertTelegramChannel,
@@ -33,20 +35,12 @@ export default async function AdminTelegramChannelsPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
   const [channels, categories] = await Promise.all([
     getAdminTelegramChannels(),
     getAdminCategories(),
   ]);
-  if (channels === null || categories === null) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (channels === null || categories === null) return <ReadKeyMissing />;
 
   return (
     <div>
@@ -56,7 +50,7 @@ export default async function AdminTelegramChannelsPage({
         </h1>
       </div>
       <p className="text-muted-foreground mb-5 max-w-2xl text-xs">{s.hint}</p>
-      {pick(sp.notice) === "err" ? (
+      {pickParam(sp.notice) === "err" ? (
         <ActionNote error={adminStrings.actionFailed} />
       ) : null}
 

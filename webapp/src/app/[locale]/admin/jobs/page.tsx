@@ -4,11 +4,12 @@ import { ActionNote } from "@/components/admin/action-note";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { ModerationForm } from "@/components/admin/moderation-form";
 import { Pagination } from "@/components/admin/pagination";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { SearchInput } from "@/components/admin/search-input";
 import { StatusBadge } from "@/components/admin/status-badge";
-import { EmptyState } from "@/components/ui/states";
 import { getAdminJobs } from "@/lib/admin/data/jobs";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import type { AdminJobRow } from "@/lib/admin/types";
 import { setJobBlocked } from "@/lib/actions/admin/moderation";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -44,19 +45,11 @@ export default async function AdminJobsPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const q = pick(sp.q) ?? "";
-  const page = Math.max(1, Number(pick(sp.page)) || 1);
+  const q = pickParam(sp.q) ?? "";
+  const page = Math.max(1, Number(pickParam(sp.page)) || 1);
 
   const list = await getAdminJobs(q, page);
-  if (!list) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (!list) return <ReadKeyMissing />;
 
   const columns: Column<AdminJobRow>[] = [
     {
@@ -122,7 +115,7 @@ export default async function AdminJobsPage({
         </h1>
         <SearchInput defaultValue={q} />
       </div>
-      {pick(sp.notice) === "err" ? (
+      {pickParam(sp.notice) === "err" ? (
         <ActionNote error={adminStrings.actionFailed} />
       ) : null}
       <DataTable columns={columns} rows={list.rows} rowKey={(j) => j.id} />

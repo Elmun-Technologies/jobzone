@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { Pagination } from "@/components/admin/pagination";
-import { EmptyState } from "@/components/ui/states";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { getAdminAudit } from "@/lib/admin/data/audit";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import type { AdminAuditRow } from "@/lib/admin/types";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { formatDate, tashkentClock } from "@/lib/format";
@@ -26,18 +27,10 @@ export default async function AdminAuditPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const page = Math.max(1, Number(pick(sp.page)) || 1);
+  const page = Math.max(1, Number(pickParam(sp.page)) || 1);
 
   const list = await getAdminAudit(page);
-  if (!list) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (!list) return <ReadKeyMissing />;
 
   const columns: Column<AdminAuditRow>[] = [
     {

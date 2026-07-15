@@ -4,11 +4,12 @@ import { ActionNote } from "@/components/admin/action-note";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { ModerationForm } from "@/components/admin/moderation-form";
 import { Pagination } from "@/components/admin/pagination";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { buttonVariants } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/states";
 import { getAdminReviews, type ReviewKind } from "@/lib/admin/data/reviews";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import type { AdminReviewRow } from "@/lib/admin/types";
 import { setReviewHidden } from "@/lib/actions/admin/moderation";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -35,19 +36,11 @@ export default async function AdminReviewsPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const tab: ReviewKind = pick(sp.tab) === "worker" ? "worker" : "company";
-  const page = Math.max(1, Number(pick(sp.page)) || 1);
+  const tab: ReviewKind = pickParam(sp.tab) === "worker" ? "worker" : "company";
+  const page = Math.max(1, Number(pickParam(sp.page)) || 1);
 
   const list = await getAdminReviews(tab, page);
-  if (!list) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (!list) return <ReadKeyMissing />;
 
   const columns: Column<AdminReviewRow>[] = [
     {
@@ -132,7 +125,7 @@ export default async function AdminReviewsPage({
           ))}
         </div>
       </div>
-      {pick(sp.notice) === "err" ? (
+      {pickParam(sp.notice) === "err" ? (
         <ActionNote error={adminStrings.actionFailed} />
       ) : null}
       <DataTable columns={columns} rows={list.rows} rowKey={(r) => r.id} />

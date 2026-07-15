@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
 import { ActionNote } from "@/components/admin/action-note";
-import { EmptyState } from "@/components/ui/states";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { getAdminSiteBanner } from "@/lib/admin/data/settings";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import { setSiteBanner } from "@/lib/actions/admin/settings";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
@@ -29,19 +30,11 @@ export default async function AdminSettingsPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
   const banner = await getAdminSiteBanner();
-  if (!banner) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (!banner) return <ReadKeyMissing />;
 
-  const notice = pick(sp.notice);
+  const notice = pickParam(sp.notice);
 
   return (
     <div className="max-w-2xl">
