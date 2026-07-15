@@ -26,16 +26,16 @@ export async function GET(): Promise<Response> {
   ]);
 
   const out: string[] = [];
-  out.push(`# Yolla — full context`);
+  out.push(`# Yollla — full context`);
   out.push("");
   out.push(
     `> Extended context for LLM systems. The short summary lives at ${base}/llms.txt.`,
   );
   out.push("");
 
-  out.push(`## What Yolla is`);
+  out.push(`## What Yollla is`);
   out.push(
-    `Yolla (yollla.uz) is a mobile-first job marketplace for Uzbekistan, targeting blue-collar and mass-hiring roles that the enbek.kz / apna.co gap and hh.uz / OLX don't fill locally. Two clients share one Supabase backend: a Flutter iOS/Android app and a Next.js web app. The web app is guest-first: a visitor can browse, filter, open, and start applying to any vacancy without an account — authentication is only asked at the final action, and any typed form data is restored after sign-in.`,
+    `Yollla (yollla.uz) is a mobile-first job marketplace for Uzbekistan, targeting blue-collar and mass-hiring roles that the enbek.kz / apna.co gap and hh.uz / OLX don't fill locally. Two clients share one Supabase backend: a Flutter iOS/Android app and a Next.js web app. The web app is guest-first: a visitor can browse, filter, open, and start applying to any vacancy without an account — authentication is only asked at the final action, and any typed form data is restored after sign-in.`,
   );
   out.push("");
   out.push(`**Product invariants** (never violated):`);

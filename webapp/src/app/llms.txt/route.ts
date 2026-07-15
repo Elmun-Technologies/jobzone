@@ -29,18 +29,18 @@ export async function GET(): Promise<Response> {
   ]);
 
   const lines: string[] = [];
-  lines.push(`# Yolla`);
+  lines.push(`# Yollla`);
   lines.push("");
   lines.push(
-    `> Yolla (yollla.uz) — Uzbekistan's mobile-first job marketplace. Blue-collar and mass-hiring focus. Guest-first: browse and even apply without signing up.`,
+    `> Yollla (yollla.uz) — Uzbekistan's mobile-first job marketplace. Blue-collar and mass-hiring focus. Guest-first: browse and even apply without signing up.`,
   );
   lines.push("");
   lines.push(
-    `Yolla connects job seekers and employers across Uzbekistan. Every posting shows the pay, schedule, and contract type up front, and applications go through in two taps. The platform serves ${jobCount.toLocaleString("en")} open vacancies at the moment across ${categories.length} categories and ${cities.length} cities.`,
+    `Yollla connects job seekers and employers across Uzbekistan. Every posting shows the pay, schedule, and contract type up front, and applications go through in two taps. The platform serves ${jobCount.toLocaleString("en")} open vacancies at the moment across ${categories.length} categories and ${cities.length} cities.`,
   );
   lines.push("");
   lines.push(
-    `_UZ_: Yolla — O'zbekistondagi mobil-birinchi ish bozori. Blue-collar va ommaviy ishga yollash uchun. Mehmon rejimida: ro'yxatdan o'tmasdan ham ish topib ariza berish mumkin.`,
+    `_UZ_: Yollla — O'zbekistondagi mobil-birinchi ish bozori. Blue-collar va ommaviy ishga yollash uchun. Mehmon rejimida: ro'yxatdan o'tmasdan ham ish topib ariza berish mumkin.`,
   );
   lines.push("");
 
@@ -56,7 +56,7 @@ export async function GET(): Promise<Response> {
     `- [Jobs map / Xarita](${base}/uz/explore): every open vacancy on a live Yandex/OSM map`,
   );
   lines.push(
-    `- [About / Loyiha haqida](${base}/uz/about): what Yolla is, how it works`,
+    `- [About / Loyiha haqida](${base}/uz/about): what Yollla is, how it works`,
   );
   lines.push(
     `- [Pricing / Narxlar](${base}/uz/pricing): employer listing tiers (first vacancy free)`,
