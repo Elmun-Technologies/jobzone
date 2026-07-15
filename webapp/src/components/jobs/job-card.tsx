@@ -55,9 +55,9 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className={`block rounded-xl border p-4 transition-colors hover:bg-muted/30 ${
+      className={`hover:bg-muted/30 block rounded-xl border p-4 transition-colors ${
         standout
-          ? "border-primary bg-primary/[0.04] shadow-[0_6px_28px_-8px_rgba(199,251,0,0.55)] ring-2 ring-primary/20"
+          ? "border-primary bg-primary/[0.04] ring-primary/20 shadow-[0_6px_28px_-8px_rgba(199,251,0,0.55)] ring-2"
           : "border-border bg-card hover:border-primary/40"
       }`}
     >
@@ -74,7 +74,7 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
             unoptimized
             className={`size-12 shrink-0 rounded-lg object-cover ${
               glow
-                ? "ring-2 ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)]"
+                ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2"
                 : ""
             }`}
           />
@@ -91,8 +91,10 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-foreground truncate font-semibold">
+              <div className="flex items-start gap-2">
+                {/* Wrap to two lines instead of truncating — on a phone the
+                    single-line ellipsis left 4-6 characters of the title. */}
+                <h3 className="text-foreground line-clamp-2 min-w-0 font-semibold">
                   {job.title}
                 </h3>
                 {standout ? (

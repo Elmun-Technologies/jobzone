@@ -174,7 +174,9 @@ export default function JobsMapInner({
     "border-border bg-background/95 text-foreground h-9 rounded-full border px-3 text-sm font-medium shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
-    <div ref={wrapRef} {...handlers} className="relative h-full w-full">
+    // `isolate` keeps Leaflet panes + our z-[1000] controls from stacking
+    // above page-level overlays (mobile menu drawer, dialogs).
+    <div ref={wrapRef} {...handlers} className="relative isolate h-full w-full">
       {useYandex ? (
         <YandexMap
           jobs={shown}

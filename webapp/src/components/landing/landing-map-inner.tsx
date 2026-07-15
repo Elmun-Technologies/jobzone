@@ -93,7 +93,10 @@ export default function LandingMapInner({
       <div
         ref={wrapRef}
         {...handlers}
-        className="relative w-full"
+        // `isolate` traps Leaflet's large internal z-indexes (panes up to
+        // 700, our overlays 500-600) inside the map card so they can't stack
+        // above page-level overlays like the mobile menu drawer (z-60).
+        className="relative isolate w-full"
         style={{ aspectRatio: "16 / 10" }}
       >
         {useYandex ? (

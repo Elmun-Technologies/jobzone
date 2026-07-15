@@ -44,8 +44,12 @@ export async function SiteHeader() {
         <div className="flex items-center gap-2 sm:gap-4">
           <HeaderNav signedIn={!!user} isEmployerAccount={isEmployerAccount} />
 
-          <LocaleSwitcher />
-          <ThemeToggle />
+          {/* Below lg these live in the mobile drawer — the phone/tablet
+              header otherwise overflows and drags the whole page sideways. */}
+          <div className="hidden items-center gap-4 lg:flex">
+            <LocaleSwitcher />
+            <ThemeToggle />
+          </div>
 
           {user ? (
             <>
