@@ -18,19 +18,26 @@ import 'shared/widgets/jz_map/jz_map.dart';
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // The product is online-only: a binary built without Supabase credentials
+  // must never reach users looking like a working app (the repos' offline
+  // seams exist purely as the unit-test substrate). Fail loudly instead of
+  // booting into demo content.
+  if (!Env.hasSupabase) {
+    runApp(const _MissingConfigApp());
+    return;
+  }
+
   // Load date-symbol data for every locale so DateFormat can render month/day
   // names in uz/ru (not just en_US) once Intl.defaultLocale is set to the
   // in-app language (see YollaApp.builder).
   await initializeDateFormatting();
 
-  if (Env.hasSupabase) {
-    await Supabase.initialize(
-      url: Env.supabaseUrl,
-      // Supabase's new publishable key (sb_publishable_…); a legacy anon key
-      // also works here for existing projects.
-      publishableKey: Env.supabaseAnonKey,
-    );
-  }
+  await Supabase.initialize(
+    url: Env.supabaseUrl,
+    // Supabase's new publishable key (sb_publishable_…); a legacy anon key
+    // also works here for existing projects.
+    publishableKey: Env.supabaseAnonKey,
+  );
 
   // Firebase enables FCM push. It throws without native config
   // (google-services.json / GoogleService-Info.plist) — e.g. on web or in dev —
@@ -79,5 +86,57 @@ Future<void> bootstrap() async {
     }, appRunner: () => runApp(appRoot()));
   } else {
     runApp(appRoot());
+  }
+}
+
+/// Shown instead of the app when the build carries no Supabase credentials —
+/// a developer-facing dead end (uz first, like the product), never meant for
+/// store builds. Deliberately l10n-free: it renders before any app scaffolding.
+class _MissingConfigApp extends StatelessWidget {
+  const _MissingConfigApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: const Color(0xFF0A0A0A),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.cloud_off_rounded,
+                  color: Color(0xFFC7FB00),
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Ilova sozlanmagan',
+                  style: TextStyle(
+                    color: Color(0xFFF3F3F1),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Supabase kalitlarisiz qurilgan build.\n'
+                  'This build was compiled without SUPABASE_URL / '
+                  'SUPABASE_ANON_KEY dart-defines.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: const Color(0xFFF3F3F1).withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

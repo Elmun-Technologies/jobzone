@@ -47,10 +47,11 @@ These are user-mandated. Breaking one is a bug even if tests pass.
 3. **Posting is automatically visible everywhere.** An employer posts a vacancy
    → it appears in BOTH apps under its category immediately, via the shared
    **`job_feed`** view. No manual publish/reindex step, ever.
-4. **Everything runs offline.** With no Supabase env, all clients boot fully on
-   mock data (`Env.hasSupabase` / `hasSupabase()` gate every live call; errors
-   degrade gracefully). **Never break the offline path** — it's the demo and the
-   test substrate.
+4. **The product is online-only — no demo data may ever render.** All content
+   comes from the live backend. Web: every `!hasSupabase()` branch returns
+   empty/null. Mobile: `bootstrap()` fails fast into a "misconfigured build"
+   screen without Supabase env; the repos' `_live ? supabase : mock` seams
+   are the **unit-test substrate only** and unreachable in a booted app.
 5. **Clients can never grant themselves privileges.** All privilege escalation
    is blocked at the database layer (see §7 Security).
 
@@ -69,25 +70,22 @@ These are user-mandated. Breaking one is a bug even if tests pass.
 | Supabase CLI | latest | DB migrations, edge functions (optional) |
 | Deno | latest | Edit/run edge functions (optional) |
 
-You do **not** need a backend to run either app — both boot on mock data.
+The apps are online-only: without Supabase credentials the web app renders
+empty states and the mobile app boots to a "misconfigured build" screen.
+Point them at a backend (below) to see content.
 
 ### 3.2 Run the mobile app
 
 ```bash
 flutter pub get
 flutter gen-l10n            # generate AppLocalizations from the .arb files
-flutter run                 # offline/mock mode — no backend needed
+flutter run --dart-define-from-file=env/dev.json   # see below
 ```
 
-To point it at a real backend, copy `env/dev.example.json` → `env/dev.json`,
-fill in the keys, and run:
-
-```bash
-flutter run --dart-define-from-file=env/dev.json
-```
-
-`Env` (`lib/core/config/env.dart`) reads these via `--dart-define`;
-`Env.hasSupabase` flips the whole app from mock to live.
+Copy `env/dev.example.json` → `env/dev.json` and fill in the Supabase keys
+first — `Env` (`lib/core/config/env.dart`) reads them via `--dart-define`, and
+without them a debug build stops at the "misconfigured build" screen (unit
+tests still exercise the repos' offline branch directly).
 
 > **Release/profile builds default to the live demo backend.** In a *debug*
 > build (`flutter run`, `flutter test`) an absent `SUPABASE_URL` keeps the app
@@ -103,7 +101,7 @@ flutter run --dart-define-from-file=env/dev.json
 ```bash
 cd webapp
 pnpm install
-pnpm dev                    # http://localhost:3000 — offline/mock mode
+pnpm dev                    # http://localhost:3000 — empty states without env
 ```
 
 For a real backend, copy `webapp/.env.example` → `webapp/.env.local` and fill
@@ -171,9 +169,9 @@ webapp/tests/   vitest (admin-role, messages-parity, pricing, seo, …)
 - **Roles:** one account = one role (`job_seeker` | `employer`), chosen once at
   registration (`ChooseRolePage`). The router guard enforces it for every auth
   path (email OTP + Google). **No role switching.**
-- **Repositories:** every feature repo is `_live ? supabase : mock`. Mock data
-  in `lib/features/jobs/data/mock_jobs.dart` (+ per-feature seeds) demos the
-  whole product offline.
+- **Repositories:** every feature repo is `_live ? supabase : mock`. The mock
+  branch (`lib/features/jobs/data/mock_jobs.dart` + per-feature seeds) is the
+  unit-test substrate only — `bootstrap()` refuses to boot without Supabase env.
 - **Jobs/search data source:** the **`job_feed` Postgres view** powers home,
   categories and search. `SearchRepository._applyFilters` builds one filter
   chain shared by `search()` and the HEAD-only `count()` behind the live

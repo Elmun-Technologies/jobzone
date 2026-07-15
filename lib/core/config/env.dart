@@ -10,9 +10,10 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 ///      iOS↔Android split: a shipped build that was compiled without the
 ///      dart-defines (e.g. a bare Xcode iOS build) now behaves like Android and
 ///      web instead of silently dropping into offline/mock mode;
-///   3. otherwise (debug — `flutter run`, `flutter test`, CI) → empty, i.e.
-///      offline/mock mode. This keeps the offline demo + test substrate intact
-///      (product invariant: everything runs offline with no backend).
+///   3. otherwise (debug — `flutter run`, `flutter test`, CI) → empty. Unit
+///      tests drive the repos' offline branch through this; a booted app never
+///      gets that far — `bootstrap()` fails fast into a "misconfigured build"
+///      screen (the product is online-only, no demo content may ever render).
 ///
 /// The fallback values are the same client-safe, RLS-protected **publishable**
 /// key the web demo and the Android APK already ship in their bundles — nothing
