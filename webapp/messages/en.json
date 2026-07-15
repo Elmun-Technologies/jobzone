@@ -64,6 +64,7 @@
     "haveAccount": "Already have an account?",
     "errInvalid": "Invalid email or password",
     "errOauthCallback": "Google sign-in didn't complete. Please try again; if it keeps happening, the site's sign-in settings may be misconfigured.",
+    "confirmEmailNotice": "We've sent a confirmation link to your email. Open it, then sign in here.",
     "errInUse": "This email is already registered",
     "errWeak": "Password must be at least 6 characters",
     "errUnknown": "Something went wrong",

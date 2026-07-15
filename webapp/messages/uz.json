@@ -64,6 +64,7 @@
     "haveAccount": "Hisobingiz bormi?",
     "errInvalid": "Email yoki parol noto'g'ri",
     "errOauthCallback": "Google orqali kirish yakunlanmadi. Qaytadan urinib ko'ring; xato takrorlansa, saytning kirish sozlamalarida muammo bo'lishi mumkin.",
+    "confirmEmailNotice": "Emailingizga tasdiqlash havolasi yubordik. Havolani oching, so'ng shu yerda tizimga kiring.",
     "errInUse": "Bu email allaqachon ro'yxatdan o'tgan",
     "errWeak": "Parol kamida 6 ta belgidan iborat bo'lsin",
     "errUnknown": "Xatolik yuz berdi",
