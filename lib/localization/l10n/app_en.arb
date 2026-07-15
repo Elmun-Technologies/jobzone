@@ -900,6 +900,8 @@
   "notifTitleApplicationUpdate": "Application update",
   "notifTitleMessage": "New message",
   "notifTitleJobMatch": "New job match",
+  "notifBodyApplicationUpdate": "Your application status changed to {status}",
+  "@notifBodyApplicationUpdate": {"placeholders": {"status": {"type": "String"}}},
   "emailHint": "example@gmail.com",
   "promoStartName": "Start",
   "promoStartDesc": "Standard free listing",

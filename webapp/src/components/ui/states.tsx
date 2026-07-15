@@ -4,14 +4,21 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /** Centered spinner for loading states. */
-export function Spinner({ className }: { className?: string }) {
+export function Spinner({
+  className,
+  label = "Loading",
+}: {
+  className?: string;
+  /** Screen-reader-only text — pass a localized string from the caller. */
+  label?: string;
+}) {
   return (
     <div className="flex w-full items-center justify-center py-16">
       <Loader2
         className={cn("text-muted-foreground size-6 animate-spin", className)}
         aria-hidden
       />
-      <span className="sr-only">Loading</span>
+      <span className="sr-only">{label}</span>
     </div>
   );
 }
