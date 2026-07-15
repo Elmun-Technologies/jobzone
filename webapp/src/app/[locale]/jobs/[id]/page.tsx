@@ -20,6 +20,7 @@ import {
   salaryText,
   schedulePatternLabel,
 } from "@/lib/format";
+import { usableLogoUrl } from "@/lib/logo";
 import { Link } from "@/i18n/navigation";
 import {
   breadcrumbJsonLd,
@@ -201,20 +202,27 @@ export default async function JobDetailsPage({
         {/* Main column */}
         <div className="lg:col-span-2">
           <div className="flex gap-4">
-            {job.companyLogoUrl ? (
-              <Image
-                src={job.companyLogoUrl}
-                alt={job.companyName}
-                width={64}
-                height={64}
-                unoptimized
-                className="size-16 shrink-0 rounded-xl object-cover"
-              />
-            ) : (
-              <div className="bg-primary text-primary-foreground flex size-16 shrink-0 items-center justify-center rounded-xl text-2xl font-bold">
-                {job.companyName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            {(() => {
+              const src = usableLogoUrl(job.companyLogoUrl);
+              return src ? (
+                <Image
+                  src={src}
+                  alt={job.companyName}
+                  width={64}
+                  height={64}
+                  // Above-the-fold on the detail page — priority hints
+                  // the browser to fetch it in the first batch. Fixed 64px
+                  // slot; one srcset entry is enough.
+                  priority
+                  sizes="64px"
+                  className="size-16 shrink-0 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="bg-primary text-primary-foreground flex size-16 shrink-0 items-center justify-center rounded-xl text-2xl font-bold">
+                  {job.companyName.charAt(0).toUpperCase()}
+                </div>
+              );
+            })()}
             <div className="min-w-0">
               <h1 className="text-foreground text-2xl font-bold">
                 {job.title}
