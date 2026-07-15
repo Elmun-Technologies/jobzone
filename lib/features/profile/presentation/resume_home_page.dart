@@ -37,10 +37,7 @@ class ResumeHomePage extends ConsumerWidget {
                 ),
                 children: [
                   if (loading)
-                    const Padding(
-                      padding: EdgeInsets.only(top: AppSpacing.xxxl),
-                      child: JzLoader(),
-                    )
+                    const TileListSkeleton()
                   else if (resumes.isEmpty)
                     const _EmptyResume()
                   else

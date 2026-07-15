@@ -30,7 +30,7 @@ class JobDetailsPage extends ConsumerWidget {
     final jobAsync = ref.watch(jobByIdProvider(jobId));
     return Scaffold(
       body: jobAsync.when(
-        loading: () => const JzLoader(),
+        loading: () => const DetailPageSkeleton(),
         error: (_, _) => JzErrorState(
           title: l.errorTitle,
           message: l.errUnknown,

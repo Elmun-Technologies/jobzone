@@ -25,7 +25,7 @@ class CompanyDetailsPage extends ConsumerWidget {
     final async = ref.watch(companyByIdProvider(companyId));
     return Scaffold(
       body: async.when(
-        loading: () => const JzLoader(),
+        loading: () => const DetailPageSkeleton(),
         error: (_, _) => JzErrorState(
           title: l.errorTitle,
           message: l.errUnknown,
@@ -421,7 +421,7 @@ class _PeopleTab extends ConsumerWidget {
     final l = context.l10n;
     final async = ref.watch(companyPeopleProvider(companyId));
     return async.when(
-      loading: () => const JzLoader(),
+      loading: () => const TileListSkeleton(),
       error: (_, _) => JzErrorState(
         title: l.errorTitle,
         message: l.errUnknown,
