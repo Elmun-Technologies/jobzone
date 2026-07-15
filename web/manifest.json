@@ -1,11 +1,11 @@
 {
-    "name": "Yolla",
-    "short_name": "Yolla",
+    "name": "Yollla",
+    "short_name": "Yollla",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0A0A0A",
     "theme_color": "#0A0A0A",
-    "description": "Yolla — find your next job.",
+    "description": "Yollla — find your next job.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

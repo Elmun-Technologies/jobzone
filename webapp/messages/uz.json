@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Yolla — O'zbekistondagi ishlar",
-    "description": "Yolla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi."
+    "title": "Yollla — O'zbekistondagi ishlar",
+    "description": "Yollla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi."
   },
   "nav": {
     "home": "Asosiy",
@@ -366,7 +366,7 @@
       "disabilityFriendly": "Nogironlar uchun qulay",
       "saveDraft": "Qoralamaga saqlash",
       "screening": "Saralash uchun savollar",
-      "screeningSub": "Nomzod Yolla orqali ariza yuborishdan oldin javob beradi.",
+      "screeningSub": "Nomzod Yollla orqali ariza yuborishdan oldin javob beradi.",
       "optional": "(ixtiyoriy)",
       "questionHint": "Savolingizni kiriting",
       "qtype": {
@@ -538,8 +538,8 @@
   },
   "homeFaq": {
     "heading": "Ko'p beriladigan savollar",
-    "q1": "Yolla nima?",
-    "a1": "Yolla — O'zbekistondagi mobil-birinchi ish bozori: har bir vakansiyada maosh, jadval va rasmiy shakl ochiq ko'rsatilgan, ariza ikki klikda topshiriladi. Blue-collar va ommaviy ishga yollashga qaratilgan.",
+    "q1": "Yollla nima?",
+    "a1": "Yollla — O'zbekistondagi mobil-birinchi ish bozori: har bir vakansiyada maosh, jadval va rasmiy shakl ochiq ko'rsatilgan, ariza ikki klikda topshiriladi. Blue-collar va ommaviy ishga yollashga qaratilgan.",
     "q2": "Ish topish uchun ro'yxatdan o'tish shartmi?",
     "a2": "Yo'q. Mehmon rejimida vakansiyalarni ko'rish, filtrlash va hatto ariza berishni boshlashingiz mumkin. Faqat oxirgi tugmada tizimga kirish so'raladi va yozgan matnlaringiz saqlanadi.",
     "q3": "Ariza qanday beriladi?",
@@ -550,7 +550,7 @@
     "a5": "Har bir e'londa maosh so'mda («2 500 000 – 4 000 000 so'm» kabi) va soliqdan oldingi/keyingi (gross/net) belgisi bilan ko'rinadi. Ba'zi ish beruvchilar «kelishiladi» deb qoldiradi — bunday hollarda maosh intervyuda muhokama qilinadi.",
     "q6": "Rezyume qanday yarataman?",
     "a6": "«Rezyume yaratish» tugmasi orqali qadam-baqadam forma to'ldirasiz: shaxsiy ma'lumot, tajriba, ta'lim, aloqa. AI yordamchi «O'zim haqimda» qismini avtomatik loyihalab beradi. Rezyume darhol saqlanadi va har bir arizada ish beruvchiga yuboriladi.",
-    "q7": "Yolla ish izlovchilar uchun bepulmi?",
+    "q7": "Yollla ish izlovchilar uchun bepulmi?",
     "a7": "Ha, ish izlovchilar uchun to'liq bepul: qidirish, ariza berish, obuna qilish, xabar yozish — hammasi bepul. Ish beruvchilar uchun birinchi vakansiya ham bepul; keyingi e'lonlar tanlangan tarifga qarab to'lanadi (Standart / Brend / Premium)."
   },
   "landingFaq": {
@@ -575,10 +575,10 @@
     "titleCategoryCity": "{city}da {category} ishi",
     "metaTitleCategory": "{category} ishi — O'zbekiston",
     "metaTitleCategoryCity": "{city}da {category} ishi",
-    "metaDescriptionCategory": "Bugun {category} sohasidagi ochiq vakansiyalar — maosh, jadval va tez ariza bilan. Yolla — O'zbekistondagi ishonchli ish bozori.",
-    "metaDescriptionCategoryCity": "{city} shahridagi {category} vakansiyalari — maosh, jadval va tez ariza. Yolla'da yangi e'lonlar har kuni.",
+    "metaDescriptionCategory": "Bugun {category} sohasidagi ochiq vakansiyalar — maosh, jadval va tez ariza bilan. Yollla — O'zbekistondagi ishonchli ish bozori.",
+    "metaDescriptionCategoryCity": "{city} shahridagi {category} vakansiyalari — maosh, jadval va tez ariza. Yollla'da yangi e'lonlar har kuni.",
     "introCategory": "Bugun {category} sohasidagi ochiq vakansiyalarni ko'ring. Maosh, jadval, formalizatsiya — hammasi kartaning ustida. Ariza — ikki klikda, ro'yxatdan o'tmasdan.",
-    "introCategoryCity": "{city}dagi {category} ishlariga tez ariza. Yaqin ishlar, aniq maosh, ishonchli ish beruvchilar — Yolla'da.",
+    "introCategoryCity": "{city}dagi {category} ishlariga tez ariza. Yaqin ishlar, aniq maosh, ishonchli ish beruvchilar — Yollla'da.",
     "resultsCount": "{count} ta vakansiya topildi",
     "empty": "Hozircha bu bo'yicha ochiq vakansiya yo'q — tez orada shu yerda paydo bo'ladi.",
     "byCity": "Shaharlar bo'yicha",
@@ -587,7 +587,7 @@
     "breadcrumbHome": "Bosh sahifa",
     "breadcrumbJobs": "Ishlar",
     "seoBlockTitle": "{category} bo'yicha ish — nima muhim",
-    "seoBlockBody": "Yolla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling.",
+    "seoBlockBody": "Yollla'da {category} sohasidagi ochiq vakansiyalar to'g'ridan-to'g'ri ish beruvchidan. Har bir e'lon ustida real maosh, jadval, formalizatsiya (rasmiy/GPH), tajriba talabi va aloqa aniq ko'rsatilgan. Sizga eng yaqin joyni tanlash uchun xaritadan foydalaning; kompaniya reytingiga qarab yakuniy qarorni qabul qiling.",
     "quickFactsLabel": "Qisqacha faktlar",
     "factVacancies": "Ochiq vakansiyalar",
     "factSalaryRange": "Maosh diapazoni",
@@ -1013,7 +1013,7 @@
   "pricing": {
     "title": "Narxlar",
     "heroTitle": "Ishga eng tez va arzon yo'l",
-    "heroSubtitle": "Minglab ishchi Yolla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
+    "heroSubtitle": "Minglab ishchi Yollla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
     "tiers": {
       "heading": "Har bir e'lon — o'z ko'rinishi bilan",
       "sub": "Birinchi e'lon bepul. Keyingilari uchun ko'rinishni tanlang — qancha ko'rinsa, shuncha ko'p nomzod.",

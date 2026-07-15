@@ -128,7 +128,7 @@ const MOCK_USERS: AdminUserRow[] = [
   { id: "u-03", fullName: "Rustam Qodirov", phone: "+998901234503", email: null, city: "Namangan", role: "employer", createdAt: "2026-06-02T08:15:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: false },
   { id: "u-04", fullName: "Malika Tosheva", phone: null, email: "malika@example.uz", city: "Toshkent", role: "job_seeker", createdAt: "2026-06-10T16:45:00Z", suspendedAt: "2026-06-25T11:00:00Z", workerVerifiedAt: null, isAdmin: false },
   { id: "u-05", fullName: "Jasur Bekmurodov", phone: "+998901234505", email: null, city: "Buxoro", role: "employer", createdAt: "2026-06-18T14:20:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: false },
-  { id: "u-06", fullName: "Nodira Aliyeva", phone: "+998901234506", email: "nodira@yolla.uz", city: "Toshkent", role: "job_seeker", createdAt: "2026-04-01T09:00:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: true },
+  { id: "u-06", fullName: "Nodira Aliyeva", phone: "+998901234506", email: "nodira@yollla.uz", city: "Toshkent", role: "job_seeker", createdAt: "2026-04-01T09:00:00Z", suspendedAt: null, workerVerifiedAt: null, isAdmin: true },
 ];
 
 const MOCK_COMPANIES: AdminCompanyRow[] = [
@@ -176,8 +176,8 @@ const MOCK_TELEGRAM_CHANNELS: AdminTelegramChannelRow[] = [
     categoryId: "cat-02",
     categoryName: "Haydovchilar",
     region: "Toshkent shahri",
-    chatId: "@yolla_haydovchilar_toshkent",
-    title: "Yolla — Haydovchilar (Toshkent)",
+    chatId: "@yollla_haydovchilar_toshkent",
+    title: "Yollla — Haydovchilar (Toshkent)",
     isActive: true,
     createdAt: "2026-06-15T09:00:00Z",
   },
@@ -186,8 +186,8 @@ const MOCK_TELEGRAM_CHANNELS: AdminTelegramChannelRow[] = [
     categoryId: "cat-01",
     categoryName: "Qurilish",
     region: null,
-    chatId: "@yolla_qurilish",
-    title: "Yolla — Qurilish (barcha viloyatlar)",
+    chatId: "@yollla_qurilish",
+    title: "Yollla — Qurilish (barcha viloyatlar)",
     isActive: true,
     createdAt: "2026-06-10T09:00:00Z",
   },

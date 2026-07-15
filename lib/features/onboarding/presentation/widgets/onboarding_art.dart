@@ -110,7 +110,7 @@ class _JobsScene extends StatelessWidget {
                     initial: 'O',
                     accent: context.colors.primary,
                     title: l.jobTitleChef,
-                    subtitle: 'Yolla Cafe · ${l.cityTashkent}',
+                    subtitle: 'Yollla Cafe · ${l.cityTashkent}',
                     pay: '4 500 000',
                   ),
                 ),

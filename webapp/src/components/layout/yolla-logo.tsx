@@ -19,7 +19,7 @@ export function YollaLogo({
         viewBox="0 0 44 48"
         className="size-7 shrink-0"
         role="img"
-        aria-label="Yolla"
+        aria-label="Yollla"
       >
         <path
           className="fill-[#0a0a0a] dark:fill-[#c7fb00]"
@@ -42,7 +42,7 @@ export function YollaLogo({
       </svg>
       {withWordmark ? (
         <span className="text-foreground text-2xl leading-none font-black tracking-[-0.05em]">
-          yolla
+          yollla
         </span>
       ) : null}
     </span>

@@ -253,7 +253,7 @@ class _ContactTab extends StatelessWidget {
     // Real channels only — the old list carried a US phone number and fake
     // social handles. Extend as official accounts are registered.
     final items = [
-      (Icons.headset_mic_rounded, l.customerService, 'support@yolla.uz'),
+      (Icons.headset_mic_rounded, l.customerService, 'support@yollla.uz'),
       (
         Icons.language_rounded,
         l.websiteLabel,

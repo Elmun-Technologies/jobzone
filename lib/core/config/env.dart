@@ -69,7 +69,7 @@ class Env {
   /// the landing page differs by build; the app polls the order itself.
   static const String webBaseUrl = String.fromEnvironment(
     'WEB_BASE_URL',
-    defaultValue: 'https://yolla.uz',
+    defaultValue: 'https://yollla.uz',
   );
 
   /// Direct pay-per-listing (Payme/Click) merchant ids. PUBLIC — they only

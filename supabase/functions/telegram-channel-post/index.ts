@@ -10,7 +10,7 @@
 //
 // Required secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN,
 //                    EDGE_SHARED_SECRET
-// Optional: WEBAPP_URL (default https://yolla.uz) — base URL for the job link
+// Optional: WEBAPP_URL (default https://yollla.uz) — base URL for the job link
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
     return json({ ok: true, skipped: "no channel mapped" });
   }
 
-  const webappUrl = Deno.env.get("WEBAPP_URL") ?? "https://yolla.uz";
+  const webappUrl = Deno.env.get("WEBAPP_URL") ?? "https://yollla.uz";
   const jobUrl = `${webappUrl}/uz/jobs/${job.id}`;
   const salary = salaryText(job.salary_min, job.salary_max, job.currency ?? "UZS");
   const location = [job.region, job.district ?? job.city].filter(Boolean).join(", ");

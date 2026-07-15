@@ -125,12 +125,12 @@ export function orgJsonLd(): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Yolla",
-    alternateName: ["Yollla", "Yolla.uz", "Yollla.uz"],
+    name: "Yollla",
+    alternateName: ["Yolla", "Yolla.uz", "Yollla.uz"],
     url: base,
     logo: `${base}/icon.svg`,
     description:
-      "O'zbekistondagi ishonchli ish bozori — Yolla. Maosh, jadval, masofa va ikki klikda ariza.",
+      "O'zbekistondagi ishonchli ish bozori — Yollla. Maosh, jadval, masofa va ikki klikda ariza.",
     // Uzbekistan + every oblast + Republic of Karakalpakstan + Tashkent city.
     areaServed: [
       { "@type": "Country", name: "Uzbekistan" },
@@ -202,7 +202,7 @@ export function collectionPageJsonLd(input: {
     dateModified: input.dateModified,
     isPartOf: {
       "@type": "WebSite",
-      name: "Yolla",
+      name: "Yollla",
       url: siteUrl(),
     },
     mainEntity: {
@@ -281,7 +281,7 @@ export function websiteJsonLd(locale: string): Record<string, unknown> {
     "@context": "https://schema.org",
     "@type": "WebSite",
     url: base,
-    name: "Yolla",
+    name: "Yollla",
     inLanguage: locale,
     potentialAction: {
       "@type": "SearchAction",

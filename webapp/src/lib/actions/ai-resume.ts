@@ -81,7 +81,7 @@ export async function generateResumeSummary(input: {
   const model = process.env.GLM_MODEL ?? "glm-4.5-flash";
   const lang = LANG[locale] ?? LANG.uz;
 
-  const system = `You are an expert career coach writing an "About me" TEMPLATE for a candidate on Yolla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write in ${lang}, first person, warm but professional.
+  const system = `You are an expert career coach writing an "About me" TEMPLATE for a candidate on Yollla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write in ${lang}, first person, warm but professional.
 
 This is a FILL-IN-THE-BLANK template the candidate personalizes with their REAL facts — that's the whole point (it prevents fake AI résumés). So:
 - Write 2–4 natural sentences, but leave 3–6 of the SPECIFIC personal details as [bracketed placeholders] written in ${lang} — e.g. the years of experience, the key skills, a notable achievement, a previous workplace. Use square brackets [ ].

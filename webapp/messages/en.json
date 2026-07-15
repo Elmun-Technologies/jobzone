@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Yolla — Jobs in Uzbekistan",
-    "description": "Yolla — the trusted platform to find work and hire across Uzbekistan."
+    "title": "Yollla — Jobs in Uzbekistan",
+    "description": "Yollla — the trusted platform to find work and hire across Uzbekistan."
   },
   "nav": {
     "home": "Home",
@@ -366,7 +366,7 @@
       "disabilityFriendly": "Disability-friendly",
       "saveDraft": "Save draft",
       "screening": "Screening questions",
-      "screeningSub": "The candidate answers these before applying through Yolla.",
+      "screeningSub": "The candidate answers these before applying through Yollla.",
       "optional": "(optional)",
       "questionHint": "Enter your question",
       "qtype": {
@@ -538,8 +538,8 @@
   },
   "homeFaq": {
     "heading": "Frequently asked questions",
-    "q1": "What is Yolla?",
-    "a1": "Yolla is a mobile-first job marketplace for Uzbekistan. Every posting shows salary, schedule, and contract type up front, and applications go through in two taps. The focus is blue-collar and mass-hiring roles.",
+    "q1": "What is Yollla?",
+    "a1": "Yollla is a mobile-first job marketplace for Uzbekistan. Every posting shows salary, schedule, and contract type up front, and applications go through in two taps. The focus is blue-collar and mass-hiring roles.",
     "q2": "Do I need to sign up to search for jobs?",
     "a2": "No. As a guest you can browse listings, apply filters, and even start filling in an application. Sign-in is only requested at the final click, and anything you typed is restored afterwards.",
     "q3": "How do I apply?",
@@ -550,7 +550,7 @@
     "a5": "Every listing shows the salary in Uzbek som (\"2 500 000 – 4 000 000 so'm\") with a gross / net tag. Where an employer chose \"negotiable\", the number is discussed at the interview.",
     "q6": "How do I create a résumé?",
     "a6": "Use \"Create résumé\" — a step-by-step form covering personal details, experience, education, and contacts. An AI assistant can draft the \"About me\" section. The résumé is saved and attached to every application.",
-    "q7": "Is Yolla free for job seekers?",
+    "q7": "Is Yollla free for job seekers?",
     "a7": "Yes — search, applications, saved searches, and messaging are all free for seekers. Employers also get their first vacancy free; further listings pick a per-listing tier (Standard / Brand / Premium)."
   },
   "landingFaq": {
@@ -575,10 +575,10 @@
     "titleCategoryCity": "{category} jobs in {city}",
     "metaTitleCategory": "{category} jobs — Uzbekistan",
     "metaTitleCategoryCity": "{category} jobs in {city}",
-    "metaDescriptionCategory": "Open {category} vacancies with salary, schedule, and two-tap apply. Yolla — the trusted job marketplace of Uzbekistan.",
-    "metaDescriptionCategoryCity": "{category} vacancies in {city} — salary, schedule, and apply in two taps. New listings on Yolla every day.",
+    "metaDescriptionCategory": "Open {category} vacancies with salary, schedule, and two-tap apply. Yollla — the trusted job marketplace of Uzbekistan.",
+    "metaDescriptionCategoryCity": "{category} vacancies in {city} — salary, schedule, and apply in two taps. New listings on Yollla every day.",
     "introCategory": "Today's open {category} vacancies in one feed. Salary, schedule, contract type — all on the card. Apply in two taps, no signup.",
-    "introCategoryCity": "{category} jobs in {city}: nearby vacancies, clear pay, verified employers — on Yolla.",
+    "introCategoryCity": "{category} jobs in {city}: nearby vacancies, clear pay, verified employers — on Yollla.",
     "resultsCount": "{count} vacancies found",
     "empty": "No open vacancies here yet — new listings will show up soon.",
     "byCity": "By city",
@@ -587,7 +587,7 @@
     "breadcrumbHome": "Home",
     "breadcrumbJobs": "Jobs",
     "seoBlockTitle": "{category} jobs — what to look at",
-    "seoBlockBody": "Yolla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply.",
+    "seoBlockBody": "Yollla lists {category} openings straight from employers. Every card carries real salary, schedule, contract type (official / GPH), experience requirement, and contact info. Use the map to pick a spot closest to you and check the company rating before you apply.",
     "quickFactsLabel": "At a glance",
     "factVacancies": "Open vacancies",
     "factSalaryRange": "Salary range",
@@ -1013,7 +1013,7 @@
   "pricing": {
     "title": "Pricing",
     "heroTitle": "The fastest, cheapest way to hire",
-    "heroSubtitle": "Thousands of workers search on Yolla. Your first vacancy is free.",
+    "heroSubtitle": "Thousands of workers search on Yollla. Your first vacancy is free.",
     "tiers": {
       "heading": "Every vacancy — with its own visibility",
       "sub": "Your first vacancy is free. For the rest, choose the visibility — the more it stands out, the more candidates.",

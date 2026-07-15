@@ -141,7 +141,7 @@ export async function generateJobContent(input: {
   const model = process.env.GLM_MODEL ?? "glm-4.5-flash";
   const lang = LANG[locale] ?? LANG.uz;
 
-  const system = `You are an expert HR copywriter for Yolla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write a complete, professional, and specific job posting in ${lang}.
+  const system = `You are an expert HR copywriter for Yollla, a blue-collar / mass-hiring job marketplace in Uzbekistan. Write a complete, professional, and specific job posting in ${lang}.
 
 Rules:
 - Be concrete and realistic for THIS exact role — no filler, no vague "responsible employee" clichés. Mention real day-to-day tasks, tools, and expectations a candidate for this job would actually see.

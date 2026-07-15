@@ -170,7 +170,7 @@ export async function jobCreative(
               color: INK,
             }}
           >
-            yolla
+            yollla
           </div>
           {/* Company name as a soft "kicker" chip — reads as a label, not body
               text, so it doesn't compete with the job title below it. */}
