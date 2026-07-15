@@ -1,6 +1,5 @@
 import "server-only";
 
-import { mockAdminUsers } from "../mock";
 import type { AdminList, AdminUserRow } from "../types";
 import { adminReadClient, pageRange, toPage } from "./shared";
 
@@ -14,7 +13,6 @@ export async function getAdminUsers(
   page: number,
 ): Promise<AdminList<AdminUserRow>> {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminUsers(q);
   if (!client) return null;
   try {
     const { from, to } = pageRange(page);

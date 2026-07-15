@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 
 import { getOpenJobs } from "./jobs";
 import { toCompany, toReview } from "./mappers";
-import { mockCompanies, mockJobs } from "./mock";
 import { hasSupabase } from "./supabase-env";
 import type { Company, CompanyReview, CompanyWithJobs, Job } from "./types";
 
@@ -16,12 +15,7 @@ export type CompanyRatings = Record<string, { avg: number; count: number }>;
  * map's "by rating" facet. Anonymous-safe; degrades to `{}` on error.
  */
 export async function getCompanyRatings(): Promise<CompanyRatings> {
-  if (!hasSupabase()) {
-    return {
-      "c-acme": { avg: 4.6, count: 12 },
-      "c-nimbus": { avg: 3.2, count: 5 },
-    };
-  }
+  if (!hasSupabase()) return {};
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -75,21 +69,9 @@ export async function getCompanies(opts?: {
   limit?: number;
 }): Promise<CompanyWithJobs[]> {
   const limit = opts?.limit ?? 48;
-  const q = opts?.q?.trim().toLowerCase();
 
-  if (!hasSupabase()) {
-    return mockCompanies
-      .filter((c) => !q || c.name.toLowerCase().includes(q))
-      .map((c) => ({
-        ...c,
-        openJobs: mockJobs.filter((j) => j.companyId === c.id).length,
-      }))
-      .sort(
-        (a, b) =>
-          Number(b.isVerified) - Number(a.isVerified) ||
-          a.name.localeCompare(b.name),
-      );
-  }
+  // Online-only: without a configured backend there is nothing to show.
+  if (!hasSupabase()) return [];
 
   try {
     const supabase = await createClient();
@@ -128,7 +110,7 @@ export async function getCompanies(opts?: {
 
 /** A company profile by id, or null. */
 export async function getCompanyById(id: string): Promise<Company | null> {
-  if (!hasSupabase()) return mockCompanies.find((c) => c.id === id) ?? null;
+  if (!hasSupabase()) return null;
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -146,10 +128,7 @@ export async function getCompanyById(id: string): Promise<Company | null> {
 
 /** Open jobs posted by a company. */
 export async function getCompanyJobs(companyId: string): Promise<Job[]> {
-  if (!hasSupabase()) {
-    const { mockJobs } = await import("./mock");
-    return mockJobs.filter((j) => j.companyId === companyId);
-  }
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -190,7 +169,7 @@ export async function getCompanyReviews(
 
 /** All company ids (for the sitemap). */
 export async function getAllCompanyIds(limit = 1000): Promise<string[]> {
-  if (!hasSupabase()) return mockCompanies.map((c) => c.id);
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase

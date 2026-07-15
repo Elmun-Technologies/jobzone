@@ -3,7 +3,6 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { routing } from "@/i18n/routing";
 import { isAdminUser } from "@/lib/auth/admin-role";
-import { hasSupabase } from "@/lib/data/supabase-env";
 import { updateSession } from "@/lib/supabase/middleware";
 import { siteUrl } from "@/lib/seo";
 
@@ -52,10 +51,6 @@ export async function proxy(request: NextRequest) {
 
   const { response, user } = await updateSession(request, intlResponse);
   const path = request.nextUrl.pathname;
-
-  // Without Supabase env the whole app (admin included) runs on mock data, so
-  // /admin stays reachable for the offline demo instead of bouncing to sign-in.
-  if (ADMIN.test(path) && !hasSupabase()) return response;
 
   if (!user && PROTECTED.test(path) && !GUEST_OK.test(path)) {
     const url = new URL(`/${localeOf(path)}/sign-in`, request.url);

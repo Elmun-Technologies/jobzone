@@ -1,6 +1,5 @@
 import "server-only";
 
-import { mockBroadcastCounts } from "../mock";
 import { adminReadClient } from "./shared";
 
 /** Audience sizes shown on the broadcast page so the admin sees the reach
@@ -14,7 +13,6 @@ export interface BroadcastCounts {
 
 export async function getBroadcastCounts(): Promise<BroadcastCounts | null> {
   const client = await adminReadClient();
-  if (client === "mock") return mockBroadcastCounts();
   if (!client) return null;
   try {
     const base = () =>

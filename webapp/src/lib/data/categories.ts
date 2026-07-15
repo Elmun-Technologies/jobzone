@@ -3,7 +3,6 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 import { toCategory } from "./mappers";
-import { mockCategories, mockJobs } from "./mock";
 import { hasSupabase } from "./supabase-env";
 import type { JobCategory } from "./types";
 
@@ -18,9 +17,8 @@ export interface CategoryWithCount extends JobCategory {
 export async function getCategoryBySlug(
   slug: string,
 ): Promise<JobCategory | null> {
-  if (!hasSupabase()) {
-    return mockCategories.find((c) => c.slug === slug) ?? null;
-  }
+  // Online-only: without a configured backend there is nothing to show.
+  if (!hasSupabase()) return null;
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -39,7 +37,7 @@ export async function getCategoryBySlug(
 
 /** Active job categories. */
 export async function getCategories(): Promise<JobCategory[]> {
-  if (!hasSupabase()) return mockCategories;
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -62,14 +60,7 @@ export async function getCategories(): Promise<JobCategory[]> {
  * the category set is small and bounded).
  */
 export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
-  if (!hasSupabase()) {
-    return mockCategories
-      .map((c) => ({
-        ...c,
-        count: mockJobs.filter((j) => j.categoryName === c.name).length,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase

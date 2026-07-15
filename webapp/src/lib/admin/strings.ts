@@ -7,9 +7,9 @@
 export const adminStrings = {
   brand: "Yollla Admin",
   panelTitle: "Boshqaruv paneli",
-  demoMode: "Demo rejim — Supabase sozlanmagan, ma'lumotlar namunaviy",
   loadError: "Ma'lumotlarni yuklab bo'lmadi",
-  loadErrorHint: "Keyinroq qayta urinib ko'ring yoki konsol loglarini tekshiring.",
+  loadErrorHint:
+    "Keyinroq qayta urinib ko'ring yoki konsol loglarini tekshiring.",
   retry: "Qayta urinish",
   readKeyMissing: "O'qish kaliti sozlanmagan",
   readKeyMissingHint:
