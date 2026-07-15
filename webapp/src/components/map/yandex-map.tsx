@@ -7,6 +7,7 @@ import type { LatLng } from "@/lib/geo";
 import { salaryPill } from "@/lib/format";
 import { loadYmaps, type YmapsMap } from "@/lib/yandex-maps-loader";
 
+import type { PinHoverApi } from "./job-pin-card";
 import {
   pinLabel,
   pinShadow,
@@ -24,9 +25,11 @@ type Located = Job & { lat: number; lng: number };
  * Yandex tiles. Only mounted when a JS-API key is present; any load/init
  * failure calls `onError` so the parent falls back to the OSM map.
  *
- * Pins carry `data-job-id`, and hover (preview card) + click (job page) are
- * handled by the parent's DOM delegation (see job-pin-card.tsx) — no Yandex
- * balloons, so the experience is identical to the Leaflet fallback.
+ * Hover (preview card) + click (job page) are wired through each placemark's
+ * own ymaps events into the parent's shared hover API — Yandex captures
+ * pointer events in its own pane, so DOM delegation (which the Leaflet
+ * fallback uses) never fires here. No Yandex balloons: the card is the same
+ * React component on both engines.
  */
 export function YandexMap({
   jobs,
@@ -35,6 +38,8 @@ export function YandexMap({
   youAreHere,
   negotiable,
   wheelZoom = true,
+  onPinClick,
+  hoverApi,
   onError,
 }: {
   jobs: Located[];
@@ -46,16 +51,25 @@ export function YandexMap({
   /** When false (embedded landing map), the mouse wheel scrolls the page
    * instead of zooming — no scroll-zoom trap. */
   wheelZoom?: boolean;
+  /** Navigate to a job (Yandex routes clicks through its own event pane, so
+   * the parent's DOM click delegation never sees them). */
+  onPinClick: (jobId: string) => void;
+  /** Drive the shared hover card from the placemarks' ymaps events. */
+  hoverApi: PinHoverApi;
   onError: () => void;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<YmapsMap | null>(null);
-  // Keep the latest onError without making it a marker-effect dependency
-  // (the parent passes a fresh closure each render).
+  // Keep the latest callbacks without making them marker-effect dependencies
+  // (the parent passes fresh closures each render).
   const onErrorRef = useRef(onError);
+  const onPinClickRef = useRef(onPinClick);
+  const hoverApiRef = useRef(hoverApi);
   useEffect(() => {
     onErrorRef.current = onError;
-  }, [onError]);
+    onPinClickRef.current = onPinClick;
+    hoverApiRef.current = hoverApi;
+  }, [onError, onPinClick, hoverApi]);
   const lang = locale === "en" ? "en_US" : "ru_RU";
 
   useEffect(() => {
@@ -106,7 +120,7 @@ export function YandexMap({
         // a lone job keeps its clean volt tag.
         const placemarks = jobs.map((job) => {
           const tier = mapTier(job.boostKind);
-          return new ymaps.Placemark(
+          const pm = new ymaps.Placemark(
             [job.lat, job.lng],
             {
               pill: pinLabel(salaryPill(job) ?? negotiable, tier),
@@ -115,6 +129,17 @@ export function YandexMap({
             },
             { iconLayout: PinLayout, iconShape: SALARY_PIN_SHAPE },
           );
+          // Yandex captures pointer events in its own pane, so the parent's
+          // DOM delegation never fires here — drive the shared hover card and
+          // navigation straight from the placemark's ymaps events instead.
+          pm.events.add("mouseenter", () =>
+            hoverApiRef.current.openByJobId(job.id),
+          );
+          pm.events.add("mouseleave", () =>
+            hoverApiRef.current.scheduleClose(),
+          );
+          pm.events.add("click", () => onPinClickRef.current(job.id));
+          return pm;
         });
         if (ymaps.Clusterer) {
           const clusterer = new ymaps.Clusterer({

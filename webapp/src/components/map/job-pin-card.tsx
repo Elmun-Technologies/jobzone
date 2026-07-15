@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import type { Job } from "@/lib/data/types";
@@ -15,6 +15,20 @@ import { mapTier } from "./tier";
 
 /** Average rating + review count per company id (from company_reviews). */
 export type PinRating = { avg: number; count: number };
+
+/** Strip markdown/whitespace noise from a description into a plain-text
+ * one-liner for the hover card (line-clamped by CSS). */
+function plainExcerpt(md: string | null): string | null {
+  if (!md) return null;
+  const text = md
+    .replace(/```[\s\S]*?```/g, " ") // fenced code
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // images
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // links → text
+    .replace(/[#>*_`~-]+/g, " ") // md punctuation
+    .replace(/\s+/g, " ")
+    .trim();
+  return text || null;
+}
 
 /**
  * The pin's hover preview — the mockup's card: company logo, title, live
@@ -37,6 +51,7 @@ export function JobPinCard({
   const t = useTranslations("apply");
   const salary = salaryPill(job);
   const tier = mapTier(job.boostKind);
+  const excerpt = plainExcerpt(job.description);
   const meta = [
     job.categoryName,
     distance != null ? formatDistanceMeters(distance) : null,
@@ -108,6 +123,12 @@ export function JobPinCard({
         </div>
       ) : null}
 
+      {excerpt ? (
+        <p className="text-foreground/80 mt-2 line-clamp-3 text-sm leading-snug">
+          {excerpt}
+        </p>
+      ) : null}
+
       <QuickApplyButton
         jobId={job.id}
         needsForm={job.screeningQuestions.some((q) => q.required)}
@@ -129,13 +150,30 @@ export type PinHover = {
   flip: boolean;
 };
 
+/** Imperative seam the map engines call to drive the preview card. */
+export type PinHoverApi = {
+  /** Open the card for a pin, positioned from its rendered DOM node. */
+  openByJobId: (jobId: string) => void;
+  /** Keep the card open (pointer is still over a pin or the card). */
+  cancelClose: () => void;
+  /** Close the card after a short grace period. */
+  scheduleClose: () => void;
+};
+
 /**
- * Engine-agnostic hover/click wiring for the salary pins. Both map engines
- * render pins as plain DOM carrying `data-job-id` (see pin-markup.ts), so a
- * single set of delegated listeners on the map wrapper covers Yandex and
- * Leaflet alike: hovering a pin (or the card itself) shows/keeps the preview
- * card, leaving both closes it after a grace period, clicking a pin opens
- * the job page.
+ * Hover/click wiring for the salary pins, driving the React-rendered preview
+ * card. Two paths feed it, because the two engines deliver pointer events
+ * differently:
+ *
+ *  - Leaflet renders pins as ordinary DOM in the wrapper, so delegated
+ *    mouseover/out/click on the wrapper (the returned `handlers`) cover it.
+ *  - Yandex routes pointer events through its own events pane, so those DOM
+ *    events never bubble to the wrapper. The Yandex component instead calls
+ *    the imperative `api` (openByJobId / cancelClose / scheduleClose) from
+ *    the placemark's own ymaps events.
+ *
+ * Both paths position the card from the pin's rendered DOM node (every pin
+ * carries `data-job-id`), so the maths is identical on either engine.
  */
 export function usePinHover(onPinClick: (jobId: string) => void) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -154,6 +192,42 @@ export function usePinHover(onPinClick: (jobId: string) => void) {
   }, [cancelClose]);
   useEffect(() => cancelClose, [cancelClose]);
 
+  // Position the card from a pin's DOM node, relative to the map wrapper.
+  const openForPin = useCallback((pin: HTMLElement, jobId: string) => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const r = pin.getBoundingClientRect();
+    const w = wrap.getBoundingClientRect();
+    // Half the card width keeps it inside the map; flip below when the pin
+    // sits too close to the top edge for the card to fit above it.
+    const half = 150;
+    const flip = r.top - w.top < 270;
+    setHover({
+      jobId,
+      x: Math.min(
+        Math.max(r.left + r.width / 2 - w.left, half),
+        Math.max(w.width - half, half),
+      ),
+      y: flip ? r.bottom - w.top + 10 : r.top - w.top - 10,
+      flip,
+    });
+  }, []);
+
+  const openByJobId = useCallback(
+    (jobId: string) => {
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+      const pin = wrap.querySelector<HTMLElement>(
+        `[data-job-id="${CSS.escape(jobId)}"]`,
+      );
+      if (pin) {
+        cancelClose();
+        openForPin(pin, jobId);
+      }
+    },
+    [cancelClose, openForPin],
+  );
+
   const onMouseOver = useCallback(
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -162,8 +236,7 @@ export function usePinHover(onPinClick: (jobId: string) => void) {
         return;
       }
       const pin = target.closest<HTMLElement>("[data-job-id]");
-      const wrap = wrapRef.current;
-      if (!pin?.dataset.jobId || !wrap) {
+      if (!pin?.dataset.jobId) {
         // The pointer surfaced somewhere that's neither pin nor card — close
         // even if the pin's own mouseout got swallowed (e.g. the map engine
         // replaced the pin's DOM node under the cursor).
@@ -171,23 +244,9 @@ export function usePinHover(onPinClick: (jobId: string) => void) {
         return;
       }
       cancelClose();
-      const r = pin.getBoundingClientRect();
-      const w = wrap.getBoundingClientRect();
-      // Half the card width keeps it inside the map; flip below when the pin
-      // sits too close to the top edge for the card to fit above it.
-      const half = 150;
-      const flip = r.top - w.top < 270;
-      setHover({
-        jobId: pin.dataset.jobId,
-        x: Math.min(
-          Math.max(r.left + r.width / 2 - w.left, half),
-          Math.max(w.width - half, half),
-        ),
-        y: flip ? r.bottom - w.top + 10 : r.top - w.top - 10,
-        flip,
-      });
+      openForPin(pin, pin.dataset.jobId);
     },
-    [cancelClose, scheduleClose],
+    [cancelClose, scheduleClose, openForPin],
   );
 
   const onMouseOut = useCallback(
@@ -213,9 +272,15 @@ export function usePinHover(onPinClick: (jobId: string) => void) {
     [onPinClick],
   );
 
+  const api = useMemo<PinHoverApi>(
+    () => ({ openByJobId, cancelClose, scheduleClose }),
+    [openByJobId, cancelClose, scheduleClose],
+  );
+
   return {
     wrapRef,
     hover,
+    api,
     // onMouseLeave backstops the boundary events: it fires when the pointer
     // exits the wrapper itself, even if a map engine replaced the hovered
     // pin's DOM node and its mouseout was never dispatched.

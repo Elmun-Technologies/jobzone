@@ -8,6 +8,7 @@ import { salaryPill } from "@/lib/format";
 import { jobLatLng } from "@/lib/uz-geo";
 import { loadYmaps, type YmapsMap } from "@/lib/yandex-maps-loader";
 
+import type { PinHoverApi } from "../map/job-pin-card";
 import {
   pinLabel,
   pinShadow,
@@ -31,23 +32,33 @@ const LANDING_ZOOM = 12;
 export function LandingYandexMap({
   jobs,
   negotiable,
+  onPinClick,
+  hoverApi,
   onError,
 }: {
   /** Already trimmed by pickLandingMapJobs on the server. */
   jobs: Job[];
   /** Pill text for a job without a stated salary. */
   negotiable: string;
+  /** Navigate to a job — Yandex captures clicks in its own event pane. */
+  onPinClick: (jobId: string) => void;
+  /** Drive the shared hover card from the placemarks' ymaps events. */
+  hoverApi: PinHoverApi;
   onError: () => void;
 }) {
   const locale = useLocale();
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<YmapsMap | null>(null);
-  // Keep the latest onError without making it an effect dependency (the
-  // parent passes a fresh closure each render).
+  // Keep the latest callbacks without making them effect dependencies (the
+  // parent passes fresh closures each render).
   const onErrorRef = useRef(onError);
+  const onPinClickRef = useRef(onPinClick);
+  const hoverApiRef = useRef(hoverApi);
   useEffect(() => {
     onErrorRef.current = onError;
-  }, [onError]);
+    onPinClickRef.current = onPinClick;
+    hoverApiRef.current = hoverApi;
+  }, [onError, onPinClick, hoverApi]);
   const lang = locale === "en" ? "en_US" : "ru_RU";
 
   useEffect(() => {
@@ -77,8 +88,8 @@ export function LandingYandexMap({
 
         // The shared volt salary bubble (see ../map/pin-markup.ts). Per-pin
         // text arrives via properties, which Yandex's template substitution
-        // HTML-escapes. Hover (preview card) and click (job page) are handled
-        // by the parent's DOM delegation over `data-job-id`.
+        // HTML-escapes. Hover (preview card) and click (job page) come through
+        // each placemark's ymaps events (below) into the parent's hover API.
         const PillLayout = ymaps.templateLayoutFactory.createClass(
           salaryPinMarkup({
             pill: "$[properties.pill]",
@@ -93,17 +104,24 @@ export function LandingYandexMap({
           const pos = jobLatLng(job);
           points.push([pos.lat, pos.lng]);
           const tier = mapTier(job.boostKind);
-          map.current.geoObjects.add(
-            new ymaps.Placemark(
-              [pos.lat, pos.lng],
-              {
-                pill: pinLabel(salaryPill(job) ?? negotiable, tier),
-                jobId: job.id,
-                pinShadow: pinShadow(tier),
-              },
-              { iconLayout: PillLayout, iconShape: SALARY_PIN_SHAPE },
-            ),
+          const pm = new ymaps.Placemark(
+            [pos.lat, pos.lng],
+            {
+              pill: pinLabel(salaryPill(job) ?? negotiable, tier),
+              jobId: job.id,
+              pinShadow: pinShadow(tier),
+            },
+            { iconLayout: PillLayout, iconShape: SALARY_PIN_SHAPE },
           );
+          // Hover/click come through ymaps' event pane, not bubbled DOM.
+          pm.events.add("mouseenter", () =>
+            hoverApiRef.current.openByJobId(job.id),
+          );
+          pm.events.add("mouseleave", () =>
+            hoverApiRef.current.scheduleClose(),
+          );
+          pm.events.add("click", () => onPinClickRef.current(job.id));
+          map.current.geoObjects.add(pm);
         }
 
         // Frame every pin comfortably inside the viewport (parity with the

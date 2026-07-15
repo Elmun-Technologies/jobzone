@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Navigation, Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapContainer,
   Marker,
@@ -75,9 +75,11 @@ export default function JobsMapInner({
   const router = useRouter();
   // Hover preview card + click-through, via DOM delegation over the pins'
   // data-job-id — engine-agnostic (works for Yandex and Leaflet alike).
-  const { wrapRef, hover, handlers } = usePinHover((id) =>
-    router.push(`/jobs/${id}`),
+  const goToJob = useCallback(
+    (id: string) => router.push(`/jobs/${id}`),
+    [router],
   );
+  const { wrapRef, hover, api, handlers } = usePinHover(goToJob);
   const { loc, status, request } = useUserLocation();
   const [nearMe, setNearMe] = useState(false);
   const [query, setQuery] = useState("");
@@ -180,6 +182,8 @@ export default function JobsMapInner({
           locale={locale}
           youAreHere={t("map.youAreHere")}
           negotiable={tj("negotiable")}
+          onPinClick={goToJob}
+          hoverApi={api}
           // Only the immersive /explore map wheel-zooms; the embedded landing
           // map must let the page scroll past it (no scroll-zoom trap).
           wheelZoom={fullBleed}

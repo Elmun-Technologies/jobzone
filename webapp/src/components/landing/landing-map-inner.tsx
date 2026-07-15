@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
 import { Minus, Navigation, Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 import { Link, useRouter } from "@/i18n/navigation";
@@ -62,9 +62,11 @@ export default function LandingMapInner({
   const useYandex = !!YANDEX_KEY && !yandexFailed;
   // Hover preview card + click-through over the pins' data-job-id — the same
   // engine-agnostic delegation the /explore map uses.
-  const { wrapRef, hover, handlers } = usePinHover((id) =>
-    router.push(`/jobs/${id}`),
+  const goToJob = useCallback(
+    (id: string) => router.push(`/jobs/${id}`),
+    [router],
   );
+  const { wrapRef, hover, api, handlers } = usePinHover(goToJob);
   // Stable identity: a fresh array every render would re-run the Yandex
   // marker effect on each hover re-render, recreating the hovered pin's DOM
   // under the cursor (and swallowing its mouseout — the card never closes).
@@ -98,6 +100,8 @@ export default function LandingMapInner({
           <LandingYandexMap
             jobs={pinned}
             negotiable={labels.negotiable}
+            onPinClick={goToJob}
+            hoverApi={api}
             onError={() => setYandexFailed(true)}
           />
         ) : (
@@ -204,10 +208,14 @@ export default function LandingMapInner({
         </Link>
 
         {/* Bottom-left: mock coordinate strip — sets the "this is a map" tone
-            without pretending to reflect an actual fix. */}
-        <div className="pointer-events-none absolute bottom-3 left-3 z-[600] hidden font-mono text-[10px] tracking-wider text-neutral-800/80 sm:block">
-          41.2995°N 69.2401°E · {labels.cityLabel}
-        </div>
+            without pretending to reflect an actual fix. Hidden on the Yandex
+            engine, where it would collide with Yandex's own "Open in Yandex
+            Maps" link + attribution in that corner. */}
+        {!useYandex ? (
+          <div className="pointer-events-none absolute bottom-3 left-3 z-[600] hidden font-mono text-[10px] tracking-wider text-neutral-800/80 sm:block">
+            41.2995°N 69.2401°E · {labels.cityLabel}
+          </div>
+        ) : null}
       </div>
 
       <div className="border-border border-t bg-white/60 px-4 py-2 text-center font-mono text-[11px] tracking-wide text-neutral-700 backdrop-blur">
