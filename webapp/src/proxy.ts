@@ -59,6 +59,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip Next internals, the OAuth callback (/auth/*), and files with an extension.
-  matcher: ["/((?!api|auth|_next|_vercel|.*\\..*).*)"],
+  // Skip Next internals, the OAuth callback (/auth/*), the Sentry tunnel
+  // (/monitoring — locale-prefixing it breaks the tunnel route and every
+  // client error report 404s), and files with an extension.
+  matcher: ["/((?!api|auth|monitoring|_next|_vercel|.*\\..*).*)"],
 };
