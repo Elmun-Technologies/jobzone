@@ -109,7 +109,9 @@ export default function LocationPickerInner({
 
   return (
     <div>
-      <div className="border-border relative h-56 overflow-hidden rounded-xl border">
+      {/* `isolate` traps Leaflet's internal z-indexes inside the picker so
+          they can't stack above page-level overlays (drawer, dialogs). */}
+      <div className="border-border relative isolate h-56 overflow-hidden rounded-xl border">
         {useYandex ? (
           <YandexLocationPicker
             center={center}

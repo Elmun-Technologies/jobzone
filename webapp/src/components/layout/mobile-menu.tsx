@@ -9,8 +9,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+import { LocaleSwitcher } from "./locale-switcher";
 import { navModel } from "./nav-model";
 import { RoleToggle } from "./role-toggle";
+import { ThemeToggle } from "./theme-toggle";
 
 /**
  * The mobile navigation drawer (below `lg`, where the desktop nav is hidden).
@@ -123,11 +125,18 @@ export function MobileMenu({
                   })}
                 </nav>
 
+                {/* Locale + theme live here below lg (hidden in the header
+                    to keep it from overflowing on phones/tablets). */}
+                <div className="mt-auto flex items-center justify-between gap-3">
+                  <LocaleSwitcher />
+                  <ThemeToggle />
+                </div>
+
                 <Link
                   href={cta.href}
                   className={cn(
                     buttonVariants({ variant: "primary", size: "md" }),
-                    "mt-auto w-full gap-1.5",
+                    "w-full gap-1.5",
                   )}
                 >
                   <cta.Icon className="size-4" />

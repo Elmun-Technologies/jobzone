@@ -10,9 +10,13 @@ import { navModel } from "./nav-model";
 
 const navLink =
   "text-foreground hover:text-primary text-sm font-medium transition-colors";
-const ctaCls =
-  "hidden gap-1.5 sm:inline-flex " +
-  buttonVariants({ variant: "primary", size: "sm" });
+// Responsive overrides must come AFTER buttonVariants: tailwind-merge keeps
+// the last display utility, so "hidden" before the variants' "inline-flex"
+// would be silently discarded and the CTA would never leave the phone header.
+const ctaCls = cn(
+  buttonVariants({ variant: "primary", size: "sm" }),
+  "hidden gap-1.5 sm:inline-flex",
+);
 
 /**
  * The desktop primary nav + CTA, switched by the seeker⇄employer mode (the
