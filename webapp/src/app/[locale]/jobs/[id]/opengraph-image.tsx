@@ -7,7 +7,7 @@ import { CREATIVE_SIZES, jobCreative } from "@/lib/share/creative";
 // The link-preview image for a vacancy. As a file-convention `opengraph-image`,
 // Next wires the result into the page's `og:image` / `twitter:image`
 // automatically — so every shared job link renders a branded card.
-export const alt = "Yolla — vacancy";
+export const alt = "Yollla — vacancy";
 export const size = CREATIVE_SIZES.og;
 export const contentType = "image/png";
 
@@ -38,7 +38,7 @@ export default async function Image({
           fontFamily: "sans-serif",
         }}
       >
-        yolla
+        yollla
       </div>
     ),
     { ...size },

@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
-        text: "✅ Yolla connected. You'll get job & applicant alerts here.",
+        text: "✅ Yollla connected. You'll get job & applicant alerts here.",
       }),
     }).catch(() => {});
   }

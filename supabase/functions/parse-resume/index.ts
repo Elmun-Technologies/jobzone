@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
 
   const system =
     "You extract structured profile data from a job-seeker's résumé for " +
-    "Yolla, a blue-collar job marketplace in Uzbekistan. Return ONLY what the " +
+    "Yollla, a blue-collar job marketplace in Uzbekistan. Return ONLY what the " +
     `résumé actually states — never invent facts. Write the headline and bio ` +
     `in ${lang}. Keep skills as short individual phrases. Use 4-digit years.`;
 

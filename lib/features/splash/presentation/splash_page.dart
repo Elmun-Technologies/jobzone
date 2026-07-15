@@ -57,7 +57,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
               delay: const Duration(milliseconds: 250),
               dy: 10,
               child: Text(
-                'yolla',
+                'yollla',
                 style: context.text.displayMedium?.copyWith(
                   color: colors.onPrimary,
                   fontWeight: FontWeight.w900,

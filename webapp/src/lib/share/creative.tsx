@@ -135,7 +135,7 @@ export function jobCreative(
               color: INK,
             }}
           >
-            yolla
+            yollla
           </div>
           <div
             style={{

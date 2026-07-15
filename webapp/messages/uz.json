@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Yolla — O'zbekistondagi ishlar",
-    "description": "Yolla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi."
+    "title": "Yollla — O'zbekistondagi ishlar",
+    "description": "Yollla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi."
   },
   "nav": {
     "home": "Asosiy",
@@ -366,7 +366,7 @@
       "disabilityFriendly": "Nogironlar uchun qulay",
       "saveDraft": "Qoralamaga saqlash",
       "screening": "Saralash uchun savollar",
-      "screeningSub": "Nomzod Yolla orqali ariza yuborishdan oldin javob beradi.",
+      "screeningSub": "Nomzod Yollla orqali ariza yuborishdan oldin javob beradi.",
       "optional": "(ixtiyoriy)",
       "questionHint": "Savolingizni kiriting",
       "qtype": {
@@ -953,7 +953,7 @@
   "pricing": {
     "title": "Narxlar",
     "heroTitle": "Ishga eng tez va arzon yo'l",
-    "heroSubtitle": "Minglab ishchi Yolla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
+    "heroSubtitle": "Minglab ishchi Yollla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
     "tiers": {
       "heading": "Har bir e'lon — o'z ko'rinishi bilan",
       "sub": "Birinchi e'lon bepul. Keyingilari uchun ko'rinishni tanlang — qancha ko'rinsa, shuncha ko'p nomzod.",

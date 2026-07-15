@@ -62,7 +62,7 @@ flutter build apk \
   --dart-define=CLICK_SERVICE_ID=<Click service id> \
   --dart-define=CLICK_MERCHANT_ID=<Click merchant id> \
   --dart-define=RAHMAT_ENABLED=1 \
-  --dart-define=WEB_BASE_URL=https://yolla.uz
+  --dart-define=WEB_BASE_URL=https://yollla.uz
 ```
 Until these are set, the mobile pay screen shows "online payment isn't set up
 yet" and the web checkout reports `unconfigured` — nothing is charged.

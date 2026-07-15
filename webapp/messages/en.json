@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Yolla — Jobs in Uzbekistan",
-    "description": "Yolla — the trusted platform to find work and hire across Uzbekistan."
+    "title": "Yollla — Jobs in Uzbekistan",
+    "description": "Yollla — the trusted platform to find work and hire across Uzbekistan."
   },
   "nav": {
     "home": "Home",
@@ -366,7 +366,7 @@
       "disabilityFriendly": "Disability-friendly",
       "saveDraft": "Save draft",
       "screening": "Screening questions",
-      "screeningSub": "The candidate answers these before applying through Yolla.",
+      "screeningSub": "The candidate answers these before applying through Yollla.",
       "optional": "(optional)",
       "questionHint": "Enter your question",
       "qtype": {
@@ -953,7 +953,7 @@
   "pricing": {
     "title": "Pricing",
     "heroTitle": "The fastest, cheapest way to hire",
-    "heroSubtitle": "Thousands of workers search on Yolla. Your first vacancy is free.",
+    "heroSubtitle": "Thousands of workers search on Yollla. Your first vacancy is free.",
     "tiers": {
       "heading": "Every vacancy — with its own visibility",
       "sub": "Your first vacancy is free. For the rest, choose the visibility — the more it stands out, the more candidates.",
