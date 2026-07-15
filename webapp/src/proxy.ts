@@ -59,6 +59,15 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip Next internals, the OAuth callback (/auth/*), and files with an extension.
-  matcher: ["/((?!api|auth|_next|_vercel|.*\\..*).*)"],
+  // Skip Next internals, the OAuth callback (/auth/*), the Sentry tunnel
+  // (/monitoring, set by next.config's withSentryConfig `tunnelRoute`), and
+  // files with an extension.
+  //
+  // The `monitoring` exclusion is critical: without it the intl middleware
+  // catches `/monitoring?…` and rewrites it to `/uz/monitoring?…`, which
+  // means Sentry's rewrites() proxy never sees the request and every client
+  // event 404s (ingest never reaches sentry.io). Confirm on the live site
+  // with a POST to /monitoring — must resolve to a 2xx from the Sentry
+  // ingest endpoint, not the app's not-found handler.
+  matcher: ["/((?!api|auth|monitoring|_next|_vercel|.*\\..*).*)"],
 };
