@@ -28,7 +28,6 @@ In the Supabase dashboard → **Authentication → URL Configuration**:
 - The Supabase project must be **active** (free-tier projects pause after
   inactivity — restore it). A paused project fails DNS, so pages render empty.
 - Apply migrations if not already: `supabase db push`.
-- Optional demo data: `psql "$DATABASE_URL" -f supabase/seed_dev.sql`.
 
 ## 4. SEO
 - After the first deploy, submit `https://jobzone.uz/sitemap.xml` to **Google

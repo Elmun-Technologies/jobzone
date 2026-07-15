@@ -149,7 +149,7 @@ webapp/         Next.js 16 web client + admin panel
 supabase/
   migrations/   0001…0057 — entire schema, RLS, triggers, views, buckets
   functions/    edge functions (see §7)
-  seed.sql · seed_dev.sql
+  seed.sql
 
 android/ ios/ web/   native shells (icons/splash generated from assets/icon/)
 docs/           go-live-checklist.md · audit-findings.md · phase-8 (calls/push) · …

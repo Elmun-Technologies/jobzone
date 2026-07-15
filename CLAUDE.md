@@ -43,7 +43,7 @@ webapp/         Next.js 16 web client (see webapp/CLAUDE.md → AGENTS.md note)
 supabase/
   migrations/   0001…0036 — entire schema, RLS, triggers, views, buckets
   functions/    13 edge functions (see Backend below)
-  seed.sql · seed_dev.sql
+  seed.sql
 android/ ios/ web/   native shells (icons/splash generated from assets/icon/)
 docs/           go-live-checklist.md · audit-findings.md · phase-8 (calls/push) · …
 test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
