@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
 
 import { getJobById } from "@/lib/data/jobs";
@@ -18,7 +21,11 @@ export default async function Image({
 }) {
   const { locale, id } = await params;
   const job = await getJobById(id);
-  if (job) return jobCreative(job, "og", locale, siteUrl());
+  if (job) return await jobCreative(job, "og", locale, siteUrl());
+
+  const archivo900 = await readFile(
+    join(process.cwd(), "assets", "fonts", "Archivo-900.ttf"),
+  );
 
   // Branded fallback when the job can't be loaded (deleted, or hit directly).
   return new ImageResponse(
@@ -33,14 +40,19 @@ export default async function Image({
           backgroundColor: "#0A0A0A",
           color: "#F3F3F1",
           fontSize: 96,
-          fontWeight: 800,
+          fontWeight: 900,
           letterSpacing: -4,
-          fontFamily: "sans-serif",
+          fontFamily: "Archivo",
         }}
       >
         yolla
       </div>
     ),
-    { ...size },
+    {
+      ...size,
+      fonts: [
+        { name: "Archivo", data: archivo900, weight: 900, style: "normal" },
+      ],
+    },
   );
 }
