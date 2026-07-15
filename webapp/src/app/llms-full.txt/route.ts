@@ -49,7 +49,7 @@ export async function GET(): Promise<Response> {
     `3. Every new employer posting appears in BOTH clients immediately, via the shared \`job_feed\` view.`,
   );
   out.push(
-    `4. The offline demo path always works: with no Supabase env, both clients boot on mock data.`,
+    `4. The marketplace is online-only: all content comes from the live backend — there is no demo data.`,
   );
   out.push(
     `5. Clients cannot grant themselves privileges — every protected column is pinned by a DB trigger unless a security-definer RPC set a txn-local flag.`,
@@ -85,9 +85,7 @@ export async function GET(): Promise<Response> {
     for (const j of sample) {
       const salary = salaryText(j);
       const loc = [j.city, j.country].filter(Boolean).join(", ");
-      const meta = [j.categoryName, loc, salary]
-        .filter(Boolean)
-        .join(" · ");
+      const meta = [j.categoryName, loc, salary].filter(Boolean).join(" · ");
       out.push(
         `- [${j.title}](${base}/uz/jobs/${j.id}) — ${j.companyName}${meta ? ` (${meta})` : ""}`,
       );

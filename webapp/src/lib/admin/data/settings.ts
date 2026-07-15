@@ -8,9 +8,6 @@ import { adminReadClient } from "./shared";
  *  pre-filled. `null` means the service-role read layer is unavailable. */
 export async function getAdminSiteBanner(): Promise<SiteBanner | null> {
   const client = await adminReadClient();
-  if (client === "mock") {
-    return { enabled: false, message: "", tone: "info" };
-  }
   if (!client) return null;
   try {
     const { data } = await client

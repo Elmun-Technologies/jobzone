@@ -10,16 +10,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const ADMIN_PAGE_SIZE = 20;
 
 /**
- * Entry point of every privileged admin reader. Three outcomes:
- * - "mock"  — no Supabase env at all: serve the demo fixtures;
- * - null    — env present but SUPABASE_SERVICE_ROLE_KEY missing: pages show
- *             the config hint;
+ * Entry point of every privileged admin reader. Two outcomes:
+ * - null    — Supabase env or SUPABASE_SERVICE_ROLE_KEY missing: pages show
+ *             the config hint (the panel is online-only, no demo fixtures);
  * - client  — the service-role client, only ever handed out after re-checking
  *             that the current session is an admin (defense-in-depth on top of
  *             the page's requireAdmin()).
  */
-export async function adminReadClient(): Promise<SupabaseClient | "mock" | null> {
-  if (!hasSupabase()) return "mock";
+export async function adminReadClient(): Promise<SupabaseClient | null> {
+  if (!hasSupabase()) return null;
   const user = await getCurrentUser();
   if (!isAdminUser(user)) throw new Error("admin only");
   return createAdminClient();

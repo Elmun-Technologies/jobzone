@@ -1,10 +1,5 @@
 import "server-only";
 
-import {
-  mockAdminOrders,
-  mockAdminProducts,
-  mockAdminWalletTx,
-} from "../mock";
 import type {
   AdminList,
   AdminOrderRow,
@@ -19,7 +14,6 @@ export async function getAdminWalletTx(
   page: number,
 ): Promise<AdminList<AdminWalletTxRow>> {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminWalletTx(q);
   if (!client) return null;
   try {
     const { from, to } = pageRange(page);
@@ -61,7 +55,6 @@ export async function getAdminOrders(
   page: number,
 ): Promise<AdminList<AdminOrderRow>> {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminOrders(q);
   if (!client) return null;
   try {
     const { from, to } = pageRange(page);
@@ -100,12 +93,13 @@ export async function getAdminOrders(
 /** The full promotion-product catalog (small, bounded) — no pagination. */
 export async function getAdminProducts(): Promise<AdminProductRow[] | null> {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminProducts();
   if (!client) return null;
   try {
     const { data, error } = await client
       .from("promotion_products")
-      .select("code, name, kind, price_uzs, duration_days, is_active, sort_order")
+      .select(
+        "code, name, kind, price_uzs, duration_days, is_active, sort_order",
+      )
       .order("sort_order", { ascending: true });
     if (error) throw error;
     return (data ?? []).map((row) => {

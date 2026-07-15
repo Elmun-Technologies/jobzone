@@ -1,6 +1,5 @@
 import "server-only";
 
-import { mockAdminCategories } from "../mock";
 import type { AdminCategoryRow } from "../types";
 import { adminReadClient } from "./shared";
 
@@ -11,7 +10,6 @@ import { adminReadClient } from "./shared";
  */
 export async function getAdminCategories(): Promise<AdminCategoryRow[] | null> {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminCategories();
   if (!client) return null;
   try {
     const { data, error } = await client

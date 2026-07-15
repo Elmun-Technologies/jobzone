@@ -1,6 +1,5 @@
 import "server-only";
 
-import { mockAdminTelegramChannels } from "../mock";
 import type { AdminTelegramChannelRow } from "../types";
 import { adminReadClient } from "./shared";
 
@@ -14,12 +13,13 @@ export async function getAdminTelegramChannels(): Promise<
   AdminTelegramChannelRow[] | null
 > {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminTelegramChannels();
   if (!client) return null;
   try {
     const { data, error } = await client
       .from("telegram_channels")
-      .select("id, category_id, region, chat_id, title, is_active, created_at, job_categories(name)")
+      .select(
+        "id, category_id, region, chat_id, title, is_active, created_at, job_categories(name)",
+      )
       .order("created_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map((row) => {

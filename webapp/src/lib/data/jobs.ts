@@ -3,7 +3,6 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 import { toJob } from "./mappers";
-import { mockJobs } from "./mock";
 import { hasSupabase } from "./supabase-env";
 import type { Job, JobQuery } from "./types";
 
@@ -31,10 +30,6 @@ async function dismissedJobIds(
   return (data ?? []).map((r) => String((r as { job_id: unknown }).job_id));
 }
 
-function salaryTop(j: Job): number | null {
-  return j.salaryMax ?? j.salaryMin;
-}
-
 /**
  * Neutralize PostgREST filter-grammar metacharacters before interpolating a
  * user search term into an `.or(...)` string. Commas separate conditions and
@@ -44,48 +39,6 @@ function salaryTop(j: Job): number | null {
  */
 function ilikeTerm(q: string): string {
   return q.replace(/[,()*%\\:]/g, " ").trim();
-}
-
-function filterMock(query: JobQuery): Job[] {
-  const q = query.q?.toLowerCase().trim();
-  const nowMs = Date.now();
-  const rows = mockJobs.filter((j) => {
-    if (
-      q &&
-      !`${j.title} ${j.companyName} ${j.categoryName ?? ""}`
-        .toLowerCase()
-        .includes(q)
-    ) {
-      return false;
-    }
-    if (query.city && j.city !== query.city) return false;
-    if (query.category && j.categoryName !== query.category) return false;
-    if (query.jobType && j.jobType !== query.jobType) return false;
-    if (query.workingModel && j.workingModel !== query.workingModel) {
-      return false;
-    }
-    if (query.experienceLevel && j.experienceLevel !== query.experienceLevel) {
-      return false;
-    }
-    if (query.salaryMin != null) {
-      if ((query.currency ?? "UZS") !== j.currency) return false;
-      const matches =
-        (j.salaryMax != null && j.salaryMax >= query.salaryMin) ||
-        (j.salaryMin != null && j.salaryMin >= query.salaryMin);
-      if (!matches) return false;
-    }
-    if (query.postedWithin != null && query.postedWithin > 0) {
-      const t = j.postedAt ? Date.parse(j.postedAt) : NaN;
-      if (Number.isNaN(t) || nowMs - t > query.postedWithin * DAY_MS) {
-        return false;
-      }
-    }
-    return true;
-  });
-  if (query.sort === "salary") {
-    return [...rows].sort((a, b) => (salaryTop(b) ?? 0) - (salaryTop(a) ?? 0));
-  }
-  return rows;
 }
 
 // The `posted_at` cutoff for a "posted within N days" filter, or null.
@@ -99,9 +52,8 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
   const limit = query.limit ?? 20;
   const offset = query.offset ?? 0;
 
-  if (!hasSupabase()) {
-    return filterMock(query).slice(offset, offset + limit);
-  }
+  // Online-only: without a configured backend there is nothing to show.
+  if (!hasSupabase()) return [];
 
   try {
     const supabase = await createClient();
@@ -162,7 +114,7 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
 
 /** Exact count of open jobs matching [query] (for result headers + totals). */
 export async function getJobCount(query: JobQuery = {}): Promise<number> {
-  if (!hasSupabase()) return filterMock(query).length;
+  if (!hasSupabase()) return 0;
   try {
     const supabase = await createClient();
     let req = supabase
@@ -213,11 +165,7 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
 
 /** Distinct cities that currently have open jobs (for the region selector). */
 export async function getCities(limit = 1000): Promise<string[]> {
-  if (!hasSupabase()) {
-    return [
-      ...new Set(mockJobs.map((j) => j.city).filter((c): c is string => !!c)),
-    ].sort((a, b) => a.localeCompare(b));
-  }
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -241,7 +189,7 @@ export async function getCities(limit = 1000): Promise<string[]> {
 
 /** Recent open jobs for the landing page. */
 export async function getRecentJobs(limit = 6): Promise<Job[]> {
-  if (!hasSupabase()) return mockJobs.slice(0, limit);
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const dismissed = await dismissedJobIds(supabase);
@@ -265,7 +213,7 @@ export async function getRecentJobs(limit = 6): Promise<Job[]> {
 
 /** A single open job by id, or null. */
 export async function getJobById(id: string): Promise<Job | null> {
-  if (!hasSupabase()) return mockJobs.find((j) => j.id === id) ?? null;
+  if (!hasSupabase()) return null;
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -301,7 +249,7 @@ export async function getRecommendedJobs(): Promise<Job[]> {
 
 /** Ids of all open jobs (for the sitemap). Capped to keep the sitemap sane. */
 export async function getAllJobIds(limit = 1000): Promise<string[]> {
-  if (!hasSupabase()) return mockJobs.map((j) => j.id);
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -333,14 +281,7 @@ export interface SitemapJob {
 export async function getAllJobsForSitemap(
   limit = 1000,
 ): Promise<SitemapJob[]> {
-  if (!hasSupabase()) {
-    return mockJobs.map((j) => ({
-      id: j.id,
-      postedAt: j.postedAt,
-      categoryName: j.categoryName,
-      city: j.city,
-    }));
-  }
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data, error } = await supabase

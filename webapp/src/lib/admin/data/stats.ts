@@ -5,7 +5,6 @@ import { getCurrentUser } from "@/lib/auth/user";
 import { hasSupabase } from "@/lib/data/supabase-env";
 import { createClient } from "@/lib/supabase/server";
 
-import { mockDashboardStats } from "../mock";
 import type { DashboardStats, SeriesPoint } from "../types";
 
 /** Raw jsonb shape returned by the `admin_dashboard_stats` RPC (0037). */
@@ -57,14 +56,14 @@ function toStats(row: StatsRow): DashboardStats {
 /**
  * Dashboard aggregates for /admin. Uses the ANON cookie client — the RPC is a
  * security-definer function that re-checks `is_admin()` itself, so no service
- * key is needed for the dashboard. Returns null on failure (page shows an
- * error state); mock data without Supabase env. The `isAdminUser` re-check is
+ * key is needed for the dashboard. Returns null on failure or without
+ * Supabase env (page shows an error state). The `isAdminUser` re-check is
  * defense-in-depth on top of the page's `requireAdmin()`.
  */
 export async function getDashboardStats(
   days: number,
 ): Promise<DashboardStats | null> {
-  if (!hasSupabase()) return mockDashboardStats(days);
+  if (!hasSupabase()) return null;
   const user = await getCurrentUser();
   if (!isAdminUser(user)) return null;
   try {

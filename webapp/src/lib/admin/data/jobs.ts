@@ -1,6 +1,5 @@
 import "server-only";
 
-import { mockAdminJobs } from "../mock";
 import type { AdminJobRow, AdminList } from "../types";
 import { adminReadClient, pageRange, toPage } from "./shared";
 import { sanitizeQuery } from "./users";
@@ -10,7 +9,6 @@ export async function getAdminJobs(
   page: number,
 ): Promise<AdminList<AdminJobRow>> {
   const client = await adminReadClient();
-  if (client === "mock") return mockAdminJobs(q);
   if (!client) return null;
   try {
     const { from, to } = pageRange(page);

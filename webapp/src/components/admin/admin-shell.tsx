@@ -9,13 +9,7 @@ import { adminStrings } from "@/lib/admin/strings";
  * content. On small screens the sidebar collapses to a horizontally scrolling
  * strip above the content.
  */
-export function AdminShell({
-  children,
-  mock,
-}: {
-  children: React.ReactNode;
-  mock: boolean;
-}) {
+export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[70vh] items-stretch">
       <aside className="hidden w-60 shrink-0 bg-[#0a0a0a] px-3 py-6 md:block">
@@ -30,11 +24,6 @@ export function AdminShell({
         <div className="overflow-x-auto bg-[#0a0a0a] px-3 py-2 md:hidden">
           <SidebarNav groups={adminNav} />
         </div>
-        {mock ? (
-          <p className="border-border bg-muted text-muted-foreground border-b px-6 py-2 text-xs">
-            {adminStrings.demoMode}
-          </p>
-        ) : null}
         <div className="px-4 py-8 sm:px-6 lg:px-8">{children}</div>
       </div>
     </div>

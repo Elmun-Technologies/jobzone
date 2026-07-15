@@ -22,7 +22,7 @@ export default async function AdminLayout({
   setRequestLocale(locale);
   // Defense-in-depth only: layouts don't re-run on client navigation in this
   // Next version, so every admin PAGE calls requireAdmin() itself as well.
-  const { mock } = await requireAdmin(locale);
+  await requireAdmin(locale);
 
-  return <AdminShell mock={mock}>{children}</AdminShell>;
+  return <AdminShell>{children}</AdminShell>;
 }
