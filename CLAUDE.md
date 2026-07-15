@@ -66,10 +66,13 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 3. **Posting must be automatically visible everywhere.** An employer posts a
    vacancy → it appears in BOTH apps under its category immediately, via the
    shared `job_feed` view. No manual publish/reindex step may ever be required.
-4. **Everything runs offline.** With no Supabase env, both clients boot fully on
-   mock data (`Env.hasSupabase` / `hasSupabase()` gate every live call; errors
-   degrade gracefully). Never break the offline path — it's the demo and the
-   test substrate.
+4. **The product is online-only — no demo data may ever render.** All content
+   comes from the live backend. Web: every `!hasSupabase()` branch returns
+   empty/null (no mock content exists). Mobile: `bootstrap()` fails fast into a
+   "misconfigured build" screen without Supabase env; the repos'
+   `_live ? supabase : mock` seams exist **solely as the unit-test substrate**
+   (Flutter tests drive controllers through the offline branch) and are
+   unreachable in any booted app.
 5. **Clients can never grant themselves privileges** (see Security).
 
 ---
@@ -84,9 +87,10 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 - **Roles:** one account = one role (`job_seeker` | `employer`), chosen once at
   registration (`ChooseRolePage`); the router guard enforces the choice for
   every auth path (email OTP and Google). No role switching.
-- **Repositories:** `_live ? supabase : mock` in every feature repo. Mock data
-  in `lib/features/jobs/data/mock_jobs.dart` (+ per-feature seeds) demos the
-  whole product.
+- **Repositories:** `_live ? supabase : mock` in every feature repo. The mock
+  branch (`lib/features/jobs/data/mock_jobs.dart` + per-feature seeds) is the
+  unit-test substrate only — `bootstrap()` refuses to boot without Supabase
+  env, so no running app can reach it.
 - **Jobs/search data source:** the **`job_feed` Postgres view** for home,
   categories, and search (`SearchRepository._applyFilters` builds one filter
   chain shared by `search()` and the HEAD-only `count()` that powers the live

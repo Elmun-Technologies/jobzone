@@ -9,7 +9,8 @@ import '../domain/jobs_repository.dart';
 import 'mock_jobs.dart';
 
 /// Reads jobs from the `job_feed` view when Supabase is configured; otherwise
-/// serves [mockJobs] so the UI is fully demoable offline.
+/// serves [mockJobs]. The mock branch is the unit-test substrate only —
+/// `bootstrap()` refuses to boot the app without Supabase env.
 class JobsRepositoryImpl implements JobsRepository {
   JobsRepositoryImpl(this._ref);
 
