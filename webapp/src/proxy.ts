@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { isAdminUser } from "@/lib/auth/admin-role";
 import { hasSupabase } from "@/lib/data/supabase-env";
 import { updateSession } from "@/lib/supabase/middleware";
+import { siteUrl } from "@/lib/seo";
 
 // Next.js 16 renamed Middleware → Proxy. The handler runs locale routing first
 // (may redirect `/` → `/uz`), refreshes the Supabase session cookies, then
@@ -30,6 +31,21 @@ function localeOf(path: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  // Self-canonicalize: the production deployment stays reachable on its
+  // *.vercel.app URLs (old indexed links, pre-domain emails, stale tabs).
+  // A session started there lives on the wrong origin — the user signs in
+  // on vercel.app, then looks signed out on the brand domain. Bounce every
+  // production vercel.app request onto the canonical host before anything
+  // else runs. Previews (VERCEL_ENV=preview) keep their vercel.app URLs.
+  const host = request.headers.get("host") ?? "";
+  if (process.env.VERCEL_ENV === "production" && host.endsWith(".vercel.app")) {
+    const canonical = new URL(request.url);
+    canonical.protocol = "https:";
+    canonical.host = new URL(siteUrl()).host;
+    canonical.port = "";
+    return NextResponse.redirect(canonical, 308);
+  }
+
   const intlResponse = intlMiddleware(request);
   // Honor a locale redirect (e.g. "/" → "/uz") as-is.
   if (intlResponse.headers.has("location")) return intlResponse;
