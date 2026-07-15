@@ -53,7 +53,6 @@ The app boots straight into the shell with realistic mock data — no setup requ
 1. Provision a Supabase project and apply the schema:
    ```bash
    supabase db reset                                 # migrations/* + seed.sql
-   psql "$DATABASE_URL" -f supabase/seed_dev.sql      # optional demo companies + jobs
    supabase functions deploy meili-sync meili-reindex search-jobs send-notification
    ```
 2. Deploy Meilisearch (Railway/Render) and set the Edge Function secrets (Meili host + admin key — never shipped to the client).
@@ -82,7 +81,7 @@ supabase/
 ├─ migrations/     0001…0008  (schema, RLS, triggers, buckets, devices)
 ├─ functions/      meili-sync · meili-reindex · search-jobs · send-notification ·
                    agora-token · push-dispatch
-└─ seed.sql · seed_dev.sql
+└─ seed.sql
 docs/
 └─ phase-8-realtime-and-push.md   real calls (Agora) + push (FCM) wiring guide
 ```
