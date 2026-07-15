@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageEvent } from "@/components/analytics/page-event";
 import { JobFilters } from "@/components/jobs/job-filters";
 import { JobResults } from "@/components/jobs/job-results";
 import { JobToolbar } from "@/components/jobs/job-toolbar";
@@ -9,17 +10,39 @@ import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import type { JobQuery } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
+import { localeAlternates } from "@/lib/seo";
 
 const PAGE_SIZE = 20;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const sp = await searchParams;
   const t = await getTranslations({ locale, namespace: "jobs" });
-  return { title: t("title") };
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+  const category = pick(sp.category);
+  const city = pick(sp.city);
+  const q = pick(sp.q);
+  // Compose a keyword-rich title from the active filters — searchers land on
+  // /jobs?category=Kassir&city=Toshkent from a "toshkentda kassir ishi"
+  // query, and the tab title should echo it back rather than staying "Ishlar".
+  const filterBits = [q, category, city].filter(Boolean).join(" · ");
+  const title = filterBits ? `${filterBits} — ${t("title")}` : t("title");
+  const description = filterBits
+    ? `${filterBits} — ${tm("description")}`
+    : tm("description");
+  return {
+    title,
+    description,
+    alternates: localeAlternates(locale, "jobs"),
+  };
 }
 
 export default async function JobsPage({
@@ -65,8 +88,26 @@ export default async function JobsPage({
   const view = pick(sp.view) === "grid" ? "grid" : "list";
   const title = query.category ?? t("title");
 
+  // Only fire when the seeker actually searched or filtered — the bare
+  // /jobs page load is captured by autocapture (GA/PostHog page views).
+  const searched = Boolean(
+    query.q || query.category || query.city || query.jobType,
+  );
+
   return (
     <Container className="py-8">
+      {searched ? (
+        <PageEvent
+          name="search_performed"
+          props={{
+            q: query.q ?? null,
+            category: query.category ?? null,
+            city: query.city ?? null,
+            job_type: query.jobType ?? null,
+            results: count,
+          }}
+        />
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Filters — top on mobile, right column on desktop */}
         <aside className="lg:col-start-2 lg:row-start-1">

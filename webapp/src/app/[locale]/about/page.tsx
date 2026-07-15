@@ -18,6 +18,7 @@ import { Container } from "@/components/ui/container";
 import { getCompanyRatings } from "@/lib/data/companies";
 import { getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
+import { localeAlternates } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 /** Guest-first post-vacancy route (carved out of the employer gate). */
@@ -36,6 +37,7 @@ export async function generateMetadata({
   return {
     title: t("meta.title"),
     description: t("meta.description"),
+    alternates: localeAlternates(locale, "about"),
   };
 }
 

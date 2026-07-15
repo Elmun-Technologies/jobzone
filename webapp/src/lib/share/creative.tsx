@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
 
 import type { Job } from "@/lib/data/types";
@@ -32,6 +35,7 @@ const VOLT = "#C7FB00";
 const GREY = "#565B4D";
 const FAINT = "#9A9F8F";
 const WHITE = "#FFFFFF";
+const CHIP_BG = "rgba(10, 10, 10, 0.06)";
 
 type Lang = "uz" | "ru" | "en";
 
@@ -64,16 +68,47 @@ function shortHost(siteUrl: string): string {
 }
 
 /**
+ * The Archivo weights the creative uses, read once per server instance and
+ * reused across requests — Satori (unlike the browser) can't pull the CSS
+ * `next/font` variables the rest of the site uses, it needs raw font buffers
+ * passed explicitly. `process.cwd()` is the webapp project root, so these
+ * live at `webapp/assets/fonts` (a copy of the Flutter app's font files —
+ * they're the same OFL-licensed Archivo, just needed on both sides).
+ */
+type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
+let fontsPromise: Promise<
+  { name: string; data: Buffer; weight: FontWeight; style: "normal" }[]
+> | null = null;
+
+function loadFonts() {
+  if (!fontsPromise) {
+    const weights = [500, 600, 700, 800, 900] as const;
+    fontsPromise = Promise.all(
+      weights.map(async (weight) => ({
+        name: "Archivo",
+        data: await readFile(
+          join(process.cwd(), "assets", "fonts", `Archivo-${weight}.ttf`),
+        ),
+        weight,
+        style: "normal" as const,
+      })),
+    );
+  }
+  return fontsPromise;
+}
+
+/**
  * Build the creative for a job in a given format. Returns an `ImageResponse`
  * (a `Response`), so both the `opengraph-image` file convention and the
  * download route handlers can just return it.
  */
-export function jobCreative(
+export async function jobCreative(
   job: Job,
   format: CreativeFormat,
   locale: string,
   siteUrl: string,
-): ImageResponse {
+): Promise<ImageResponse> {
   const size = CREATIVE_SIZES[format];
   const L = LABELS[lang(locale)];
   // Everything scales off a 1080-wide baseline so all three formats share one
@@ -99,7 +134,7 @@ export function jobCreative(
           backgroundColor: WHITE,
           color: INK,
           padding: pad,
-          fontFamily: "sans-serif",
+          fontFamily: "Archivo",
           overflow: "hidden",
         }}
       >
@@ -137,11 +172,18 @@ export function jobCreative(
           >
             yollla
           </div>
+          {/* Company name as a soft "kicker" chip — reads as a label, not body
+              text, so it doesn't compete with the job title below it. */}
           <div
             style={{
               display: "flex",
-              fontSize: 26 * u,
-              fontWeight: 600,
+              alignItems: "center",
+              backgroundColor: CHIP_BG,
+              borderRadius: 999,
+              padding: `${8 * u}px ${20 * u}px`,
+              fontSize: 24 * u,
+              fontWeight: 700,
+              letterSpacing: 0.5 * u,
               color: INK,
               maxWidth: size.width * 0.42,
               overflow: "hidden",
@@ -164,7 +206,7 @@ export function jobCreative(
             style={{
               display: "flex",
               fontSize: (isOg ? 60 : 84) * (isOg ? 1 : u),
-              fontWeight: 800,
+              fontWeight: 900,
               letterSpacing: -2 * u,
               lineHeight: 1.02,
               color: INK,
@@ -200,14 +242,22 @@ export function jobCreative(
             >
               {L.pay}
             </div>
+            {/* Salary as a volt-on-ink badge — the same treatment as the CTA
+                pill below, so the number reads as the headline stat it is
+                rather than another line of plain body text. */}
             <div
               style={{
                 display: "flex",
-                marginTop: 6 * u,
-                fontSize: (isOg ? 44 : 54) * (isOg ? 1 : u),
+                marginTop: 12 * u,
+                alignItems: "center",
+                alignSelf: "flex-start",
+                backgroundColor: INK,
+                borderRadius: 999,
+                padding: `${10 * u}px ${24 * u}px`,
+                fontSize: (isOg ? 40 : 48) * (isOg ? 1 : u),
                 fontWeight: 800,
                 letterSpacing: -1 * u,
-                color: INK,
+                color: VOLT,
               }}
             >
               {pay}
@@ -255,6 +305,6 @@ export function jobCreative(
         )}
       </div>
     ),
-    { width: size.width, height: size.height },
+    { width: size.width, height: size.height, fonts: await loadFonts() },
   );
 }

@@ -140,34 +140,39 @@ class _SeeAllJobsPageState extends ConsumerState<SeeAllJobsPage> {
             ),
           ),
         Expanded(
-          child: ListView.separated(
-            controller: _scroll,
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            itemCount: itemCount,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (_, i) {
-              // Last slot → loading spinner or an error retry button.
-              if (i == filtered.length) {
-                if (state.error != null) {
-                  return Center(
-                    child: TextButton.icon(
-                      onPressed: () => ref
-                          .read(paginatedJobsProvider(_recentFirst).notifier)
-                          .loadMore(),
-                      icon: const Icon(Icons.refresh),
-                      label: Text(l.retry),
+          child: RefreshIndicator(
+            onRefresh: () => ref
+                .read(paginatedJobsProvider(_recentFirst).notifier)
+                .refresh(),
+            child: ListView.separated(
+              controller: _scroll,
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              itemCount: itemCount,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (_, i) {
+                // Last slot → loading spinner or an error retry button.
+                if (i == filtered.length) {
+                  if (state.error != null) {
+                    return Center(
+                      child: TextButton.icon(
+                        onPressed: () => ref
+                            .read(paginatedJobsProvider(_recentFirst).notifier)
+                            .loadMore(),
+                        icon: const Icon(Icons.refresh),
+                        label: Text(l.retry),
+                      ),
+                    );
+                  }
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.lg),
+                      child: CircularProgressIndicator.adaptive(),
                     ),
                   );
                 }
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.lg),
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-                );
-              }
-              return JobCard(job: filtered[i]);
-            },
+                return JobCard(job: filtered[i]);
+              },
+            ),
           ),
         ),
       ],

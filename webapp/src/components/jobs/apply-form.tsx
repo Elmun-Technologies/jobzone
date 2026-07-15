@@ -11,6 +11,7 @@ import { useRouter } from "@/i18n/navigation";
 
 import { buttonVariants } from "@/components/ui/button";
 import { applyToJob, type ApplyState } from "@/lib/actions/apply";
+import { track } from "@/lib/analytics/track";
 import type { ScreeningQuestion } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 
@@ -82,6 +83,11 @@ export function ApplyForm({
     );
   }, [state.signedOut, jobId, locale, router]);
 
+  // The success path redirects (server-side) so we never see an `ok`
+  // state — fire the conversion at submit-intent time via onSubmit
+  // below. Duplicate is the one server-visible failure that stays
+  // client-side; the "user tried to apply" signal is what we track.
+
   const errorMsg =
     state.error === "duplicate"
       ? t("errDuplicate")
@@ -98,6 +104,13 @@ export function ApplyForm({
       key={restored ? "restored" : "initial"}
       ref={formRef}
       action={action}
+      onSubmit={() => {
+        // Fires just before the server action runs — the intent-to-apply
+        // signal used as the funnel-bottom conversion. GA4 / Meta count
+        // this even when the server later 4xxs, matching how other job
+        // sites report "apply submit" in their SEM dashboards.
+        track("job_apply_submit", { job_id: jobId, path: "form" });
+      }}
       className="flex flex-col gap-5"
     >
       <input type="hidden" name="jobId" value={jobId} />

@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { getCompanies } from "@/lib/data/companies";
+import { localeAlternates } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -16,7 +17,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "company" });
-  return { title: t("directoryTitle") };
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return {
+    title: t("directoryTitle"),
+    description: `${t("directoryTitle")} — ${tm("description")}`,
+    alternates: localeAlternates(locale, "companies"),
+  };
 }
 
 export default async function CompaniesPage({

@@ -20,5 +20,5 @@ export async function GET(
   }
   const job = await getJobById(id);
   if (!job) return new Response("Not found", { status: 404 });
-  return jobCreative(job, format as CreativeFormat, locale, siteUrl());
+  return await jobCreative(job, format as CreativeFormat, locale, siteUrl());
 }

@@ -68,6 +68,10 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_messaging: ^16.4.1
   url_launcher: ^6.3.1
+  # Sentry — crash + performance reporting. Wired dark: bootstrap only
+  # enables it when SENTRY_DSN is passed via --dart-define. See
+  # docs/go-live-checklist.md when the DSN is issued.
+  sentry_flutter: ^9.24.0
 
 # win32 is Windows-only, but both file_picker and package_info_plus compile
 # their Windows implementation even for an Android build (their conditional

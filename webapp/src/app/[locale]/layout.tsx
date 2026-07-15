@@ -1,13 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { YandexMetrica } from "@/components/analytics/yandex-metrica";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
+import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
 
@@ -33,6 +40,45 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+// theme-color is a Viewport field in Next 13.2+ (the old metadata.themeColor
+// is deprecated). Bind it to the same volt-on-ink pair the design tokens use
+// so mobile browsers tint the address bar to match the app.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
+const OG_LOCALE: Record<string, string> = {
+  uz: "uz_UZ",
+  ru: "ru_RU",
+  en: "en_US",
+};
+
+// Google Search Console (URL-prefix) verification. The token is public — it
+// only proves control of the deployment — so shipping it in the bundle is
+// safe; env-backed so a future rotation is a Vercel change, not a deploy.
+const GOOGLE_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ??
+  "y__H-hpjfRt5Yl-VtnwEJJn3pNab4g-9CLeP3QOyPb0";
+// Yandex.Webmaster verification (empty until issued — Yandex dominates search
+// in UZ, so we want to be listed there as well).
+const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
+
+// Google Analytics 4 measurement id. Public — appears in every page's HTML;
+// env-backed so preview envs can point at a separate stream (or leave empty
+// to skip). Default is the currently issued Yolla Web stream.
+const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-6DZDQYHJMX";
+// Yandex.Metrica counter id — public. Default is the issued Yolla counter;
+// unset in env to skip (dev/preview).
+const YANDEX_METRICA_ID =
+  process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "110738388";
+// Meta (Facebook) Pixel id — public. Empty until an ad account is wired,
+// at which point Vercel env NEXT_PUBLIC_META_PIXEL_ID lights it up.
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
+
 export async function generateMetadata({
   params,
 }: {
@@ -40,9 +86,40 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  // metadataBase resolves every relative canonical/og:url/twitter:image below
+  // it — without it Next warns and drops relative URLs at build time.
+  const primary = OG_LOCALE[locale] ?? OG_LOCALE.uz;
   return {
+    metadataBase: new URL(siteUrl()),
     title: { default: t("title"), template: "%s · Yollla" },
     description: t("description"),
+    applicationName: "Yollla",
+    // Alternates on the layout only cover the localized root (/uz, /ru, /en).
+    // Every child page redeclares its own alternates via localeAlternates(...)
+    // so canonicals + hreflang are self-referencing on every URL Google finds.
+    alternates: localeAlternates(locale, ""),
+    openGraph: {
+      type: "website",
+      siteName: "Yollla",
+      title: t("title"),
+      description: t("description"),
+      // Locale + alternates match how Google/Facebook expect them. Pages that
+      // set their own openGraph.title/description override these; siteName
+      // and locale keep inheriting.
+      locale: primary,
+      alternateLocale: Object.values(OG_LOCALE).filter((l) => l !== primary),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+    },
+    manifest: "/manifest.webmanifest",
+    icons: { icon: "/icon.svg" },
+    verification: {
+      google: GOOGLE_SITE_VERIFICATION,
+      ...(YANDEX_VERIFICATION ? { yandex: YANDEX_VERIFICATION } : {}),
+    },
   };
 }
 
@@ -77,6 +154,17 @@ export default async function LocaleLayout({
           <main className="flex-1">{children}</main>
           <SiteFooter />
         </NextIntlClientProvider>
+        <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+        <YandexMetrica counterId={YANDEX_METRICA_ID} />
+        <MetaPixel pixelId={META_PIXEL_ID} />
+        {/* PostHog gates itself on NEXT_PUBLIC_POSTHOG_KEY — safe to
+            mount unconditionally, no-ops without the env. */}
+        <PostHogProvider />
+        {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
+            Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
+            banner needed, no third-party host. Both no-op in dev. */}
+        <VercelAnalytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -316,3 +316,57 @@ export async function getAllJobIds(limit = 1000): Promise<string[]> {
     return [];
   }
 }
+
+/** Minimal per-job shape the sitemap needs. `categoryName` + `city` let
+ * the caller compute per-category and per-city×category `lastmod` from
+ * one query rather than N+N×M round trips. */
+export interface SitemapJob {
+  id: string;
+  postedAt: string | null;
+  categoryName: string | null;
+  city: string | null;
+}
+
+/** All open job (id, postedAt, category, city) tuples — for sitemap
+ * `lastmod`. Capped for the same reason as getAllJobIds (bounded
+ * sitemap). */
+export async function getAllJobsForSitemap(
+  limit = 1000,
+): Promise<SitemapJob[]> {
+  if (!hasSupabase()) {
+    return mockJobs.map((j) => ({
+      id: j.id,
+      postedAt: j.postedAt,
+      categoryName: j.categoryName,
+      city: j.city,
+    }));
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("job_feed")
+      .select("id, posted_at, category_name, city")
+      .eq("status", "open")
+      .order("posted_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((r) => {
+      const row = r as {
+        id: unknown;
+        posted_at: unknown;
+        category_name: unknown;
+        city: unknown;
+      };
+      return {
+        id: String(row.id),
+        postedAt: row.posted_at == null ? null : String(row.posted_at),
+        categoryName:
+          row.category_name == null ? null : String(row.category_name),
+        city: row.city == null ? null : String(row.city),
+      };
+    });
+  } catch (e) {
+    console.error("getAllJobsForSitemap failed", e);
+    return [];
+  }
+}

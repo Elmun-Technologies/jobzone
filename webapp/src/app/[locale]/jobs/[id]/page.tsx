@@ -1,8 +1,10 @@
 import { BadgeCheck, MapPin, Phone } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageEvent } from "@/components/analytics/page-event";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
@@ -19,7 +21,12 @@ import {
   schedulePatternLabel,
 } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
-import { jobPostingJsonLd, siteUrl } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  jobPostingJsonLd,
+  localeAlternates,
+  siteUrl,
+} from "@/lib/seo";
 
 // Auth/session-dependent, per-request. Without this the page can be
 // full-route-cached (getCurrentUser swallows cookies() so Next never sees
@@ -33,17 +40,37 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const job = await getJobById(id);
-  if (!job) return { title: "Job" };
+  if (!job) {
+    const t = await getTranslations({ locale, namespace: "common" });
+    return { title: t("notFound") };
+  }
   const loc = locationText(job);
-  const title = `${job.title} — ${job.companyName}`;
-  const description =
+  const salary = salaryText(job);
+  // "Kassir — Toshkent | 4 000 000 so'm | Yolla" — the exact query shape
+  // seekers type into Google. City goes right after the job title so the
+  // "toshkentda kassir" tail matches; salary joins when we have it. Yolla
+  // is appended by the layout template so it isn't duplicated here.
+  const titleParts = [job.title, loc, salary].filter(Boolean).join(" — ");
+  const title = titleParts || job.title;
+  // Description leads with the raw posting when we have one; otherwise a
+  // synthesized one liner in the seeker's language stays keyword-rich.
+  const description = (
     job.description?.slice(0, 155) ??
-    `${job.title} at ${job.companyName}${loc ? ` · ${loc}` : ""}`;
+    [
+      job.title,
+      job.companyName,
+      loc,
+      salary,
+      schedulePatternLabel(job.schedulePattern),
+    ]
+      .filter(Boolean)
+      .join(" · ")
+  ).slice(0, 160);
   const url = `${siteUrl()}/${locale}/jobs/${id}`;
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: localeAlternates(locale, `jobs/${id}`),
     // The `opengraph-image` file in this segment supplies og:image /
     // twitter:image automatically, so a shared job link renders a branded card.
     openGraph: { title, description, url, type: "website" },
@@ -145,21 +172,42 @@ export default async function JobDetailsPage({
   // QuickApplyButton routes an unauthenticated tap to sign-in and back.
   const needsForm = job.screeningQuestions.some((q) => q.required);
 
+  const tb = await getTranslations("landingPage");
+  const base = siteUrl();
+  const localePath = `${base}/${locale}`;
+
   return (
     <Container className="py-8">
       <JsonLd data={jobPostingJsonLd(job)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: tb("breadcrumbHome"), url: localePath },
+          { name: tb("breadcrumbJobs"), url: `${localePath}/jobs` },
+          { name: job.title, url: `${localePath}/jobs/${id}` },
+        ])}
+      />
+      <PageEvent
+        name="job_view"
+        props={{
+          job_id: job.id,
+          company_id: job.companyId,
+          category: job.categoryName ?? null,
+          city: job.city ?? null,
+          salary_max: job.salaryMax ?? null,
+        }}
+      />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Main column */}
         <div className="lg:col-span-2">
           <div className="flex gap-4">
             {job.companyLogoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={job.companyLogoUrl}
                 alt={job.companyName}
                 width={64}
                 height={64}
+                unoptimized
                 className="size-16 shrink-0 rounded-xl object-cover"
               />
             ) : (

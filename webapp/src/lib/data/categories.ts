@@ -12,6 +12,31 @@ export interface CategoryWithCount extends JobCategory {
   count: number;
 }
 
+/** Find one active category by its slug — the URL segment used on the
+ * /[locale]/ish/[category] landing pages. Returns null when there is no
+ * match so the caller can 404 cleanly. */
+export async function getCategoryBySlug(
+  slug: string,
+): Promise<JobCategory | null> {
+  if (!hasSupabase()) {
+    return mockCategories.find((c) => c.slug === slug) ?? null;
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("job_categories")
+      .select("id, slug, name")
+      .eq("is_active", true)
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? toCategory(data) : null;
+  } catch (e) {
+    console.error("getCategoryBySlug failed", e);
+    return null;
+  }
+}
+
 /** Active job categories. */
 export async function getCategories(): Promise<JobCategory[]> {
   if (!hasSupabase()) return mockCategories;

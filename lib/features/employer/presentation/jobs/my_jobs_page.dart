@@ -110,7 +110,7 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
             const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: async.when(
-                loading: () => const JzLoader(),
+                loading: () => const JobListSkeleton(),
                 error: (_, _) => JzErrorState(
                   title: l.errorTitle,
                   message: l.errUnknown,
@@ -125,34 +125,38 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
                       message: l.noJobsBody,
                     );
                   }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      0,
-                      AppSpacing.lg,
-                      96,
-                    ),
-                    itemCount: jobs.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, i) => _MyJobCard(
-                      job: jobs[i],
-                      onTap: () => context.push(
-                        Routes.employerJobApplicants(jobs[i].id),
-                        extra: jobs[i],
+                  return RefreshIndicator(
+                    onRefresh: () =>
+                        ref.refresh(myJobsProvider(_status).future),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        0,
+                        AppSpacing.lg,
+                        96,
                       ),
-                      onEdit: () => context.push(
-                        Routes.employerEditJob(jobs[i].id),
-                        extra: jobs[i],
-                      ),
-                      onClose: () => _setStatus(jobs[i], 'closed'),
-                      onReopen: () => _setStatus(jobs[i], 'open'),
-                      onPublish: () => _publishDraft(jobs[i]),
-                      onPromote: () =>
-                          showPromoteSheet(context, jobId: jobs[i].id),
-                      onDuplicate: () => context.push(
-                        Routes.employerDuplicateJob(jobs[i].id),
-                        extra: jobs[i],
+                      itemCount: jobs.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: AppSpacing.md),
+                      itemBuilder: (context, i) => _MyJobCard(
+                        job: jobs[i],
+                        onTap: () => context.push(
+                          Routes.employerJobApplicants(jobs[i].id),
+                          extra: jobs[i],
+                        ),
+                        onEdit: () => context.push(
+                          Routes.employerEditJob(jobs[i].id),
+                          extra: jobs[i],
+                        ),
+                        onClose: () => _setStatus(jobs[i], 'closed'),
+                        onReopen: () => _setStatus(jobs[i], 'open'),
+                        onPublish: () => _publishDraft(jobs[i]),
+                        onPromote: () =>
+                            showPromoteSheet(context, jobId: jobs[i].id),
+                        onDuplicate: () => context.push(
+                          Routes.employerDuplicateJob(jobs[i].id),
+                          extra: jobs[i],
+                        ),
                       ),
                     ),
                   );
