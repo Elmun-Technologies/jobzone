@@ -851,6 +851,7 @@
   "notifTitleApplicationUpdate": "Обновление заявки",
   "notifTitleMessage": "Новое сообщение",
   "notifTitleJobMatch": "Новая подходящая вакансия",
+  "notifBodyApplicationUpdate": "Статус вашей заявки изменён на «{status}»",
   "emailHint": "example@gmail.com",
   "promoStartName": "Старт",
   "promoStartDesc": "Обычное бесплатное объявление",

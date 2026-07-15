@@ -33,7 +33,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const company = await getCompanyById(id);
-  if (!company) return { title: "Company" };
+  if (!company) {
+    const t = await getTranslations({ locale, namespace: "common" });
+    return { title: t("notFound") };
+  }
   const description =
     company.about?.slice(0, 155) ?? `${company.name} on Yolla`;
   const url = `${siteUrl()}/${locale}/companies/${id}`;

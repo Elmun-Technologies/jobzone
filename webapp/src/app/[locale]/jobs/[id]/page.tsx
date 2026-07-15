@@ -40,7 +40,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const job = await getJobById(id);
-  if (!job) return { title: "Job" };
+  if (!job) {
+    const t = await getTranslations({ locale, namespace: "common" });
+    return { title: t("notFound") };
+  }
   const loc = locationText(job);
   const salary = salaryText(job);
   // "Kassir — Toshkent | 4 000 000 so'm | Yolla" — the exact query shape

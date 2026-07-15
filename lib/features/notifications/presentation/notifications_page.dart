@@ -7,6 +7,7 @@ import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/enums/enums.dart';
+import '../../applications/presentation/util/status_label.dart';
 import '../application/notifications_providers.dart';
 import '../domain/notification.dart';
 
@@ -161,6 +162,7 @@ class _NotificationTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final unread = !notification.isRead;
+    final body = _body(context);
     return InkWell(
       onTap: () => _open(context, ref),
       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -209,10 +211,10 @@ class _NotificationTile extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  if (notification.body != null) ...[
+                  if (body != null) ...[
                     const SizedBox(height: 2),
                     Text(
-                      notification.body!,
+                      body,
                       style: context.text.bodySmall?.copyWith(
                         color: colors.textSecondary,
                         height: 1.4,
@@ -268,6 +270,27 @@ class _NotificationTile extends ConsumerWidget {
       NotificationType.jobMatch => l.notifTitleJobMatch,
       NotificationType.review || NotificationType.system => notification.title,
     };
+  }
+
+  // applicationUpdate's server-stored body is a fixed-language sentence (the
+  // status-change trigger only ever writes one language); re-derive it from
+  // `data.status` (always present — see notify_application_status_change())
+  // the same way the title above is re-derived, so it follows the in-app
+  // language. Every other type's body is either literal user content (a chat
+  // message preview) or already-localized system/admin copy, so it passes
+  // through unchanged.
+  String? _body(BuildContext context) {
+    if (notification.type == NotificationType.applicationUpdate) {
+      final status = ApplicationStatus.fromWire(
+        notification.data['status'] as String?,
+      );
+      if (status != null) {
+        return context.l10n.notifBodyApplicationUpdate(
+          applicationStatusLabel(context, status),
+        );
+      }
+    }
+    return notification.body;
   }
 
   IconData _icon(NotificationType type) => switch (type) {
