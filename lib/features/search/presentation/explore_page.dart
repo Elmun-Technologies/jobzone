@@ -144,7 +144,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                     onRetry: () =>
                         ref.read(searchControllerProvider.notifier).retry(),
                   ),
-                  _ListTab(results: results),
+                  _ListTab(
+                    results: results,
+                    onRefresh: () =>
+                        ref.read(searchControllerProvider.notifier).retry(),
+                  ),
                 ],
               ),
             ),
@@ -251,9 +255,10 @@ class _MapTab extends StatelessWidget {
 }
 
 class _ListTab extends StatelessWidget {
-  const _ListTab({required this.results});
+  const _ListTab({required this.results, required this.onRefresh});
 
   final AsyncValue<List<Job>> results;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -264,16 +269,20 @@ class _ListTab extends StatelessWidget {
           JzEmptyState(icon: Icons.error_outline_rounded, title: l.errUnknown),
       data: (jobs) => jobs.isEmpty
           ? JzEmptyState(icon: Icons.work_outline_rounded, title: l.noJobsTitle)
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                0,
-                AppSpacing.lg,
-                AppSpacing.lg,
+          : RefreshIndicator(
+              onRefresh: onRefresh,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                itemCount: jobs.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(height: AppSpacing.md),
+                itemBuilder: (_, i) => JobCard(job: jobs[i]),
               ),
-              itemCount: jobs.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-              itemBuilder: (_, i) => JobCard(job: jobs[i]),
             ),
     );
   }

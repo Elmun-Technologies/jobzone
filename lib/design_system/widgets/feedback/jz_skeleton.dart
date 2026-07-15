@@ -186,6 +186,55 @@ class TileListSkeleton extends StatelessWidget {
   }
 }
 
+/// Placeholder for a single-item detail page: a header (avatar/logo + two
+/// title lines) followed by a few body-text lines. Used where a whole screen
+/// (job details, company details, a chat thread) loads at once, so a bare
+/// spinner would otherwise sit alone on an empty page.
+class DetailPageSkeleton extends StatelessWidget {
+  const DetailPageSkeleton({super.key, this.lines = 6});
+  final int lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const SkeletonBox(width: 56, height: 56, radius: AppRadius.md),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      SkeletonBox(height: 16),
+                      SizedBox(height: AppSpacing.xs),
+                      SkeletonBox(width: 140, height: 12),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            for (var i = 0; i < lines; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: SkeletonBox(
+                  height: 12,
+                  width: i == lines - 1 ? 160 : double.infinity,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// A shimmering column of [JobCardSkeleton]s for list loading states.
 class JobListSkeleton extends StatelessWidget {
   const JobListSkeleton({super.key, this.count = 4, this.padding});

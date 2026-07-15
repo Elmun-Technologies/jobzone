@@ -39,17 +39,21 @@ class BookmarksPage extends ConsumerWidget {
                         title: l.noBookmarksTitle,
                         message: l.noBookmarksBody,
                       )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          0,
-                          AppSpacing.lg,
-                          AppSpacing.lg,
+                    : RefreshIndicator(
+                        onRefresh: () =>
+                            ref.refresh(bookmarkedJobsProvider.future),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            0,
+                            AppSpacing.lg,
+                            AppSpacing.lg,
+                          ),
+                          itemCount: jobs.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: AppSpacing.md),
+                          itemBuilder: (_, i) => JobCard(job: jobs[i]),
                         ),
-                        itemCount: jobs.length,
-                        separatorBuilder: (_, _) =>
-                            const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (_, i) => JobCard(job: jobs[i]),
                       ),
               ),
             ),

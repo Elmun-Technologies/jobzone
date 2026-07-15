@@ -39,7 +39,7 @@ class _ApplicantsPageState extends ConsumerState<ApplicantsPage> {
             ),
             Expanded(
               child: async.when(
-                loading: () => const JzLoader(),
+                loading: () => const TileListSkeleton(),
                 error: (_, _) => JzErrorState(
                   title: l.errorTitle,
                   message: l.errUnknown,
