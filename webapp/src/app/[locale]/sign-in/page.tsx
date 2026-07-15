@@ -29,6 +29,8 @@ export default async function SignInPage({
   const sp = await searchParams;
   const next = typeof sp.next === "string" ? sp.next : undefined;
   const role = typeof sp.role === "string" ? sp.role : undefined;
+  // Set by /auth/callback when an OAuth round-trip failed.
+  const oauthFailed = sp.error === "oauth";
   const t = await getTranslations("auth");
 
   // Carry next/role across to sign-up so a guest who came from an auth-last
@@ -47,6 +49,12 @@ export default async function SignInPage({
       <p className="text-muted-foreground mb-6 text-sm">
         {t("signInSubtitle")}
       </p>
+
+      {oauthFailed ? (
+        <p className="border-destructive/30 bg-destructive/10 text-destructive mb-4 rounded-lg border px-3 py-2 text-sm font-medium">
+          {t("errOauthCallback")}
+        </p>
+      ) : null}
 
       <SignInForm next={next} />
 
