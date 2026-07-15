@@ -1,34 +1,35 @@
 import * as Sentry from "@sentry/nextjs";
 
 /**
- * Server + edge runtime initialisation. Next runs this once at boot on
- * every runtime the app has (Node.js for Server Components / route
- * handlers, Vercel Edge for the middleware). Client init lives in
- * `instrumentation-client.ts` — Next wires it separately.
+ * Next 15+ picks this up automatically on every runtime it boots. Per the
+ * Sentry Next.js SDK convention, this file just dispatches to the
+ * runtime-specific config file at the repo root:
  *
- * Everything gates on SENTRY_DSN. Empty → no init, no network, no
- * telemetry: safe to ship dark until we point it at a Sentry project.
+ *   Node.js (Server Components / route handlers / actions)  → sentry.server.config.ts
+ *   Edge   (middleware / edge route handlers)               → sentry.edge.config.ts
+ *   Browser                                                 → instrumentation-client.ts (wired separately by Next)
+ *
+ * Keeping the actual Sentry.init in the wizard-style root files makes a
+ * future `sentry-wizard` re-run idempotent, and lets the two runtimes
+ * carry per-runtime integrations without cross-import.
+ *
+ * `dynamic()` (not a top-level import) keeps the Node-only code out of the
+ * Edge bundle — Sentry's Node integrations pull node:async_hooks and
+ * friends that aren't available in the Edge runtime, so importing
+ * unconditionally would break the middleware build.
  */
-export function register() {
-  const dsn = process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN;
-  if (!dsn) return;
-
-  const shared = {
-    dsn,
-    environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV,
-    // Sample everything at launch; drop this once traffic climbs so we
-    // don't burn the quota (Sentry free tier: 5 000 errors / month,
-    // 10 000 performance events).
-    tracesSampleRate: 1.0,
-    // Log Sentry init in server logs so a silent gate-fail is visible.
-    debug: false,
-  };
-
+export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    Sentry.init(shared);
+    await import("../sentry.server.config");
   } else if (process.env.NEXT_RUNTIME === "edge") {
-    Sentry.init(shared);
+    await import("../sentry.edge.config");
   }
 }
 
+/**
+ * Server-side error hook Next 15+ calls when a Server Component / route
+ * handler throws. Sentry ships a ready-made handler that captures the
+ * error along with the request context — safe to export unconditionally;
+ * it no-ops when the SDK didn't init (DSN unset).
+ */
 export const onRequestError = Sentry.captureRequestError;
