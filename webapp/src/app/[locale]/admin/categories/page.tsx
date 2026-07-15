@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 
 import { ActionNote } from "@/components/admin/action-note";
 import { ModerationForm } from "@/components/admin/moderation-form";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { EmptyState } from "@/components/ui/states";
 import { getAdminCategories } from "@/lib/admin/data/categories";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import { setCategoryActive, upsertCategory } from "@/lib/actions/admin/categories";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
@@ -30,17 +32,9 @@ export default async function AdminCategoriesPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
   const categories = await getAdminCategories();
-  if (categories === null) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (categories === null) return <ReadKeyMissing />;
 
   return (
     <div>
@@ -49,7 +43,7 @@ export default async function AdminCategoriesPage({
           {adminStrings.nav.categories}
         </h1>
       </div>
-      {pick(sp.notice) === "err" ? (
+      {pickParam(sp.notice) === "err" ? (
         <ActionNote error={adminStrings.actionFailed} />
       ) : null}
 

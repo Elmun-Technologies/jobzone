@@ -10,6 +10,7 @@ export const adminStrings = {
   demoMode: "Demo rejim — Supabase sozlanmagan, ma'lumotlar namunaviy",
   loadError: "Ma'lumotlarni yuklab bo'lmadi",
   loadErrorHint: "Keyinroq qayta urinib ko'ring yoki konsol loglarini tekshiring.",
+  retry: "Qayta urinish",
   readKeyMissing: "O'qish kaliti sozlanmagan",
   readKeyMissingHint:
     "SUPABASE_SERVICE_ROLE_KEY o'rnatilmagan — ro'yxatlar shu kalitsiz o'qilmaydi.",

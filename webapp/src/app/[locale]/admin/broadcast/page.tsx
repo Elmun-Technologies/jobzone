@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 
 import { ActionNote } from "@/components/admin/action-note";
 import { ConfirmSubmit } from "@/components/admin/confirm-submit";
-import { EmptyState } from "@/components/ui/states";
+import { ReadKeyMissing } from "@/components/admin/read-key-missing";
 import { getBroadcastCounts } from "@/lib/admin/data/broadcast";
 import { adminStrings } from "@/lib/admin/strings";
+import { pickParam } from "@/lib/admin/search-params";
 import { sendBroadcast } from "@/lib/actions/admin/broadcast";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { groupNumber } from "@/lib/format";
@@ -31,20 +32,12 @@ export default async function AdminBroadcastPage({
   const { locale } = await params;
   await requireAdmin(locale);
   const sp = await searchParams;
-  const pick = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
   const counts = await getBroadcastCounts();
-  if (!counts) {
-    return (
-      <EmptyState
-        title={adminStrings.readKeyMissing}
-        description={adminStrings.readKeyMissingHint}
-      />
-    );
-  }
+  if (!counts) return <ReadKeyMissing />;
 
-  const notice = pick(sp.notice);
-  const sentCount = Number(pick(sp.count)) || 0;
+  const notice = pickParam(sp.notice);
+  const sentCount = Number(pickParam(sp.count)) || 0;
 
   const reach = [
     { key: "all", label: s.audienceAll, n: counts.all },
