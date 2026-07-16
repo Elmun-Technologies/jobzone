@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -5,6 +8,20 @@ plugins {
     // Firebase Cloud Messaging (push) — reads google-services.json in this dir.
     id("com.google.gms.google-services")
 }
+
+// Release-signing config lives in android/key.properties (gitignored — never
+// committed). Load it lazily: if the file is absent (fresh checkout, CI without
+// the secret, `flutter run --release` on a dev box) `keystoreProperties` stays
+// empty and the release buildType silently falls back to the debug keystore for
+// local iteration. A real Play upload rejects debug-signed AABs, so
+// `key.properties` MUST exist on the machine that produces the release artifact
+// — see docs/android-signing.md.
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+val hasReleaseKeystore = keystoreProperties.getProperty("storeFile")?.isNotEmpty() == true
 
 android {
     namespace = "io.jobzone.jobzone"
@@ -34,11 +51,32 @@ android {
         versionName = flutter.versionName
     }
 
+    // Register the release signing config only when key.properties supplies the
+    // four required values. Without them Gradle would fail to resolve the block
+    // at configure-time, breaking every task (including `flutter run --debug`).
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // With key.properties present → sign with the upload keystore
+            // registered above (Play Console accepts this). Without it → fall
+            // back to the debug key so `flutter run --release` still works on
+            // dev machines, but a Play upload will be rejected until the
+            // developer follows docs/android-signing.md.
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
 
             // Shrink + obfuscate the Java/Kotlin plugin layer (R8) and strip
             // unused Android resources, so the test APK downloads smaller. Keep
