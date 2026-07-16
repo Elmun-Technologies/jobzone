@@ -22,6 +22,10 @@ class AuthSocialRow extends ConsumerWidget {
     final ok = await ref
         .read(authControllerProvider.notifier)
         .signInWithGoogle();
+    // The analyzer's use_build_context_synchronously lint can't see through
+    // a helper — the mounted guard has to live at the same statement level
+    // as the await for the check to satisfy it, so we inline it here.
+    if (!context.mounted) return;
     _surfaceIfFailed(context, ref, ok);
   }
 
@@ -29,12 +33,14 @@ class AuthSocialRow extends ConsumerWidget {
     final ok = await ref
         .read(authControllerProvider.notifier)
         .signInWithApple();
+    if (!context.mounted) return;
     _surfaceIfFailed(context, ref, ok);
   }
 
   void _surfaceIfFailed(BuildContext context, WidgetRef ref, bool ok) {
-    // On web the page redirects on success; only surface failures.
-    if (ok || !context.mounted) return;
+    // On web the page redirects on success; only surface failures. Callers
+    // above have already checked context.mounted at the await boundary.
+    if (ok) return;
     final err = ref.read(authControllerProvider).error;
     showErrorSnack(
       context,
