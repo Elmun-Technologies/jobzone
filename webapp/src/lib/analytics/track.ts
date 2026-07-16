@@ -24,7 +24,12 @@ type EventName =
   | "signup_complete"
   | "vacancy_post_start"
   | "vacancy_post_complete"
-  | "wallet_topup_pending";
+  | "wallet_topup_pending"
+  // Two lightweight engagement events — currently GA/PostHog only, no Meta
+  // standard-event mapping. Adding them to the union so calls are compile-safe
+  // and so a typo (`bookmarked` etc.) fails at the call site.
+  | "phone_click"
+  | "bookmark_added";
 
 type EventProps = Record<string, string | number | boolean | null | undefined>;
 
@@ -68,10 +73,13 @@ export function track(name: EventName, props: EventProps = {}): void {
 
   // Yandex.Metrica reachGoal — the counter id must match the loader.
   // Metrica does not accept arbitrary props on goals; we pass them
-  // as params for filtering in the report.
+  // as params for filtering in the report. Env-only (no hardcoded fallback);
+  // when `NEXT_PUBLIC_YANDEX_METRICA_ID` is unset the loader also skipped,
+  // so `w.ym` is undefined and this branch never fires — but the env read
+  // stays first so a misconfigured `w.ym` (stray SDK on the page) can't
+  // accidentally receive events aimed at production.
   try {
-    const metricaId = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "110738388";
-    const idNum = Number(metricaId);
+    const idNum = Number(process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "");
     if (idNum && w.ym) {
       w.ym(idNum, "reachGoal", name, props as Record<string, unknown>);
     }

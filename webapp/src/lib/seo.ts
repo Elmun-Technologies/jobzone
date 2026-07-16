@@ -74,6 +74,14 @@ export function jobPostingJsonLd(job: Job): Record<string, unknown> {
 
   if (job.workingModel === "remote") {
     data.jobLocationType = "TELECOMMUTE";
+    // Google's JobPosting rich result REQUIRES applicantLocationRequirements
+    // whenever jobLocationType=TELECOMMUTE — without it the posting is
+    // ineligible for the Google Jobs widget entirely. Ship the job's stated
+    // country (defaults to UZ, matching jobLocation.addressCountry above).
+    data.applicantLocationRequirements = {
+      "@type": "Country",
+      name: job.country ?? "UZ",
+    };
   }
 
   if (job.salaryMin != null || job.salaryMax != null) {

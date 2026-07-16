@@ -56,27 +56,16 @@ const OG_LOCALE: Record<string, string> = {
   en: "en_US",
 };
 
-// Google Search Console (URL-prefix) verification. The token is public — it
-// only proves control of the deployment — so shipping it in the bundle is
-// safe; env-backed so a future rotation is a Vercel change, not a deploy.
+// Public verification / analytics IDs. All env-only, NO hardcoded fallbacks:
+// a hardcoded default runs on every preview branch too, contaminating the
+// production stream with dev traffic and violating the "dev/preview stays
+// silent" invariant. Set each on the production environment in Vercel and
+// leave preview/local unset — see .env.example for the full list.
 const GOOGLE_SITE_VERIFICATION =
-  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ??
-  "y__H-hpjfRt5Yl-VtnwEJJn3pNab4g-9CLeP3QOyPb0";
-// Yandex.Webmaster verification (empty until issued — Yandex dominates search
-// in UZ, so we want to be listed there as well).
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "";
 const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
-
-// Google Analytics 4 measurement id. Public — appears in every page's HTML;
-// env-backed so preview envs can point at a separate stream (or leave empty
-// to skip). Default is the currently issued Yolla Web stream.
-const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-6DZDQYHJMX";
-// Yandex.Metrica counter id — public. Default is the issued Yolla counter;
-// unset in env to skip (dev/preview).
-const YANDEX_METRICA_ID =
-  process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "110738388";
-// Meta (Facebook) Pixel id — public. Empty until an ad account is wired,
-// at which point Vercel env NEXT_PUBLIC_META_PIXEL_ID lights it up.
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
+const YANDEX_METRICA_ID = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "";
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
 
 export async function generateMetadata({

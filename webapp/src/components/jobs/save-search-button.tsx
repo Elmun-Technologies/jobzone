@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { saveSearch } from "@/lib/actions/saved-search";
+import { track } from "@/lib/analytics/track";
 
 /**
  * "Save this search" affordance on the jobs page. Web-native (no bottom sheet):
@@ -42,6 +43,14 @@ export function SaveSearchButton() {
         router.push(`/${locale}/sign-in?next=${encodeURIComponent(next)}`);
       } else if (res.ok) {
         setSaved(true);
+        // Funnel event — fired on the successful save only (not on the
+        // guest → sign-in bounce, which the user could always abandon).
+        // Props stay filter-shaped, no PII.
+        track("saved_search_created", {
+          q: q || null,
+          category: category || null,
+          city: city || null,
+        });
       }
     });
   }

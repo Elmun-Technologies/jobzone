@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { signInAction, type AuthFormState } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,14 @@ export function SignInForm({ next = "" }: { next?: string }) {
         emailLabel={t("email")}
         passwordLabel={t("password")}
       />
+      <div className="-mt-2 flex justify-end">
+        <Link
+          href="/forgot-password"
+          className="text-muted-foreground hover:text-primary text-sm font-medium"
+        >
+          {t("forgotPassword")}
+        </Link>
+      </div>
       <FormError message={errorMsg} />
       <button
         type="submit"
