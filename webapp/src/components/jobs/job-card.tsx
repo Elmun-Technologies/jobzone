@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { Job } from "@/lib/data/types";
 import { locationText, postedInfo, salaryText } from "@/lib/format";
+import { usableLogoUrl } from "@/lib/logo";
 import { useNow } from "@/lib/use-now";
 
 import { JobCardActions } from "./job-card-actions";
@@ -62,31 +63,39 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
       }`}
     >
       <div className="flex gap-3">
-        {/* Company logo or initial */}
-        {job.companyLogoUrl ? (
-          <Image
-            src={job.companyLogoUrl}
-            alt={job.companyName}
-            width={48}
-            height={48}
-            // Small logo — no LCP candidate; unoptimized keeps it cheap while
-            // Next still emits width/height so layout doesn't shift.
-            unoptimized
-            className={`size-12 shrink-0 rounded-lg object-cover ${
-              glow
-                ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2"
-                : ""
-            }`}
-          />
-        ) : (
-          <div
-            className={`bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg font-bold ${
-              glow ? "shadow-[0_0_12px_rgba(199,251,0,0.55)]" : ""
-            }`}
-          >
-            {job.companyName.charAt(0).toUpperCase()}
-          </div>
-        )}
+        {/* Company logo or initial. `usableLogoUrl` filters out the seed
+            placeholder host (picsum.photos) so a slow external image never
+            becomes the LCP element — that alone was pushing LCP into the
+            tens of seconds on /jobs. */}
+        {(() => {
+          const src = usableLogoUrl(job.companyLogoUrl);
+          return src ? (
+            <Image
+              src={src}
+              alt={job.companyName}
+              width={48}
+              height={48}
+              // Below-the-fold on a long list; browser handles native lazy.
+              loading="lazy"
+              // Fixed pixel size — one srcset entry is enough; Next still emits
+              // width/height so layout doesn't shift on load.
+              sizes="48px"
+              className={`size-12 shrink-0 rounded-lg object-cover ${
+                glow
+                  ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2"
+                  : ""
+              }`}
+            />
+          ) : (
+            <div
+              className={`bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg font-bold ${
+                glow ? "shadow-[0_0_12px_rgba(199,251,0,0.55)]" : ""
+              }`}
+            >
+              {job.companyName.charAt(0).toUpperCase()}
+            </div>
+          );
+        })()}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">

@@ -7,12 +7,14 @@ import * as Sentry from "@sentry/nextjs";
  * because the client bundle is where dead-code elimination matters
  * most — the DSN check short-circuits the whole block when unset.
  *
- * Session Replay is opt-in via `replaysOnErrorSampleRate: 1.0` — every
- * session that hits an error is replayed, no replays for happy sessions.
- * That's the highest signal-to-noise trade-off for a job platform where
- * a full-session replay budget would burn through a free quota fast, and
- * where salary/CV inputs (masked below) are the most sensitive fields
- * you could accidentally capture.
+ * **Session Replay is intentionally NOT included.** The replay integration
+ * ships ~85 KB of gzipped worker code and starts recording DOM mutations
+ * on page load — the largest single contributor to Yolla's tunable JS
+ * bundle, and enough to push LCP up on hot pages like /jobs. Yandex
+ * Metrica already runs `webvisor` (its own session replay) so a second
+ * recorder is redundant anyway. Bring it back per-route via
+ * `Sentry.lazyLoadIntegration("replay")` inside a debug flow when you
+ * actually need to review a session.
  */
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
@@ -26,13 +28,6 @@ if (dsn) {
     // front-to-back sampling rate. Raise per-route via startSpan if
     // a specific flow needs fuller coverage.
     tracesSampleRate: 0.1,
-    // Session Replay — 10% of ordinary sessions, 100% of sessions that
-    // throw. Errored sessions are where replay pays off; a healthy
-    // session's replay only fills the quota. Every input is masked and
-    // every media asset blocked so a résumé draft / salary field never
-    // leaves the browser.
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
     // PII (IP, cookies, user identity) stays off unless a route calls
     // Sentry.setUser explicitly.
     sendDefaultPii: false,
@@ -44,14 +39,7 @@ if (dsn) {
       "AbortError",
       "Non-Error promise rejection captured",
     ],
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllInputs: true,
-        maskAllText: false,
-        blockAllMedia: true,
-      }),
-    ],
+    integrations: [Sentry.browserTracingIntegration()],
   });
 }
 
