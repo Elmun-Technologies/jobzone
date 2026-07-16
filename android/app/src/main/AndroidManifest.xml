@@ -6,7 +6,9 @@
     <application
         android:label="Yolla"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,12 +30,34 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Supabase OAuth (Google) deep-link callback. -->
+            <!-- Supabase OAuth (Google, Apple) deep-link callback. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="io.jobzone.jobzone" android:host="login-callback"/>
+            </intent-filter>
+            <!--
+                Android App Links (https://). autoVerify=true asks Android to
+                fetch https://www.yollla.uz/.well-known/assetlinks.json (and
+                the naked host) at install time and, if it contains the app's
+                SHA-256, open Yolla directly instead of routing to Chrome. The
+                assetlinks.json + release keystore fingerprint must both be in
+                place in production for verification to succeed — see
+                docs/android-signing.md §4 and webapp/src/app/.well-known/.
+                Both hosts listed so a bare yollla.uz link also opens the app.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"/>
+                <data android:host="www.yollla.uz"/>
+                <data android:host="yollla.uz"/>
+                <data android:pathPrefix="/jobs"/>
+                <data android:pathPrefix="/companies"/>
+                <data android:pathPrefix="/ish"/>
+                <data android:pathPrefix="/resumes"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
@@ -41,16 +65,53 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!--
+            FCM defaults. Without these, notifications land in a low-priority
+            "Miscellaneous" channel with a white-square icon:
+             - default_notification_channel_id points at the channel created
+               client-side by FcmPushService (Importance.high) before the
+               first push arrives.
+             - default_notification_icon is a monochrome / alpha-only drawable;
+               Android strips color from status-bar icons and displays only
+               the alpha. Using the multi-color launcher icon renders as a
+               solid white square from Android 5+.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default_high_importance"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notify"/>
     </application>
-    <!-- Required to query activities that can process text, see:
-         https://developer.android.com/training/package-visibility and
-         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
-
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <!--
+        Android 11+ (targetSdk 30+) hides other apps by default; url_launcher /
+        share intents must declare the intents they'll resolve or they silently
+        no-op. Yolla launches: HTTPS URLs (Click/Payme checkout, Telegram
+        t.me links, external website links), tel: (phone number tap), mailto:
+        (support email), plus the platform's text-process contract for the
+        Flutter engine. https and http both listed — a naked http:// URL
+        arriving from a partner would otherwise fail resolution silently.
+    -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="http"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
         </intent>
     </queries>
 </manifest>

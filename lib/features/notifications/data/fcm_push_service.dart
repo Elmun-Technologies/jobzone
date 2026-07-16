@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/router/routes.dart';
@@ -8,6 +11,13 @@ import '../../../core/supabase/supabase_providers.dart';
 import '../../../shared/enums/enums.dart';
 import '../../../shared/providers/app_flags.dart';
 import '../domain/push_service.dart';
+
+/// Channel id referenced by `com.google.firebase.messaging.default_notification_channel_id`
+/// in AndroidManifest.xml. Both must stay in sync — the manifest meta-data
+/// tells Firebase which channel to route notification-only payloads into, and
+/// the channel MUST exist on the device before the first push or Android
+/// silently drops the notification.
+const String _fcmChannelId = 'default_high_importance';
 
 /// FCM implementation of [PushService] (Phase 8).
 ///
@@ -28,6 +38,7 @@ class FcmPushService implements PushService {
   Future<void> initialize() async {
     final messaging = FirebaseMessaging.instance;
     await messaging.requestPermission();
+    await _ensureAndroidChannel();
     // Show foreground notifications on iOS (Android shows via the system tray /
     // an in-app listener on [messages]).
     await messaging.setForegroundNotificationPresentationOptions(
@@ -66,6 +77,27 @@ class FcmPushService implements PushService {
       registerDevice();
     });
     await registerDevice();
+  }
+
+  /// Registers the high-importance Android notification channel that the
+  /// manifest's `default_notification_channel_id` meta-data points at.
+  /// Idempotent — Android quietly merges duplicate `createNotificationChannel`
+  /// calls. iOS handles channels differently (via UNNotificationCategory,
+  /// which we skip) so this is a no-op there.
+  Future<void> _ensureAndroidChannel() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    const channel = AndroidNotificationChannel(
+      _fcmChannelId,
+      'Yolla notifications',
+      description:
+          'Job matches, application updates, and messages from employers.',
+      importance: Importance.high,
+    );
+    final plugin = FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    await plugin?.createNotificationChannel(channel);
   }
 
   /// Maps a notification data payload to a go_router path, or null when the
