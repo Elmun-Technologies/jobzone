@@ -23,7 +23,7 @@
 		<key>CFBundleAllowMixedLocalizations</key>
 		<true/>
 		<key>CFBundleName</key>
-		<string>jobzone</string>
+		<string>Yolla</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -77,10 +77,26 @@
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Yolla uses your location to show jobs near you.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Yolla needs access to your photos to set a profile picture.</string>
-		<key>NSCameraUsageDescription</key>
-		<string>Yolla needs camera access to take a profile picture.</string>
+		<string>Yolla needs access to your photos to set a profile picture and to attach images to your company reviews.</string>
 		<key>UIStatusBarHidden</key>
+		<false/>
+		<!--
+			Push background delivery. `remote-notification` lets iOS wake the
+			app for silent/data-only APNs pushes (used by the notify-dispatch
+			→ FCM pipeline). Without it those payloads are dropped and the app
+			only sees user-visible notifications.
+		-->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
+		<!--
+			Export compliance: the app uses only HTTPS + Apple/standard system
+			crypto (no custom cipher, no proprietary encryption). Setting this
+			to false skips the "Missing Compliance" click-through on every
+			TestFlight build and satisfies the App Store submission gate.
+		-->
+		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 		<key>CFBundleURLTypes</key>
 		<array>

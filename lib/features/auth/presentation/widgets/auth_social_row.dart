@@ -8,7 +8,11 @@ import '../../application/auth_controller.dart';
 import '../util/auth_failure_message.dart';
 
 /// "Or sign in with" divider + Apple / Google circular buttons.
-/// Google is wired to Supabase OAuth; Apple sign-in is coming soon.
+///
+/// Both providers dispatch through Supabase Auth: Google via browser OAuth,
+/// Apple via native SIWA on iOS/macOS and browser OAuth elsewhere. The
+/// Apple button MUST stay visible on iOS as long as any other social
+/// provider is offered — App Store Guideline 4.8.
 class AuthSocialRow extends ConsumerWidget {
   const AuthSocialRow({super.key, required this.label});
 
@@ -18,16 +22,24 @@ class AuthSocialRow extends ConsumerWidget {
     final ok = await ref
         .read(authControllerProvider.notifier)
         .signInWithGoogle();
+    _surfaceIfFailed(context, ref, ok);
+  }
+
+  Future<void> _apple(BuildContext context, WidgetRef ref) async {
+    final ok = await ref
+        .read(authControllerProvider.notifier)
+        .signInWithApple();
+    _surfaceIfFailed(context, ref, ok);
+  }
+
+  void _surfaceIfFailed(BuildContext context, WidgetRef ref, bool ok) {
     // On web the page redirects on success; only surface failures.
-    if (!ok && context.mounted) {
-      final err = ref.read(authControllerProvider).error;
-      showErrorSnack(
-        context,
-        err == null
-            ? context.l10n.errUnknown
-            : authFailureMessage(context, err),
-      );
-    }
+    if (ok || !context.mounted) return;
+    final err = ref.read(authControllerProvider).error;
+    showErrorSnack(
+      context,
+      err == null ? context.l10n.errUnknown : authFailureMessage(context, err),
+    );
   }
 
   @override
@@ -55,7 +67,7 @@ class AuthSocialRow extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _SocialButton(
-              onTap: () => _comingSoon(context),
+              onTap: () => _apple(context, ref),
               child: const Icon(
                 Icons.apple,
                 color: Color(0xFF1A1A1A),
@@ -77,12 +89,6 @@ class AuthSocialRow extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  void _comingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(context.l10n.comingSoon)));
   }
 }
 

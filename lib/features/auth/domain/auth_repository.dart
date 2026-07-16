@@ -13,6 +13,13 @@ abstract interface class AuthRepository {
   /// mobile). Requires the Google provider to be enabled in Supabase Auth.
   Future<void> signInWithGoogle();
 
+  /// Starts the Apple sign-in flow. On iOS/macOS this uses Apple's native
+  /// AuthenticationServices SDK (App Store Guideline 4.8 — offering Google
+  /// without Apple = automatic rejection). On Android + web falls back to
+  /// Supabase's browser OAuth. Requires the Apple provider to be enabled
+  /// in Supabase Auth (Services ID + Sign in with Apple key).
+  Future<void> signInWithApple();
+
   Future<void> signUp({
     required String email,
     required String password,
