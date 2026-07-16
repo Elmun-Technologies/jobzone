@@ -61,7 +61,13 @@ export default async function AdminCategoriesPage({
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">{s.slug}</span>
-            <input name="slug" required className={inputClass} />
+            <input
+              name="slug"
+              required
+              pattern="[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+              title={s.slugHint}
+              className={inputClass}
+            />
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">{s.icon}</span>
@@ -130,7 +136,14 @@ export default async function AdminCategoriesPage({
                       <input type="hidden" name="id" value={c.id} />
                       <input type="hidden" name="isActive" value={c.isActive ? "1" : "0"} />
                       <input name="name" defaultValue={c.name} required className={inputClass} />
-                      <input name="slug" defaultValue={c.slug} required className={inputClass} />
+                      <input
+                        name="slug"
+                        defaultValue={c.slug}
+                        required
+                        pattern="[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+                        title={s.slugHint}
+                        className={inputClass}
+                      />
                       <input name="icon" defaultValue={c.icon ?? ""} className={inputClass} />
                       <label className="flex flex-col gap-1 text-xs">
                         <span className="text-muted-foreground">{s.bannerUrl}</span>

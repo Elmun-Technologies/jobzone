@@ -11,7 +11,11 @@ import { getAdminCompanies } from "@/lib/admin/data/companies";
 import { adminStrings } from "@/lib/admin/strings";
 import { pickParam } from "@/lib/admin/search-params";
 import type { AdminCompanyRow } from "@/lib/admin/types";
-import { setCompanyBlocked, verifyCompany } from "@/lib/actions/admin/moderation";
+import {
+  setCompanyBlocked,
+  unverifyCompany,
+  verifyCompany,
+} from "@/lib/actions/admin/moderation";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { formatDate } from "@/lib/format";
 
@@ -99,7 +103,14 @@ export default async function AdminCompaniesPage({
                 {s.verify}
               </button>
             </form>
-          ) : null}
+          ) : (
+            <ModerationForm
+              action={unverifyCompany}
+              fields={{ locale, id: c.id }}
+              label={s.unverify}
+              withReason
+            />
+          )}
         </div>
       ),
     },

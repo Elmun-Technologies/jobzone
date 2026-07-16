@@ -63,9 +63,45 @@ export async function setOrderStatus(formData: FormData): Promise<void> {
   const id = field(formData, "id");
   const status = field(formData, "status");
   if (!id || !ORDER_STATUSES.has(status)) redirect(`${backTo}?notice=err`);
+  // Optional reason — captured on the audit row + on the compensating wallet
+  // transaction the RPC inserts for paid→refunded/cancelled transitions.
   await runAdminRpc(
     "admin_set_order_status",
-    { p_id: id, p_status: status },
+    { p_id: id, p_status: status, p_reason: field(formData, "reason") || null },
+    backTo,
+  );
+}
+
+const CREDIT_KINDS = new Set(["bonus", "refund", "spend", "topup"]);
+
+/**
+ * Manual wallet adjustment. Positive amount = credit (bonus / goodwill
+ * refund). Negative = debit (write-off / correction). Reason required —
+ * the RPC RAISEs without one so the audit row is never empty.
+ */
+export async function creditWallet(formData: FormData): Promise<void> {
+  const backTo = backPath(formData, "finance");
+  const companyId = field(formData, "companyId");
+  const kind = field(formData, "kind");
+  const reason = field(formData, "reason");
+  const amount = Number(field(formData, "amountUzs").replace(/\s+/g, ""));
+  if (
+    !companyId ||
+    !CREDIT_KINDS.has(kind) ||
+    !reason ||
+    !Number.isFinite(amount) ||
+    amount === 0
+  ) {
+    redirect(`${backTo}?notice=err`);
+  }
+  await runAdminRpc(
+    "admin_credit_wallet",
+    {
+      p_company: companyId,
+      p_amount_uzs: amount,
+      p_kind: kind,
+      p_reason: reason,
+    },
     backTo,
   );
 }
