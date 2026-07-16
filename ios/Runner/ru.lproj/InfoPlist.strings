@@ -1,4 +1,3 @@
 /* iOS system permission dialogs — Russian. */
 "NSLocationWhenInUseUsageDescription" = "Yolla использует ваше местоположение, чтобы показывать вакансии рядом с вами.";
-"NSPhotoLibraryUsageDescription" = "Yolla запрашивает доступ к фотографиям, чтобы установить фото профиля.";
-"NSCameraUsageDescription" = "Yolla запрашивает доступ к камере, чтобы сделать фото профиля.";
+"NSPhotoLibraryUsageDescription" = "Yolla запрашивает доступ к фотографиям, чтобы установить фото профиля и прикрепить изображения к отзывам о компаниях.";
