@@ -1,9 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { requestTopUp, type TopUpState } from "@/lib/actions/wallet";
+import { track } from "@/lib/analytics/track";
 import { cn } from "@/lib/utils";
 
 const PRESETS = [50000, 100000, 200000, 500000];
@@ -34,6 +35,22 @@ export function TopUpForm({
     requestTopUp,
     {},
   );
+
+  // Funnel event — fires exactly when the server confirms the pending
+  // top-up. Amount goes as a number so GA4 can aggregate; company_id is
+  // safe (non-PII) so cohorts can be split by employer size.
+  useEffect(() => {
+    if (state.ok) {
+      track("wallet_topup_pending", {
+        company_id: companyId,
+        amount_uzs: Number(amount) || 0,
+      });
+    }
+    // The action returns a fresh `state` object on every submission, so the
+    // effect only fires on the transition into ok — no risk of double-firing
+    // on re-renders driven by unrelated parent updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <form action={action} className="space-y-4">

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { toggleBookmark } from "@/lib/actions/bookmark";
+import { track } from "@/lib/analytics/track";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,6 +39,11 @@ export function BookmarkButton({
         return;
       }
       setSaved(result.saved);
+      // Funnel event only on the add (not the remove) — the unsave is a
+      // correction, not a retention signal we care to attribute.
+      if (result.saved && !initial) {
+        track("bookmark_added", { job_id: jobId });
+      }
     });
   }
 

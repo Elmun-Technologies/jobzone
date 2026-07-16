@@ -1,4 +1,4 @@
-import { BadgeCheck, MapPin, Phone } from "lucide-react";
+import { BadgeCheck, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -8,6 +8,7 @@ import { PageEvent } from "@/components/analytics/page-event";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
+import { PhoneLink } from "@/components/jobs/phone-link";
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { ShareCreative } from "@/components/jobs/share-creative";
 import { hasApplied } from "@/lib/data/applications";
@@ -335,13 +336,11 @@ export default async function JobDetailsPage({
               className="mt-2 w-full justify-center"
             />
             {job.contactPhone ? (
-              <a
-                href={`tel:${job.contactPhone.replace(/\s+/g, "")}`}
-                className="border-border text-foreground hover:border-primary/40 mt-3 flex items-center justify-center gap-2 rounded-full border py-2.5 text-sm font-semibold transition-colors"
-              >
-                <Phone className="size-4" />
-                {job.contactPhone}
-              </a>
+              <PhoneLink
+                phone={job.contactPhone}
+                jobId={job.id}
+                companyId={job.companyId}
+              />
             ) : null}
             {job.postedAt ? (
               <p className="text-muted-foreground mt-3 text-center text-xs">

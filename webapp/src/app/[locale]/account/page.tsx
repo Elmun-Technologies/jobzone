@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PageEvent } from "@/components/analytics/page-event";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { StatCard } from "@/components/ui/stat-card";
@@ -78,11 +79,18 @@ function resumeReadiness(r: ResumeDraft): {
 
 export default async function AccountPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const sp = await searchParams;
+  // signUpAction (immediate-session path) and the /auth/callback confirmation
+  // both tack `signup=1` onto the redirect so the funnel event fires exactly
+  // once, on the first authenticated view of /account.
+  const justSignedUp = sp.signup === "1";
 
   // Proxy already gates this route; this is the secure (DAL-style) check.
   const user = await getCurrentUser();
@@ -163,6 +171,9 @@ export default async function AccountPage({
 
   return (
     <Container className="max-w-4xl py-12">
+      {justSignedUp ? (
+        <PageEvent name="signup_complete" props={{ role: role ?? null }} />
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-foreground text-2xl font-bold">{t("title")}</h1>
         <span className="border-primary/40 bg-accent text-accent-foreground rounded-full border px-3 py-1 text-xs font-semibold">
