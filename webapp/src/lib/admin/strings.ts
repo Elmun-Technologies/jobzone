@@ -5,7 +5,7 @@
  * copy may stay inline in the page components.
  */
 export const adminStrings = {
-  brand: "Yollla Admin",
+  brand: "Yolla Admin",
   panelTitle: "Boshqaruv paneli",
   loadError: "Ma'lumotlarni yuklab bo'lmadi",
   loadErrorHint:
@@ -33,6 +33,7 @@ export const adminStrings = {
     hide: "Yashirish",
     show: "Ko'rsatish",
     verify: "Tasdiqlash",
+    unverify: "Tasdiqni bekor qilish",
     blocked: "Bloklangan",
     suspended: "To'xtatilgan",
     hidden: "Yashirilgan",
@@ -79,6 +80,8 @@ export const adminStrings = {
     editTitle: "Tahrirlash",
     name: "Nomi",
     slug: "Slug",
+    slugHint:
+      "Faqat kichik lotin harflar, raqamlar va tire (a-z, 0-9, -). Boshi va oxirida tire bo'lmasin.",
     icon: "Ikonka (emoji)",
     sortOrder: "Tartib raqami",
     active: "Faol",
@@ -163,5 +166,12 @@ export const adminStrings = {
     price: "Narxi (so'm)",
     duration: "Muddati (kun)",
     products: "Mahsulotlar narxi",
+    manualCreditTitle: "Qo'lda pul kiritish / yechish",
+    manualCreditHint:
+      "Ijobiy summa — kirim (bonus, xayrixoh qaytarish). Manfiy — chiqim (hisobdan chiqarish, tuzatish).",
+    companyId: "Kompaniya ID",
+    companyIdHint: "Jadvaldagi qatordan yoki /admin/companies dan nusxa oling",
+    reason: "Sabab (majburiy)",
+    submit: "Amalga oshirish",
   },
 } as const;

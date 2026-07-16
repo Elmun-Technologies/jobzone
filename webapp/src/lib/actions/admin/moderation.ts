@@ -115,6 +115,18 @@ export async function verifyCompany(formData: FormData): Promise<void> {
   );
 }
 
+/** Reverse a company verification — the RPC records the reason in the audit. */
+export async function unverifyCompany(formData: FormData): Promise<void> {
+  const backTo = backPath(formData, "companies");
+  const id = field(formData, "id");
+  if (!id) redirect(`${backTo}?notice=err`);
+  await runAdminRpc(
+    "admin_unset_company_verification",
+    { p_company: id, p_reason: field(formData, "reason") || null },
+    backTo,
+  );
+}
+
 const WORKER_VERIFY_METHODS = new Set(["id_document", "manual"]);
 
 export async function verifyWorker(formData: FormData): Promise<void> {
@@ -125,6 +137,17 @@ export async function verifyWorker(formData: FormData): Promise<void> {
   await runAdminRpc(
     "admin_set_worker_verification",
     { p_profile: id, p_method: method },
+    backTo,
+  );
+}
+
+export async function unverifyWorker(formData: FormData): Promise<void> {
+  const backTo = backPath(formData, "users");
+  const id = field(formData, "id");
+  if (!id) redirect(`${backTo}?notice=err`);
+  await runAdminRpc(
+    "admin_unset_worker_verification",
+    { p_profile: id, p_reason: field(formData, "reason") || null },
     backTo,
   );
 }

@@ -35,6 +35,35 @@ export async function getCategoryBySlug(
   }
 }
 
+/**
+ * Look up a category by a retired slug (0069 job_category_slug_history).
+ * Returns the CURRENT slug + name of the category the retired slug used to
+ * point at, or null if it was never used. Powers the 301 redirect on
+ * /ish/[category]: without it every renamed category 404s and drops its
+ * SEO history.
+ */
+export async function getCategoryByHistoricalSlug(
+  slug: string,
+): Promise<JobCategory | null> {
+  if (!hasSupabase()) return null;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("job_category_slug_history")
+      .select("category_id, job_categories!inner(id, slug, name, is_active)")
+      .eq("slug", slug)
+      .eq("job_categories.is_active", true)
+      .maybeSingle();
+    if (error) throw error;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cat = (data as any)?.job_categories;
+    return cat ? toCategory(cat) : null;
+  } catch (e) {
+    console.error("getCategoryByHistoricalSlug failed", e);
+    return null;
+  }
+}
+
 /** Active job categories. */
 export async function getCategories(): Promise<JobCategory[]> {
   if (!hasSupabase()) return [];

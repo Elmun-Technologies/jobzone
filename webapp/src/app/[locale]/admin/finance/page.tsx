@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { ActionNote } from "@/components/admin/action-note";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import { ManualCreditForm } from "@/components/admin/manual-credit-form";
 import { ModerationForm } from "@/components/admin/moderation-form";
 import { Pagination } from "@/components/admin/pagination";
 import { ReadKeyMissing } from "@/components/admin/read-key-missing";
@@ -112,6 +113,7 @@ export default async function AdminFinancePage({
         <SearchInput defaultValue={q} />
       </div>
       {pickParam(sp.notice) === "err" ? <ActionNote error={adminStrings.actionFailed} /> : null}
+      <ManualCreditForm locale={locale} />
       <DataTable columns={columns} rows={list.rows} rowKey={(t) => t.id} />
       <Pagination
         pathname="/admin/finance"

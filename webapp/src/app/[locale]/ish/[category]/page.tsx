@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobCard } from "@/components/jobs/job-card";
@@ -8,7 +8,10 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
-import { getCategoryBySlug } from "@/lib/data/categories";
+import {
+  getCategoryByHistoricalSlug,
+  getCategoryBySlug,
+} from "@/lib/data/categories";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
 import { groupNumber, salaryRangeUzsText } from "@/lib/format";
@@ -55,7 +58,15 @@ export default async function CategoryLandingPage({
   const { locale, category } = await params;
   setRequestLocale(locale);
   const cat = await getCategoryBySlug(category);
-  if (!cat) notFound();
+  if (!cat) {
+    // Renamed since the crawler last saw it? Look up the retired slug and
+    // 301 forward — Google keeps the historical PageRank on the new URL.
+    // Only reached on real miss (the current-slug lookup already failed),
+    // so no extra query for the happy path.
+    const historical = await getCategoryByHistoricalSlug(category);
+    if (historical) redirect(`/${locale}/ish/${historical.slug}`);
+    notFound();
+  }
 
   const t = await getTranslations("landingPage");
   const tfaq = await getTranslations("landingFaq");
