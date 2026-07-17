@@ -107,22 +107,12 @@ class _PasswordManagerPageState extends ConsumerState<PasswordManagerPage> {
                           Validators.isNotBlank(v) ? null : l.valRequired,
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () => ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
-                        child: Text(
-                          l.forgotPassword,
-                          style: context.text.bodyMedium?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // "Forgot password?" inside the manager (user is signed
+                    // in) opened a "coming soon" toast. The real recovery
+                    // path is the sign-in screen's forgot-password link —
+                    // this affordance is redundant, hidden for launch. If
+                    // a signed-in user really can't remember their current
+                    // password, they can sign out and use the sign-in flow.
                     const SizedBox(height: AppSpacing.lg),
                     JzPasswordField(
                       label: l.newPasswordTitle,

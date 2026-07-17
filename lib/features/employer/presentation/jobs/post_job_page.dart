@@ -18,7 +18,6 @@ import '../../../jobs/domain/job_language.dart';
 import '../../../jobs/domain/screening_question.dart';
 import '../../../jobs/presentation/category_label.dart';
 import '../../../jobs/presentation/job_details_page.dart';
-import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'listing_payment_page.dart';
@@ -476,8 +475,13 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         showInfoSnack(context, context.l10n.jobScheduledToast);
         if (mounted) context.pop();
       } else if (created != null && effectiveStatus == 'open') {
-        // Newly published (free first) job → offer the promote sheet on the way.
-        await showPromoteSheet(context, jobId: created.id);
+        // Mobile promote checkout is a dead-end (no wallet-backed spend
+        // parity with web yet) — showing the promote sheet auto-opens
+        // that dead-end after a successful post, which is the worst UX
+        // right after the employer completes the full posting flow. Skip
+        // straight to the toast; the web version continues to offer the
+        // promote picker inline where the boost actually works.
+        showInfoSnack(context, context.l10n.jobSavedToast);
         if (mounted) context.pop();
       } else {
         showInfoSnack(context, context.l10n.jobSavedToast);
