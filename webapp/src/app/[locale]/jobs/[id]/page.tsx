@@ -11,6 +11,7 @@ import { BookmarkButton } from "@/components/jobs/bookmark-button";
 import { PhoneLink } from "@/components/jobs/phone-link";
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { ShareCreative } from "@/components/jobs/share-creative";
+import { ReportButton } from "@/components/reports/report-button";
 import { hasApplied } from "@/lib/data/applications";
 import { isBookmarked } from "@/lib/data/bookmarks";
 import { getJobById } from "@/lib/data/jobs";
@@ -350,6 +351,10 @@ export default async function JobDetailsPage({
             shareUrl={`${siteUrl()}/${locale}/jobs/${id}`}
             title={job.title}
           />
+
+          <div className="mt-4 flex justify-center">
+            <ReportButton targetType="job" targetId={id} />
+          </div>
         </aside>
       </div>
     </Container>

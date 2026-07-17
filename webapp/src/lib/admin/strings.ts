@@ -65,6 +65,7 @@ export const adminStrings = {
     companies: "Kompaniyalar",
     jobs: "E'lonlar",
     reviews: "Sharhlar",
+    reports: "Shikoyatlar",
     categories: "Kategoriyalar",
     telegramChannels: "Telegram kanallar",
     products: "Mahsulotlar",

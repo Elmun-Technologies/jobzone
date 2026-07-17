@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/widgets/report_content_dialog.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../applications/application/applications_controller.dart';
 import '../../employer/data/ai_content_repository.dart';
@@ -138,6 +139,15 @@ class _Header extends ConsumerWidget {
                 onTap: () => ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              JzCircleButton(
+                icon: Icons.flag_outlined,
+                onTap: () => showReportContentDialog(
+                  context,
+                  targetType: 'job',
+                  targetId: job.id,
+                ),
               ),
             ],
           ),
