@@ -16,7 +16,7 @@ class NotFoundPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return JzScaffold(
-      appBar: JzAppBar(title: l.notFoundTitle),
+      title: l.notFoundTitle,
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Center(
@@ -43,7 +43,7 @@ class NotFoundPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xl),
-              JzButton.primary(
+              JzPrimaryButton(
                 label: l.backToHome,
                 onPressed: () => context.go(Routes.home),
               ),
