@@ -38,7 +38,7 @@ export async function generateMetadata({
     return { title: t("notFound") };
   }
   const description =
-    company.about?.slice(0, 155) ?? `${company.name} on Yolla`;
+    company.about?.slice(0, 155) ?? `${company.name} on Yollla`;
   const url = `${siteUrl()}/${locale}/companies/${id}`;
   return {
     title: company.name,

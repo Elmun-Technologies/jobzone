@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="Yolla"
+        android:label="Yollla"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
@@ -41,7 +41,7 @@
                 Android App Links (https://). autoVerify=true asks Android to
                 fetch https://www.yollla.uz/.well-known/assetlinks.json (and
                 the naked host) at install time and, if it contains the app's
-                SHA-256, open Yolla directly instead of routing to Chrome. The
+                SHA-256, open Yollla directly instead of routing to Chrome. The
                 assetlinks.json + release keystore fingerprint must both be in
                 place in production for verification to succeed — see
                 docs/android-signing.md §4 and webapp/src/app/.well-known/.
@@ -86,7 +86,7 @@
     <!--
         Android 11+ (targetSdk 30+) hides other apps by default; url_launcher /
         share intents must declare the intents they'll resolve or they silently
-        no-op. Yolla launches: HTTPS URLs (Click/Payme checkout, Telegram
+        no-op. Yollla launches: HTTPS URLs (Click/Payme checkout, Telegram
         t.me links, external website links), tel: (phone number tap), mailto:
         (support email), plus the platform's text-process contract for the
         Flutter engine. https and http both listed — a naked http:// URL

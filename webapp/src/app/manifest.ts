@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 /**
- * PWA manifest — makes Yolla installable on Android (Add to Home Screen)
+ * PWA manifest — makes Yollla installable on Android (Add to Home Screen)
  * and lets Chrome/Safari treat the site as an app when the visitor pins it.
  * Route lives at /manifest.webmanifest; the locale layout advertises it via
  * `metadata.manifest`, so every locale root gets the correct <link>.
@@ -12,10 +12,10 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Yolla — O'zbekistondagi ishlar",
-    short_name: "Yolla",
+    name: "Yollla — O'zbekistondagi ishlar",
+    short_name: "Yollla",
     description:
-      "Yolla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi.",
+      "Yollla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi.",
     start_url: "/uz",
     scope: "/",
     display: "standalone",

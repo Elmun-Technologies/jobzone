@@ -5,7 +5,7 @@
  * copy may stay inline in the page components.
  */
 export const adminStrings = {
-  brand: "Yolla Admin",
+  brand: "Yollla Admin",
   panelTitle: "Boshqaruv paneli",
   loadError: "Ma'lumotlarni yuklab bo'lmadi",
   loadErrorHint:
