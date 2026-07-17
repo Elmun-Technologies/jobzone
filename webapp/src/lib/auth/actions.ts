@@ -166,3 +166,56 @@ export async function updatePasswordAction(
   // browser context and shouldn't inherit stale intent.
   redirect(localePath(formData, "/account"));
 }
+
+export interface DeleteAccountFormState extends AuthFormState {
+  ok?: boolean;
+}
+
+/**
+ * Self-service account deletion (Apple 5.1.1(v), Play Data Safety). The
+ * form gates with a typed confirmation phrase; if that passes we forward
+ * the caller's JWT to the `delete-account` edge function, which uses the
+ * service-role client to remove the auth.users row. Every user-scoped
+ * table cascades from profiles.id (0001), so no other cleanup is needed.
+ *
+ * On success we sign out (server-side supabase already lost the user) and
+ * redirect to /. If the edge fn fails we surface an opaque `error` so the
+ * user can retry.
+ */
+export async function deleteAccountAction(
+  _prev: DeleteAccountFormState,
+  formData: FormData,
+): Promise<DeleteAccountFormState> {
+  const confirm = field(formData, "confirm");
+  // The form asks the user to type DELETE (or a locale equivalent). Server
+  // enforces the check so a scripted POST can't skip it.
+  if (confirm.toUpperCase() !== "DELETE") return { error: "confirm" };
+
+  const supabase = await createClient();
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) return { error: "no_session" };
+
+  const reason = field(formData, "reason").slice(0, 500);
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return { error: "unknown" };
+
+  try {
+    const res = await fetch(`${url}/functions/v1/delete-account`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ reason }),
+    });
+    if (!res.ok) return { error: "unknown" };
+  } catch {
+    return { error: "unknown" };
+  }
+
+  // Auth cookie now references a deleted user — clearing it locally so the
+  // next request lands on the marketing home without a stale identity.
+  await supabase.auth.signOut();
+  redirect(localePath(formData, "/"));
+}
