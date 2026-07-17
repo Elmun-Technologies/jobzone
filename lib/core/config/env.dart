@@ -1,31 +1,22 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
-
-/// Compile-time configuration, supplied via `--dart-define-from-file=env/<flavor>.json`.
+/// Compile-time configuration, supplied via `--dart-define-from-file=env/<flavor>.json`
+/// or `--dart-define=SUPABASE_URL=… --dart-define=SUPABASE_ANON_KEY=…` on the
+/// build command line.
 ///
-/// Supabase connection precedence (see [supabaseUrl] / [supabaseAnonKey]):
-///   1. an explicit `--dart-define=SUPABASE_URL=…` — what the CI build
-///      workflows pass (`android-apk.yml`, `web-deploy.yml`);
-///   2. otherwise, in **non-debug (release/profile) builds only**, a baked-in
-///      fallback to the public Yolla demo backend. This is the fix for the
-///      iOS↔Android split: a shipped build that was compiled without the
-///      dart-defines (e.g. a bare Xcode iOS build) now behaves like Android and
-///      web instead of silently dropping into offline/mock mode;
-///   3. otherwise (debug — `flutter run`, `flutter test`, CI) → empty. Unit
-///      tests drive the repos' offline branch through this; a booted app never
-///      gets that far — `bootstrap()` fails fast into a "misconfigured build"
-///      screen (the product is online-only, no demo content may ever render).
+/// Supabase connection: EMPTY when the dart-defines aren't passed. There is
+/// deliberately NO baked-in fallback backend — the earlier "hardcoded demo
+/// Supabase URL for release builds" leaked into production risk (a store build
+/// missing the CI dart-defines would silently talk to a different project than
+/// the one Vercel + edge functions + admin panel are configured for). Now
+/// `hasSupabase` returns false in that case, `bootstrap()` refuses to boot
+/// with a "misconfigured build" screen, and the release AAB/IPA fails loud —
+/// which is the invariant the launch checklist assumes.
 ///
-/// The fallback values are the same client-safe, RLS-protected **publishable**
-/// key the web demo and the Android APK already ship in their bundles — nothing
-/// secret is exposed here that isn't already public.
+/// The CI build workflows (`android-apk.yml`, `web-deploy.yml`, iOS Fastlane)
+/// pass the production project's URL + publishable key as dart-defines;
+/// unit tests drive the repos through the empty-env branch, which routes to
+/// each feature's in-memory mock substrate.
 class Env {
   const Env._();
-
-  // Public demo backend — mirrors the keys baked into the CI build workflows.
-  static const String _fallbackSupabaseUrl =
-      'https://nzxdnsxwxrstcrumwzwu.supabase.co';
-  static const String _fallbackSupabaseAnonKey =
-      'sb_publishable_3OcEGaXAaF0x5bClTA_PkA_e6FvbeGG';
 
   static const String _definedSupabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
@@ -34,17 +25,14 @@ class Env {
     'SUPABASE_ANON_KEY',
   );
 
-  /// Resolved Supabase URL — the explicit dart-define, else the demo-backend
-  /// fallback in release/profile builds, else empty (offline) in debug/tests.
-  static String get supabaseUrl => _definedSupabaseUrl.isNotEmpty
-      ? _definedSupabaseUrl
-      : (kDebugMode ? '' : _fallbackSupabaseUrl);
+  /// Resolved Supabase URL — the explicit dart-define, else empty. Empty
+  /// implies `hasSupabase == false`, which routes debug/test builds through
+  /// the offline mock branch and forces release builds into the
+  /// "misconfigured build" screen (see [_MissingConfigApp] in bootstrap.dart).
+  static String get supabaseUrl => _definedSupabaseUrl;
 
-  /// Resolved Supabase publishable key, with the same precedence as
-  /// [supabaseUrl] so the two never disagree.
-  static String get supabaseAnonKey => _definedSupabaseAnonKey.isNotEmpty
-      ? _definedSupabaseAnonKey
-      : (kDebugMode ? '' : _fallbackSupabaseAnonKey);
+  /// Resolved Supabase publishable key, same precedence as [supabaseUrl].
+  static String get supabaseAnonKey => _definedSupabaseAnonKey;
 
   /// Edge Function endpoint for `search-jobs` (Meilisearch proxy).
   static const String searchProxyUrl = String.fromEnvironment(

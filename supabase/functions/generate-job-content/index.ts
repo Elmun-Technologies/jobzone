@@ -16,7 +16,10 @@
 import { corsHeaders, json } from "../_shared/cors.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-const CLAUDE_MODEL = "claude-opus-4-8";
+// Currently issued Anthropic model id. `claude-opus-4-8` was a placeholder
+// that would 400 at runtime — pinned to the current opus point release.
+// Bump on Anthropic model refresh (see claude-api skill).
+const CLAUDE_MODEL = "claude-opus-4-5";
 
 interface Draft {
   description: string;
@@ -272,8 +275,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  // Fail CLOSED — a missing EDGE_SHARED_SECRET used to leave this endpoint
+  // fully open, letting anyone burn ANTHROPIC_API_KEY spend by hitting it
+  // directly. Every other _shared/auth.ts-based fn already fails closed;
+  // this was the outlier. If the secret isn't set the request is rejected
+  // exactly as if the header didn't match, so a misconfigured deployment
+  // fails loud instead of silently exposing Claude to the public internet.
   const secret = Deno.env.get("EDGE_SHARED_SECRET");
-  if (secret && req.headers.get("x-edge-secret") !== secret) {
+  if (!secret || req.headers.get("x-edge-secret") !== secret) {
     return json({ ok: false, error: "unauthorized" }, 401);
   }
   const body = await req.json().catch(() => ({}));
