@@ -254,11 +254,7 @@ class _ContactTab extends StatelessWidget {
     // social handles. Extend as official accounts are registered.
     final items = [
       (Icons.headset_mic_rounded, l.customerService, 'support@yollla.uz'),
-      (
-        Icons.language_rounded,
-        l.websiteLabel,
-        'https://jobzone-virid.vercel.app',
-      ),
+      (Icons.language_rounded, l.websiteLabel, 'https://www.yollla.uz'),
     ];
     return ListView(
       padding: const EdgeInsets.symmetric(

@@ -40,53 +40,17 @@ export interface PromotionProduct {
   durationDays: number;
 }
 
-/** Catalog fallback (mirrors the 0011 seed) so the promote page still renders
- * a real-looking package list offline / on any read error. Buying is a no-op
- * without a backend, but the demo stays whole. */
-const FALLBACK_PROMOTIONS: PromotionProduct[] = [
-  {
-    code: "featured",
-    name: "Tezkor topish",
-    description: "Kategoriyada ajratib ko'rsatish",
-    kind: "featured",
-    priceUzs: 10000,
-    durationDays: 7,
-  },
-  {
-    code: "top_3",
-    name: "3 kun TOP",
-    description: "Ro'yxat tepasida 3 kun",
-    kind: "top",
-    priceUzs: 15000,
-    durationDays: 3,
-  },
-  {
-    code: "top_7",
-    name: "7 kun TOP",
-    description: "Ro'yxat tepasida 7 kun",
-    kind: "top",
-    priceUzs: 30000,
-    durationDays: 7,
-  },
-  {
-    code: "top_30",
-    name: "30 kun TOP",
-    description: "Ro'yxat tepasida 30 kun",
-    kind: "top",
-    priceUzs: 99000,
-    durationDays: 30,
-  },
-];
-
 /**
  * The paid, time-boxed promotions an employer can buy for a vacancy (the `top`
  * and `featured` kinds — never the free base tier, the job_post posting fee, or
- * the not-yet-live AI tier). Ordered cheapest-first via sort_order. Degrades to
- * the seeded fallback catalog on any error/offline so the page never renders
- * empty.
+ * the not-yet-live AI tier). Ordered cheapest-first via sort_order. Returns an
+ * empty list on any read error / when the backend is unreachable — the promote
+ * page's own empty state handles the "no packages available" case gracefully.
+ * We intentionally do NOT ship a hardcoded fallback catalog: launch invariant
+ * is "no demo data", and stale prices would mislead the employer.
  */
 export async function getPromotionProducts(): Promise<PromotionProduct[]> {
-  if (!hasSupabase()) return FALLBACK_PROMOTIONS;
+  if (!hasSupabase()) return [];
   try {
     const supabase = await createClient();
     const { data } = await supabase
@@ -107,9 +71,9 @@ export async function getPromotionProducts(): Promise<PromotionProduct[]> {
         priceUzs: Number(r.price_uzs ?? 0),
         durationDays: Number(r.duration_days ?? 0),
       }));
-    return products.length ? products : FALLBACK_PROMOTIONS;
+    return products;
   } catch (e) {
     console.error("getPromotionProducts failed", e);
-    return FALLBACK_PROMOTIONS;
+    return [];
   }
 }
