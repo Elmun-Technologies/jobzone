@@ -12,10 +12,10 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Yollla — O'zbekistondagi ishlar",
-    short_name: "Yollla",
+    name: "Yolla — O'zbekistondagi ishlar",
+    short_name: "Yolla",
     description:
-      "Yollla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi.",
+      "Yolla — O'zbekistonda ishonchli ish topish va xodim yollash platformasi.",
     start_url: "/uz",
     scope: "/",
     display: "standalone",

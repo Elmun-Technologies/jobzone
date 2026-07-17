@@ -43,6 +43,11 @@ export async function signUpAction(
   const email = field(formData, "email");
   const password = field(formData, "password");
   const role = field(formData, "role") || "job_seeker";
+  // ToS acceptance — the sign-up form has `required` on the checkbox, but a
+  // scripted POST could omit it. Reject server-side so the click-to-accept
+  // audit line "you must have checked the box to reach this branch" holds.
+  const tosAccepted = field(formData, "tos") === "on";
+  if (!tosAccepted) return { error: "tos" };
   if (!email || password.length < 6) return { error: "weak" };
 
   const next = safeNext(

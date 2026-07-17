@@ -17,7 +17,7 @@ export async function SiteFooter() {
           <YollaLogo />
           <span>— {t("tagline")}</span>
         </div>
-        <nav className="flex items-center gap-4">
+        <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
           <Link href="/about" className="hover:text-primary transition-colors">
             {tn("about")}
           </Link>
@@ -30,9 +30,18 @@ export async function SiteFooter() {
           >
             {tn("companies")}
           </Link>
+          <Link
+            href="/privacy"
+            className="hover:text-primary transition-colors"
+          >
+            {t("privacy")}
+          </Link>
+          <Link href="/terms" className="hover:text-primary transition-colors">
+            {t("terms")}
+          </Link>
         </nav>
         <p>
-          © {year} Yollla. {t("rights")}
+          © {year} Yolla. {t("rights")}
         </p>
       </Container>
     </footer>
