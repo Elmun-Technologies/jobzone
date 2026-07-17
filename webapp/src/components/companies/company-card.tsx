@@ -6,14 +6,12 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 import type { CompanyWithJobs } from "@/lib/data/types";
-import { usableLogoUrl } from "@/lib/logo";
 
 export function CompanyCard({ company }: { company: CompanyWithJobs }) {
   const t = useTranslations("company");
   const meta = [company.industry, company.headquarters]
     .filter(Boolean)
     .join(" · ");
-  const logoSrc = usableLogoUrl(company.logoUrl);
 
   return (
     <Link
@@ -21,9 +19,9 @@ export function CompanyCard({ company }: { company: CompanyWithJobs }) {
       className="border-border bg-card hover:border-primary/40 flex h-full flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm"
     >
       <div className="flex items-center gap-3">
-        {logoSrc ? (
+        {company.logoUrl ? (
           <Image
-            src={logoSrc}
+            src={company.logoUrl}
             alt={company.name}
             width={48}
             height={48}

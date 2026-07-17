@@ -14,7 +14,6 @@ import {
   getCompanyReviews,
 } from "@/lib/data/companies";
 import { formatDate } from "@/lib/format";
-import { usableLogoUrl } from "@/lib/logo";
 import {
   breadcrumbJsonLd,
   localeAlternates,
@@ -83,24 +82,21 @@ export default async function CompanyPage({
 
       {/* Header */}
       <div className="flex gap-4">
-        {(() => {
-          const src = usableLogoUrl(company.logoUrl);
-          return src ? (
-            <Image
-              src={src}
-              alt={company.name}
-              width={72}
-              height={72}
-              priority
-              sizes="72px"
-              className="size-[72px] shrink-0 rounded-xl object-cover"
-            />
-          ) : (
-            <div className="bg-primary text-primary-foreground flex size-[72px] shrink-0 items-center justify-center rounded-xl text-3xl font-bold">
-              {company.name.charAt(0).toUpperCase()}
-            </div>
-          );
-        })()}
+        {company.logoUrl ? (
+          <Image
+            src={company.logoUrl}
+            alt={company.name}
+            width={72}
+            height={72}
+            priority
+            sizes="72px"
+            className="size-[72px] shrink-0 rounded-xl object-cover"
+          />
+        ) : (
+          <div className="bg-primary text-primary-foreground flex size-[72px] shrink-0 items-center justify-center rounded-xl text-3xl font-bold">
+            {company.name.charAt(0).toUpperCase()}
+          </div>
+        )}
         <div className="min-w-0">
           <h1 className="text-foreground flex items-center gap-2 text-2xl font-bold">
             {company.name}

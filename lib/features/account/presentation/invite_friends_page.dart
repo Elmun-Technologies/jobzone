@@ -6,7 +6,7 @@ import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/snackbars.dart';
 
 /// The public marketplace URL to share. Update when the custom domain lands.
-const _shareUrl = 'https://jobzone-virid.vercel.app';
+const _shareUrl = 'https://www.yollla.uz';
 
 /// Invite friends by sharing the marketplace link (copy-to-clipboard). The
 /// old screen listed ten hardcoded fake US contacts with dead "Invite"
