@@ -41,7 +41,7 @@ export async function SiteFooter() {
           </Link>
         </nav>
         <p>
-          © {year} Yolla. {t("rights")}
+          © {year} Yollla. {t("rights")}
         </p>
       </Container>
     </footer>

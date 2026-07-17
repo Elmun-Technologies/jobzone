@@ -88,7 +88,7 @@ class FcmPushService implements PushService {
     if (kIsWeb || !Platform.isAndroid) return;
     const channel = AndroidNotificationChannel(
       _fcmChannelId,
-      'Yolla notifications',
+      'Yollla notifications',
       description:
           'Job matches, application updates, and messages from employers.',
       importance: Importance.high,

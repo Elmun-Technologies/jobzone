@@ -18,7 +18,7 @@ import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
 
-// Yolla type: Archivo for everything (UI, body, headings via weight, and the
+// Yollla type: Archivo for everything (UI, body, headings via weight, and the
 // wordmark at 900) — multilingual (uz Latin + ru Cyrillic). Space Mono for
 // numbers/prices/tags. Anton (the board's poster face) is Latin-only, so it is
 // intentionally not used on localized text.
@@ -80,16 +80,16 @@ export async function generateMetadata({
   const primary = OG_LOCALE[locale] ?? OG_LOCALE.uz;
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: t("title"), template: "%s · Yolla" },
+    title: { default: t("title"), template: "%s · Yollla" },
     description: t("description"),
-    applicationName: "Yolla",
+    applicationName: "Yollla",
     // Alternates on the layout only cover the localized root (/uz, /ru, /en).
     // Every child page redeclares its own alternates via localeAlternates(...)
     // so canonicals + hreflang are self-referencing on every URL Google finds.
     alternates: localeAlternates(locale, ""),
     openGraph: {
       type: "website",
-      siteName: "Yolla",
+      siteName: "Yollla",
       title: t("title"),
       description: t("description"),
       // Locale + alternates match how Google/Facebook expect them. Pages that

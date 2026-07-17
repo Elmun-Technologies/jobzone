@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Yolla brand lockup: the "yo" speech-bubble mark + the "yolla" wordmark.
+ * Yollla brand lockup: the "yo" speech-bubble mark + the "yolla" wordmark.
  * Per the brand board both the glyph and wordmark are Archivo 900 (not Anton).
  * The mark is theme-aware: ink bubble + volt "yo" on light, inverted on dark —
  * so it stays high-contrast on either surface. Wordmark uses the foreground.
@@ -19,7 +19,7 @@ export function YollaLogo({
         viewBox="0 0 44 48"
         className="size-7 shrink-0"
         role="img"
-        aria-label="Yolla"
+        aria-label="Yollla"
       >
         <path
           className="fill-[#0a0a0a] dark:fill-[#c7fb00]"
@@ -42,7 +42,7 @@ export function YollaLogo({
       </svg>
       {withWordmark ? (
         <span className="text-foreground text-2xl leading-none font-black tracking-[-0.05em]">
-          yolla
+          yollla
         </span>
       ) : null}
     </span>
