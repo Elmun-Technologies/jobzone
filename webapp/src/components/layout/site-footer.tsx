@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { CookieSettingsButton } from "@/components/consent/cookie-settings-button";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 
@@ -30,6 +31,7 @@ export async function SiteFooter() {
           >
             {tn("companies")}
           </Link>
+          <CookieSettingsButton className="hover:text-primary cursor-pointer transition-colors" />
         </nav>
         <p>
           © {year} Yollla. {t("rights")}

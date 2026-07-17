@@ -1070,5 +1070,13 @@
     "ctaTitle": "Start today",
     "ctaText": "First vacancy is free — post it in a couple of minutes.",
     "ctaButton": "Post a vacancy"
+  },
+  "consent": {
+    "title": "We use cookies",
+    "body": "We use analytics cookies to understand how visitors use Yolla and improve the service. First-party performance cookies run either way.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "reject": "Reject",
+    "settings": "Cookie settings"
   }
 }
