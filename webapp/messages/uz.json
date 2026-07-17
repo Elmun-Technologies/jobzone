@@ -55,6 +55,8 @@
     "signIn": "Kirish",
     "signInSubtitle": "Hisobingizga kiring",
     "createAccount": "Ro'yxatdan o'tish",
+    "agreeTos": "<terms>Foydalanish shartlari</terms> va <privacy>Maxfiylik siyosati</privacy>ga roziman.",
+    "errTosRequired": "Foydalanish shartlari va Maxfiylik siyosatiga rozilik bering.",
     "signUpSubtitle": "Yangi hisob yarating",
     "email": "Email",
     "password": "Parol",
@@ -732,7 +734,9 @@
   },
   "footer": {
     "tagline": "Ishonchli ish bozori.",
-    "rights": "Barcha huquqlar himoyalangan."
+    "rights": "Barcha huquqlar himoyalangan.",
+    "privacy": "Maxfiylik",
+    "terms": "Shartlar"
   },
   "common": {
     "loading": "Yuklanmoqda…",
