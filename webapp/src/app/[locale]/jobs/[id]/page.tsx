@@ -10,9 +10,12 @@ import { Container } from "@/components/ui/container";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
 import { PhoneLink } from "@/components/jobs/phone-link";
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
+import { RichText } from "@/components/jobs/rich-text";
 import { ShareCreative } from "@/components/jobs/share-creative";
 import { hasApplied } from "@/lib/data/applications";
 import { isBookmarked } from "@/lib/data/bookmarks";
+import { getCompanyById } from "@/lib/data/companies";
+import { getMyRole } from "@/lib/data/employer";
 import { getJobById } from "@/lib/data/jobs";
 import { getCurrentUser } from "@/lib/auth/user";
 import {
@@ -84,9 +87,7 @@ function Section({ title, body }: { title: string; body: string | null }) {
   return (
     <section className="mt-6">
       <h2 className="text-foreground mb-2 text-lg font-semibold">{title}</h2>
-      <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
-        {body}
-      </p>
+      <RichText text={body} />
     </section>
   );
 }
@@ -164,10 +165,16 @@ export default async function JobDetailsPage({
     });
 
   const user = await getCurrentUser();
-  const [applied, bookmarked] = await Promise.all([
+  const [applied, bookmarked, role, company] = await Promise.all([
     user ? hasApplied(job.id) : Promise.resolve(false),
     user ? isBookmarked(job.id) : Promise.resolve(false),
+    user ? getMyRole() : Promise.resolve(null),
+    getCompanyById(job.companyId),
   ]);
+  // The share-creative block (ready-made Instagram Story/Post images + link)
+  // is an employer tool — it lets a company advertise a vacancy without
+  // paying a designer. Guests and job seekers don't see it; only employers do.
+  const isEmployer = role === "employer";
   // A job needs the full apply form only when it has a required screening
   // question (the sidebar CTA one-taps otherwise). Guest-first throughout:
   // QuickApplyButton routes an unauthenticated tap to sign-in and back.
@@ -306,6 +313,66 @@ export default async function JobDetailsPage({
               </dl>
             </section>
           ) : null}
+
+          {/* About the company — the job header only names the company; this
+              gives the seeker its story + a path to its other openings, so
+              they can judge the employer before applying. */}
+          {company && (company.about || company.industry || company.size) ? (
+            <section className="mt-8">
+              <h2 className="text-foreground mb-2 text-lg font-semibold">
+                {t("aboutCompany")}
+              </h2>
+              <div className="border-border bg-card rounded-xl border p-5">
+                <div className="flex items-center gap-3">
+                  {company.logoUrl ? (
+                    <Image
+                      src={company.logoUrl}
+                      alt={company.name}
+                      width={48}
+                      height={48}
+                      sizes="48px"
+                      className="size-12 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg text-lg font-bold">
+                      {company.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <Link
+                      href={`/companies/${company.id}`}
+                      className="text-foreground hover:text-primary flex items-center gap-1 font-semibold"
+                    >
+                      {company.name}
+                      {company.isVerified ? (
+                        <BadgeCheck className="text-primary size-4" />
+                      ) : null}
+                    </Link>
+                    {[company.industry, company.size, company.headquarters]
+                      .filter(Boolean)
+                      .join(" · ") ? (
+                      <p className="text-muted-foreground text-xs">
+                        {[company.industry, company.size, company.headquarters]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                {company.about ? (
+                  <p className="text-muted-foreground mt-3 line-clamp-4 text-sm leading-relaxed">
+                    {company.about}
+                  </p>
+                ) : null}
+                <Link
+                  href={`/companies/${company.id}`}
+                  className="text-primary mt-3 inline-flex text-sm font-semibold hover:underline"
+                >
+                  {t("viewCompany")}
+                </Link>
+              </div>
+            </section>
+          ) : null}
         </div>
 
         {/* Sidebar */}
@@ -345,11 +412,13 @@ export default async function JobDetailsPage({
             ) : null}
           </div>
 
-          <ShareCreative
-            basePath={`/${locale}/jobs/${id}`}
-            shareUrl={`${siteUrl()}/${locale}/jobs/${id}`}
-            title={job.title}
-          />
+          {isEmployer ? (
+            <ShareCreative
+              basePath={`/${locale}/jobs/${id}`}
+              shareUrl={`${siteUrl()}/${locale}/jobs/${id}`}
+              title={job.title}
+            />
+          ) : null}
         </aside>
       </div>
     </Container>

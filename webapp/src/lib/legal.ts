@@ -1,5 +1,5 @@
 /**
- * Yolla legal-text content — Privacy Policy and Terms of Service.
+ * Yollla legal-text content — Privacy Policy and Terms of Service.
  *
  * Stored as structured sections per locale so the pages that render them
  * (`/[locale]/privacy`, `/[locale]/terms`) can style them uniformly and the
@@ -9,7 +9,7 @@
  * users see when it was last changed.
  *
  * Both documents disclose:
- * - What data Yolla collects and why (matches PrivacyInfo.xcprivacy)
+ * - What data Yollla collects and why (matches PrivacyInfo.xcprivacy)
  * - Who it's shared with (Supabase, Firebase, Yandex, Google, Meta, Sentry,
  *   PostHog — every third-party processor a live build actually touches)
  * - User rights (access, correction, deletion, portability)
@@ -50,7 +50,7 @@ const privacyUz: LegalDocument = {
   title: "Maxfiylik siyosati",
   effectiveDate: LEGAL_EFFECTIVE_DATE,
   intro:
-    "Yolla — O'zbekiston uchun mobil ish qidirish va yollash bozori. Ushbu siyosat qanday ma'lumot yig'ishimizni, nima uchun, kimga uzatishimizni va sizning tanlovlaringizni tushuntiradi.",
+    "Yollla — O'zbekiston uchun mobil ish qidirish va yollash bozori. Ushbu siyosat qanday ma'lumot yig'ishimizni, nima uchun, kimga uzatishimizni va sizning tanlovlaringizni tushuntiradi.",
   sections: [
     {
       id: "collect",
@@ -134,14 +134,14 @@ const privacyUz: LegalDocument = {
       id: "children",
       title: "8. Bolalar",
       paragraphs: [
-        "Yolla 16 yoshdan katta foydalanuvchilar uchun mo'ljallangan. Agar biz bilmasdan 16 yoshdan kichik bolaning ma'lumotini yig'ib qo'ygan bo'lsak, uni darhol o'chirib tashlaymiz.",
+        "Yollla 16 yoshdan katta foydalanuvchilar uchun mo'ljallangan. Agar biz bilmasdan 16 yoshdan kichik bolaning ma'lumotini yig'ib qo'ygan bo'lsak, uni darhol o'chirib tashlaymiz.",
       ],
     },
     {
       id: "changes",
       title: "9. Ushbu siyosatga o'zgartirishlar",
       paragraphs: [
-        "Yolla bu siyosatni yangilashi mumkin. Muhim o'zgarishlar ilova va emailingizga xabar beriladi. Yangi versiya kuchga kirgan sanadan boshlab qo'llaniladi.",
+        "Yollla bu siyosatni yangilashi mumkin. Muhim o'zgarishlar ilova va emailingizga xabar beriladi. Yangi versiya kuchga kirgan sanadan boshlab qo'llaniladi.",
       ],
     },
   ],
@@ -156,7 +156,7 @@ const privacyRu: LegalDocument = {
   title: "Политика конфиденциальности",
   effectiveDate: LEGAL_EFFECTIVE_DATE,
   intro:
-    "Yolla — мобильная площадка поиска работы и найма для Узбекистана. Эта политика объясняет, какие данные мы собираем, зачем, кому передаём и какие у вас есть возможности.",
+    "Yollla — мобильная площадка поиска работы и найма для Узбекистана. Эта политика объясняет, какие данные мы собираем, зачем, кому передаём и какие у вас есть возможности.",
   sections: [
     {
       id: "collect",
@@ -240,14 +240,14 @@ const privacyRu: LegalDocument = {
       id: "children",
       title: "8. Дети",
       paragraphs: [
-        "Yolla предназначен для пользователей 16 лет и старше. Если мы случайно собрали данные лица младше 16 лет, мы их немедленно удалим.",
+        "Yollla предназначен для пользователей 16 лет и старше. Если мы случайно собрали данные лица младше 16 лет, мы их немедленно удалим.",
       ],
     },
     {
       id: "changes",
       title: "9. Изменения политики",
       paragraphs: [
-        "Yolla может обновить эту политику. О существенных изменениях вы получите уведомление в приложении и по email. Новая версия действует с даты вступления в силу.",
+        "Yollla может обновить эту политику. О существенных изменениях вы получите уведомление в приложении и по email. Новая версия действует с даты вступления в силу.",
       ],
     },
   ],
@@ -262,7 +262,7 @@ const privacyEn: LegalDocument = {
   title: "Privacy Policy",
   effectiveDate: LEGAL_EFFECTIVE_DATE,
   intro:
-    "Yolla is a mobile job-search and recruitment marketplace for Uzbekistan. This policy explains what we collect, why, who we share it with, and your choices.",
+    "Yollla is a mobile job-search and recruitment marketplace for Uzbekistan. This policy explains what we collect, why, who we share it with, and your choices.",
   sections: [
     {
       id: "collect",
@@ -346,14 +346,14 @@ const privacyEn: LegalDocument = {
       id: "children",
       title: "8. Children",
       paragraphs: [
-        "Yolla is intended for users 16 and older. If we accidentally collect data from a person under 16, we will delete it immediately.",
+        "Yollla is intended for users 16 and older. If we accidentally collect data from a person under 16, we will delete it immediately.",
       ],
     },
     {
       id: "changes",
       title: "9. Changes to this policy",
       paragraphs: [
-        "Yolla may update this policy. You will be notified of material changes in the app and by email. The new version takes effect on the effective date.",
+        "Yollla may update this policy. You will be notified of material changes in the app and by email. The new version takes effect on the effective date.",
       ],
     },
   ],
@@ -368,13 +368,13 @@ const termsUz: LegalDocument = {
   title: "Foydalanish shartlari",
   effectiveDate: LEGAL_EFFECTIVE_DATE,
   intro:
-    "Yolla xizmatidan foydalanish uchun ushbu shartlarni qabul qilishingiz kerak. Xizmatga kirsangiz — siz ular bilan roziligingizni tasdiqlaysiz.",
+    "Yollla xizmatidan foydalanish uchun ushbu shartlarni qabul qilishingiz kerak. Xizmatga kirsangiz — siz ular bilan roziligingizni tasdiqlaysiz.",
   sections: [
     {
       id: "eligibility",
       title: "1. Muvofiqlik",
       paragraphs: [
-        "Yolladan foydalanish uchun kamida 16 yoshda bo'lishingiz kerak.",
+        "Yollladan foydalanish uchun kamida 16 yoshda bo'lishingiz kerak.",
         "Rost va aniq ma'lumot berishga majbursiz. Yolg'on identifikatsiya — hisobingiz bloklanishi uchun asosdir.",
         "Bitta jismoniy shaxs bitta hisob yaratadi. Ish beruvchi jamoasi bir nechta hisob yaratishi mumkin.",
       ],
@@ -404,7 +404,7 @@ const termsUz: LegalDocument = {
         "Ish e'lonlaringiz aniq va halol bo'lsin. Xayoliy ish e'lonlari, MLM, noqonuniy tuzilmalar (jinsi, yoshi, dini, millati bo'yicha kamsitish) taqiqlanadi.",
         "Ariza bergan ish qidiruvchilarning shaxsiy ma'lumotlarini faqat yollash maqsadida ishlating. Boshqa maqsadda uzatish yoki sotish taqiqlanadi.",
         "Yolg'on kompaniya profillari yaratish yoki boshqa foydalanuvchini yollash uchun sotib olishga urinish taqiqlanadi.",
-        "Yolla ba'zi ish e'lonlarini yoki kompaniyalarni oldindan tekshiruvsiz e'lon qilishi mumkin — siz to'liq mazmun uchun javobgarsiz.",
+        "Yollla ba'zi ish e'lonlarini yoki kompaniyalarni oldindan tekshiruvsiz e'lon qilishi mumkin — siz to'liq mazmun uchun javobgarsiz.",
       ],
     },
     {
@@ -413,18 +413,18 @@ const termsUz: LegalDocument = {
       paragraphs: [
         "Kamsitish, tahdid, tahqir, qonunbuzarlik, MLM tarqatish, ochiq/pornografik mazmun taqiqlanadi.",
         "Ish beruvchining ish e'loni jinsi, yoshi, millati, dini, oilaviy holati bo'yicha talab qo'yishi taqiqlanadi.",
-        "Har qanday foydalanuvchi shubhali mazmunni shikoyat qila oladi. Yolla 24 soat ichida ko'rib chiqadi.",
-        "Yolla har qanday mazmun yoki hisobni oldindan xabar bermasdan olib tashlash yoki bloklash huquqiga ega.",
+        "Har qanday foydalanuvchi shubhali mazmunni shikoyat qila oladi. Yollla 24 soat ichida ko'rib chiqadi.",
+        "Yollla har qanday mazmun yoki hisobni oldindan xabar bermasdan olib tashlash yoki bloklash huquqiga ega.",
       ],
     },
     {
       id: "payments",
       title: "6. To'lovlar",
       paragraphs: [
-        "Yollada birinchi ish e'loni bepul; keyingi e'lonlar uchun to'lov olinadi (narxlar /pricing sahifasida).",
+        "Yolllada birinchi ish e'loni bepul; keyingi e'lonlar uchun to'lov olinadi (narxlar /pricing sahifasida).",
         "Ilg'or paketlar (TOP, Brend, Premium) ixtiyoriy va xarid vaqtida narxda bo'ladi.",
         "To'lov Click, Payme yoki bank o'tkazmasi orqali. To'lov muvaffaqiyatli o'tgach ariza qaytarilmaydi (ish e'lon qilingandan keyin).",
-        "Yolla narxlarni istalgan vaqtda o'zgartirishi mumkin — o'zgarish e'lon qilingan sanadan boshlab yangi to'lovlarga qo'llaniladi.",
+        "Yollla narxlarni istalgan vaqtda o'zgartirishi mumkin — o'zgarish e'lon qilingan sanadan boshlab yangi to'lovlarga qo'llaniladi.",
       ],
     },
     {
@@ -432,7 +432,7 @@ const termsUz: LegalDocument = {
       title: "7. To'xtatish va bekor qilish",
       paragraphs: [
         "Siz hisobingizni istalgan vaqtda o'chirishingiz mumkin (Sozlamalar → Hisobni o'chirish).",
-        "Yolla ushbu shartlarni buzganingizni aniqlagan taqdirda hisobingizni to'xtatishi yoki o'chirishi mumkin.",
+        "Yollla ushbu shartlarni buzganingizni aniqlagan taqdirda hisobingizni to'xtatishi yoki o'chirishi mumkin.",
         "Hisobingiz o'chirilsa, sizga hech qanday to'lov qaytarilmaydi (o'chirish sabab bo'lgan hollarda).",
       ],
     },
@@ -440,10 +440,10 @@ const termsUz: LegalDocument = {
       id: "disclaimer",
       title: "8. Kafolatlar va javobgarlik",
       paragraphs: [
-        "Yolla ishga olish yoki yollash natijalarini kafolatlamaydi — biz platforma, ish beruvchi va ish qidiruvchi mustaqil shaxslar.",
-        "Ish beruvchi bergan ma'lumot yoki ish qidiruvchi taqdim etgan rezyume mazmuni uchun Yolla javobgar emas.",
-        "Yolla xizmatining uzluksizligini kafolatlamaydi (planlanmagan texnik ta'mirlar, uchinchi tomon xizmatlari to'xtashi bo'lishi mumkin).",
-        "Yolla javobgarligi qonun bilan ruxsat etilgan darajaga cheklangan.",
+        "Yollla ishga olish yoki yollash natijalarini kafolatlamaydi — biz platforma, ish beruvchi va ish qidiruvchi mustaqil shaxslar.",
+        "Ish beruvchi bergan ma'lumot yoki ish qidiruvchi taqdim etgan rezyume mazmuni uchun Yollla javobgar emas.",
+        "Yollla xizmatining uzluksizligini kafolatlamaydi (planlanmagan texnik ta'mirlar, uchinchi tomon xizmatlari to'xtashi bo'lishi mumkin).",
+        "Yollla javobgarligi qonun bilan ruxsat etilgan darajaga cheklangan.",
       ],
     },
     {
@@ -458,7 +458,7 @@ const termsUz: LegalDocument = {
       id: "changes",
       title: "10. Shartlarga o'zgartirishlar",
       paragraphs: [
-        "Yolla ushbu shartlarni yangilashi mumkin. Muhim o'zgarishlar oldindan e'lon qilinadi. Yangi versiya kuchga kirgan sanadan boshlab qo'llaniladi. O'zgarishlarga rozi bo'lmasangiz — hisobingizni o'chiring.",
+        "Yollla ushbu shartlarni yangilashi mumkin. Muhim o'zgarishlar oldindan e'lon qilinadi. Yangi versiya kuchga kirgan sanadan boshlab qo'llaniladi. O'zgarishlarga rozi bo'lmasangiz — hisobingizni o'chiring.",
       ],
     },
   ],
@@ -473,13 +473,13 @@ const termsRu: LegalDocument = {
   title: "Условия использования",
   effectiveDate: LEGAL_EFFECTIVE_DATE,
   intro:
-    "Чтобы пользоваться Yolla, вы должны принять эти условия. Заходя в сервис, вы подтверждаете согласие с ними.",
+    "Чтобы пользоваться Yollla, вы должны принять эти условия. Заходя в сервис, вы подтверждаете согласие с ними.",
   sections: [
     {
       id: "eligibility",
       title: "1. Право использования",
       paragraphs: [
-        "Для использования Yolla вам должно быть не менее 16 лет.",
+        "Для использования Yollla вам должно быть не менее 16 лет.",
         "Вы обязаны предоставлять правдивую и точную информацию. Ложная идентификация — основание для блокировки аккаунта.",
         "Один физический человек создаёт один аккаунт. Команда работодателя может создавать несколько аккаунтов.",
       ],
@@ -509,7 +509,7 @@ const termsRu: LegalDocument = {
         "Ваши вакансии должны быть точными и честными. Фиктивные вакансии, MLM, незаконные схемы (дискриминация по полу, возрасту, религии, национальности) запрещены.",
         "Используйте персональные данные откликнувшихся соискателей только для целей найма. Передача или продажа для других целей запрещена.",
         "Создание поддельных профилей компаний или попытки покупки для найма другого пользователя запрещены.",
-        "Yolla может публиковать некоторые вакансии или компании без предварительной проверки — вы полностью отвечаете за содержание.",
+        "Yollla может публиковать некоторые вакансии или компании без предварительной проверки — вы полностью отвечаете за содержание.",
       ],
     },
     {
@@ -518,8 +518,8 @@ const termsRu: LegalDocument = {
       paragraphs: [
         "Дискриминация, угрозы, оскорбления, нарушение закона, распространение MLM, откровенный/порнографический контент запрещены.",
         "Вакансии, содержащие требования по полу, возрасту, национальности, религии или семейному положению, запрещены.",
-        "Любой пользователь может пожаловаться на подозрительное содержание. Yolla рассматривает жалобы в течение 24 часов.",
-        "Yolla вправе удалить или заблокировать любое содержание или аккаунт без предварительного уведомления.",
+        "Любой пользователь может пожаловаться на подозрительное содержание. Yollla рассматривает жалобы в течение 24 часов.",
+        "Yollla вправе удалить или заблокировать любое содержание или аккаунт без предварительного уведомления.",
       ],
     },
     {
@@ -529,7 +529,7 @@ const termsRu: LegalDocument = {
         "Первая вакансия бесплатна; за последующие взимается плата (цены на странице /pricing).",
         "Пакеты продвижения (TOP, Бренд, Премиум) необязательны и оплачиваются при покупке.",
         "Оплата через Click, Payme или банковский перевод. После успешной оплаты возврат не производится (после публикации вакансии).",
-        "Yolla может изменить цены в любое время — изменения применяются к новым платежам с даты объявления.",
+        "Yollla может изменить цены в любое время — изменения применяются к новым платежам с даты объявления.",
       ],
     },
     {
@@ -537,7 +537,7 @@ const termsRu: LegalDocument = {
       title: "7. Приостановка и прекращение",
       paragraphs: [
         "Вы можете удалить аккаунт в любое время (Настройки → Удалить аккаунт).",
-        "Yolla может приостановить или удалить ваш аккаунт при нарушении настоящих условий.",
+        "Yollla может приостановить или удалить ваш аккаунт при нарушении настоящих условий.",
         "При удалении аккаунта возврат уплаченных средств не производится (если удаление связано с нарушением).",
       ],
     },
@@ -545,10 +545,10 @@ const termsRu: LegalDocument = {
       id: "disclaimer",
       title: "8. Гарантии и ответственность",
       paragraphs: [
-        "Yolla не гарантирует результат найма — мы платформа, а работодатель и соискатель — независимые лица.",
-        "Yolla не отвечает за содержание, предоставленное работодателем или соискателем.",
-        "Yolla не гарантирует бесперебойность сервиса (возможны плановые технические работы, сбои сторонних сервисов).",
-        "Ответственность Yolla ограничена в рамках, разрешённых законом.",
+        "Yollla не гарантирует результат найма — мы платформа, а работодатель и соискатель — независимые лица.",
+        "Yollla не отвечает за содержание, предоставленное работодателем или соискателем.",
+        "Yollla не гарантирует бесперебойность сервиса (возможны плановые технические работы, сбои сторонних сервисов).",
+        "Ответственность Yollla ограничена в рамках, разрешённых законом.",
       ],
     },
     {
@@ -563,7 +563,7 @@ const termsRu: LegalDocument = {
       id: "changes",
       title: "10. Изменения условий",
       paragraphs: [
-        "Yolla может обновлять эти условия. О существенных изменениях сообщается заранее. Новая версия действует с даты вступления в силу. Если не согласны с изменениями — удалите аккаунт.",
+        "Yollla может обновлять эти условия. О существенных изменениях сообщается заранее. Новая версия действует с даты вступления в силу. Если не согласны с изменениями — удалите аккаунт.",
       ],
     },
   ],
@@ -578,13 +578,13 @@ const termsEn: LegalDocument = {
   title: "Terms of Service",
   effectiveDate: LEGAL_EFFECTIVE_DATE,
   intro:
-    "To use Yolla you must accept these terms. By accessing the service you confirm your agreement.",
+    "To use Yollla you must accept these terms. By accessing the service you confirm your agreement.",
   sections: [
     {
       id: "eligibility",
       title: "1. Eligibility",
       paragraphs: [
-        "You must be at least 16 years old to use Yolla.",
+        "You must be at least 16 years old to use Yollla.",
         "You must provide truthful and accurate information. False identification is grounds for account blocking.",
         "One individual creates one account. Employer teams may create multiple accounts.",
       ],
@@ -614,7 +614,7 @@ const termsEn: LegalDocument = {
         "Your job postings must be accurate and honest. Fictitious postings, MLM, illegal schemes (discrimination based on gender, age, religion, nationality) are prohibited.",
         "Use personal data of applicants only for hiring purposes. Transfer or sale for other purposes is prohibited.",
         "Creating fake company profiles or purchasing to hire another user is prohibited.",
-        "Yolla may publish some postings or companies without pre-review — you are fully responsible for the content.",
+        "Yollla may publish some postings or companies without pre-review — you are fully responsible for the content.",
       ],
     },
     {
@@ -623,8 +623,8 @@ const termsEn: LegalDocument = {
       paragraphs: [
         "Discrimination, threats, insults, illegal activity, MLM distribution, explicit/pornographic content are prohibited.",
         "Job postings with requirements based on gender, age, nationality, religion, or family status are prohibited.",
-        "Any user can report suspicious content. Yolla reviews reports within 24 hours.",
-        "Yolla reserves the right to remove or block any content or account without prior notice.",
+        "Any user can report suspicious content. Yollla reviews reports within 24 hours.",
+        "Yollla reserves the right to remove or block any content or account without prior notice.",
       ],
     },
     {
@@ -634,7 +634,7 @@ const termsEn: LegalDocument = {
         "The first job posting is free; subsequent postings are paid (prices at /pricing).",
         "Promotion packages (TOP, Brand, Premium) are optional and priced at purchase.",
         "Payment via Click, Payme or bank transfer. After successful payment no refund is provided (after job publication).",
-        "Yolla may change prices at any time — changes apply to new payments from the announced date.",
+        "Yollla may change prices at any time — changes apply to new payments from the announced date.",
       ],
     },
     {
@@ -642,7 +642,7 @@ const termsEn: LegalDocument = {
       title: "7. Suspension and termination",
       paragraphs: [
         "You can delete your account at any time (Settings → Delete account).",
-        "Yolla may suspend or delete your account for violation of these terms.",
+        "Yollla may suspend or delete your account for violation of these terms.",
         "If your account is deleted, no refund is provided (in violation-related cases).",
       ],
     },
@@ -650,10 +650,10 @@ const termsEn: LegalDocument = {
       id: "disclaimer",
       title: "8. Warranties and liability",
       paragraphs: [
-        "Yolla does not guarantee hiring outcomes — we are a platform; employer and seeker are independent parties.",
-        "Yolla is not responsible for content provided by the employer or the seeker.",
-        "Yolla does not guarantee uninterrupted service (planned maintenance and third-party outages may occur).",
-        "Yolla's liability is limited to the extent permitted by law.",
+        "Yollla does not guarantee hiring outcomes — we are a platform; employer and seeker are independent parties.",
+        "Yollla is not responsible for content provided by the employer or the seeker.",
+        "Yollla does not guarantee uninterrupted service (planned maintenance and third-party outages may occur).",
+        "Yollla's liability is limited to the extent permitted by law.",
       ],
     },
     {
@@ -668,7 +668,7 @@ const termsEn: LegalDocument = {
       id: "changes",
       title: "10. Changes to terms",
       paragraphs: [
-        "Yolla may update these terms. Material changes are announced in advance. The new version takes effect on the effective date. If you disagree with changes, delete your account.",
+        "Yollla may update these terms. Material changes are announced in advance. The new version takes effect on the effective date. If you disagree with changes, delete your account.",
       ],
     },
   ],

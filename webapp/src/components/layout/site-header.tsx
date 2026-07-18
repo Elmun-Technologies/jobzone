@@ -33,7 +33,7 @@ export async function SiteHeader() {
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label="Yolla">
+          <Link href="/" aria-label="Yollla">
             <YollaLogo />
           </Link>
           <div className="hidden sm:block">
