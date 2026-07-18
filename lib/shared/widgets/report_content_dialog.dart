@@ -111,7 +111,13 @@ class _ReportDialogState extends State<_ReportDialog> {
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   value: r,
+                  // Flutter 3.32 deprecated per-tile groupValue/onChanged in
+                  // favour of a RadioGroup ancestor. The old API still works;
+                  // migrating is a separate cleanup. Suppress so `flutter
+                  // analyze` (which fails on infos) stays green.
+                  // ignore: deprecated_member_use
                   groupValue: _reason,
+                  // ignore: deprecated_member_use
                   onChanged: (v) => setState(() => _reason = v),
                   title: Text(_reasonLabel(l, r)),
                 ),
