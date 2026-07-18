@@ -56,6 +56,8 @@
     "signInSubtitle": "Sign in to your account",
     "createAccount": "Create account",
     "signUpSubtitle": "Create a new account",
+    "agreeTos": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+    "errTosRequired": "Please accept the Terms of Service and Privacy Policy.",
     "email": "Email",
     "password": "Password",
     "or": "or",
@@ -732,7 +734,9 @@
   },
   "footer": {
     "tagline": "The trusted job marketplace.",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "common": {
     "loading": "Loading…",
@@ -1073,10 +1077,25 @@
   },
   "consent": {
     "title": "We use cookies",
-    "body": "We use analytics cookies to understand how visitors use Yolla and improve the service. First-party performance cookies run either way.",
+    "body": "We use analytics cookies to understand how visitors use Yollla and improve the service. First-party performance cookies run either way.",
     "learnMore": "Learn more",
     "accept": "Accept",
     "reject": "Reject",
     "settings": "Cookie settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and data",
+    "linkFromAccount": "Settings",
+    "dangerZone": "Danger zone",
+    "deleteWarning": "Deleting your account is permanent. Your profile, resume, applications, messages and any other data will be removed and cannot be restored. Any companies you own will remain but will be marked orphaned.",
+    "deleteReasonLabel": "Reason (optional)",
+    "deleteReasonPlaceholder": "Tell us why you're leaving — it helps us improve.",
+    "deleteConfirmLabel": "Type DELETE to confirm",
+    "deleteCta": "Delete my account",
+    "deleteInProgress": "Deleting…",
+    "deleteErrConfirm": "Type DELETE exactly to confirm.",
+    "deleteErrSession": "You are not signed in.",
+    "deleteErrUnknown": "Something went wrong. Please try again."
   }
 }

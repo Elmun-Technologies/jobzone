@@ -55,6 +55,8 @@
     "signIn": "Kirish",
     "signInSubtitle": "Hisobingizga kiring",
     "createAccount": "Ro'yxatdan o'tish",
+    "agreeTos": "<terms>Foydalanish shartlari</terms> va <privacy>Maxfiylik siyosati</privacy>ga roziman.",
+    "errTosRequired": "Foydalanish shartlari va Maxfiylik siyosatiga rozilik bering.",
     "signUpSubtitle": "Yangi hisob yarating",
     "email": "Email",
     "password": "Parol",
@@ -732,7 +734,9 @@
   },
   "footer": {
     "tagline": "Ishonchli ish bozori.",
-    "rights": "Barcha huquqlar himoyalangan."
+    "rights": "Barcha huquqlar himoyalangan.",
+    "privacy": "Maxfiylik",
+    "terms": "Shartlar"
   },
   "common": {
     "loading": "Yuklanmoqda…",
@@ -1073,10 +1077,25 @@
   },
   "consent": {
     "title": "Cookie fayllardan foydalanamiz",
-    "body": "Yollani qanday ishlatilishini tushunish va xizmatni yaxshilash uchun analitik cookie ishlatamiz. Birinchi tarafli ishlash cookie qanday bo'lsa ham ishlaydi.",
+    "body": "Yolllani qanday ishlatilishini tushunish va xizmatni yaxshilash uchun analitik cookie ishlatamiz. Birinchi tarafli ishlash cookie qanday bo'lsa ham ishlaydi.",
     "learnMore": "Batafsil",
     "accept": "Roziman",
     "reject": "Rad etish",
     "settings": "Cookie sozlamalari"
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "subtitle": "Hisobingiz va ma'lumotlaringizni boshqaring",
+    "linkFromAccount": "Sozlamalar",
+    "dangerZone": "Xavfli hudud",
+    "deleteWarning": "Hisobni o'chirish qaytarib bo'lmaydigan amal. Profilingiz, rezyume, arizalar, xabarlar va boshqa barcha ma'lumotlar butunlay o'chiriladi. Sizga tegishli kompaniyalar saqlanib qoladi, ammo egasiz deb belgilanadi.",
+    "deleteReasonLabel": "Sabab (majburiy emas)",
+    "deleteReasonPlaceholder": "Nima uchun ketayotganingizni ayting — bu bizga yordam beradi.",
+    "deleteConfirmLabel": "Tasdiqlash uchun DELETE deb yozing",
+    "deleteCta": "Hisobimni o'chirish",
+    "deleteInProgress": "O'chirilmoqda…",
+    "deleteErrConfirm": "Tasdiqlash uchun aynan DELETE deb yozing.",
+    "deleteErrSession": "Siz kirmagansiz.",
+    "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
   }
 }
