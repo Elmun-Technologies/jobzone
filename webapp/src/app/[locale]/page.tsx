@@ -6,7 +6,6 @@ import { EmployerCta } from "@/components/landing/employer-cta";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
-import { ReputationTeaser } from "@/components/landing/reputation-teaser";
 import { JobCard } from "@/components/jobs/job-card";
 import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -203,11 +202,17 @@ export default async function HomePage({
       {/* How it works (shared with /about) */}
       <HowItWorks />
 
-      {/* Category grid */}
-      {categories.length > 0 ? (
-        <Container className="py-16">
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {categories.map((c) => (
+      {/* Category grid — only categories that actually have open vacancies
+          today. Rendering all 22 seed categories with "0 vakansiya" per
+          card on Day 1 makes the marketplace look broken; hiding an empty
+          category and re-appearing it once real jobs land is the right
+          trade. */}
+      {(() => {
+        const activeCategories = categories.filter((c) => c.count > 0);
+        return activeCategories.length > 0 ? (
+          <Container className="py-16">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {activeCategories.map((c) => (
               <li key={c.id}>
                 <Link
                   // Deep-link into the SEO landing (/ish/[category]) instead
@@ -231,7 +236,8 @@ export default async function HomePage({
             ))}
           </ul>
         </Container>
-      ) : null}
+        ) : null;
+      })()}
 
       {/* Popular searches */}
       <Container className="pb-16">
@@ -308,8 +314,12 @@ export default async function HomePage({
         </Container>
       ) : null}
 
-      {/* Reputation teaser (shared with /about) */}
-      <ReputationTeaser background="bg-muted/30" moreLabel={t("learnMore")} />
+      {/* Reputation teaser removed on launch: it rendered scripted
+          example ratings ("Bahor kafesi 9,2" / "7-ombor 3,1"), which
+          are demonstrably fake companies. As soon as real
+          `worker_reviews` accumulate we can wire a live-rating widget
+          here that reads the top-N and bottom-N from a view; keeping
+          the placeholder version was a customer-trust risk. */}
 
       {/* FAQ — visible + FAQPage JSON-LD. GEO signal: LLMs (ChatGPT /
           Claude / Perplexity / Gemini) quote FAQ answers verbatim, and

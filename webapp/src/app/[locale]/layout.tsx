@@ -80,16 +80,16 @@ export async function generateMetadata({
   const primary = OG_LOCALE[locale] ?? OG_LOCALE.uz;
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: t("title"), template: "%s · Yollla" },
+    title: { default: t("title"), template: "%s · Yolla" },
     description: t("description"),
-    applicationName: "Yollla",
+    applicationName: "Yolla",
     // Alternates on the layout only cover the localized root (/uz, /ru, /en).
     // Every child page redeclares its own alternates via localeAlternates(...)
     // so canonicals + hreflang are self-referencing on every URL Google finds.
     alternates: localeAlternates(locale, ""),
     openGraph: {
       type: "website",
-      siteName: "Yollla",
+      siteName: "Yolla",
       title: t("title"),
       description: t("description"),
       // Locale + alternates match how Google/Facebook expect them. Pages that

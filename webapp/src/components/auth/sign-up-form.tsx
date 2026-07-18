@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { signUpAction, type AuthFormState } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,9 @@ export function SignUpForm({
       ? t("errInUse")
       : state.error === "weak"
         ? t("errWeak")
-        : t("errUnknown")
+        : state.error === "tos"
+          ? t("errTosRequired")
+          : t("errUnknown")
     : undefined;
 
   return (
@@ -63,6 +66,41 @@ export function SignUpForm({
         emailLabel={t("email")}
         passwordLabel={t("password")}
       />
+      {/* ToS acceptance — REQUIRED by the browser before the form can
+          submit (checkbox has `required`). Real click-to-accept audit trail
+          on both stores + a legal-defence line if someone claims they never
+          agreed. Links open the /terms and /privacy pages in the current
+          locale, in a new tab so the user doesn't lose their form state. */}
+      <label className="text-muted-foreground flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          name="tos"
+          required
+          className="border-border mt-0.5 size-4 shrink-0 rounded"
+        />
+        <span>
+          {t.rich("agreeTos", {
+            terms: (chunks) => (
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-primary font-medium hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link
+                href="/privacy"
+                target="_blank"
+                className="text-primary font-medium hover:underline"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
+        </span>
+      </label>
       <FormError message={errorMsg} />
       <button
         type="submit"

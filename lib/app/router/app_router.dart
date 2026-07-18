@@ -89,6 +89,7 @@ import '../../features/search/presentation/saved_searches_page.dart';
 import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
+import '../../shared/widgets/not_found_page.dart';
 import '../../shared/widgets/placeholder_page.dart';
 import 'app_shell.dart';
 import 'guards.dart';
@@ -547,7 +548,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => const InviteFriendsPage(),
       ),
     ],
-    errorBuilder: (context, state) =>
-        PlaceholderPage(title: state.error?.message ?? 'Not found'),
+    // A bad deep link should read as "we couldn't find this", not as an
+    // "upcoming phase" stub. NotFoundPage is a real 404 with a "Back to home"
+    // action; PlaceholderPage stays reserved for planned-but-not-yet-shipped
+    // features (marked with a construction icon by design).
+    errorBuilder: (context, state) => const NotFoundPage(),
   );
 });

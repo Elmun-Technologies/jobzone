@@ -14,7 +14,9 @@
 import { corsHeaders, json } from "../_shared/cors.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-const CLAUDE_MODEL = "claude-opus-4-8";
+// Currently issued Anthropic model id. `claude-opus-4-8` was a placeholder
+// that would 400 at runtime — pinned to the current opus point release.
+const CLAUDE_MODEL = "claude-opus-4-5";
 
 const LANG: Record<string, string> = {
   uz: "Uzbek (Latin script)",
@@ -85,6 +87,14 @@ Deno.serve(async (req) => {
   }
   if (req.method !== "POST") {
     return json({ error: "method not allowed" }, 405);
+  }
+
+  // Fail closed on EDGE_SHARED_SECRET — same posture as generate-job-content
+  // and notify-dispatch. Every path below burns ANTHROPIC_API_KEY spend, so
+  // leaving the endpoint open (no header check at all) is unsafe.
+  const secret = Deno.env.get("EDGE_SHARED_SECRET");
+  if (!secret || req.headers.get("x-edge-secret") !== secret) {
+    return json({ ok: false, error: "unauthorized" }, 401);
   }
 
   if (!ANTHROPIC_API_KEY) return json({ available: false });
