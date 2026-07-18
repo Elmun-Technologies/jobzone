@@ -196,12 +196,11 @@ class _Header extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Text(
-                  l.online,
-                  style: context.text.bodySmall?.copyWith(
-                    color: Colors.white70,
-                  ),
-                ),
+                // Static "Online" subtitle used to render on every chat
+                // regardless of the peer's actual state — an outright lie.
+                // Removed for launch; when we wire real presence (Supabase
+                // realtime broadcast on a `presence` channel keyed by user
+                // id) the subtitle comes back with the real signal.
               ],
             ),
           ),
@@ -448,19 +447,18 @@ class _Composer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    // Attach (image/file) and voice-note send aren't wired yet — the
+    // "+" and mic buttons used to show a "coming soon" toast, which is a
+    // dead-end. Both are hidden for launch. Received image / voice / audio
+    // messages still render (message bubbles handle those types), so an
+    // employer/seeker on another client can send media in — we just can't
+    // send them back until the composer gets its send-image + record paths.
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
-            _RoundIcon(
-              icon: Icons.add_rounded,
-              onTap: () => ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
-            ),
-            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: TextField(
                 controller: controller,
@@ -475,14 +473,13 @@ class _Composer extends StatelessWidget {
             ListenableBuilder(
               listenable: controller,
               builder: (_, _) {
+                // Send is enabled only when there's text to send. No
+                // fallback icon — an empty composer just doesn't get a
+                // send button, no false affordance.
                 final hasText = controller.text.trim().isNotEmpty;
                 return _RoundIcon(
-                  icon: hasText ? Icons.send_rounded : Icons.mic_rounded,
-                  onTap: hasText
-                      ? onSend
-                      : () => ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+                  icon: Icons.send_rounded,
+                  onTap: hasText ? onSend : () {},
                 );
               },
             ),

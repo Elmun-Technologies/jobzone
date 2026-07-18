@@ -90,7 +90,6 @@ import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
 import '../../shared/widgets/not_found_page.dart';
-import '../../shared/widgets/placeholder_page.dart';
 import 'app_shell.dart';
 import 'guards.dart';
 import 'routes.dart';
@@ -318,21 +317,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/employer/applicants/:id',
-        builder: (c, s) {
-          final applicant = s.extra as Applicant?;
-          return applicant == null
-              ? PlaceholderPage(title: s.uri.toString())
-              : ApplicantDetailPage(applicant: applicant);
-        },
+        // Cold nav (deep link, browser refresh, notification tap) hits this
+        // route without `extra` — instead of rendering the "upcoming phase"
+        // PlaceholderPage that used to fall through, redirect to the
+        // applicants list so the employer can pick again. Once the repo has
+        // a fetch-by-id method wired we can re-hydrate the applicant from
+        // the id path segment and drop this redirect.
+        redirect: (c, s) => s.extra == null ? Routes.employerApplicants : null,
+        builder: (c, s) => ApplicantDetailPage(applicant: s.extra as Applicant),
       ),
       GoRoute(
         path: Routes.employerCompanyEdit,
-        builder: (c, s) {
-          final company = s.extra as Company?;
-          return company == null
-              ? PlaceholderPage(title: s.uri.toString())
-              : EditCompanyPage(company: company);
-        },
+        // Same pattern as the applicants detail — cold nav routes back to
+        // the company manage page (which has an "Edit" button that carries
+        // the company object as `extra`).
+        redirect: (c, s) => s.extra == null ? Routes.employerCompany : null,
+        builder: (c, s) => EditCompanyPage(company: s.extra as Company),
       ),
       GoRoute(
         path: Routes.employerCompanyPeople,

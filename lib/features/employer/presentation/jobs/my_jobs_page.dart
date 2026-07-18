@@ -9,7 +9,6 @@ import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/presentation/util/job_labels.dart';
-import '../../../monetization/presentation/promote_sheet.dart';
 import '../../data/employer_jobs_repository.dart';
 import 'listing_payment_page.dart';
 
@@ -151,8 +150,6 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
                         onClose: () => _setStatus(jobs[i], 'closed'),
                         onReopen: () => _setStatus(jobs[i], 'open'),
                         onPublish: () => _publishDraft(jobs[i]),
-                        onPromote: () =>
-                            showPromoteSheet(context, jobId: jobs[i].id),
                         onDuplicate: () => context.push(
                           Routes.employerDuplicateJob(jobs[i].id),
                           extra: jobs[i],
@@ -212,7 +209,6 @@ class _MyJobCard extends StatelessWidget {
     required this.onClose,
     required this.onReopen,
     required this.onPublish,
-    required this.onPromote,
     required this.onDuplicate,
   });
 
@@ -222,7 +218,6 @@ class _MyJobCard extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onReopen;
   final VoidCallback onPublish;
-  final VoidCallback onPromote;
   final VoidCallback onDuplicate;
 
   @override
@@ -266,7 +261,6 @@ class _MyJobCard extends StatelessWidget {
                 _StatusChip(status: job.status),
                 PopupMenuButton<String>(
                   onSelected: (v) => switch (v) {
-                    'promote' => onPromote(),
                     'edit' => onEdit(),
                     'duplicate' => onDuplicate(),
                     'close' => onClose(),
@@ -276,14 +270,19 @@ class _MyJobCard extends StatelessWidget {
                   },
                   itemBuilder: (_) => [
                     // A draft's primary action is publishing it (through the
-                    // first-free / then-pay-per-listing gate); promoting only
-                    // makes sense once it's live.
+                    // first-free / then-pay-per-listing gate).
+                    //
+                    // Promote menu item is hidden on mobile until the
+                    // wallet-backed boost purchase mirrors the web
+                    // PromotePicker flow — today the mobile checkout only
+                    // renders a permanently-disabled "coming soon" Pay
+                    // button, which is a dead-end for real employers. Web
+                    // employers can still promote from /employer/jobs/[id]
+                    // /promote (fully wired to the wallet).
                     if (job.status == 'draft')
-                      PopupMenuItem(value: 'publish', child: Text(l.publishJob))
-                    else
                       PopupMenuItem(
-                        value: 'promote',
-                        child: Text(l.promoteCta),
+                        value: 'publish',
+                        child: Text(l.publishJob),
                       ),
                     PopupMenuItem(value: 'edit', child: Text(l.jobEditAction)),
                     PopupMenuItem(

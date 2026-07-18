@@ -163,26 +163,22 @@ class _PersonalInfoPageState extends ConsumerState<PersonalInfoPage> {
                                   l.phoneNumber,
                                   style: context.text.labelLarge,
                                 ),
-                                GestureDetector(
-                                  onTap: () => ScaffoldMessenger.of(context)
-                                    ..hideCurrentSnackBar()
-                                    ..showSnackBar(
-                                      SnackBar(content: Text(l.comingSoon)),
-                                    ),
-                                  child: Text(
-                                    l.changeLabel,
-                                    style: context.text.labelLarge?.copyWith(
-                                      color: colors.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                                // Change-phone flow (verify OTP for a new
+                                // number via the existing phone-change RPC
+                                // path) is not wired end-to-end yet. Hiding
+                                // the affordance until that lands, rather
+                                // than teasing users with a "coming soon"
+                                // toast.
                               ],
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             JzTextField(
                               controller: _phone,
                               keyboardType: TextInputType.phone,
+                              // The phone number is view-only in this form
+                              // until the change flow ships — matches the
+                              // hidden "Change" affordance above.
+                              readOnly: true,
                             ),
                           ],
                         ),
