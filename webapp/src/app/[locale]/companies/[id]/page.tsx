@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobCard } from "@/components/jobs/job-card";
+import { ReportButton } from "@/components/reports/report-button";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
@@ -196,6 +197,10 @@ export default async function CompanyPage({
           </ul>
         )}
       </section>
+
+      <div className="mt-8 flex justify-center">
+        <ReportButton targetType="company" targetId={id} />
+      </div>
     </Container>
   );
 }

@@ -12,6 +12,7 @@ import { PhoneLink } from "@/components/jobs/phone-link";
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { RichText } from "@/components/jobs/rich-text";
 import { ShareCreative } from "@/components/jobs/share-creative";
+import { ReportButton } from "@/components/reports/report-button";
 import { hasApplied } from "@/lib/data/applications";
 import { isBookmarked } from "@/lib/data/bookmarks";
 import { getCompanyById } from "@/lib/data/companies";
@@ -419,6 +420,10 @@ export default async function JobDetailsPage({
               title={job.title}
             />
           ) : null}
+
+          <div className="mt-4 flex justify-center">
+            <ReportButton targetType="job" targetId={id} />
+          </div>
         </aside>
       </div>
     </Container>

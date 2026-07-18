@@ -32,6 +32,7 @@ export const adminNav: AdminNavGroup[] = [
       { key: "companies", label: n.companies, href: "/admin/companies", enabled: true },
       { key: "jobs", label: n.jobs, href: "/admin/jobs", enabled: true },
       { key: "reviews", label: n.reviews, href: "/admin/reviews", enabled: true },
+      { key: "reports", label: n.reports, href: "/admin/reports", enabled: true },
     ],
   },
   {
