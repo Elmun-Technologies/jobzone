@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,15 +11,17 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { YandexMetrica } from "@/components/analytics/yandex-metrica";
+import { ConsentBanner } from "@/components/consent/consent-banner";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
+import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
 
-// Yolla type: Archivo for everything (UI, body, headings via weight, and the
+// Yollla type: Archivo for everything (UI, body, headings via weight, and the
 // wordmark at 900) — multilingual (uz Latin + ru Cyrillic). Space Mono for
 // numbers/prices/tags. Anton (the board's poster face) is Latin-only, so it is
 // intentionally not used on localized text.
@@ -80,16 +83,16 @@ export async function generateMetadata({
   const primary = OG_LOCALE[locale] ?? OG_LOCALE.uz;
   return {
     metadataBase: new URL(siteUrl()),
-    title: { default: t("title"), template: "%s · Yolla" },
+    title: { default: t("title"), template: "%s · Yollla" },
     description: t("description"),
-    applicationName: "Yolla",
+    applicationName: "Yollla",
     // Alternates on the layout only cover the localized root (/uz, /ru, /en).
     // Every child page redeclares its own alternates via localeAlternates(...)
     // so canonicals + hreflang are self-referencing on every URL Google finds.
     alternates: localeAlternates(locale, ""),
     openGraph: {
       type: "website",
-      siteName: "Yolla",
+      siteName: "Yollla",
       title: t("title"),
       description: t("description"),
       // Locale + alternates match how Google/Facebook expect them. Pages that
@@ -127,6 +130,14 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
+  // Consent gate: read the cookie once, use it to (a) hide the banner
+  // when the visitor already chose and (b) gate every third-party
+  // analytics loader so scripts don't reach the browser at all until the
+  // visitor has clicked accept. GDPR + UZ personal-data law both require
+  // this pattern for non-first-party trackers.
+  const consent = parseConsent((await cookies()).get(CONSENT_COOKIE)?.value);
+  const analyticsAllowed = consent === "granted";
+
   return (
     <html
       lang={locale}
@@ -142,13 +153,16 @@ export default async function LocaleLayout({
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
+          <ConsentBanner initialConsent={consent} />
         </NextIntlClientProvider>
-        <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
-        <YandexMetrica counterId={YANDEX_METRICA_ID} />
-        <MetaPixel pixelId={META_PIXEL_ID} />
-        {/* PostHog gates itself on NEXT_PUBLIC_POSTHOG_KEY — safe to
-            mount unconditionally, no-ops without the env. */}
-        <PostHogProvider />
+        {analyticsAllowed ? (
+          <>
+            <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
+            <YandexMetrica counterId={YANDEX_METRICA_ID} />
+            <MetaPixel pixelId={META_PIXEL_ID} />
+            <PostHogProvider />
+          </>
+        ) : null}
         {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
             Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
             banner needed, no third-party host. Both no-op in dev. */}

@@ -79,7 +79,7 @@
     "sendResetLink": "Отправить ссылку",
     "backToSignIn": "Вернуться ко входу",
     "resetTitle": "Задайте новый пароль",
-    "resetSubtitle": "Выберите новый пароль для вашей учётной записи Yolla.",
+    "resetSubtitle": "Выберите новый пароль для вашей учётной записи Yollla.",
     "newPassword": "Новый пароль",
     "confirmPassword": "Повторите пароль",
     "updatePassword": "Обновить пароль",
@@ -667,6 +667,8 @@
       "lead": "Ведущий"
     },
     "aboutRole": "О вакансии",
+    "aboutCompany": "О компании",
+    "viewCompany": "Страница компании",
     "responsibilities": "Обязанности",
     "requirements": "Требования",
     "benefits": "Преимущества",
@@ -1120,6 +1122,14 @@
     "targetLink": "Открыть",
     "filterAll": "Все",
     "filterOpen": "Открытые"
+  },
+  "consent": {
+    "title": "Мы используем cookies",
+    "body": "Мы используем аналитические cookies, чтобы понимать, как посетители пользуются Yollla, и улучшать сервис. Собственные cookies для производительности работают в любом случае.",
+    "learnMore": "Подробнее",
+    "accept": "Принять",
+    "reject": "Отклонить",
+    "settings": "Настройки cookies"
   },
   "settings": {
     "title": "Настройки",

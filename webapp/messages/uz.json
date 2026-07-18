@@ -79,7 +79,7 @@
     "sendResetLink": "Tiklash havolasini yuborish",
     "backToSignIn": "Kirish sahifasiga qaytish",
     "resetTitle": "Yangi parol o'rnatish",
-    "resetSubtitle": "Yolla hisobingiz uchun yangi parol tanlang.",
+    "resetSubtitle": "Yollla hisobingiz uchun yangi parol tanlang.",
     "newPassword": "Yangi parol",
     "confirmPassword": "Parolni takrorlang",
     "updatePassword": "Parolni yangilash",
@@ -667,6 +667,8 @@
       "lead": "Yetakchi"
     },
     "aboutRole": "Ish haqida",
+    "aboutCompany": "Kompaniya haqida",
+    "viewCompany": "Kompaniya sahifasi",
     "responsibilities": "Majburiyatlar",
     "requirements": "Talablar",
     "benefits": "Imtiyozlar",
@@ -1120,6 +1122,14 @@
     "targetLink": "Ochish",
     "filterAll": "Barchasi",
     "filterOpen": "Ochiq"
+  },
+  "consent": {
+    "title": "Cookie fayllardan foydalanamiz",
+    "body": "Yolllani qanday ishlatilishini tushunish va xizmatni yaxshilash uchun analitik cookie ishlatamiz. Birinchi tarafli ishlash cookie qanday bo'lsa ham ishlaydi.",
+    "learnMore": "Batafsil",
+    "accept": "Roziman",
+    "reject": "Rad etish",
+    "settings": "Cookie sozlamalari"
   },
   "settings": {
     "title": "Sozlamalar",

@@ -7,7 +7,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Yolla</string>
+		<string>Yollla</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -23,7 +23,7 @@
 		<key>CFBundleAllowMixedLocalizations</key>
 		<true/>
 		<key>CFBundleName</key>
-		<string>Yolla</string>
+		<string>Yollla</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -75,9 +75,9 @@
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Yolla uses your location to show jobs near you.</string>
+		<string>Yollla uses your location to show jobs near you.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Yolla needs access to your photos to set a profile picture and to attach images to your company reviews.</string>
+		<string>Yollla needs access to your photos to set a profile picture and to attach images to your company reviews.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<!--

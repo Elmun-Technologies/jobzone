@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/config/env.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/widgets/report_content_dialog.dart';
@@ -136,9 +138,20 @@ class _Header extends ConsumerWidget {
               const SizedBox(width: AppSpacing.sm),
               JzCircleButton(
                 icon: Icons.share_outlined,
-                onTap: () => ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(SnackBar(content: Text(l.comingSoon))),
+                // Copy the job's public web URL to the clipboard. `share_plus`
+                // would open the OS share sheet but adds ~200KB to the AAB for
+                // one feature; the copy-and-toast pattern is the standard
+                // Uzbek app UX (Telegram / OLX / hh.uz all do this) and works
+                // identically on iOS + Android + web.
+                onTap: () async {
+                  final url = '${Env.webBaseUrl}/uz/jobs/${job.id}';
+                  await Clipboard.setData(ClipboardData(text: url));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(SnackBar(content: Text(l.linkCopied)));
+                  }
+                },
               ),
               const SizedBox(width: AppSpacing.sm),
               JzCircleButton(

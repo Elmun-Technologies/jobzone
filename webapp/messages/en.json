@@ -79,7 +79,7 @@
     "sendResetLink": "Send reset link",
     "backToSignIn": "Back to sign in",
     "resetTitle": "Set a new password",
-    "resetSubtitle": "Choose a new password for your Yolla account.",
+    "resetSubtitle": "Choose a new password for your Yollla account.",
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
     "updatePassword": "Update password",
@@ -667,6 +667,8 @@
       "lead": "Lead"
     },
     "aboutRole": "About the role",
+    "aboutCompany": "About the company",
+    "viewCompany": "View company page",
     "responsibilities": "Responsibilities",
     "requirements": "Requirements",
     "benefits": "Benefits",
@@ -1120,6 +1122,14 @@
     "targetLink": "Open",
     "filterAll": "All",
     "filterOpen": "Open"
+  },
+  "consent": {
+    "title": "We use cookies",
+    "body": "We use analytics cookies to understand how visitors use Yollla and improve the service. First-party performance cookies run either way.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "reject": "Reject",
+    "settings": "Cookie settings"
   },
   "settings": {
     "title": "Settings",
