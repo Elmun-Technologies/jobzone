@@ -1077,6 +1077,14 @@
     "ctaText": "Birinchi vakansiya bepul — bir necha daqiqada e'lon qiling.",
     "ctaButton": "Vakansiya joylash"
   },
+  "consent": {
+    "title": "Cookie fayllardan foydalanamiz",
+    "body": "Yolllani qanday ishlatilishini tushunish va xizmatni yaxshilash uchun analitik cookie ishlatamiz. Birinchi tarafli ishlash cookie qanday bo'lsa ham ishlaydi.",
+    "learnMore": "Batafsil",
+    "accept": "Roziman",
+    "reject": "Rad etish",
+    "settings": "Cookie sozlamalari"
+  },
   "settings": {
     "title": "Sozlamalar",
     "subtitle": "Hisobingiz va ma'lumotlaringizni boshqaring",
