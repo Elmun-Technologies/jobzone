@@ -8,6 +8,7 @@ import {
   FileText,
   LayoutDashboard,
   MessageSquare,
+  Settings,
   Sparkles,
   UserCog,
   Wallet,
@@ -100,6 +101,7 @@ export default async function AccountPage({
   const te = await getTranslations("employer");
   const tw = await getTranslations("wallet");
   const tn = await getTranslations("nav");
+  const tset = await getTranslations("settings");
   const role = await getMyRole();
   const isEmployer = role === "employer";
 
@@ -145,6 +147,7 @@ export default async function AccountPage({
     { href: "/account/messages", label: t("messages"), icon: MessageSquare },
     { href: "/account/notifications", label: t("notifications"), icon: Bell },
     { href: "/account/profile", label: t("editProfile"), icon: UserCog },
+    { href: "/account/settings", label: tset("linkFromAccount"), icon: Settings },
   ];
   const items = [...roleItems, ...sharedItems];
 

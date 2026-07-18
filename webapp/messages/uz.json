@@ -1079,7 +1079,7 @@
     "cta": "Shikoyat",
     "openDialog": "Ushbu kontent haqida shikoyat qilish",
     "title": "Kontentga shikoyat",
-    "subtitle": "Yollani xavfsiz saqlashga yordam bering. Shikoyatlar moderatsiya jamoasi tomonidan ko'rib chiqiladi.",
+    "subtitle": "Yolllani xavfsiz saqlashga yordam bering. Shikoyatlar moderatsiya jamoasi tomonidan ko'rib chiqiladi.",
     "reasonLegend": "Sabab",
     "reason.spam": "Spam yoki takroriy e'lon",
     "reason.scam": "Firibgarlik yoki qonunga zid",
@@ -1120,5 +1120,20 @@
     "targetLink": "Ochish",
     "filterAll": "Barchasi",
     "filterOpen": "Ochiq"
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "subtitle": "Hisobingiz va ma'lumotlaringizni boshqaring",
+    "linkFromAccount": "Sozlamalar",
+    "dangerZone": "Xavfli hudud",
+    "deleteWarning": "Hisobni o'chirish qaytarib bo'lmaydigan amal. Profilingiz, rezyume, arizalar, xabarlar va boshqa barcha ma'lumotlar butunlay o'chiriladi. Sizga tegishli kompaniyalar saqlanib qoladi, ammo egasiz deb belgilanadi.",
+    "deleteReasonLabel": "Sabab (majburiy emas)",
+    "deleteReasonPlaceholder": "Nima uchun ketayotganingizni ayting — bu bizga yordam beradi.",
+    "deleteConfirmLabel": "Tasdiqlash uchun DELETE deb yozing",
+    "deleteCta": "Hisobimni o'chirish",
+    "deleteInProgress": "O'chirilmoqda…",
+    "deleteErrConfirm": "Tasdiqlash uchun aynan DELETE deb yozing.",
+    "deleteErrSession": "Siz kirmagansiz.",
+    "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
   }
 }

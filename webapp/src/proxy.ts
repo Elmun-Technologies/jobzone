@@ -49,24 +49,36 @@ export async function proxy(request: NextRequest) {
   // Honor a locale redirect (e.g. "/" → "/uz") as-is.
   if (intlResponse.headers.has("location")) return intlResponse;
 
-  const { response, user } = await updateSession(request, intlResponse);
-  const path = request.nextUrl.pathname;
+  // Fail OPEN: this is a guest-first marketplace, so the middleware must
+  // never take the whole site down. If the session refresh throws (a
+  // Supabase blip, a malformed auth cookie, an edge-runtime hiccup), serve
+  // the page as a guest — the protected pages re-check auth server-side via
+  // getCurrentUser()/requireAdmin() anyway, so security doesn't depend on
+  // this optimistic gate. Without this, any throw here becomes a
+  // MIDDLEWARE_INVOCATION_FAILED 500 on EVERY route.
+  try {
+    const { response, user } = await updateSession(request, intlResponse);
+    const path = request.nextUrl.pathname;
 
-  if (!user && PROTECTED.test(path) && !GUEST_OK.test(path)) {
-    const url = new URL(`/${localeOf(path)}/sign-in`, request.url);
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
-  }
-  if (user && ADMIN.test(path) && !isAdminUser(user)) {
-    return NextResponse.redirect(new URL(`/${localeOf(path)}`, request.url));
-  }
-  if (user && AUTH_PAGES.test(path)) {
-    return NextResponse.redirect(
-      new URL(`/${localeOf(path)}/account`, request.url),
-    );
-  }
+    if (!user && PROTECTED.test(path) && !GUEST_OK.test(path)) {
+      const url = new URL(`/${localeOf(path)}/sign-in`, request.url);
+      url.searchParams.set("next", path);
+      return NextResponse.redirect(url);
+    }
+    if (user && ADMIN.test(path) && !isAdminUser(user)) {
+      return NextResponse.redirect(new URL(`/${localeOf(path)}`, request.url));
+    }
+    if (user && AUTH_PAGES.test(path)) {
+      return NextResponse.redirect(
+        new URL(`/${localeOf(path)}/account`, request.url),
+      );
+    }
 
-  return response;
+    return response;
+  } catch {
+    // Degrade to a guest response rather than 500 the entire site.
+    return intlResponse;
+  }
 }
 
 export const config = {

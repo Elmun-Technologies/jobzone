@@ -1079,7 +1079,7 @@
     "cta": "Report",
     "openDialog": "Report this content",
     "title": "Report content",
-    "subtitle": "Help keep Yolla safe. Reports are reviewed by our moderation team.",
+    "subtitle": "Help keep Yollla safe. Reports are reviewed by our moderation team.",
     "reasonLegend": "Reason",
     "reason.spam": "Spam or repeated postings",
     "reason.scam": "Scam or fraud",
@@ -1120,5 +1120,20 @@
     "targetLink": "Open",
     "filterAll": "All",
     "filterOpen": "Open"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and data",
+    "linkFromAccount": "Settings",
+    "dangerZone": "Danger zone",
+    "deleteWarning": "Deleting your account is permanent. Your profile, resume, applications, messages and any other data will be removed and cannot be restored. Any companies you own will remain but will be marked orphaned.",
+    "deleteReasonLabel": "Reason (optional)",
+    "deleteReasonPlaceholder": "Tell us why you're leaving — it helps us improve.",
+    "deleteConfirmLabel": "Type DELETE to confirm",
+    "deleteCta": "Delete my account",
+    "deleteInProgress": "Deleting…",
+    "deleteErrConfirm": "Type DELETE exactly to confirm.",
+    "deleteErrSession": "You are not signed in.",
+    "deleteErrUnknown": "Something went wrong. Please try again."
   }
 }
