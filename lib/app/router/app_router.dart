@@ -90,7 +90,6 @@ import '../../features/search/presentation/search_page.dart';
 import '../../features/splash/presentation/splash_page.dart';
 import '../../shared/providers/app_flags.dart';
 import '../../shared/widgets/not_found_page.dart';
-import '../../shared/widgets/placeholder_page.dart';
 import 'app_shell.dart';
 import 'guards.dart';
 import 'routes.dart';

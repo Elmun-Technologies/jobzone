@@ -80,7 +80,6 @@ class _PasswordManagerPageState extends ConsumerState<PasswordManagerPage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
     return Scaffold(
       body: SafeArea(
         child: Column(
