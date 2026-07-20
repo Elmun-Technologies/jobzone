@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/utils/uz_geo.dart';
 import '../../../shared/widgets/jz_map/jz_map.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
@@ -318,15 +319,14 @@ class _HomeMapPreview extends ConsumerWidget {
     final colors = context.colors;
     final jobs = ref.watch(recentJobsProvider).value ?? const <Job>[];
     final markers = [
+      // Every job gets a pin — pinless postings fall back to their city
+      // centroid so they still show on the preview map (matches Explore + web).
       for (final j in jobs)
-        if (j.lat != null && j.lng != null)
-          // Salary pins, same as the full Explore map (clustering keeps the
-          // small preview readable).
-          JzMapMarker(
-            id: j.id,
-            point: LatLng(j.lat!, j.lng!),
-            label: j.salaryPillText ?? l.mapSalaryNegotiable,
-          ),
+        JzMapMarker(
+          id: j.id,
+          point: jobLatLng(lat: j.lat, lng: j.lng, city: j.city, id: j.id),
+          label: j.salaryPillText ?? l.mapSalaryNegotiable,
+        ),
     ];
 
     return Column(
