@@ -87,6 +87,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   Widget build(BuildContext context) {
     final results = ref.watch(searchControllerProvider);
     final jobs = results.value ?? const <Job>[];
+    final l = context.l10n;
 
     return Scaffold(
       body: SafeArea(
@@ -125,10 +126,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                           JzMapMarker(
                             id: job.id,
                             point: LatLng(job.lat!, job.lng!),
-                            // The pin shows the job TITLE (truncated when
-                            // long); salary and details are in the preview
-                            // sheet that opens on tap.
-                            label: job.title,
+                            // The pin IS the salary (Joyme-style price pill);
+                            // the full title and details live in the preview
+                            // sheet that opens on tap. Falls back to a
+                            // "negotiable" label when no salary is stated.
+                            label: job.salaryPillText ?? l.mapSalaryNegotiable,
                             imageUrl: job.companyLogoUrl,
                             tier: job.tierStandout
                                 ? JzMarkerTier.premium

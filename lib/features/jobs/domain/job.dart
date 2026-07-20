@@ -213,6 +213,30 @@ class Job {
     return '$s${fmt(single)}';
   }
 
+  /// Compact salary for a map marker pill — the upper bound only, e.g.
+  /// "4 mln" / "4,2 mln" (UZS) or "$3k" (USD). Null when no salary is set so
+  /// the map can fall back to a localized "negotiable" label. Mirrors the web
+  /// `salaryPill`: a map pin wants one glanceable number, not the full range.
+  String? get salaryPillText {
+    final v = salaryMax ?? salaryMin;
+    if (v == null) return null;
+    if (currency == 'UZS') {
+      if (v >= 1000000) {
+        final m = v / 1000000;
+        final s = v % 1000000 == 0
+            ? m.toStringAsFixed(0)
+            : m.toStringAsFixed(1).replaceAll('.', ',');
+        return '$s mln';
+      }
+      return _groupDigits(v.round());
+    }
+    final s = _currencySymbol;
+    final f = v >= 1000
+        ? '${(v / 1000).toStringAsFixed(v % 1000 == 0 ? 0 : 1)}k'
+        : v.toStringAsFixed(0);
+    return '$s$f';
+  }
+
   /// Space-grouped thousands, e.g. 2500000 -> "2 500 000".
   static String _groupDigits(int v) {
     final s = v.abs().toString();
