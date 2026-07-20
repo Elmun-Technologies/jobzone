@@ -1,4 +1,9 @@
--- 0065_rahmat_provider.sql
+-- 0072_rahmat_provider.sql
+-- Renumbered from 0065: it collided with 0065_security_hardening, and the DB
+-- had only recorded that one under version 0065 — so this migration would never
+-- apply via `supabase db push`. As 0072 it applies after 0064 (which creates
+-- payment_transactions) and after the rest, which is all it needs.
+--
 -- Adds Rahmat (Multicard) as a third payment provider alongside Payme + Click.
 -- Rahmat is a white-label front for Multicard's mesh.multicard.uz acquiring rail;
 -- from Yolla's side it's the same shape as click-merchant/payme-merchant — an
