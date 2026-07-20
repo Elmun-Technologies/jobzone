@@ -101,16 +101,28 @@ export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
     if (error) throw error;
     const cats = (data ?? []).map(toCategory);
 
-    const withCounts = await Promise.all(
-      cats.map(async (c) => {
-        const { count } = await supabase
-          .from("job_feed")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "open")
-          .eq("category_name", c.name);
-        return { ...c, count: count ?? 0 };
-      }),
-    );
+    // One round-trip instead of a count-per-category fan-out (was 1 + N
+    // head-count requests, each a full cross-region RTT to Supabase): pull the
+    // open jobs' category names once and tally locally. `job_feed` is already
+    // the open + non-expired feed; the explicit status filter keeps drafts out.
+    // The high cap guards against PostgREST's default 1000-row page silently
+    // truncating the tally; past that scale a materialized count is the move.
+    const { data: rows, error: tallyErr } = await supabase
+      .from("job_feed")
+      .select("category_name")
+      .eq("status", "open")
+      .limit(20000);
+    if (tallyErr) throw tallyErr;
+    const tally = new Map<string, number>();
+    for (const row of rows ?? []) {
+      const name = (row as { category_name: string | null }).category_name;
+      if (name) tally.set(name, (tally.get(name) ?? 0) + 1);
+    }
+
+    const withCounts = cats.map((c) => ({
+      ...c,
+      count: tally.get(c.name) ?? 0,
+    }));
     return withCounts.sort((a, b) => b.count - a.count);
   } catch (e) {
     console.error("getCategoriesWithCounts failed", e);
