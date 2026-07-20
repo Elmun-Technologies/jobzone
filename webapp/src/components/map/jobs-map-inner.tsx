@@ -13,6 +13,7 @@ import {
   TileLayer,
   ZoomControl,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 
 import { useRouter } from "@/i18n/navigation";
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { jobLatLng } from "@/lib/uz-geo";
 
 import { PinCardOverlay, usePinHover } from "./job-pin-card";
-import { salaryPinIcon } from "./pin-icon";
+import { dotPinIcon, salaryPinIcon } from "./pin-icon";
 import { mapTier } from "./tier";
 import { YandexMap } from "./yandex-map";
 
@@ -32,6 +33,9 @@ export type MapRatings = Record<string, { avg: number; count: number }>;
 
 const TASHKENT: [number, number] = [41.3111, 69.2797];
 const NEAR_RADIUS_M = 10_000;
+// Below this Leaflet zoom the pins collapse to plain dots (Joyme-style: dots
+// from afar, salary pills up close) so a city-wide view isn't a wall of tags.
+const DOT_ZOOM = 12;
 const SALARY_FROM = 4_000_000; // "4 mln dan" chip
 const TOP_RATED_MIN = 4; // avg rating for the "gullar" / top-rated facet
 // Job-type segment tabs (Joyme's Sotuv/Ijara/Kunlik analogue). "" = all;
@@ -66,6 +70,17 @@ function Recenter({ to, zoom }: { to: LatLng | null; zoom: number }) {
   useEffect(() => {
     if (to) map.flyTo([to.lat, to.lng], zoom, { duration: 0.8 });
   }, [to, zoom, map]);
+  return null;
+}
+
+/** Reports the live Leaflet zoom so pins can switch between dot and pill. */
+function ZoomWatcher({ onZoom }: { onZoom: (z: number) => void }) {
+  const map = useMapEvents({
+    zoomend: () => onZoom(map.getZoom()),
+  });
+  useEffect(() => {
+    onZoom(map.getZoom());
+  }, [map, onZoom]);
   return null;
 }
 
@@ -106,6 +121,9 @@ export default function JobsMapInner({
   // salary pins pop and matches the brand. The ☀️/🌙 button flips it. Only the
   // OSM/Leaflet engine themes this way (Yandex JS has no clean night mode).
   const [mapDark, setMapDark] = useState(true);
+  // Live Leaflet zoom → dot vs pill (see DOT_ZOOM). Starts at the map's
+  // initial city-wide zoom; ZoomWatcher reports the real value on mount.
+  const [zoom, setZoom] = useState(11);
   const useYandex = !!YANDEX_KEY && !yandexFailed;
 
   const hasRatings = ratings != null && Object.keys(ratings).length > 0;
@@ -234,6 +252,7 @@ export default function JobsMapInner({
           {/* Zoom +/- buttons — the map must stay controllable when wheel-zoom
               is off (embedded landing map) or on touch devices. */}
           <ZoomControl position="bottomright" />
+          <ZoomWatcher onZoom={setZoom} />
 
           {loc ? (
             <>
@@ -248,11 +267,15 @@ export default function JobsMapInner({
             <Marker
               key={j.id}
               position={[j.lat, j.lng]}
-              icon={salaryPinIcon(
-                salaryPill(j) ?? tj("negotiable"),
-                j.id,
-                mapTier(j.boostKind),
-              )}
+              icon={
+                zoom < DOT_ZOOM
+                  ? dotPinIcon(j.id, mapTier(j.boostKind))
+                  : salaryPinIcon(
+                      salaryPill(j) ?? tj("negotiable"),
+                      j.id,
+                      mapTier(j.boostKind),
+                    )
+              }
             />
           ))}
         </MapContainer>
