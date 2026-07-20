@@ -34,6 +34,18 @@ const TASHKENT: [number, number] = [41.3111, 69.2797];
 const NEAR_RADIUS_M = 10_000;
 const SALARY_FROM = 4_000_000; // "4 mln dan" chip
 const TOP_RATED_MIN = 4; // avg rating for the "gullar" / top-rated facet
+// Job-type segment tabs (Joyme's Sotuv/Ijara/Kunlik analogue). "" = all;
+// order puts the blue-collar-relevant types first, the row scrolls for the
+// rest. Labels come from the shared `jobs.type.*` catalogue.
+const JOB_TYPES = [
+  "",
+  "full_time",
+  "part_time",
+  "rotational",
+  "contract",
+  "temporary",
+  "internship",
+] as const;
 // A *JavaScript API* key switches the engine to Yandex; empty → OSM/Leaflet.
 const YANDEX_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
@@ -88,6 +100,7 @@ export default function JobsMapInner({
   const [topRated, setTopRated] = useState(false);
   const [salaryOn, setSalaryOn] = useState(false);
   const [schedule22, setSchedule22] = useState(false);
+  const [jobType, setJobType] = useState("");
   const [yandexFailed, setYandexFailed] = useState(false);
   // Dark base map by default — the Joyme-style ink map that makes the volt
   // salary pins pop and matches the brand. The ☀️/🌙 button flips it. Only the
@@ -154,6 +167,7 @@ export default function JobsMapInner({
           return false;
         }
         if (schedule22 && j.schedulePattern !== "2_2") return false;
+        if (jobType && j.jobType !== jobType) return false;
         return true;
       }),
     [
@@ -165,6 +179,7 @@ export default function JobsMapInner({
       topRated,
       salaryOn,
       schedule22,
+      jobType,
       ratings,
     ],
   );
@@ -284,6 +299,25 @@ export default function JobsMapInner({
               <X className="size-4" />
             </button>
           ) : null}
+        </div>
+        {/* Job-type segment tabs (Joyme's Sotuv/Ijara/Kunlik analogue) —
+            filter the pins by employment type; the row scrolls for the rest. */}
+        <div className="pointer-events-auto mt-2 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+          {JOB_TYPES.map((jt) => (
+            <button
+              key={jt || "all"}
+              type="button"
+              onClick={() => setJobType(jt)}
+              className={cn(
+                "shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold shadow-sm transition-colors",
+                jobType === jt
+                  ? "bg-primary text-primary-foreground"
+                  : "border-border bg-background/95 text-foreground border",
+              )}
+            >
+              {jt === "" ? t("map.allTypes") : tj(`type.${jt}`)}
+            </button>
+          ))}
         </div>
         <div className="pointer-events-auto mt-2 flex [scrollbar-width:none] items-center gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
           <Chip
