@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-const segment =
-  "rounded-full px-3 py-1.5 text-sm font-medium transition-colors";
-const active = "bg-background text-foreground shadow-sm";
-const inactive = "text-muted-foreground hover:text-foreground";
+// Apple-style segmented control: two equal halves + a thumb that slides. Each
+// label is a centred, non-wrapping cell, so uz/ru/en all render one clean line
+// at (near-)identical width — no more the Uzbek "Ish qidiruvchi" wrapping to
+// two lines and making the pill taller than the compact Russian one.
+const cell =
+  "relative z-10 whitespace-nowrap rounded-full px-3 py-1.5 text-center text-sm font-medium transition-colors";
 
 /**
  * Seeker ⇄ Employer audience switch — the master mode boundary (mirrors the
@@ -26,13 +28,37 @@ export function RoleToggle({
   const isEmployer = pathname.startsWith("/employer");
 
   return (
-    <div className="bg-muted inline-flex items-center rounded-full p-1">
-      <Link href="/" className={cn(segment, isEmployer ? inactive : active)}>
+    <div className="bg-muted relative grid grid-cols-2 items-center rounded-full p-1">
+      {/* The sliding thumb. Width = one half minus the container padding; it
+          translates by its own width to sit under the employer cell. */}
+      <span
+        aria-hidden
+        className={cn(
+          "bg-background pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full shadow-sm transition-transform duration-200 ease-out",
+          isEmployer && "translate-x-full",
+        )}
+      />
+      <Link
+        href="/"
+        aria-current={isEmployer ? undefined : "page"}
+        className={cn(
+          cell,
+          isEmployer
+            ? "text-muted-foreground hover:text-foreground"
+            : "text-foreground",
+        )}
+      >
         {t("seeker")}
       </Link>
       <Link
         href={employerHref}
-        className={cn(segment, isEmployer ? active : inactive)}
+        aria-current={isEmployer ? "page" : undefined}
+        className={cn(
+          cell,
+          isEmployer
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground",
+        )}
       >
         {t("employer")}
       </Link>
