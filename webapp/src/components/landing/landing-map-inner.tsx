@@ -124,11 +124,13 @@ export default function LandingMapInner({
             zoomControl={false}
             attributionControl={false}
             className="h-full w-full"
-            style={{ background: "#F1F1EA" }}
+            // Ink base while tiles load — the showcase map is dark to match
+            // the brand and the /explore map (volt pins pop on ink).
+            style={{ background: "#0A0A0A" }}
           >
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap"
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              attribution="&copy; OpenStreetMap &copy; CARTO"
             />
             {pinned.map((job) => {
               const pos = jobLatLng(job);

@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
-import { Navigation, Search, X } from "lucide-react";
+import { Moon, Navigation, Search, Sun, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -89,6 +89,10 @@ export default function JobsMapInner({
   const [salaryOn, setSalaryOn] = useState(false);
   const [schedule22, setSchedule22] = useState(false);
   const [yandexFailed, setYandexFailed] = useState(false);
+  // Dark base map by default — the Joyme-style ink map that makes the volt
+  // salary pins pop and matches the brand. The ☀️/🌙 button flips it. Only the
+  // OSM/Leaflet engine themes this way (Yandex JS has no clean night mode).
+  const [mapDark, setMapDark] = useState(true);
   const useYandex = !!YANDEX_KEY && !yandexFailed;
 
   const hasRatings = ratings != null && Object.keys(ratings).length > 0;
@@ -200,8 +204,17 @@ export default function JobsMapInner({
           className="h-full w-full"
         >
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            // CartoDB Dark Matter for the ink map; light OSM when toggled off.
+            url={
+              mapDark
+                ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            }
+            attribution={
+              mapDark
+                ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }
           />
           {/* Zoom +/- buttons — the map must stay controllable when wheel-zoom
               is off (embedded landing map) or on touch devices. */}
@@ -357,6 +370,23 @@ export default function JobsMapInner({
         <Navigation className="size-4" aria-hidden />
         {status === "locating" ? t("map.locating") : t("map.nearMe")}
       </button>
+
+      {/* Light/dark base-map toggle — OSM engine only (Yandex JS has no clean
+          night mode). Sits above "near me", bottom-right like the reference. */}
+      {!useYandex ? (
+        <button
+          type="button"
+          onClick={() => setMapDark((v) => !v)}
+          aria-label={t("map.mapTheme")}
+          className="border-border bg-background text-foreground absolute right-4 bottom-40 z-[1001] flex size-11 items-center justify-center rounded-full border shadow-lg"
+        >
+          {mapDark ? (
+            <Sun className="size-5" aria-hidden />
+          ) : (
+            <Moon className="size-5" aria-hidden />
+          )}
+        </button>
+      ) : null}
 
       {shown.length === 0 ? (
         <div className="pointer-events-none absolute inset-0 z-[1000] flex items-center justify-center p-6">
