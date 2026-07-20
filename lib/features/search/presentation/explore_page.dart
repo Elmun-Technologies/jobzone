@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
+import '../../../shared/utils/uz_geo.dart';
 import '../../../shared/widgets/jz_map/jz_map.dart';
 import '../../../shared/widgets/snackbars.dart';
 import '../../jobs/domain/job.dart';
@@ -121,24 +122,31 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                     initialCenter: _initialCenter,
                     myLocation: _myLocation,
                     markers: [
+                      // Every job gets a pin: exact coords when set, else the
+                      // city centroid (jittered) so a pinless posting is never
+                      // dropped from the map — matches the web.
                       for (final job in jobs)
-                        if (job.lat != null && job.lng != null)
-                          JzMapMarker(
+                        JzMapMarker(
+                          id: job.id,
+                          point: jobLatLng(
+                            lat: job.lat,
+                            lng: job.lng,
+                            city: job.city,
                             id: job.id,
-                            point: LatLng(job.lat!, job.lng!),
-                            // The pin IS the salary (Joyme-style price pill);
-                            // the full title and details live in the preview
-                            // sheet that opens on tap. Falls back to a
-                            // "negotiable" label when no salary is stated.
-                            label: job.salaryPillText ?? l.mapSalaryNegotiable,
-                            imageUrl: job.companyLogoUrl,
-                            tier: job.tierStandout
-                                ? JzMarkerTier.premium
-                                : job.tierGlowLogo
-                                ? JzMarkerTier.brand
-                                : JzMarkerTier.none,
-                            onTap: () => _showJobPreview(job),
                           ),
+                          // The pin IS the salary (Joyme-style price pill);
+                          // the full title and details live in the preview
+                          // sheet that opens on tap. Falls back to a
+                          // "negotiable" label when no salary is stated.
+                          label: job.salaryPillText ?? l.mapSalaryNegotiable,
+                          imageUrl: job.companyLogoUrl,
+                          tier: job.tierStandout
+                              ? JzMarkerTier.premium
+                              : job.tierGlowLogo
+                              ? JzMarkerTier.brand
+                              : JzMarkerTier.none,
+                          onTap: () => _showJobPreview(job),
+                        ),
                     ],
                     carousel: jobs,
                     onMyLocation: _goToMyLocation,
