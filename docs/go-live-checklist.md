@@ -12,8 +12,15 @@ Work top-to-bottom; each section notes how to verify it.
 ## 1. Database — apply migrations
 
 ```bash
-supabase db push        # applies every migration through 0067
+supabase db push        # applies every migration through 0072
 ```
+
+> Note: the live DB is behind — it has 0065 (security_hardening) and 0067
+> recorded but is missing 0063, 0064, 0066 and everything from 0068 on. A
+> single `db push` applies all the un-recorded ones in version order, so a
+> later migration never runs before the one it depends on. The old duplicate
+> `0065_rahmat_provider` was renumbered to `0072` so it actually applies (two
+> files shared version 0065, so it was silently skipped).
 
 Most recent, most likely un-applied:
 
