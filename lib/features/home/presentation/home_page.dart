@@ -320,9 +320,13 @@ class _HomeMapPreview extends ConsumerWidget {
     final markers = [
       for (final j in jobs)
         if (j.lat != null && j.lng != null)
-          // Titled pins, same as the full Explore map (clustering keeps the
+          // Salary pins, same as the full Explore map (clustering keeps the
           // small preview readable).
-          JzMapMarker(id: j.id, point: LatLng(j.lat!, j.lng!), label: j.title),
+          JzMapMarker(
+            id: j.id,
+            point: LatLng(j.lat!, j.lng!),
+            label: j.salaryPillText ?? l.mapSalaryNegotiable,
+          ),
     ];
 
     return Column(
