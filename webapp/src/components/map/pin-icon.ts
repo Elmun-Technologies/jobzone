@@ -41,3 +41,30 @@ export function salaryPinIcon(
   cache.set(key, icon);
   return icon;
 }
+
+const dotCache = new Map<string, L.DivIcon>();
+
+/**
+ * A plain volt dot for the zoomed-out view (Joyme-style: dots from afar, salary
+ * pills up close) — smaller and quieter than the pill so a city-wide view
+ * doesn't drown in price tags. Premium listings dot a touch larger. Carries the
+ * same `data-job-id` so hover/click delegation works identically to the pill.
+ */
+export function dotPinIcon(jobId: string, tier: PinTier): L.DivIcon {
+  const key = `dot|${jobId}|${tier ?? ""}`;
+  const hit = dotCache.get(key);
+  if (hit) return hit;
+  const size = tier === "premium" ? 15 : 12;
+  const icon = L.divIcon({
+    className: "",
+    html:
+      `<span data-job-id="${escHtml(jobId)}" style="display:block;` +
+      `width:${size}px;height:${size}px;border-radius:9999px;` +
+      `transform:translate(-50%,-50%);background:#C7FB00;` +
+      `border:2px solid #0A0A0A;box-shadow:0 0 0 1px rgba(199,251,0,.4)"></span>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+  });
+  dotCache.set(key, icon);
+  return icon;
+}
