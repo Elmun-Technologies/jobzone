@@ -4,13 +4,14 @@ import en from "../messages/en.json";
 import ru from "../messages/ru.json";
 import uz from "../messages/uz.json";
 
-type Tree = { [key: string]: string | Tree };
+type Tree = { [key: string]: string | string[] | Tree };
 
 /** Flattens a message catalog to a sorted list of dotted key paths. */
 function keyPaths(obj: Tree, prefix = ""): string[] {
   return Object.entries(obj)
     .flatMap(([key, value]) => {
       const path = prefix ? `${prefix}.${key}` : key;
+      if (Array.isArray(value)) return [path];
       return typeof value === "object" ? keyPaths(value, path) : [path];
     })
     .sort();

@@ -748,7 +748,17 @@
     "error": "Xatolik yuz berdi",
     "retry": "Qayta urinish",
     "notFound": "Sahifa topilmadi",
-    "goHome": "Bosh sahifaga"
+    "goHome": "Bosh sahifaga",
+    "searchExamples": [
+      "Marketolog",
+      "Sotuvchi",
+      "Haydovchi",
+      "Oshpaz",
+      "Qurilishchi",
+      "Kassir",
+      "Kuryer",
+      "Dizayner"
+    ]
   },
   "theme": {
     "light": "Yorug' rejim",

@@ -748,7 +748,17 @@
     "error": "Something went wrong",
     "retry": "Retry",
     "notFound": "Page not found",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "searchExamples": [
+      "Marketer",
+      "Sales assistant",
+      "Driver",
+      "Cook",
+      "Construction worker",
+      "Cashier",
+      "Courier",
+      "Designer"
+    ]
   },
   "theme": {
     "light": "Light",

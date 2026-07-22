@@ -310,7 +310,7 @@ class _Salary extends StatelessWidget {
         maxLines: 1,
         text: TextSpan(
           text: salary,
-          style: context.text.titleMedium?.copyWith(
+          style: context.text.titleLarge?.copyWith(
             color: colors.textPrimary,
             fontWeight: FontWeight.w800,
           ),
