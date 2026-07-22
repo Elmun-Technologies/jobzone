@@ -1,6 +1,8 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+
+import { createPublicClient } from "@/lib/supabase/server";
 
 import { toCategory } from "./mappers";
 import { hasSupabase } from "./supabase-env";
@@ -11,6 +13,30 @@ export interface CategoryWithCount extends JobCategory {
   count: number;
 }
 
+// Categories and their counts are the same for every visitor and change minutes
+// apart at most, yet they render on the home page and every category landing.
+// Caching them (tag "categories"/"jobs", 5-min window) means the DB is read once
+// per window instead of on every request — the biggest lever on homepage DB
+// load. A publish/close (actions/employer.ts) revalidateTag("jobs","max")s the
+// counts; the admin category CMS should revalidateTag("categories","max").
+const REVALIDATE = 300;
+
+const _getCategoryBySlug = unstable_cache(
+  async (slug: string): Promise<JobCategory | null> => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("job_categories")
+      .select("id, slug, name")
+      .eq("is_active", true)
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? toCategory(data) : null;
+  },
+  ["category-by-slug"],
+  { tags: ["categories"], revalidate: REVALIDATE },
+);
+
 /** Find one active category by its slug — the URL segment used on the
  * /[locale]/ish/[category] landing pages. Returns null when there is no
  * match so the caller can 404 cleanly. */
@@ -20,20 +46,30 @@ export async function getCategoryBySlug(
   // Online-only: without a configured backend there is nothing to show.
   if (!hasSupabase()) return null;
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("job_categories")
-      .select("id, slug, name")
-      .eq("is_active", true)
-      .eq("slug", slug)
-      .maybeSingle();
-    if (error) throw error;
-    return data ? toCategory(data) : null;
+    return await _getCategoryBySlug(slug);
   } catch (e) {
     console.error("getCategoryBySlug failed", e);
     return null;
   }
 }
+
+const _getCategoryByHistoricalSlug = unstable_cache(
+  async (slug: string): Promise<JobCategory | null> => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("job_category_slug_history")
+      .select("category_id, job_categories!inner(id, slug, name, is_active)")
+      .eq("slug", slug)
+      .eq("job_categories.is_active", true)
+      .maybeSingle();
+    if (error) throw error;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cat = (data as any)?.job_categories;
+    return cat ? toCategory(cat) : null;
+  },
+  ["category-by-historical-slug"],
+  { tags: ["categories"], revalidate: REVALIDATE },
+);
 
 /**
  * Look up a category by a retired slug (0069 job_category_slug_history).
@@ -47,28 +83,16 @@ export async function getCategoryByHistoricalSlug(
 ): Promise<JobCategory | null> {
   if (!hasSupabase()) return null;
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("job_category_slug_history")
-      .select("category_id, job_categories!inner(id, slug, name, is_active)")
-      .eq("slug", slug)
-      .eq("job_categories.is_active", true)
-      .maybeSingle();
-    if (error) throw error;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cat = (data as any)?.job_categories;
-    return cat ? toCategory(cat) : null;
+    return await _getCategoryByHistoricalSlug(slug);
   } catch (e) {
     console.error("getCategoryByHistoricalSlug failed", e);
     return null;
   }
 }
 
-/** Active job categories. */
-export async function getCategories(): Promise<JobCategory[]> {
-  if (!hasSupabase()) return [];
-  try {
-    const supabase = await createClient();
+const _getCategories = unstable_cache(
+  async (): Promise<JobCategory[]> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("job_categories")
       .select("id, slug, name")
@@ -77,21 +101,25 @@ export async function getCategories(): Promise<JobCategory[]> {
       .order("name", { ascending: true });
     if (error) throw error;
     return (data ?? []).map(toCategory);
+  },
+  ["categories"],
+  { tags: ["categories"], revalidate: REVALIDATE },
+);
+
+/** Active job categories. */
+export async function getCategories(): Promise<JobCategory[]> {
+  if (!hasSupabase()) return [];
+  try {
+    return await _getCategories();
   } catch (e) {
     console.error("getCategories failed", e);
     return [];
   }
 }
 
-/**
- * Categories with their open-vacancy counts, busiest first — backs the
- * landing-page category grid. Counts are exact (one head-count per category;
- * the category set is small and bounded).
- */
-export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
-  if (!hasSupabase()) return [];
-  try {
-    const supabase = await createClient();
+const _getCategoriesWithCounts = unstable_cache(
+  async (): Promise<CategoryWithCount[]> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("job_categories")
       .select("id, slug, name")
@@ -124,6 +152,19 @@ export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
       count: tally.get(c.name) ?? 0,
     }));
     return withCounts.sort((a, b) => b.count - a.count);
+  },
+  ["categories-with-counts"],
+  { tags: ["categories", "jobs"], revalidate: REVALIDATE },
+);
+
+/**
+ * Categories with their open-vacancy counts, busiest first — backs the
+ * landing-page category grid. Counts are exact and cached (see REVALIDATE).
+ */
+export async function getCategoriesWithCounts(): Promise<CategoryWithCount[]> {
+  if (!hasSupabase()) return [];
+  try {
+    return await _getCategoriesWithCounts();
   } catch (e) {
     console.error("getCategoriesWithCounts failed", e);
     return [];
