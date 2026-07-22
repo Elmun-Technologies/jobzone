@@ -28,7 +28,14 @@ export function RoleToggle({
   const isEmployer = pathname.startsWith("/employer");
 
   return (
-    <div className="bg-muted relative grid grid-cols-2 items-center rounded-full p-1">
+    <div className="bg-muted relative grid shrink-0 grid-cols-2 items-center rounded-full p-1">
+      {/* `shrink-0`: grid-cols-2 tracks are `minmax(0,1fr)`, which have no
+          protected minimum — sitting in the header's flex row, this pill was
+          the first thing squeezed once the `lg:` nav/locale/theme toggles pop
+          into view around the 1024px breakpoint, collapsing narrower than its
+          own labels and rendering "Job seeker" and "Employer" on top of each
+          other. Pinning it to its content size pushes any real overflow onto
+          flexible siblings (the nav links) instead of onto unreadable text. */}
       {/* The sliding thumb. Width = one half minus the container padding; it
           translates by its own width to sit under the employer cell. */}
       <span

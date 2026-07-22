@@ -21,8 +21,15 @@ const ctaCls = cn(
 /**
  * The desktop primary nav + CTA, switched by the seeker⇄employer mode (the
  * RoleToggle lives on the `/employer/*` path, so mode is path-based). The
- * nav links are lg-only; the mobile drawer (mobile-menu) covers smaller
- * screens from the same navModel so the two never drift.
+ * nav links are xl-only; the mobile drawer (mobile-menu) covers everything
+ * below that from the same navModel so the two never drift.
+ *
+ * xl (1280px), not lg (1024px): at lg the role toggle, this nav, and the
+ * locale/theme toggles all pop into view in the same breath that Container's
+ * padding jumps `sm:px-6` → `lg:px-8` — the combined content needs ~1096px
+ * at 1024px of available width, so the header overflowed (and, before the
+ * toggle's own shrink-0 fix, silently squashed into overlapping text
+ * instead). 1280px has confirmed room to spare.
  */
 export function HeaderNav({
   signedIn,
@@ -37,7 +44,7 @@ export function HeaderNav({
 
   return (
     <>
-      <nav className="hidden items-center gap-5 lg:flex">
+      <nav className="hidden items-center gap-5 xl:flex">
         {links.map((l) => (
           <Link key={l.href} href={l.href} className={navLink}>
             {t(l.labelKey)}
