@@ -157,6 +157,54 @@ body {
   }
 }
 
+/* Search bars: cycles through example queries ("Marketolog" → "Sotuvchi" →
+   …) in place of a static placeholder, so an empty search never reads as a
+   dead end. One cycle's duration matches the JS rotation interval so a word
+   is fully faded out exactly as the next one swaps in. */
+@keyframes placeholderCycle {
+  0% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  15%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+.animate-placeholder-cycle {
+  animation: placeholderCycle 2.6s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-placeholder-cycle {
+    animation: none;
+  }
+}
+
+/* Hero map backdrop: floating salary pins bob gently, like they're pinned to
+   a live map rather than a static graphic. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float 4.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-float {
+    animation: none;
+  }
+}
+
 /* Leaflet popups (the OSM map pin cards) default to a white wrapper, which
    makes our themed content invisible in dark mode. Bind them to the tokens. */
 .leaflet-popup-content-wrapper,

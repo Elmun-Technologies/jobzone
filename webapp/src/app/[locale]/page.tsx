@@ -3,12 +3,14 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { CompanyCard } from "@/components/companies/company-card";
 import { EmployerCta } from "@/components/landing/employer-cta";
+import { HeroMapBackdrop } from "@/components/landing/hero-map-backdrop";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { JobCard } from "@/components/jobs/job-card";
 import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
+import { AnimatedSearchInput } from "@/components/ui/animated-search-input";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
@@ -45,6 +47,8 @@ export default async function HomePage({
   const tj = await getTranslations("jobs");
   const tm = await getTranslations("explore.map");
   const tfaq = await getTranslations("homeFaq");
+  const tc = await getTranslations("common");
+  const searchExamples = tc.raw("searchExamples") as string[];
 
   // Compact FAQ set (7 Q/A) — visible HTML + FAQPage JSON-LD via
   // FaqSection. Kept in the messages catalog so uz/ru/en can drift as
@@ -95,65 +99,70 @@ export default async function HomePage({
       <JsonLd data={orgJsonLd()} />
       <JsonLd data={websiteJsonLd(locale)} />
 
-      {/* Hero */}
-      <Container className="py-14 sm:py-20">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
-          <span className="border-border bg-muted text-muted-foreground inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-xs font-semibold tracking-wide uppercase">
-            <MapPin className="text-primary size-3.5" />
-            {t("heroBadge")}
-          </span>
-          <h1 className="text-foreground text-4xl font-bold tracking-tight text-balance sm:text-6xl">
-            {t("heroTitle")}
-          </h1>
-          <p className="text-muted-foreground text-lg text-pretty">
-            {t("heroSubtitle")}
-          </p>
-          {total > 0 ? (
-            <p className="text-muted-foreground text-sm">
-              {t("jobCount", { count: groupNumber(total) })}
+      {/* Hero — a dark map-poster card (grid + floating salary pins) instead
+          of a plain text block, so the brand's map-first identity reads
+          immediately instead of only after scrolling to the real map below. */}
+      <Container className="py-10 sm:py-14">
+        <div className="relative isolate overflow-hidden rounded-3xl bg-[#0A0A0A] px-5 py-16 sm:px-10 sm:py-24">
+          <HeroMapBackdrop />
+          <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-white/80 uppercase backdrop-blur">
+              <MapPin className="text-primary size-3.5" />
+              {t("heroBadge")}
+            </span>
+            <h1 className="text-4xl font-bold tracking-tight text-balance text-white sm:text-6xl">
+              {t("heroTitle")}
+            </h1>
+            <p className="text-lg text-pretty text-white/70">
+              {t("heroSubtitle")}
             </p>
-          ) : null}
+            {total > 0 ? (
+              <p className="text-sm text-white/60">
+                {t("jobCount", { count: groupNumber(total) })}
+              </p>
+            ) : null}
 
-          <form
-            action={`/${locale}/jobs`}
-            className="border-border bg-card flex w-full max-w-2xl flex-col gap-2 rounded-2xl border p-2 shadow-sm sm:flex-row sm:items-center sm:rounded-full"
-          >
-            <div className="flex flex-1 items-center gap-2">
-              <Search className="text-muted-foreground ml-2 size-5 shrink-0" />
-              <input
-                name="q"
-                placeholder={t("searchPlaceholder")}
-                aria-label={t("searchPlaceholder")}
-                className="text-foreground placeholder:text-muted-foreground h-10 w-full flex-1 bg-transparent px-1 outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              {cities.length > 0 ? (
-                <select
-                  name="city"
-                  defaultValue=""
-                  aria-label={t("allRegions")}
-                  className="text-foreground bg-muted h-10 max-w-[10rem] rounded-full px-3 text-sm outline-none sm:bg-transparent"
+            <form
+              action={`/${locale}/jobs`}
+              className="flex w-full max-w-2xl flex-col gap-2 rounded-2xl bg-white/95 p-2 shadow-xl backdrop-blur sm:flex-row sm:items-center sm:rounded-full"
+            >
+              <div className="flex flex-1 items-center gap-2">
+                <Search className="ml-2 size-5 shrink-0 text-neutral-500" />
+                <AnimatedSearchInput
+                  name="q"
+                  examples={searchExamples}
+                  ariaLabel={t("searchPlaceholder")}
+                  className="h-10 w-full bg-transparent px-1 text-neutral-900 outline-none placeholder:text-neutral-500"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                {cities.length > 0 ? (
+                  <select
+                    name="city"
+                    defaultValue=""
+                    aria-label={t("allRegions")}
+                    className="h-10 max-w-[10rem] rounded-full bg-neutral-100 px-3 text-sm text-neutral-900 outline-none sm:bg-transparent"
+                  >
+                    <option value="">{t("allRegions")}</option>
+                    {cities.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+                <button
+                  type="submit"
+                  className={cn(
+                    buttonVariants({ variant: "primary", size: "sm" }),
+                    "shrink-0",
+                  )}
                 >
-                  <option value="">{t("allRegions")}</option>
-                  {cities.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              ) : null}
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants({ variant: "primary", size: "sm" }),
-                  "shrink-0",
-                )}
-              >
-                {t("searchCta")}
-              </button>
-            </div>
-          </form>
+                  {t("searchCta")}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </Container>
 

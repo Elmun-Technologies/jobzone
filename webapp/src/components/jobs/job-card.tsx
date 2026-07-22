@@ -14,7 +14,7 @@ import { QuickApplyButton } from "./quick-apply-button";
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-1 text-xs font-medium">
+    <span className="border-border text-muted-foreground rounded-full border px-2.5 py-1 text-xs font-medium">
       {children}
     </span>
   );
@@ -55,7 +55,7 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className={`hover:bg-muted/30 block rounded-xl border p-4 transition-colors ${
+      className={`group block rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:p-5 ${
         standout
           ? "border-primary bg-primary/[0.04] ring-primary/20 shadow-[0_6px_28px_-8px_rgba(199,251,0,0.55)] ring-2"
           : "border-border bg-card hover:border-primary/40"
@@ -69,14 +69,14 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
           <Image
             src={job.companyLogoUrl}
             alt={job.companyName}
-            width={48}
-            height={48}
+            width={52}
+            height={52}
             // Below-the-fold on a long list; browser handles native lazy.
             loading="lazy"
             // Fixed pixel size — one srcset entry is enough; Next still emits
             // width/height so layout doesn't shift on load.
-            sizes="48px"
-            className={`size-12 shrink-0 rounded-lg object-cover ${
+            sizes="52px"
+            className={`ring-border size-13 shrink-0 rounded-xl object-cover ring-1 ${
               glow
                 ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2"
                 : ""
@@ -84,8 +84,8 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
           />
         ) : (
           <div
-            className={`bg-primary text-primary-foreground flex size-12 shrink-0 items-center justify-center rounded-lg font-bold ${
-              glow ? "shadow-[0_0_12px_rgba(199,251,0,0.55)]" : ""
+            className={`bg-primary text-primary-foreground ring-border flex size-13 shrink-0 items-center justify-center rounded-xl text-lg font-bold ring-1 ${
+              glow ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2" : ""
             }`}
           >
             {job.companyName.charAt(0).toUpperCase()}
@@ -132,19 +132,16 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
             </div>
           ) : null}
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span
-              className={`text-foreground text-sm font-semibold ${salary ? "font-mono" : ""}`}
-            >
-              {salary ?? t("negotiable")}
-            </span>
-            {typeLabel ? <Chip>{typeLabel}</Chip> : null}
-            {modelLabel ? <Chip>{modelLabel}</Chip> : null}
-          </div>
+          {typeLabel || modelLabel ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {typeLabel ? <Chip>{typeLabel}</Chip> : null}
+              {modelLabel ? <Chip>{modelLabel}</Chip> : null}
+            </div>
+          ) : null}
 
           {info ? (
             <div
-              className="mt-3 flex items-center gap-2 text-xs"
+              className="mt-2 flex items-center gap-2 text-xs"
               suppressHydrationWarning
             >
               {info.fresh ? (
@@ -162,19 +159,32 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
             </div>
           ) : null}
 
-          {/* The card is one big <Link>; stop the tap from also navigating. */}
-          <div
-            className="mt-3"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            <QuickApplyButton
-              jobId={job.id}
-              needsForm={needsForm}
-              className="w-full justify-center"
-            />
+          <div className="border-border mt-3 border-t" />
+
+          {/* Salary + one-tap apply share the footer row — the two things a
+              seeker actually decides on, given equal visual weight. The card
+              is one big <Link>; stop the tap from also navigating. */}
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span
+              className={`text-foreground truncate text-lg font-extrabold sm:text-xl ${
+                salary ? "font-mono" : "text-muted-foreground text-sm font-semibold"
+              }`}
+            >
+              {salary ?? t("negotiable")}
+            </span>
+            <div
+              className="shrink-0"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <QuickApplyButton
+                jobId={job.id}
+                needsForm={needsForm}
+                className="h-9 px-4 text-sm"
+              />
+            </div>
           </div>
         </div>
       </div>

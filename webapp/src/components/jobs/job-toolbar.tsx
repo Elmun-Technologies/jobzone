@@ -4,6 +4,7 @@ import { LayoutGrid, List, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { AnimatedSearchInput } from "@/components/ui/animated-search-input";
 import { cn } from "@/lib/utils";
 
 import { SaveSearchButton } from "./save-search-button";
@@ -11,6 +12,7 @@ import { SaveSearchButton } from "./save-search-button";
 /** Search box + sort selector + list/grid view toggle for the jobs page. */
 export function JobToolbar() {
   const t = useTranslations("jobs");
+  const tc = useTranslations("common");
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -39,12 +41,12 @@ export function JobToolbar() {
         className="border-border bg-card flex flex-1 items-center gap-2 rounded-full border p-1.5"
       >
         <Search className="text-muted-foreground ml-2 size-5 shrink-0" />
-        <input
+        <AnimatedSearchInput
           name="q"
           defaultValue={params.get("q") ?? ""}
-          placeholder={t("searchPlaceholder")}
-          aria-label={t("search")}
-          className="text-foreground placeholder:text-muted-foreground h-9 w-full flex-1 bg-transparent px-1 outline-none"
+          examples={tc.raw("searchExamples") as string[]}
+          ariaLabel={t("search")}
+          className="text-foreground placeholder:text-muted-foreground h-9 w-full bg-transparent px-1 outline-none"
         />
       </form>
 
