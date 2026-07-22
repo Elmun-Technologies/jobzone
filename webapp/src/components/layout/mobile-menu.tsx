@@ -15,11 +15,12 @@ import { RoleToggle } from "./role-toggle";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
- * The mobile navigation drawer (below `lg`, where the desktop nav is hidden).
- * A hamburger opens a slide-in sheet with the seeker⇄employer toggle, the
- * mode-aware links (same navModel as the desktop nav), and the primary CTA —
- * so a phone user can actually reach Jobs / Companies / About / Saved and
- * switch audience. Closes on navigation, backdrop tap, or Escape.
+ * The mobile navigation drawer (below `xl`, where the desktop nav is hidden
+ * — see header-nav.tsx for why xl, not lg). A hamburger opens a slide-in
+ * sheet with the seeker⇄employer toggle, the mode-aware links (same
+ * navModel as the desktop nav), and the primary CTA — so a phone/tablet user
+ * can actually reach Jobs / Companies / About / Saved and switch audience.
+ * Closes on navigation, backdrop tap, or Escape.
  */
 export function MobileMenu({
   signedIn,
@@ -63,7 +64,7 @@ export function MobileMenu({
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         type="button"
         onClick={() => setOpen(true)}

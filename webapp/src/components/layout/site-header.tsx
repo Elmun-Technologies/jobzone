@@ -32,7 +32,15 @@ export async function SiteHeader() {
   return (
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        {/* `shrink-0`: this is the flex item Container's row actually
+            squeezes once space runs short — right around the 1024px `lg:`
+            breakpoint, where the nav links + locale/theme toggles all pop
+            into view at once. Without it, this group (and the pill inside
+            it) gets compressed below its own content size and overflows on
+            top of the nav that starts right after it, rendering "Job
+            seeker"/"Employer" on top of each other and "Home"/"Jobs" hidden
+            behind the pill. */}
+        <div className="flex shrink-0 items-center gap-3">
           <Link href="/" aria-label="Yollla">
             <YollaLogo />
           </Link>
@@ -44,9 +52,9 @@ export async function SiteHeader() {
         <div className="flex items-center gap-2 sm:gap-4">
           <HeaderNav signedIn={!!user} isEmployerAccount={isEmployerAccount} />
 
-          {/* Below lg these live in the mobile drawer — the phone/tablet
-              header otherwise overflows and drags the whole page sideways. */}
-          <div className="hidden items-center gap-4 lg:flex">
+          {/* Below xl these live in the mobile drawer (see header-nav.tsx for
+              why xl, not lg) — otherwise the header overflows sideways. */}
+          <div className="hidden items-center gap-4 xl:flex">
             <LocaleSwitcher />
             <ThemeToggle />
           </div>
