@@ -1,6 +1,8 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 import { getOpenJobs } from "./jobs";
 import { toCompany, toReview } from "./mappers";
@@ -14,10 +16,12 @@ export type CompanyRatings = Record<string, { avg: number; count: number }>;
  * Public company reputation (from the `company_rating_summary` view) for the
  * map's "by rating" facet. Anonymous-safe; degrades to `{}` on error.
  */
-export async function getCompanyRatings(): Promise<CompanyRatings> {
-  if (!hasSupabase()) return {};
-  try {
-    const supabase = await createClient();
+// Public rating summary for the landing/explore map — same for every visitor,
+// changes only when a review lands. Cache it (5-min window) so the map stops
+// re-reading the whole summary on every page load.
+const _getCompanyRatings = unstable_cache(
+  async (): Promise<CompanyRatings> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("company_rating_summary")
       .select("company_id, avg_rating, review_count");
@@ -30,6 +34,15 @@ export async function getCompanyRatings(): Promise<CompanyRatings> {
       };
     }
     return out;
+  },
+  ["company-ratings"],
+  { tags: ["reviews"], revalidate: 300 },
+);
+
+export async function getCompanyRatings(): Promise<CompanyRatings> {
+  if (!hasSupabase()) return {};
+  try {
+    return await _getCompanyRatings();
   } catch (e) {
     console.error("getCompanyRatings failed", e);
     return {};

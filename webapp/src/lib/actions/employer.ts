@@ -1,12 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { safeNext } from "@/lib/auth/safe-next";
 import { getEmployerStats } from "@/lib/data/employer";
-import { clickCheckoutUrl, paymeCheckoutUrl } from "@/lib/payments/checkout-url";
+import {
+  clickCheckoutUrl,
+  paymeCheckoutUrl,
+} from "@/lib/payments/checkout-url";
 import { createClient } from "@/lib/supabase/server";
 
 export interface CompanyFormState {
@@ -299,6 +302,9 @@ export async function createJob(
   if (charged) {
     redirect(`/${locale}/employer/jobs/${inserted.id}/pay`);
   }
+  // A free first post is live immediately → refresh the cached category counts /
+  // city facet so it shows up in those aggregates without waiting for the window.
+  if (status === "open") revalidateTag("jobs", "max");
   // ?posted signals the "My jobs" page to confirm the post (draft vs open).
   redirect(`/${locale}/employer/jobs?posted=${status}`);
 }
@@ -334,9 +340,13 @@ export async function payListing(
     p_job_id: jobId,
     p_tier_code: `tier_${tier}`,
   });
-  const row = Array.isArray(data) ? (data[0] as OrderRow | undefined) : undefined;
+  const row = Array.isArray(data)
+    ? (data[0] as OrderRow | undefined)
+    : undefined;
   if (error || !row) {
-    return { error: error?.message.includes("not_draft") ? "notDraft" : "unknown" };
+    return {
+      error: error?.message.includes("not_draft") ? "notDraft" : "unknown",
+    };
   }
 
   const h = await headers();
@@ -448,6 +458,9 @@ export async function updateJobStatus(formData: FormData): Promise<void> {
   if (!newStatus) redirect(jobsPath);
   await supabase.from("jobs").update({ status: newStatus }).eq("id", jobId);
   revalidatePath(jobsPath);
+  // The open-job set changed → refresh the cached category counts / city facet
+  // so a just-published (or closed) vacancy is reflected without the 5-min lag.
+  revalidateTag("jobs", "max");
   redirect(jobsPath);
 }
 

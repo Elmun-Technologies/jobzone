@@ -1,6 +1,8 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 import { toJob } from "./mappers";
 import { hasSupabase } from "./supabase-env";
@@ -164,10 +166,12 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
 }
 
 /** Distinct cities that currently have open jobs (for the region selector). */
-export async function getCities(limit = 1000): Promise<string[]> {
-  if (!hasSupabase()) return [];
-  try {
-    const supabase = await createClient();
+// The region selector is the same for every visitor and changes rarely, but it
+// renders on the home page and every category landing. Cache it (5-min window)
+// so it stops scanning up to `limit` open-job rows on every request.
+const _getCities = unstable_cache(
+  async (limit: number): Promise<string[]> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("job_feed")
       .select("city")
@@ -181,6 +185,15 @@ export async function getCities(limit = 1000): Promise<string[]> {
       if (typeof c === "string" && c.trim()) set.add(c.trim());
     }
     return [...set].sort((a, b) => a.localeCompare(b));
+  },
+  ["cities"],
+  { tags: ["jobs"], revalidate: 300 },
+);
+
+export async function getCities(limit = 1000): Promise<string[]> {
+  if (!hasSupabase()) return [];
+  try {
+    return await _getCities(limit);
   } catch (e) {
     console.error("getCities failed", e);
     return [];
