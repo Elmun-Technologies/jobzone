@@ -223,6 +223,7 @@
   "submitApplication": "Submit application",
   "defaultCv": "Default CV",
   "uploadCvResume": "Upload CV/Resume",
+  "orUploadNewCv": "Or upload a new CV",
   "browseFile": "Browse File",
   "addText": "Add Text",
   "submit": "Submit",
