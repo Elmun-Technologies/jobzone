@@ -103,7 +103,11 @@ export default async function HomePage({
           of a plain text block, so the brand's map-first identity reads
           immediately instead of only after scrolling to the real map below. */}
       <Container className="py-10 sm:py-14">
-        <div className="relative isolate overflow-hidden rounded-3xl bg-[#0A0A0A] px-5 py-16 sm:px-10 sm:py-24">
+        {/* #141412, not the brand ink: this is the largest dark area on the
+            site and it sits on white, so pure black made the page a
+            maximum-contrast slab. A few points of lift reads the same at a
+            glance and is far easier to sit in front of. */}
+        <div className="relative isolate overflow-hidden rounded-3xl bg-[#141412] px-5 py-16 sm:px-10 sm:py-24">
           <HeroMapBackdrop />
           <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-white/80 uppercase backdrop-blur">
