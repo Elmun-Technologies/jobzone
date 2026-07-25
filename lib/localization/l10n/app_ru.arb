@@ -917,5 +917,9 @@
   "reportReasonIllegal": "Незаконная деятельность",
   "reportReasonInappropriate": "Недопустимый контент",
   "reportReasonPersonalInfo": "Раскрыта личная информация",
-  "reportReasonOther": "Другое"
+  "reportReasonOther": "Другое",
+  "onboardChatIncoming": "Здравствуйте! Придёте завтра на собеседование?",
+  "onboardChatOutgoing": "Конечно, спасибо! 🙌",
+  "onboardApplyAccepted": "Ваша заявка принята",
+  "onboardApplyInvited": "Вас пригласили на собеседование"
 }

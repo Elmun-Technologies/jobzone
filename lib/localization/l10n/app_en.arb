@@ -909,7 +909,13 @@
   "notifTitleMessage": "New message",
   "notifTitleJobMatch": "New job match",
   "notifBodyApplicationUpdate": "Your application status changed to {status}",
-  "@notifBodyApplicationUpdate": {"placeholders": {"status": {"type": "String"}}},
+  "@notifBodyApplicationUpdate": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "emailHint": "example@gmail.com",
   "promoStartName": "Start",
   "promoStartDesc": "Standard free listing",
@@ -929,7 +935,13 @@
   "confirmRemovePersonBody": "This person will be removed from your team. This can't be undone.",
   "confirmRemoveGalleryBody": "This photo will be removed from your gallery. This can't be undone.",
   "ratingStar": "Rate {n} stars",
-  "@ratingStar": {"placeholders": {"n": {"type": "int"}}},
+  "@ratingStar": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "showPassword": "Show password",
   "hidePassword": "Hide password",
   "mdBold": "Bold",
@@ -937,7 +949,13 @@
   "mdBulletList": "Bulleted list",
   "mdNumberList": "Numbered list",
   "vacancyCount": "{n} jobs",
-  "@vacancyCount": {"placeholders": {"n": {"type": "int"}}},
+  "@vacancyCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "payListingTitle": "Publish your vacancy",
   "payListingSubtitle": "Choose a plan and pay to publish “{title}”.",
   "@payListingSubtitle": {
@@ -976,5 +994,9 @@
   "reportReasonIllegal": "Illegal activity",
   "reportReasonInappropriate": "Inappropriate content",
   "reportReasonPersonalInfo": "Personal information exposed",
-  "reportReasonOther": "Other"
+  "reportReasonOther": "Other",
+  "onboardChatIncoming": "Hello! Can you come for an interview tomorrow?",
+  "onboardChatOutgoing": "Of course, thank you! 🙌",
+  "onboardApplyAccepted": "Your application was accepted",
+  "onboardApplyInvited": "You're invited to an interview"
 }

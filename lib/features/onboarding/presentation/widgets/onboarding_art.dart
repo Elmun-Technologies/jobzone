@@ -464,14 +464,17 @@ class _ChatScene extends StatelessWidget {
                 JzFadeSlideIn(
                   delay: const Duration(milliseconds: 80),
                   child: _Bubble(
-                    text: 'Assalomu alaykum! Ertaga suhbatga kelasizmi?',
+                    text: context.l10n.onboardChatIncoming,
                     incoming: true,
                   ),
                 ),
                 const SizedBox(height: 10),
                 JzFadeSlideIn(
                   delay: const Duration(milliseconds: 200),
-                  child: _Bubble(text: 'Albatta, rahmat! 🙌', incoming: false),
+                  child: _Bubble(
+                    text: context.l10n.onboardChatOutgoing,
+                    incoming: false,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 JzFadeSlideIn(
@@ -504,13 +507,13 @@ class _ChatScene extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Arizangiz qabul qilindi',
+                                context.l10n.onboardApplyAccepted,
                                 style: context.text.titleSmall?.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               Text(
-                                'Suhbatga taklif etildingiz',
+                                context.l10n.onboardApplyInvited,
                                 style: context.text.bodySmall?.copyWith(
                                   color: colors.textSecondary,
                                 ),

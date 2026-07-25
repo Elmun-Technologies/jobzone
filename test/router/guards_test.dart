@@ -155,8 +155,9 @@ void main() {
       );
     });
 
-    test('language gate comes after onboarding, not before', () {
-      // Onboarding still wins when nothing is seen yet.
+    test('language gate comes before onboarding', () {
+      // Nothing chosen yet: the picker wins, so the slides that follow render
+      // in the language the user just selected.
       expect(
         resolveRedirect(
           hasSupabase: true,
@@ -166,7 +167,7 @@ void main() {
           profileComplete: false,
           location: Routes.home,
         ),
-        Routes.onboarding,
+        Routes.chooseLanguage,
       );
     });
 

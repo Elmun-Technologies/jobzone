@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,16 +8,26 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../application/auth_controller.dart';
 import '../util/auth_failure_message.dart';
 
-/// "Or sign in with" divider + Apple / Google circular buttons.
+/// "Or sign in with" divider + Google (and, on Apple platforms, Apple).
 ///
 /// Both providers dispatch through Supabase Auth: Google via browser OAuth,
-/// Apple via native SIWA on iOS/macOS and browser OAuth elsewhere. The
-/// Apple button MUST stay visible on iOS as long as any other social
-/// provider is offered — App Store Guideline 4.8.
+/// Apple via native SIWA on iOS/macOS.
+///
+/// The Apple button is **iOS/macOS-only**. On Android it was pure noise — a
+/// sign-in method most users there can't complete — so it's hidden. It must
+/// keep rendering on Apple platforms for as long as any other social provider
+/// is offered: App Store Review Guideline 4.8 makes Sign in with Apple
+/// mandatory there, and dropping it is a rejection at review.
 class AuthSocialRow extends ConsumerWidget {
   const AuthSocialRow({super.key, required this.label});
 
   final String label;
+
+  /// Sign in with Apple only makes sense — and is only mandated — on Apple
+  /// platforms. See the class doc for why it must NOT be dropped there.
+  static bool get _showApple =>
+      defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.macOS;
 
   Future<void> _google(BuildContext context, WidgetRef ref) async {
     final ok = await ref
@@ -72,15 +83,17 @@ class AuthSocialRow extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _SocialButton(
-              onTap: () => _apple(context, ref),
-              child: const Icon(
-                Icons.apple,
-                color: Color(0xFF1A1A1A),
-                size: 28,
+            if (_showApple) ...[
+              _SocialButton(
+                onTap: () => _apple(context, ref),
+                child: const Icon(
+                  Icons.apple,
+                  color: Color(0xFF1A1A1A),
+                  size: 28,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.lg),
+              const SizedBox(width: AppSpacing.lg),
+            ],
             _SocialButton(
               onTap: () => _google(context, ref),
               child: Text(

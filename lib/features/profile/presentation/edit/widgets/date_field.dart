@@ -78,7 +78,10 @@ class DateField extends StatelessWidget {
       initialDate: value ?? now,
       firstDate: DateTime(1960),
       lastDate: DateTime(now.year + 10),
-      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      // Open on the keyboard, not the calendar grid: picking a birth year by
+      // scrolling back decades is painful, and users asked to type the date.
+      // `input` (not `inputOnly`) keeps the calendar one tap away.
+      initialEntryMode: DatePickerEntryMode.input,
     );
     if (picked != null) onChanged(picked);
   }

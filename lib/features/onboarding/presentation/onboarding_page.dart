@@ -33,9 +33,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   Future<void> _finish() async {
     await ref.read(appFlagsProvider.notifier).markOnboardingSeen();
-    // Next stop is the first-run language picker; the router guard also
-    // enforces this hop, so a returning user who already chose skips it.
-    if (mounted) context.go(Routes.chooseLanguage);
+    // The language picker already ran (it gates onboarding), so the next stop
+    // is the welcome/auth screen. The router guard enforces this hop too.
+    if (mounted) context.go(Routes.welcome);
   }
 
   void _next(bool isLast) {

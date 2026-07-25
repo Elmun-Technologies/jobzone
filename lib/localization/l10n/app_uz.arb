@@ -917,5 +917,9 @@
   "reportReasonIllegal": "Noqonuniy faoliyat",
   "reportReasonInappropriate": "Nomaqbul kontent",
   "reportReasonPersonalInfo": "Shaxsiy ma'lumot ochib berilgan",
-  "reportReasonOther": "Boshqa"
+  "reportReasonOther": "Boshqa",
+  "onboardChatIncoming": "Assalomu alaykum! Ertaga suhbatga kelasizmi?",
+  "onboardChatOutgoing": "Albatta, rahmat! 🙌",
+  "onboardApplyAccepted": "Arizangiz qabul qilindi",
+  "onboardApplyInvited": "Suhbatga taklif etildingiz"
 }

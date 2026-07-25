@@ -154,6 +154,8 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       initialDate: _publishAt ?? now,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
+      // Typing beats scrolling — same rationale as the profile DateField.
+      initialEntryMode: DatePickerEntryMode.input,
     );
     if (date == null || !mounted) return;
     final time = await showTimePicker(

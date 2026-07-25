@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../app/router/routes.dart';
+import '../../../../core/config/env.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
@@ -34,6 +35,21 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     _email.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  /// Opens the public terms page in the browser.
+  ///
+  /// It used to `push(Routes.accountPrivacy)`, but that route lives inside the
+  /// signed-in shell: the router guard bounced the (by definition signed-out)
+  /// sign-up visitor straight to sign-in, losing everything they had typed.
+  /// The web terms page is public, so send them there instead.
+  Future<void> _openTerms() async {
+    final locale = Localizations.localeOf(context).languageCode;
+    final uri = Uri.parse('${Env.webBaseUrl}/$locale/terms');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (!mounted) return;
+      showErrorSnack(context, context.l10n.errUnknown);
+    }
   }
 
   Future<void> _submit() async {
@@ -137,7 +153,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => context.push(Routes.accountPrivacy),
+                          onTap: _openTerms,
                           child: Text(
                             l.termsAndConditions,
                             style: context.text.bodyMedium?.copyWith(
