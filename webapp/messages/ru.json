@@ -85,7 +85,7 @@
     "confirmPassword": "Повторите пароль",
     "updatePassword": "Обновить пароль",
     "phone": "Номер телефона",
-    "phoneHint": "Мы отправим одноразовый код сообщением в Telegram",
+    "phoneHint": "Одноразовый код придёт сообщением в Telegram — номер должен быть зарегистрирован в Telegram",
     "sendCode": "Отправить код через Telegram",
     "code": "Код",
     "codeHint": "Отправлено в Telegram на {phone}",

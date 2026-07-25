@@ -85,7 +85,7 @@
     "confirmPassword": "Parolni takrorlang",
     "updatePassword": "Parolni yangilash",
     "phone": "Telefon raqami",
-    "phoneHint": "Bir martalik kodni Telegram xabari sifatida yuboramiz",
+    "phoneHint": "Bir martalik kodni Telegram xabari sifatida yuboramiz — raqam Telegramga ro'yxatdan o'tgan bo'lishi kerak",
     "sendCode": "Telegram orqali kod yuborish",
     "code": "Kod",
     "codeHint": "{phone} raqamiga Telegram orqali yuborildi",

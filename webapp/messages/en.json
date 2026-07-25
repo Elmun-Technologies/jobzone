@@ -85,7 +85,7 @@
     "confirmPassword": "Confirm password",
     "updatePassword": "Update password",
     "phone": "Phone number",
-    "phoneHint": "We'll send a one-time code as a Telegram message",
+    "phoneHint": "We'll send the one-time code as a Telegram message — the number must be registered with Telegram",
     "sendCode": "Send code via Telegram",
     "code": "Code",
     "codeHint": "Sent via Telegram to {phone}",
