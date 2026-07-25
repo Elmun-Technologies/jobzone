@@ -95,6 +95,9 @@ async function sendViaTelegramGateway(
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   const token = Deno.env.get("TELEGRAM_GATEWAY_TOKEN");
   if (!token) {
+    console.error(
+      "send-sms-hook: TELEGRAM_GATEWAY_TOKEN is not set — no code can be delivered",
+    );
     return { ok: false, message: "Telegram Gateway is not configured" };
   }
 
@@ -109,6 +112,13 @@ async function sendViaTelegramGateway(
     body: JSON.stringify({ phone_number: phone }),
   }).then((r) => r.json()).catch(() => null);
   if (!ability?.ok) {
+    // The usual causes, in order: the Gateway account has no balance or isn't
+    // approved yet; the token is wrong; or this number simply has no Telegram
+    // account (Gateway can only reach numbers registered with Telegram).
+    console.error(
+      "send-sms-hook: checkSendAbility failed",
+      JSON.stringify(ability),
+    );
     return {
       ok: false,
       message: ability?.error ?? "Telegram Gateway declined this number",
@@ -126,8 +136,13 @@ async function sendViaTelegramGateway(
     }),
   }).then((r) => r.json()).catch(() => null);
   if (!send?.ok) {
+    console.error(
+      "send-sms-hook: sendVerificationMessage failed",
+      JSON.stringify(send),
+    );
     return { ok: false, message: send?.error ?? "Telegram Gateway send failed" };
   }
+  console.log("send-sms-hook: code delivered via Telegram Gateway");
   return { ok: true };
 }
 
@@ -135,6 +150,11 @@ Deno.serve(async (req) => {
   const rawBody = await req.text();
 
   if (!(await verifySignature(req, rawBody))) {
+    console.error(
+      Deno.env.get("SEND_SMS_HOOK_SECRET")
+        ? "send-sms-hook: signature mismatch — SEND_SMS_HOOK_SECRET does not match the secret Supabase generated for this hook"
+        : "send-sms-hook: SEND_SMS_HOOK_SECRET is not set — every hook call is rejected",
+    );
     return hookError(401, "invalid webhook signature");
   }
 

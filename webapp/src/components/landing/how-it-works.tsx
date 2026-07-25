@@ -14,7 +14,7 @@ const STEPS = [
 
 /**
  * "Three steps to a job" strip (open the map → filter → 2-click apply).
- * Self-contained section shared by `/about` and the home page. `background`
+ * Self-contained section used by the home page. `background`
  * lets the caller slot it into either page's section rhythm (one bg class,
  * so no Tailwind conflict).
  */

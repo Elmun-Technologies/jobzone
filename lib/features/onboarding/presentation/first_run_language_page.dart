@@ -8,8 +8,9 @@ import '../../../localization/l10n_extension.dart';
 import '../../../localization/locale_controller.dart';
 import '../../../shared/providers/app_flags.dart';
 
-/// First-run language picker — the hop between onboarding and the welcome
-/// screen. Selecting a language previews it live (the whole UI re-renders via
+/// First-run language picker — the very first screen, before the onboarding
+/// slides, so everything that follows is already in the user's language.
+/// Selecting a language previews it live (the whole UI re-renders via
 /// `localeControllerProvider`); "Continue" persists the choice so the router
 /// guard never shows this screen again.
 class FirstRunLanguagePage extends ConsumerStatefulWidget {
@@ -37,7 +38,7 @@ class _FirstRunLanguagePageState extends ConsumerState<FirstRunLanguagePage> {
         .read(localeControllerProvider.notifier)
         .setLocale(Locale(_selected));
     await ref.read(appFlagsProvider.notifier).markLanguageChosen();
-    if (mounted) context.go(Routes.welcome);
+    if (mounted) context.go(Routes.onboarding);
   }
 
   @override

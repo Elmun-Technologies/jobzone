@@ -51,7 +51,6 @@ export function navModel(
       { href: "/", labelKey: "home" },
       { href: "/jobs", labelKey: "jobs" },
       { href: "/companies", labelKey: "companies" },
-      { href: "/about", labelKey: "about" },
       { href: "/account/bookmarks", labelKey: "saved" },
     ],
     cta: { href: "/resumes/new", labelKey: "createResume", Icon: FilePlus2 },

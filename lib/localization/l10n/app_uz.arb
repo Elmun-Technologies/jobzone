@@ -73,9 +73,9 @@
   "didntReceiveOtp": "Kod kelmadimi?",
   "resendCode": "Qayta yuborish",
   "codeResent": "Kod yuborildi",
-  "continueWithPhone": "Telefon orqali davom etish",
-  "phoneSignInTitle": "Telefon bilan kirish",
-  "phoneSignInSubtitle": "Bir martalik kodni Telegramingizga yuboramiz",
+  "continueWithPhone": "Telegram orqali davom etish",
+  "phoneSignInTitle": "Telegram orqali kirish",
+  "phoneSignInSubtitle": "Raqamingizni kiriting — bir martalik kodni Telegramingizga yuboramiz",
   "phoneCodeSubtitle": "Telegramingizga yuborilgan kodni kiriting",
   "changePhoneNumber": "Raqamni o'zgartirish",
   "phoneVerifiedToast": "Telefon tasdiqlandi ✓",
@@ -917,5 +917,10 @@
   "reportReasonIllegal": "Noqonuniy faoliyat",
   "reportReasonInappropriate": "Nomaqbul kontent",
   "reportReasonPersonalInfo": "Shaxsiy ma'lumot ochib berilgan",
-  "reportReasonOther": "Boshqa"
+  "reportReasonOther": "Boshqa",
+  "onboardChatIncoming": "Assalomu alaykum! Ertaga suhbatga kelasizmi?",
+  "onboardChatOutgoing": "Albatta, rahmat! 🙌",
+  "onboardApplyAccepted": "Arizangiz qabul qilindi",
+  "onboardApplyInvited": "Suhbatga taklif etildingiz",
+  "phoneHint": "Raqam Telegramga ro'yxatdan o'tgan bo'lishi kerak"
 }

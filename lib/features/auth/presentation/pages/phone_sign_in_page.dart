@@ -151,6 +151,16 @@ class _PhoneSignInPageState extends ConsumerState<PhoneSignInPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  // Telegram Gateway can only reach numbers that have a
+                  // Telegram account — saying so up front beats a silent
+                  // "no code arrived".
+                  Text(
+                    l.phoneHint,
+                    style: context.text.bodySmall?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.xl),
                   JzPrimaryButton(
                     label: l.sendCode,

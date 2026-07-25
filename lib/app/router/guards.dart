@@ -10,7 +10,8 @@ import 'routes.dart';
 /// Pure redirect decision for the router. Kept side-effect free so it can be
 /// unit-tested as a truth table.
 ///
-/// Order: onboarding slides → authentication → profile/preferences setup → app.
+/// Order: language → onboarding slides → authentication → profile/preferences
+/// setup → app.
 /// After setup, [role] keeps each account type in its own area: job seekers in
 /// the bottom-nav shell, employers in the `/employer` (Yolla Business) shell.
 /// When Supabase isn't configured we skip gating entirely so the app still
@@ -55,11 +56,13 @@ String? resolveRedirect({
           : (location.startsWith('/setup') ||
                 location.startsWith('/permissions')));
 
-  if (!onboardingSeen) return inOnboarding ? null : Routes.onboarding;
-  // First-run language picker sits between onboarding and welcome.
+  // Language first: the picker is the one screen that must be readable before
+  // the user has told us anything, and choosing here means the onboarding
+  // slides that follow are already in their language.
   if (!languageChosen) {
     return inChooseLanguage ? null : Routes.chooseLanguage;
   }
+  if (!onboardingSeen) return inOnboarding ? null : Routes.onboarding;
   if (!signedIn) return inAuth ? null : Routes.signIn;
   // Password reset rides a recovery session whose profile may look incomplete
   // (e.g. straight after a sign-out). Let the new-password screen through the

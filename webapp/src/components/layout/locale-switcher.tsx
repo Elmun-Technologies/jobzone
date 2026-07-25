@@ -5,41 +5,72 @@ import { useTransition } from "react";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 
+/** Full names for the drawer, two-letter codes for the header pill. */
 const LOCALE_NAMES: Record<Locale, string> = {
   uz: "O'zbekcha",
   ru: "Русский",
   en: "English",
 };
+const LOCALE_SHORT: Record<Locale, string> = {
+  uz: "UZ",
+  ru: "RU",
+  en: "EN",
+};
 
-/** Switches locale while preserving the current path. */
-export function LocaleSwitcher() {
+const segment =
+  "rounded-full px-2.5 py-1 text-sm font-medium transition-colors disabled:opacity-60";
+const active = "bg-background text-foreground shadow-sm";
+const inactive = "text-muted-foreground hover:text-foreground";
+
+/**
+ * Switches locale while preserving the current path.
+ *
+ * A segmented pill rather than a `<select>`: the native control rendered an
+ * OS dropdown that ignored every brand token (a full-screen wheel on mobile),
+ * and its width was set by the longest language name, which is what made the
+ * header look lopsided. This mirrors `RoleToggle` — same pill, same thumb —
+ * so the two controls in the header read as one system.
+ *
+ * `compact` (the default) shows UZ/RU/EN; the mobile drawer has room for the
+ * full names.
+ */
+export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
   const locale = useLocale();
   const t = useTranslations("nav");
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
-  function onChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    const next = event.target.value as Locale;
+  function switchTo(next: Locale) {
+    if (next === locale) return;
     startTransition(() => {
       router.replace(pathname, { locale: next });
     });
   }
 
   return (
-    <select
-      value={locale}
-      onChange={onChange}
-      disabled={isPending}
+    <div
+      role="group"
       aria-label={t("language")}
-      className="border-border bg-background text-foreground focus-visible:ring-ring h-9 rounded-full border px-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none"
+      className="bg-muted inline-flex shrink-0 items-center rounded-full p-1"
     >
-      {routing.locales.map((l) => (
-        <option key={l} value={l}>
-          {LOCALE_NAMES[l]}
-        </option>
-      ))}
-    </select>
+      {routing.locales.map((l) => {
+        const isActive = l === locale;
+        return (
+          <button
+            key={l}
+            type="button"
+            onClick={() => switchTo(l)}
+            disabled={isPending}
+            aria-current={isActive ? "true" : undefined}
+            className={cn(segment, isActive ? active : inactive)}
+          >
+            {compact ? LOCALE_SHORT[l] : LOCALE_NAMES[l]}
+          </button>
+        );
+      })}
+    </div>
   );
 }

@@ -73,9 +73,9 @@
   "didntReceiveOtp": "Не получили код?",
   "resendCode": "Отправить повторно",
   "codeResent": "Код отправлен",
-  "continueWithPhone": "Войти по номеру телефона",
-  "phoneSignInTitle": "Вход по телефону",
-  "phoneSignInSubtitle": "Мы отправим одноразовый код в ваш Telegram",
+  "continueWithPhone": "Продолжить через Telegram",
+  "phoneSignInTitle": "Вход через Telegram",
+  "phoneSignInSubtitle": "Введите номер — одноразовый код придёт в ваш Telegram",
   "phoneCodeSubtitle": "Введите код, отправленный в ваш Telegram",
   "changePhoneNumber": "Изменить номер",
   "phoneVerifiedToast": "Телефон подтверждён ✓",
@@ -917,5 +917,10 @@
   "reportReasonIllegal": "Незаконная деятельность",
   "reportReasonInappropriate": "Недопустимый контент",
   "reportReasonPersonalInfo": "Раскрыта личная информация",
-  "reportReasonOther": "Другое"
+  "reportReasonOther": "Другое",
+  "onboardChatIncoming": "Здравствуйте! Придёте завтра на собеседование?",
+  "onboardChatOutgoing": "Конечно, спасибо! 🙌",
+  "onboardApplyAccepted": "Ваша заявка принята",
+  "onboardApplyInvited": "Вас пригласили на собеседование",
+  "phoneHint": "Номер должен быть зарегистрирован в Telegram"
 }

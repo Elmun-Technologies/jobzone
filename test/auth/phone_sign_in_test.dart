@@ -83,7 +83,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Sign in with phone'), findsOneWidget);
+    // The method is Telegram (you still type a phone number) — see the
+    // phoneSignInTitle ARB key.
+    expect(find.text('Sign in with Telegram'), findsOneWidget);
     expect(find.text('Phone Number'), findsOneWidget);
     expect(find.text('Send code'), findsOneWidget);
   });

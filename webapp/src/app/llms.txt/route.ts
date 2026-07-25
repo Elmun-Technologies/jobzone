@@ -56,7 +56,6 @@ export async function GET(): Promise<Response> {
     `- [Jobs map / Xarita](${base}/uz/explore): every open vacancy on a live Yandex/OSM map`,
   );
   lines.push(
-    `- [About / Loyiha haqida](${base}/uz/about): what Yollla is, how it works`,
   );
   lines.push(
     `- [Pricing / Narxlar](${base}/uz/pricing): employer listing tiers (first vacancy free)`,
