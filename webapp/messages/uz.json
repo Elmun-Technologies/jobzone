@@ -242,6 +242,12 @@
     "save": "Saqlash",
     "saved": "Saqlangan"
   },
+  "archived": {
+    "title": "Arxivlangan ishlar",
+    "subtitle": "Siz \"qiziq emas\" deb belgilagan vakansiyalar. Ular tavsiyalarda ko'rinmaydi.",
+    "empty": "Arxivda hech narsa yo'q",
+    "emptyHint": "Vakansiya kartasidagi arxiv tugmasini bossangiz, u shu yerga tushadi."
+  },
   "savedSearches": {
     "title": "Obunalar",
     "subtitle": "Saqlangan qidiruvni istalgan vaqtda qayta ishga tushiring.",
@@ -507,7 +513,7 @@
     "errDuplicate": "Siz bu ishga allaqachon ariza topshirgansiz",
     "errUnknown": "Xatolik yuz berdi",
     "quickApply": "1-klik ariza",
-    "quickApplied": "Ariza yuborildi ✓",
+    "quickApplied": "Ariza yuborildi",
     "quickApplyHint": "Rezyumeingiz bilan darhol yuboriladi.",
     "orAddLetter": "yoki motivatsion xat qo'shing",
     "socialProof": "Bu ishga allaqachon {count} kishi ariza berdi",
@@ -528,8 +534,15 @@
       "interview": "Suhbat",
       "offer": "Taklif",
       "rejected": "Rad etilgan",
-      "hired": "Ishga olingan"
-    }
+      "hired": "Ishga olingan",
+      "withdrawn": "Qaytarib olingan"
+    },
+    "withdraw": "Arizani qaytarib olish",
+    "withdrawConfirm": "Ishonchingiz komilmi?",
+    "withdrawYes": "Ha, qaytarib olaman",
+    "withdrawNo": "Yo'q",
+    "withdrawnToast": "Ariza qaytarib olindi",
+    "withdrawFailed": "Qaytarib olib bo'lmadi. Keyinroq urinib ko'ring."
   },
   "recommended": {
     "title": "Sizga mos ishlar",

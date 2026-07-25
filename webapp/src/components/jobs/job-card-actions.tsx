@@ -19,15 +19,18 @@ const iconButton =
 export function JobCardActions({
   jobId,
   initialSaved = false,
+  initialDismissed = false,
 }: {
   jobId: string;
   initialSaved?: boolean;
+  /** True on the archived-jobs list, where the button un-archives. */
+  initialDismissed?: boolean;
 }) {
   const t = useTranslations("jobs");
   const tb = useTranslations("bookmarks");
   const locale = useLocale();
   const [saved, setSaved] = useState(initialSaved);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(initialDismissed);
   const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
   const [dismissPending, startDismissTransition] = useTransition();

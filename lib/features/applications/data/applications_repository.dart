@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -49,6 +50,20 @@ class ApplicationsRepository {
         .byIds(rows.map((r) => r['job_id'] as String));
     final jobById = {for (final j in jobs) j.id: j};
 
+    // byIds() reads job_feed, which only carries open, unexpired vacancies.
+    // Dropping the rows it can't resolve silently deleted an application the
+    // moment its job closed or expired — including from the Archive tab, and
+    // including for someone who was HIRED for that now-filled position. The
+    // web has read `my_applied_jobs` (0048) since it hit the same bug; this
+    // brings mobile onto the same view.
+    final missing = rows
+        .map((r) => r['job_id'] as String)
+        .where((id) => !jobById.containsKey(id))
+        .toSet();
+    if (missing.isNotEmpty) {
+      jobById.addAll(await _closedJobsByIds(missing));
+    }
+
     return rows
         .where((r) => jobById.containsKey(r['job_id']))
         .map<Application>(
@@ -88,20 +103,58 @@ class ApplicationsRepository {
         .maybeSingle();
     if (row == null) return null;
 
-    final jobs = await _ref.read(jobsRepositoryProvider).byIds([
-      row['job_id'] as String,
-    ]);
-    if (jobs.isEmpty) return null;
+    final jobId = row['job_id'] as String;
+    final jobs = await _ref.read(jobsRepositoryProvider).byIds([jobId]);
+    // Same closed-job fallback as myApplications: a push notification about an
+    // application whose vacancy has since closed must still open its screen.
+    final job = jobs.isNotEmpty
+        ? jobs.first
+        : (await _closedJobsByIds({jobId}))[jobId];
+    if (job == null) return null;
 
     return Application(
       id: row['id'] as String,
-      job: jobs.first,
+      job: job,
       status:
           ApplicationStatus.fromWire(row['current_status'] as String?) ??
           ApplicationStatus.submitted,
       appliedAt: DateTime.tryParse('${row['applied_at']}') ?? DateTime.now(),
       coverLetter: row['cover_letter'] as String?,
     );
+  }
+
+  /// Minimal [Job] stand-ins for vacancies that are no longer in `job_feed`
+  /// (closed, expired or blocked), read from the `my_applied_jobs` definer
+  /// view (0048) — which is scoped to jobs the caller actually applied to, so
+  /// this grants no wider visibility than the application row itself.
+  ///
+  /// The view carries only id/title/status/company_name; that is what the
+  /// applications list and the status screen render, and the rest of the Job
+  /// falls back to its defaults. A closed job has no live listing to link to
+  /// anyway.
+  Future<Map<String, Job>> _closedJobsByIds(Set<String> ids) async {
+    if (ids.isEmpty) return const {};
+    try {
+      final rows = await _client
+          .from('my_applied_jobs')
+          .select('id, title, status, company_name')
+          .inFilter('id', ids.toList());
+      return {
+        for (final r in rows as List)
+          (r['id'] as String): Job(
+            id: r['id'] as String,
+            title: (r['title'] ?? '') as String,
+            companyId: '',
+            companyName: (r['company_name'] ?? '') as String,
+            status: (r['status'] ?? 'closed') as String,
+          ),
+      };
+    } catch (e) {
+      // A DB behind on 0048 has no such view. Degrade to the old behaviour
+      // (the row is dropped) rather than failing the whole list.
+      if (kDebugMode) debugPrint('my_applied_jobs lookup failed: $e');
+      return const {};
+    }
   }
 
   Future<void> apply({

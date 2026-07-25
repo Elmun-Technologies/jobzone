@@ -242,6 +242,12 @@
     "save": "Save",
     "saved": "Saved"
   },
+  "archived": {
+    "title": "Archived jobs",
+    "subtitle": "Vacancies you marked as not interesting. They stay out of your feed.",
+    "empty": "Nothing archived",
+    "emptyHint": "Tap the archive icon on a job card and it lands here."
+  },
   "savedSearches": {
     "title": "Saved searches",
     "subtitle": "Re-run a saved search anytime.",
@@ -507,7 +513,7 @@
     "errDuplicate": "You've already applied to this job",
     "errUnknown": "Something went wrong",
     "quickApply": "Apply in 1 tap",
-    "quickApplied": "Application sent ✓",
+    "quickApplied": "Application sent",
     "quickApplyHint": "Sent instantly with your résumé.",
     "orAddLetter": "or add a cover letter",
     "socialProof": "{count} already applied to this job",
@@ -528,8 +534,15 @@
       "interview": "Interview",
       "offer": "Offer",
       "rejected": "Rejected",
-      "hired": "Hired"
-    }
+      "hired": "Hired",
+      "withdrawn": "Withdrawn"
+    },
+    "withdraw": "Withdraw application",
+    "withdrawConfirm": "Are you sure?",
+    "withdrawYes": "Yes, withdraw",
+    "withdrawNo": "No",
+    "withdrawnToast": "Application withdrawn",
+    "withdrawFailed": "Couldn't withdraw. Please try again later."
   },
   "recommended": {
     "title": "Recommended jobs",
