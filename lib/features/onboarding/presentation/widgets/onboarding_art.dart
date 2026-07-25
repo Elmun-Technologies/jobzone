@@ -33,20 +33,69 @@ class OnboardingArt extends StatelessWidget {
 
 // ── shared panel ─────────────────────────────────────────────────────────────
 
+/// Photo behind each slide, when one has been supplied.
+///
+/// Drop real photographs at these paths (WebP or JPEG, ~1080px wide, licensed
+/// for commercial use) and they render automatically — no code change:
+///
+///   assets/images/onboarding_jobs.webp   — someone browsing work on a phone
+///   assets/images/onboarding_map.webp    — a workplace/street scene in UZ
+///   assets/images/onboarding_chat.webp   — a hiring conversation / handshake
+///
+/// Until then `errorBuilder` falls through to the drawn scene below, so a
+/// missing file is invisible rather than a broken-image glyph.
+const _slidePhotos = <String>[
+  'assets/images/onboarding_jobs.webp',
+  'assets/images/onboarding_map.webp',
+  'assets/images/onboarding_chat.webp',
+];
+
 class _Panel extends StatelessWidget {
-  const _Panel({required this.child});
+  const _Panel({required this.child, this.photoIndex});
   final Widget child;
+
+  /// Slide index whose photo should sit behind [child], if present.
+  final int? photoIndex;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final photo = photoIndex == null ? null : _slidePhotos[photoIndex!];
     return Container(
       decoration: BoxDecoration(
         color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(40),
       ),
       clipBehavior: Clip.antiAlias,
-      child: child,
+      child: photo == null
+          ? child
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  photo,
+                  fit: BoxFit.cover,
+                  // No photo shipped yet (or it failed to decode) → render the
+                  // drawn scene alone, exactly as before.
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+                // Scrim so the product chrome on top stays legible over any
+                // photo, light or dark.
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        colors.surfaceVariant.withValues(alpha: 0.15),
+                        colors.surfaceVariant.withValues(alpha: 0.75),
+                      ],
+                    ),
+                  ),
+                ),
+                child,
+              ],
+            ),
     );
   }
 }
@@ -79,6 +128,7 @@ class _JobsScene extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return _Panel(
+      photoIndex: 0,
       child: Stack(
         children: [
           Positioned(top: -26, right: -20, child: _Disc(size: 120, alpha: 0.5)),
@@ -277,6 +327,7 @@ class _MapScene extends StatelessWidget {
     final l = context.l10n;
     final colors = context.colors;
     return _Panel(
+      photoIndex: 1,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -452,6 +503,7 @@ class _ChatScene extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return _Panel(
+      photoIndex: 2,
       child: Stack(
         children: [
           Positioned(top: -24, left: -18, child: _Disc(size: 110, alpha: 0.4)),

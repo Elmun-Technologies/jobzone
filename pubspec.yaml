@@ -146,6 +146,7 @@ flutter:
   assets:
     - assets/icon/
     - assets/illustrations/
+    - assets/images/
     - assets/onboarding/
 
   # Yolla brand type — Archivo, bundled as static weights so it renders
