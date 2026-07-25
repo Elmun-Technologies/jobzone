@@ -96,7 +96,9 @@
     "role": {
       "job_seeker": "Job seeker",
       "employer": "Employer"
-    }
+    },
+    "continueWithEmail": "Continue with email and password",
+    "otherMethods": "Other methods"
   },
   "account": {
     "title": "Account",

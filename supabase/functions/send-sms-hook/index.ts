@@ -1,7 +1,8 @@
 // send-sms-hook — Supabase Auth "Send SMS" hook. Supabase's own phone-OTP
 // system generates, stores, hashes, rate-limits and verifies the code
 // end-to-end; this hook is called once per code and is responsible only for
-// *delivering* it — here, via Telegram Gateway (gateway.telegram.org) instead
+// *delivering* it — here, via Telegram Gateway (API host gatewayapi.telegram.org,
+// dashboard at gateway.telegram.org) instead
 // of a traditional SMS provider, so a code is delivered as a Telegram message
 // rather than an SMS. The client still calls supabase.auth.signInWithOtp({phone})
 // to trigger a code and supabase.auth.verifyOtp({phone, token, type:'sms'}) to
@@ -106,7 +107,7 @@ async function sendViaTelegramGateway(
     "Content-Type": "application/json",
   };
 
-  const ability = await fetch("https://gateway.telegram.org/checkSendAbility", {
+  const ability = await fetch("https://gatewayapi.telegram.org/checkSendAbility", {
     method: "POST",
     headers,
     body: JSON.stringify({ phone_number: phone }),
@@ -125,7 +126,7 @@ async function sendViaTelegramGateway(
     };
   }
 
-  const send = await fetch("https://gateway.telegram.org/sendVerificationMessage", {
+  const send = await fetch("https://gatewayapi.telegram.org/sendVerificationMessage", {
     method: "POST",
     headers,
     body: JSON.stringify({

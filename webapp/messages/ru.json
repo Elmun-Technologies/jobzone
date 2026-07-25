@@ -96,7 +96,9 @@
     "role": {
       "job_seeker": "Соискатель",
       "employer": "Работодатель"
-    }
+    },
+    "continueWithEmail": "Продолжить с email и паролем",
+    "otherMethods": "Другие способы"
   },
   "account": {
     "title": "Аккаунт",

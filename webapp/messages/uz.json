@@ -96,7 +96,9 @@
     "role": {
       "job_seeker": "Ish izlovchi",
       "employer": "Ish beruvchi"
-    }
+    },
+    "continueWithEmail": "Email va parol bilan davom etish",
+    "otherMethods": "Boshqa usullar"
   },
   "account": {
     "title": "Hisob",
