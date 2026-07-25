@@ -25,6 +25,10 @@ class LocationAccessPage extends ConsumerWidget {
       },
       secondaryLabel: l.enterManually,
       onSecondary: () => context.push(Routes.permLocationManual),
+      // Neither allowing nor typing a city used to lead anywhere: this screen
+      // was a hard stop in the middle of registration.
+      tertiaryLabel: l.maybeLater,
+      onTertiary: () => context.push(Routes.permNotifications),
     );
   }
 }

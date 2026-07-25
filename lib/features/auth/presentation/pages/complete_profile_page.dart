@@ -28,16 +28,40 @@ class CompleteProfilePage extends ConsumerStatefulWidget {
 class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
-  final _headline = TextEditingController();
   final _phone = TextEditingController();
-  String? _gender;
   Uint8List? _avatar;
   bool _saving = false;
 
   @override
+  void initState() {
+    super.initState();
+    _prefill();
+  }
+
+  /// Fill in what the account already told us. A phone-OTP sign-up just typed
+  /// its number; a Google sign-in carries a name. Re-asking for both is the
+  /// bulk of why this screen felt like a form rather than a confirmation.
+  void _prefill() {
+    if (!Env.hasSupabase) return;
+    final user = ref.read(supabaseClientProvider).auth.currentUser;
+    if (user == null) return;
+
+    final name = (user.userMetadata?['full_name'] ?? user.userMetadata?['name'])
+        ?.toString();
+    if (name != null && name.trim().isNotEmpty) _name.text = name.trim();
+
+    // Stored E.164 ("+998901234567"); the field holds the national part only,
+    // since "+998" is fixed in the UI.
+    final phone = user.phone;
+    if (phone != null && phone.isNotEmpty) {
+      final digits = phone.replaceAll(RegExp(r'\D'), '');
+      _phone.text = digits.startsWith('998') ? digits.substring(3) : digits;
+    }
+  }
+
+  @override
   void dispose() {
     _name.dispose();
-    _headline.dispose();
     _phone.dispose();
     super.dispose();
   }
@@ -81,8 +105,6 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
               .update({
                 'full_name': _name.text.trim(),
                 'phone': '+998${_phone.text.replaceAll(RegExp(r'\D'), '')}',
-                if (_headline.text.trim().isNotEmpty)
-                  'headline': _headline.text.trim(),
                 'avatar_url': ?avatarUrl,
               })
               .eq('id', uid);
@@ -181,34 +203,11 @@ class _CompleteProfilePageState extends ConsumerState<CompleteProfilePage> {
                   return digits.length >= 7 ? null : l.valPhoneRequired;
                 },
               ),
-              const SizedBox(height: AppSpacing.lg),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l.gender, style: context.text.labelLarge),
-                  const SizedBox(height: AppSpacing.sm),
-                  DropdownButtonFormField<String>(
-                    initialValue: _gender,
-                    isExpanded: true,
-                    hint: Text(l.selectOption),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'male',
-                        child: Text(l.genderMale),
-                      ),
-                      DropdownMenuItem(
-                        value: 'female',
-                        child: Text(l.genderFemale),
-                      ),
-                      DropdownMenuItem(
-                        value: 'other',
-                        child: Text(l.genderOther),
-                      ),
-                    ],
-                    onChanged: (v) => setState(() => _gender = v),
-                  ),
-                ],
-              ),
+              // The gender dropdown that used to sit here was never written to
+              // the database — and it offered "other", which `profiles.gender`
+              // (0031, check male|female) would have rejected anyway. It only
+              // added a required-looking field to registration. Gender belongs
+              // to the résumé, where it is actually stored and used.
               const SizedBox(height: AppSpacing.xxl),
               JzPrimaryButton(
                 label: l.completeProfileCta,

@@ -28,6 +28,14 @@ class ExperienceLevelPage extends ConsumerWidget {
       totalSteps: 4,
       nextLabel: l.next,
       onNext: () => context.push(Routes.setupWorkingModel),
+      // Skip persists whatever has been picked so far and jumps past the rest
+      // of the chain — none of these answers is needed to browse jobs.
+      skipLabel: l.skip,
+      onSkip: () async {
+        final router = GoRouter.of(context);
+        await notifier.persist();
+        router.push(Routes.permLocation);
+      },
       child: OptionCheckList(
         options: options,
         selected: draft.experienceLevels,
