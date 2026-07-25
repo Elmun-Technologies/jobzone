@@ -48,7 +48,8 @@ export function navModel(
   return {
     employerMode: false,
     links: [
-      { href: "/", labelKey: "home" },
+      // No "Home" link: the Yollla wordmark to its left already goes there,
+      // so it was one nav slot spent on a destination the user already has.
       { href: "/jobs", labelKey: "jobs" },
       { href: "/companies", labelKey: "companies" },
       { href: "/account/bookmarks", labelKey: "saved" },
