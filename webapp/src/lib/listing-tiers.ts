@@ -4,8 +4,8 @@
 // visual treatment the listing gets everywhere (card + map), for the life of
 // the listing — it replaces the old separate TOP/featured boost packages.
 //
-// This is the marketing source of truth (the /pricing page and the /about
-// landing section). The mobile app mirrors these values in
+// This is the marketing source of truth (the /pricing page). The mobile app
+// mirrors these values in
 // `lib/features/monetization/domain/listing_tier.dart`; the post-time picker
 // and the `promotion_products` catalog (PR2) reuse the same three prices.
 

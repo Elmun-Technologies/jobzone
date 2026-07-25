@@ -129,7 +129,7 @@ export function MobileMenu({
                 {/* Locale + theme live here below lg (hidden in the header
                     to keep it from overflowing on phones/tablets). */}
                 <div className="mt-auto flex items-center justify-between gap-3">
-                  <LocaleSwitcher />
+                  <LocaleSwitcher compact={false} />
                   <ThemeToggle />
                 </div>
 

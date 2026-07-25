@@ -19,9 +19,6 @@ export async function SiteFooter() {
           <span>— {t("tagline")}</span>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-          <Link href="/about" className="hover:text-primary transition-colors">
-            {tn("about")}
-          </Link>
           <Link href="/jobs" className="hover:text-primary transition-colors">
             {tn("jobs")}
           </Link>

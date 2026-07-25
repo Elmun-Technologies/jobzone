@@ -31,7 +31,7 @@ export async function EmployerCta() {
             <ArrowRight className="size-4" />
           </Link>
           <Link
-            href="/about#pricing"
+            href="/pricing"
             className="border-primary-foreground/30 hover:bg-primary-foreground/10 inline-flex h-11 items-center justify-center rounded-full border px-6 font-semibold transition-colors"
           >
             {t("pricing.eyebrow")}

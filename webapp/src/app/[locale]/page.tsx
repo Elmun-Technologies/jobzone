@@ -201,6 +201,8 @@ export default async function HomePage({
                   pinHint: t("mapLead"),
                   cityLabel: "TOSHKENT",
                   negotiable: tj("negotiable"),
+                  zoomIn: t("map.zoomIn"),
+                  zoomOut: t("map.zoomOut"),
                 }}
               />
             );
@@ -208,7 +210,7 @@ export default async function HomePage({
         </Container>
       </section>
 
-      {/* How it works (shared with /about) */}
+      {/* How it works */}
       <HowItWorks />
 
       {/* Category grid — only categories that actually have open vacancies
@@ -335,7 +337,7 @@ export default async function HomePage({
           Google may render this as a rich result on the SERP. */}
       <FaqSection heading={tfaq("heading")} items={faqItems} />
 
-      {/* Employer CTA (shared with /about) */}
+      {/* Employer CTA */}
       <EmployerCta />
     </>
   );

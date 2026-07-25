@@ -42,6 +42,8 @@ type Labels = {
   pinHint: string;
   cityLabel: string;
   negotiable: string;
+  zoomIn: string;
+  zoomOut: string;
 };
 
 export type LandingMapLabels = Labels;
@@ -59,6 +61,9 @@ export default function LandingMapInner({
 }) {
   const router = useRouter();
   const [yandexFailed, setYandexFailed] = useState(false);
+  // The Leaflet instance, so the +/- buttons can actually drive it. Yandex
+  // owns its own controls, so this stays null on that engine.
+  const [map, setMap] = useState<L.Map | null>(null);
   const useYandex = !!YANDEX_KEY && !yandexFailed;
   // Hover preview card + click-through over the pins' data-job-id — the same
   // engine-agnostic delegation the /explore map uses.
@@ -109,20 +114,23 @@ export default function LandingMapInner({
           />
         ) : (
           <MapContainer
+            ref={setMap}
             {...(bounds
               ? { bounds, boundsOptions: { padding: [30, 30] } }
               : { center: TASHKENT, zoom: LANDING_ZOOM })}
-            // Non-interactive on the landing surface — the map is a backdrop,
-            // not a driver. All exploration flows through the chips or the
-            // /explore link, which sidesteps the scroll-zoom trap for real.
+            // Pannable and zoomable — the map used to be a frozen poster with
+            // decorative +/- badges, which reads as broken ("why won't it
+            // move?"). Wheel zoom stays OFF so scrolling the page over the map
+            // is never hijacked; the +/- buttons and pinch cover zooming.
             scrollWheelZoom={false}
-            dragging={false}
-            doubleClickZoom={false}
-            touchZoom={false}
+            dragging
+            doubleClickZoom
+            touchZoom
             boxZoom={false}
-            keyboard={false}
+            keyboard
             zoomControl={false}
-            attributionControl={false}
+            // Attribution is required once the base map is actually explorable.
+            attributionControl
             className="h-full w-full"
             // Ink base while tiles load — the showcase map is dark to match
             // the brand and the /explore map (volt pins pop on ink).
@@ -193,15 +201,19 @@ export default function LandingMapInner({
           </span>
         </div>
 
-        {/* Right-hand zoom column — decorative, matches the mockup silhouette. */}
-        <div className="pointer-events-none absolute top-1/2 right-3 z-[600] flex -translate-y-1/2 flex-col gap-1.5 sm:right-4">
-          <ZoomBadge>
-            <Plus className="size-4" aria-hidden />
-          </ZoomBadge>
-          <ZoomBadge>
-            <Minus className="size-4" aria-hidden />
-          </ZoomBadge>
-        </div>
+        {/* Right-hand zoom column — real controls (they used to be inert
+            decoration on a frozen map). Hidden on the Yandex engine, which
+            ships its own. */}
+        {map ? (
+          <div className="absolute top-1/2 right-3 z-[600] flex -translate-y-1/2 flex-col gap-1.5 sm:right-4">
+            <ZoomBadge label={labels.zoomIn} onClick={() => map.zoomIn()}>
+              <Plus className="size-4" aria-hidden />
+            </ZoomBadge>
+            <ZoomBadge label={labels.zoomOut} onClick={() => map.zoomOut()}>
+              <Minus className="size-4" aria-hidden />
+            </ZoomBadge>
+          </div>
+        ) : null}
 
         {/* Bottom-right: "near me" primary — jumps to the live map. */}
         <Link
@@ -247,10 +259,23 @@ function ChipLink({
   );
 }
 
-function ZoomBadge({ children }: { children: React.ReactNode }) {
+function ZoomBadge({
+  children,
+  label,
+  onClick,
+}: {
+  children: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
   return (
-    <span className="flex size-8 items-center justify-center rounded-md bg-white/95 text-neutral-800 shadow-md ring-1 ring-black/5 backdrop-blur">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex size-8 items-center justify-center rounded-md bg-white/95 text-neutral-800 shadow-md ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white"
+    >
       {children}
-    </span>
+    </button>
   );
 }
