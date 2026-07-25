@@ -8,6 +8,7 @@ import '../core/supabase/supabase_providers.dart';
 import '../design_system/design_system.dart';
 import '../features/notifications/application/push_providers.dart';
 import '../features/notifications/presentation/widgets/notification_toast.dart';
+import '../shared/providers/account_scope.dart';
 import '../localization/generated/app_localizations.dart';
 import '../localization/locale_controller.dart';
 import 'router/app_router.dart';
@@ -22,6 +23,16 @@ class YollaApp extends ConsumerWidget {
     final router = ref.watch(goRouterProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final locale = ref.watch(localeControllerProvider);
+
+    // Every per-account cache is dropped the moment the signed-in identity
+    // changes. None of those providers auto-dispose, and each resolves the
+    // uid once when first built, so without this the next account to sign in
+    // on this device inherits the previous one's applications, bookmarks,
+    // résumés, chats and profile.
+    ref.listen(currentUserIdProvider, (previous, next) {
+      if (previous == next) return;
+      invalidateAccountScope(ref);
+    });
 
     // Register this device for push once the user is signed in. No-op unless
     // Firebase is configured (else pushServiceProvider is a NoopPushService).

@@ -219,6 +219,7 @@
   "statusWithdrawn": "Отозвано",
   "applyTitle": "Отклик на вакансию",
   "uploadCvResume": "Загрузить резюме",
+  "orUploadNewCv": "Или загрузите новое резюме",
   "browseFile": "Выбрать файл",
   "addText": "Добавить текст",
   "submit": "Отправить",

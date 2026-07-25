@@ -12,7 +12,9 @@ import '../../../shared/widgets/snackbars.dart';
 import '../../jobs/application/jobs_providers.dart';
 import '../../jobs/domain/job.dart';
 import '../../jobs/domain/screening_question.dart';
+import '../../profile/application/cv_providers.dart';
 import '../../profile/data/cv_repository.dart';
+import '../../profile/domain/cv_models.dart';
 import '../application/applications_controller.dart';
 import '../data/applications_repository.dart' show NotSignedIn;
 
@@ -30,10 +32,30 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
   PlatformFile? _cvFile;
   bool _submitting = false;
 
+  /// Id of an already-uploaded résumé to attach, when the seeker picked one
+  /// instead of uploading a new file. Null once [_cvFile] is set.
+  String? _savedResumeId;
+
+  /// Whether [_savedResumeId] has been seeded from the seeker's résumé list.
+  bool _resumeSeeded = false;
+
   @override
   void dispose() {
     _text.dispose();
     super.dispose();
+  }
+
+  /// Preselect the seeker's default résumé (or the newest, since the list is
+  /// ordered newest-first) the first time it loads, so an applicant who
+  /// already uploaded a CV doesn't have to find the file again.
+  void _seedResume(List<Resume> resumes) {
+    if (_resumeSeeded || resumes.isEmpty) return;
+    _resumeSeeded = true;
+    final preferred = resumes.firstWhere(
+      (r) => r.isDefault,
+      orElse: () => resumes.first,
+    );
+    _savedResumeId = preferred.id;
   }
 
   Future<void> _pickCv() async {
@@ -42,7 +64,11 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
       allowedExtensions: const ['pdf', 'doc', 'docx'],
     );
     if (res != null && res.files.isNotEmpty) {
-      setState(() => _cvFile = res.files.first);
+      // A freshly picked file wins over whatever was selected from the list.
+      setState(() {
+        _cvFile = res.files.first;
+        _savedResumeId = null;
+      });
     }
   }
 
@@ -60,8 +86,14 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
       showErrorSnack(context, context.l10n.valCoverLetterRequired);
       return;
     }
-    // When the employer won't accept an incomplete resume, a CV is mandatory.
-    if (!job.allowIncompleteResume && _cvFile == null) {
+    // When the employer won't accept an incomplete resume, a CV is mandatory —
+    // but an already-uploaded one counts. This used to demand a freshly picked
+    // file on every application, and since `allow_incomplete_resume` defaults
+    // to false that blocked most applications for anyone whose CV was already
+    // in Yolla.
+    if (!job.allowIncompleteResume &&
+        _cvFile == null &&
+        _savedResumeId == null) {
       showErrorSnack(context, context.l10n.resumeRequired);
       return;
     }
@@ -69,7 +101,7 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
     try {
       // Actually upload the picked CV and attach it to the application — the
       // earlier version captured only the file name and dropped the file.
-      String? resumeId;
+      String? resumeId = _savedResumeId;
       final cv = _cvFile;
       if (cv != null) {
         // file_picker 12: read bytes on demand instead of the deprecated
@@ -132,6 +164,15 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
     final l = context.l10n;
     final jobAsync = ref.watch(jobByIdProvider(widget.jobId));
 
+    final savedResumes =
+        ref.watch(resumesControllerProvider).value ?? const <Resume>[];
+    // Seed here rather than from a listener: the provider may already hold a
+    // cached list, in which case a listener never fires. Watching means this
+    // build reruns when the list arrives, and `_seedResume` is idempotent, so
+    // the widgets below read the preselection in this same pass — no setState
+    // and no extra frame.
+    _seedResume(savedResumes);
+
     return Scaffold(
       body: SafeArea(
         child: jobAsync.when(
@@ -171,6 +212,18 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
                             style: context.text.labelLarge,
                           ),
                           const SizedBox(height: AppSpacing.sm),
+                          // Saved résumés first: for a returning applicant the
+                          // CV is usually already here, and re-picking the file
+                          // for every application is the friction this screen
+                          // used to force.
+                          _SavedResumes(
+                            resumes: savedResumes,
+                            selectedId: _cvFile == null ? _savedResumeId : null,
+                            onSelect: (id) => setState(() {
+                              _savedResumeId = id;
+                              _cvFile = null;
+                            }),
+                          ),
                           _UploadBox(fileName: _cvFile?.name, onTap: _pickCv),
                           const SizedBox(height: AppSpacing.lg),
                           if (job.screeningQuestions.isNotEmpty) ...[
@@ -220,6 +273,97 @@ class _ApplyJobPageState extends ConsumerState<ApplyJobPage> {
                 ),
         ),
       ),
+    );
+  }
+}
+
+/// The seeker's already-uploaded résumés, as selectable rows. Renders nothing
+/// when there are none, so a first-time applicant still just sees the upload
+/// box.
+class _SavedResumes extends StatelessWidget {
+  const _SavedResumes({
+    required this.resumes,
+    required this.selectedId,
+    required this.onSelect,
+  });
+
+  final List<Resume> resumes;
+  final String? selectedId;
+  final ValueChanged<String?> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    if (resumes.isEmpty) return const SizedBox.shrink();
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final r in resumes)
+          if (r.id != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: InkWell(
+                onTap: () => onSelect(r.id),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: r.id == selectedId
+                          ? colors.primary
+                          : Colors.transparent,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        r.id == selectedId
+                            ? Icons.radio_button_checked_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        color: r.id == selectedId
+                            ? colors.primary
+                            : colors.textSecondary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              r.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.text.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (r.sizeText != null)
+                              Text(
+                                r.sizeText!,
+                                style: context.text.bodySmall?.copyWith(
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          context.l10n.orUploadNewCv,
+          style: context.text.bodySmall?.copyWith(color: colors.textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+      ],
     );
   }
 }
