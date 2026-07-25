@@ -15,6 +15,8 @@ class PermissionScaffold extends StatelessWidget {
     required this.onPrimary,
     required this.secondaryLabel,
     required this.onSecondary,
+    this.tertiaryLabel,
+    this.onTertiary,
   });
 
   final IconData icon;
@@ -24,6 +26,12 @@ class PermissionScaffold extends StatelessWidget {
   final VoidCallback onPrimary;
   final String secondaryLabel;
   final VoidCallback onSecondary;
+
+  /// Optional third, quieter action. The location screen needs one: its two
+  /// buttons were "allow" and "enter it by hand", so a user who wanted neither
+  /// had no way forward during registration.
+  final String? tertiaryLabel;
+  final VoidCallback? onTertiary;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +91,16 @@ class PermissionScaffold extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (tertiaryLabel != null && onTertiary != null)
+                        TextButton(
+                          onPressed: onTertiary,
+                          child: Text(
+                            tertiaryLabel!,
+                            style: context.text.titleSmall?.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
                       const Spacer(flex: 4),
                     ],
                   ),

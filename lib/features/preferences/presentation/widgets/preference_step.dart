@@ -15,6 +15,8 @@ class PreferenceStepScaffold extends StatelessWidget {
     required this.nextLabel,
     required this.onNext,
     this.nextEnabled = true,
+    this.skipLabel,
+    this.onSkip,
   });
 
   final String title;
@@ -24,6 +26,12 @@ class PreferenceStepScaffold extends StatelessWidget {
   final String nextLabel;
   final VoidCallback onNext;
   final bool nextEnabled;
+
+  /// Optional "skip" action under the primary button. Registration ran four
+  /// mandatory preference steps before the app was reachable; none of the
+  /// answers is required to browse, so every step now offers a way past.
+  final String? skipLabel;
+  final VoidCallback? onSkip;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +87,16 @@ class PreferenceStepScaffold extends StatelessWidget {
                 label: nextLabel,
                 onPressed: nextEnabled ? onNext : null,
               ),
+              if (skipLabel != null && onSkip != null)
+                TextButton(
+                  onPressed: onSkip,
+                  child: Text(
+                    skipLabel!,
+                    style: context.text.titleSmall?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

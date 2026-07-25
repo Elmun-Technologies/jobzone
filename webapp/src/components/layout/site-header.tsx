@@ -1,6 +1,7 @@
 import { Bell, CircleUser } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { NotificationListener } from "@/components/notifications/notification-listener";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { getCurrentUser } from "@/lib/auth/user";
@@ -61,6 +62,9 @@ export async function SiteHeader() {
 
           {user ? (
             <>
+              {/* Renders nothing; subscribes to this user's notifications and
+                  pops a toast for each one that arrives live. */}
+              <NotificationListener userId={user.id} />
               <Link
                 href="/account/notifications"
                 aria-label={t("notifications")}

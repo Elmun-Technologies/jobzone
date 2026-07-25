@@ -15,6 +15,7 @@ import { ConsentBanner } from "@/components/consent/consent-banner";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Toaster } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
 import { localeAlternates, siteUrl } from "@/lib/seo";
@@ -154,6 +155,10 @@ export default async function LocaleLayout({
           <main className="flex-1">{children}</main>
           <SiteFooter />
           <ConsentBanner initialConsent={consent} />
+          {/* Mounted once for the whole app: toast() pushes to a module-level
+              store, so any client component can raise one without a provider
+              in its own tree. */}
+          <Toaster />
         </NextIntlClientProvider>
         {analyticsAllowed ? (
           <>

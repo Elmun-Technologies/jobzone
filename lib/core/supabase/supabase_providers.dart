@@ -27,3 +27,10 @@ final currentSessionProvider = Provider<Session?>((ref) {
 final isSignedInProvider = Provider<bool>((ref) {
   return ref.watch(currentSessionProvider) != null;
 });
+
+/// The signed-in user's id, or null. Unlike [currentSessionProvider] this
+/// settles: a token refresh yields a new `Session` object but the same id
+/// string, so dependents rebuild only when the identity actually changes.
+final currentUserIdProvider = Provider<String?>((ref) {
+  return ref.watch(currentSessionProvider)?.user.id;
+});

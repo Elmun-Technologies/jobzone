@@ -27,6 +27,14 @@ class JobTitlePage extends ConsumerWidget {
         await notifier.persist();
         router.push(Routes.permLocation);
       },
+      // Same destination as Next: by the last step "skip" only means "I have
+      // nothing to add here", and whatever was picked earlier still persists.
+      skipLabel: l.skip,
+      onSkip: () async {
+        final router = GoRouter.of(context);
+        await notifier.persist();
+        router.push(Routes.permLocation);
+      },
       // Localized blue-collar keywords (wire = the Uzbek keyword matched
       // against real job titles) — see shared/options/option_lists.dart.
       child: OptionCheckList(

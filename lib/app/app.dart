@@ -7,6 +7,7 @@ import '../core/config/flavors.dart';
 import '../core/supabase/supabase_providers.dart';
 import '../design_system/design_system.dart';
 import '../features/notifications/application/push_providers.dart';
+import '../features/notifications/presentation/widgets/notification_toast.dart';
 import '../localization/generated/app_localizations.dart';
 import '../localization/locale_controller.dart';
 import 'router/app_router.dart';
@@ -54,7 +55,10 @@ class YollaApp extends ConsumerWidget {
         // in uz/ru/en — not the device default. This is the single root-cause
         // fix for every bare DateFormat.* call across the app.
         Intl.defaultLocale = Localizations.localeOf(context).toString();
-        return child ?? const SizedBox.shrink();
+        // Above the Navigator so an incoming notification pops over whatever
+        // route the user is on. A system push only fires when the app is
+        // backgrounded — this is the foreground half of the same alert.
+        return NotificationToastHost(child: child ?? const SizedBox.shrink());
       },
     );
   }
