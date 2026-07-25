@@ -1,15 +1,14 @@
 import "server-only";
 
+import {
+  toNotificationKind,
+  type NotificationKind,
+} from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 
 import { hasSupabase } from "./supabase-env";
 
-export type NotificationKind =
-  | "job_match"
-  | "message"
-  | "application_update"
-  | "review"
-  | "system";
+export type { NotificationKind };
 
 export interface WebNotification {
   id: string;
@@ -20,20 +19,6 @@ export interface WebNotification {
   createdAt: string | null;
   /** Type-specific payload, e.g. { job_id } for job_match. */
   data: Record<string, unknown>;
-}
-
-const KINDS: readonly NotificationKind[] = [
-  "job_match",
-  "message",
-  "application_update",
-  "review",
-  "system",
-];
-
-function toKind(v: unknown): NotificationKind {
-  return KINDS.includes(v as NotificationKind)
-    ? (v as NotificationKind)
-    : "system";
 }
 
 /**
@@ -58,7 +43,7 @@ export async function getNotifications(limit = 50): Promise<WebNotification[]> {
       const row = r as Record<string, unknown>;
       return {
         id: String(row.id),
-        kind: toKind(row.type),
+        kind: toNotificationKind(row.type),
         title: String(row.title ?? ""),
         body: typeof row.body === "string" && row.body ? row.body : null,
         isRead: Boolean(row.is_read),

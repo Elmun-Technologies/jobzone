@@ -3,13 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
-import '../../../shared/enums/enums.dart';
-import '../../applications/presentation/util/status_label.dart';
 import '../application/notifications_providers.dart';
 import '../domain/notification.dart';
+import 'notification_display.dart';
 
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({super.key});
@@ -162,7 +160,7 @@ class _NotificationTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final unread = !notification.isRead;
-    final body = _body(context);
+    final body = notificationBody(context, notification);
     return InkWell(
       onTap: () => _open(context, ref),
       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -179,7 +177,7 @@ class _NotificationTile extends ConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                _icon(notification.type),
+                notificationIcon(notification.type),
                 color: colors.primary,
                 size: 22,
               ),
@@ -194,7 +192,7 @@ class _NotificationTile extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          _title(context),
+                          notificationTitle(context, notification),
                           style: context.text.titleSmall?.copyWith(
                             fontWeight: unread
                                 ? FontWeight.w700
@@ -238,68 +236,9 @@ class _NotificationTile extends ConsumerWidget {
           .read(notificationsControllerProvider.notifier)
           .markRead(notification.id);
     }
-    final dest = _destination();
+    final dest = notificationDestination(notification);
     if (dest != null) context.push(dest);
   }
-
-  String? _destination() {
-    final data = notification.data;
-    String? nav(String key, String Function(String) route) {
-      final v = data[key];
-      return v is String && v.isNotEmpty ? route(v) : null;
-    }
-
-    return switch (notification.type) {
-      NotificationType.jobMatch => nav('job_id', Routes.jobDetails),
-      NotificationType.message => nav('conversation_id', Routes.chatDetail),
-      NotificationType.applicationUpdate => nav(
-        'application_id',
-        Routes.applicationStatus,
-      ),
-      NotificationType.review || NotificationType.system => null,
-    };
-  }
-
-  // Derive the title from the notification type so it renders in the in-app
-  // language (uz/ru/en). review/system keep their server-provided title.
-  String _title(BuildContext context) {
-    final l = context.l10n;
-    return switch (notification.type) {
-      NotificationType.applicationUpdate => l.notifTitleApplicationUpdate,
-      NotificationType.message => l.notifTitleMessage,
-      NotificationType.jobMatch => l.notifTitleJobMatch,
-      NotificationType.review || NotificationType.system => notification.title,
-    };
-  }
-
-  // applicationUpdate's server-stored body is a fixed-language sentence (the
-  // status-change trigger only ever writes one language); re-derive it from
-  // `data.status` (always present — see notify_application_status_change())
-  // the same way the title above is re-derived, so it follows the in-app
-  // language. Every other type's body is either literal user content (a chat
-  // message preview) or already-localized system/admin copy, so it passes
-  // through unchanged.
-  String? _body(BuildContext context) {
-    if (notification.type == NotificationType.applicationUpdate) {
-      final status = ApplicationStatus.fromWire(
-        notification.data['status'] as String?,
-      );
-      if (status != null) {
-        return context.l10n.notifBodyApplicationUpdate(
-          applicationStatusLabel(context, status),
-        );
-      }
-    }
-    return notification.body;
-  }
-
-  IconData _icon(NotificationType type) => switch (type) {
-    NotificationType.applicationUpdate => Icons.work_outline_rounded,
-    NotificationType.message => Icons.chat_bubble_outline_rounded,
-    NotificationType.jobMatch => Icons.work_outline_rounded,
-    NotificationType.review => Icons.star_outline_rounded,
-    NotificationType.system => Icons.person_outline_rounded,
-  };
 
   String _relativeTime(BuildContext context, DateTime t) {
     final l = context.l10n;

@@ -257,7 +257,8 @@
     "subtitle": "Mos vakansiyalar, arizalar yangilanishi va xabarlar shu yerga keladi.",
     "markAllRead": "Hammasini o'qilgan deb belgilash",
     "emptyTitle": "Hozircha bildirishnomalar yo'q",
-    "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga ariza bering — yangiliklar shu yerda ko'rinadi."
+    "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga ariza bering — yangiliklar shu yerda ko'rinadi.",
+    "toastAction": "Ko'rish"
   },
   "employer": {
     "dashboard": "Boshqaruv paneli",
@@ -763,7 +764,8 @@
       "Kassir",
       "Kuryer",
       "Dizayner"
-    ]
+    ],
+    "close": "Yopish"
   },
   "theme": {
     "light": "Yorug' rejim",

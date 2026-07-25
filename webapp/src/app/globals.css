@@ -241,3 +241,39 @@ body {
     transform: none;
   }
 }
+
+/* Toasts (see components/ui/toast.tsx): slide in from the edge they're
+   anchored to — bottom on phones, right from `sm:` up. */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes toastInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.toast-in {
+  animation: toastIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 40rem) {
+  .toast-in {
+    animation-name: toastInRight;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-in {
+    animation: none;
+  }
+}

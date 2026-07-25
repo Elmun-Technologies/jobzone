@@ -257,7 +257,8 @@
     "subtitle": "Job matches, application updates and messages land here.",
     "markAllRead": "Mark all as read",
     "emptyTitle": "No notifications yet",
-    "emptyBody": "Save a search or apply to jobs — updates will show up here."
+    "emptyBody": "Save a search or apply to jobs — updates will show up here.",
+    "toastAction": "View"
   },
   "employer": {
     "dashboard": "Dashboard",
@@ -763,7 +764,8 @@
       "Cashier",
       "Courier",
       "Designer"
-    ]
+    ],
+    "close": "Close"
   },
   "theme": {
     "light": "Light",

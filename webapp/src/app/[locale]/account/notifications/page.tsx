@@ -7,10 +7,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { markAllNotificationsRead } from "@/lib/actions/notifications";
-import {
-  getNotifications,
-  type WebNotification,
-} from "@/lib/data/notifications";
+import { getNotifications } from "@/lib/data/notifications";
+import { notificationHref } from "@/lib/notifications";
 import { getCurrentUser } from "@/lib/auth/user";
 import { formatDate, tashkentClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -29,28 +27,6 @@ export async function generateMetadata({
 // swallows the cookies() dynamic signal, so without this Next.js would bake a
 // build-time redirect into static HTML (see #142).
 export const dynamic = "force-dynamic";
-
-/** Where a notification leads: job_match deep-links to the vacancy. */
-function hrefFor(n: WebNotification): string | null {
-  const str = (k: string): string | null => {
-    const v = n.data[k];
-    return typeof v === "string" && v ? v : null;
-  };
-  switch (n.kind) {
-    case "job_match": {
-      const id = str("job_id");
-      return id ? `/jobs/${id}` : null;
-    }
-    case "message": {
-      const id = str("conversation_id");
-      return id ? `/account/messages/${id}` : "/account/messages";
-    }
-    case "application_update":
-      return "/account/applications";
-    default:
-      return null;
-  }
-}
 
 export default async function NotificationsPage({
   params,
@@ -106,7 +82,7 @@ export default async function NotificationsPage({
                     : ""
                 }
                 unread={!n.isRead}
-                href={hrefFor(n)}
+                href={notificationHref(n.kind, n.data)}
               />
             ))}
           </ul>

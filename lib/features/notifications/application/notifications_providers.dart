@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../data/notifications_repository.dart';
 import '../domain/notification.dart';
 
@@ -14,6 +15,13 @@ class NotificationsController extends AsyncNotifier<List<AppNotification>> {
 
   @override
   Future<List<AppNotification>> build() {
+    // Rebind when the signed-in identity changes. `stream()` resolves the uid
+    // once, at creation — and since the in-app toast host keeps this provider
+    // alive app-wide (not just while the notifications page is open), it can
+    // now be built *before* sign-in. Without this watch that first, empty
+    // subscription would survive the sign-in and never emit anything.
+    ref.watch(currentUserIdProvider);
+
     final repo = ref.read(notificationsRepositoryProvider);
     final completer = Completer<List<AppNotification>>();
     _sub?.cancel();
