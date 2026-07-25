@@ -393,7 +393,8 @@
       "qtype": {
         "text": "Свободный ответ",
         "choice": "Выбор варианта",
-        "yesno": "Да / Нет"
+        "yesno": "Да / Нет",
+        "number": "Число"
       },
       "optionHint": "Вариант ответа",
       "addOption": "Добавить вариант",
@@ -716,8 +717,8 @@
     },
     "workHours": "Рабочее время",
     "payType": "Тип оплаты",
-    "gross": "Гросс (до налогов)",
-    "net": "Нетто (на руки)",
+    "gross": "До вычета налогов",
+    "net": "На руки",
     "requiredLanguages": "Требуемые языки",
     "driverLicense": "Водительские права",
     "contactPhone": "Телефон",
@@ -728,7 +729,15 @@
     },
     "langLevelNative": "родной",
     "tierBrand": "Бренд",
-    "tierPremium": "Премиум"
+    "tierPremium": "Премиум",
+    "salaryBasis": "Расчёт зарплаты",
+    "per": {
+      "hour": "в час",
+      "day": "в день",
+      "week": "в неделю",
+      "month": "в месяц",
+      "year": "в год"
+    }
   },
   "company": {
     "about": "О компании",

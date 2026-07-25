@@ -393,7 +393,8 @@
       "qtype": {
         "text": "Erkin javob",
         "choice": "Variantdan tanlash",
-        "yesno": "Ha / yo'q"
+        "yesno": "Ha / yo'q",
+        "number": "Raqam"
       },
       "optionHint": "Javob varianti",
       "addOption": "Variant qo'shish",
@@ -716,8 +717,8 @@
     },
     "workHours": "Ish vaqti",
     "payType": "To'lov turi",
-    "gross": "Gross (soliqqacha)",
-    "net": "Net (qo'lga tegadigan)",
+    "gross": "Soliqdan oldin",
+    "net": "Qo'lga tegadigan",
     "requiredLanguages": "Talab qilinadigan tillar",
     "driverLicense": "Haydovchilik guvohnomasi",
     "contactPhone": "Telefon",
@@ -728,7 +729,15 @@
     },
     "langLevelNative": "ona tili",
     "tierBrand": "Brend",
-    "tierPremium": "Premium"
+    "tierPremium": "Premium",
+    "salaryBasis": "Maosh hisobi",
+    "per": {
+      "hour": "soatiga",
+      "day": "kuniga",
+      "week": "haftasiga",
+      "month": "oyiga",
+      "year": "yiliga"
+    }
   },
   "company": {
     "about": "Kompaniya haqida",

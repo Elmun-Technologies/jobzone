@@ -69,6 +69,8 @@ export interface JobDraft {
   salaryMax: string;
   currency: string;
   salaryPeriod: string;
+  /** "1" = before tax, "0" = take-home. See the control in sectionSalary. */
+  salaryGross: string;
   city: string;
   addressText: string;
   lat: number | null;
@@ -111,6 +113,7 @@ function draftFromFormData(data: FormData): JobDraft {
     salaryMax: str("salaryMax"),
     currency: str("currency") || "UZS",
     salaryPeriod: str("salaryPeriod") || "month",
+    salaryGross: str("salaryGross") || "0",
     city: str("city"),
     addressText: str("addressText"),
     lat: num("lat"),
@@ -786,6 +789,20 @@ export function PostJobForm({
                   </option>
                 ))}
               </select>
+            </Labeled>
+            {/* This form never asked, but `salary_gross` defaults to true in
+                the DB — so every web-posted vacancy told candidates the figure
+                was before tax, whether or not it was. Defaults to take-home:
+                that is what a blue-collar wage is actually quoted in here. */}
+            <Labeled label={tj("salaryBasis")}>
+              <ChipRadio
+                name="salaryGross"
+                defaultValue={d?.salaryGross ?? "0"}
+                options={[
+                  { value: "0", label: tj("net") },
+                  { value: "1", label: tj("gross") },
+                ]}
+              />
             </Labeled>
           </Section>
 

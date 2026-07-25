@@ -6,7 +6,21 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-type QType = "text" | "choice" | "yesno";
+type QType = "text" | "choice" | "yesno" | "number";
+
+/**
+ * Mobile writes `multiple_choice` where web writes `choice` (see
+ * `lib/features/jobs/domain/screening_question.dart`). Loading one into this
+ * editor without normalising left it matching no type chip, which hid the
+ * options sub-editor — and the save payload then dropped the options entirely,
+ * so editing an unrelated field wiped a mobile-authored question's answers.
+ * Everything is normalised to the web spelling on the way in; mobile's apply
+ * form already accepts both.
+ */
+function normalizeType(t: string): QType {
+  if (t === "multiple_choice") return "choice";
+  return t === "choice" || t === "yesno" || t === "number" ? t : "text";
+}
 interface Q {
   /** Preserved across edits so applicants' stored answers (keyed by this id in
    * applications.answers) keep matching their question. New rows have none. */
@@ -20,7 +34,9 @@ interface Q {
 export interface StashedQuestion {
   id?: string;
   label: string;
-  type: QType;
+  /** Loose on purpose — a stored question may carry mobile's spelling.
+   *  normalizeType() narrows it when the editor loads. */
+  type: string;
   required: boolean;
   options?: string[];
 }
@@ -31,7 +47,7 @@ const EMPTY_Q: Q = {
   required: false,
   options: ["", ""],
 };
-const TYPES: QType[] = ["text", "choice", "yesno"];
+const TYPES: QType[] = ["text", "choice", "yesno", "number"];
 
 const inputClass =
   "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -51,7 +67,7 @@ export function ScreeningEditor({
     initialQuestions.map((q) => ({
       id: q.id,
       label: q.label,
-      type: q.type,
+      type: normalizeType(q.type),
       required: q.required,
       options: q.options && q.options.length > 0 ? q.options : ["", ""],
     })),

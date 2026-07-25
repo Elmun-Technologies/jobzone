@@ -393,7 +393,8 @@
       "qtype": {
         "text": "Free text",
         "choice": "Multiple choice",
-        "yesno": "Yes / No"
+        "yesno": "Yes / No",
+        "number": "Number"
       },
       "optionHint": "Answer option",
       "addOption": "Add option",
@@ -716,8 +717,8 @@
     },
     "workHours": "Working hours",
     "payType": "Pay type",
-    "gross": "Gross (before tax)",
-    "net": "Net (take-home)",
+    "gross": "Before tax",
+    "net": "Take-home",
     "requiredLanguages": "Required languages",
     "driverLicense": "Driver's license",
     "contactPhone": "Phone",
@@ -728,7 +729,15 @@
     },
     "langLevelNative": "native",
     "tierBrand": "Brand",
-    "tierPremium": "Premium"
+    "tierPremium": "Premium",
+    "salaryBasis": "Salary basis",
+    "per": {
+      "hour": "per hour",
+      "day": "per day",
+      "week": "per week",
+      "month": "per month",
+      "year": "per year"
+    }
   },
   "company": {
     "about": "About",

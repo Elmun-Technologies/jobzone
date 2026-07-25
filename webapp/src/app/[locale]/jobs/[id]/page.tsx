@@ -50,7 +50,9 @@ export async function generateMetadata({
     return { title: t("notFound") };
   }
   const loc = locationText(job);
-  const salary = salaryText(job);
+  const tj = await getTranslations({ locale, namespace: "jobs" });
+  const perKey = `per.${job.salaryPeriod}`;
+  const salary = salaryText(job, tj.has(perKey) ? tj(perKey) : null);
   // "Kassir — Toshkent | 4 000 000 so'm | Yolla" — the exact query shape
   // seekers type into Google. City goes right after the job title so the
   // "toshkentda kassir" tail matches; salary joins when we have it. Yolla
@@ -104,7 +106,10 @@ export default async function JobDetailsPage({
   if (!job) notFound();
 
   const t = await getTranslations("jobs");
-  const salary = salaryText(job);
+  // `per.*` covers the known periods only; anything else degrades to a bare
+  // amount rather than throwing on a missing key.
+  const perKey = `per.${job.salaryPeriod}`;
+  const salary = salaryText(job, t.has(perKey) ? t(perKey) : null);
   const loc = locationText(job);
 
   // Employment "at a glance" chips (neutral) — most are already on the Job.
@@ -142,7 +147,7 @@ export default async function JobDetailsPage({
     facts.push({ label: t("workHours"), value: job.workHours });
   if (job.salaryMin != null || job.salaryMax != null)
     facts.push({
-      label: t("payType"),
+      label: t("salaryBasis"),
       value: job.salaryGross ? t("gross") : t("net"),
     });
   if (job.driverLicenses.length)

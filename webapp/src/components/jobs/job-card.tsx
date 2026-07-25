@@ -23,7 +23,10 @@ function Chip({ children }: { children: React.ReactNode }) {
 export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
   const t = useTranslations("jobs");
   const nowMs = useNow();
-  const salary = salaryText(job);
+  // `per.*` is only defined for the known periods; a row carrying anything
+  // else falls back to a bare amount rather than throwing on a missing key.
+  const perKey = `per.${job.salaryPeriod}`;
+  const salary = salaryText(job, t.has(perKey) ? t(perKey) : null);
   const loc = locationText(job);
   // Listing-tier visuals from boostKind (legacy boosts map to the nearest tier).
   const glow =

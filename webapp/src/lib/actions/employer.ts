@@ -264,6 +264,12 @@ export async function createJob(
     salary_max: money("salaryMax"),
     currency: optional(formData, "currency") ?? "UZS",
     salary_period: optional(formData, "salaryPeriod") ?? "month",
+    // The column is `not null default true` (0023), so leaving it unwritten
+    // published every web vacancy publicly claiming "before tax" — a figure
+    // the employer was never asked about. The form now asks; "net" is the
+    // default there because take-home is what a blue-collar candidate is
+    // quoted in practice.
+    salary_gross: bool("salaryGross"),
     job_type: optional(formData, "jobType"),
     experience_level: optional(formData, "experienceLevel"),
     working_model: optional(formData, "workingModel"),
@@ -497,6 +503,12 @@ function jobContentFields(formData: FormData): Record<string, unknown> {
     salary_max: money("salaryMax"),
     currency: optional(formData, "currency") ?? "UZS",
     salary_period: optional(formData, "salaryPeriod") ?? "month",
+    // The column is `not null default true` (0023), so leaving it unwritten
+    // published every web vacancy publicly claiming "before tax" — a figure
+    // the employer was never asked about. The form now asks; "net" is the
+    // default there because take-home is what a blue-collar candidate is
+    // quoted in practice.
+    salary_gross: bool("salaryGross"),
     job_type: optional(formData, "jobType"),
     experience_level: optional(formData, "experienceLevel"),
     working_model: optional(formData, "workingModel"),
