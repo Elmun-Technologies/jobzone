@@ -48,7 +48,9 @@ export default async function ApplyPage({
   // sign-in / missing-résumé by routing there and back.
   const needsForm = job.screeningQuestions.some((q) => q.required);
 
-  const salary = salaryText(job);
+  const tj = await getTranslations("jobs");
+  const perKey = `per.${job.salaryPeriod}`;
+  const salary = salaryText(job, tj.has(perKey) ? tj(perKey) : null);
   const location = locationText(job);
   const schedule = schedulePatternLabel(job.schedulePattern);
   const chips = [

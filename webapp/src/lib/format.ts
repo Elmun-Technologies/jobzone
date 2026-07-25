@@ -21,8 +21,15 @@ function currencyLabel(currency: string): string {
 /**
  * Human salary string, e.g. "2 500 000 - 4 000 000 so'm" or "$2 500+".
  * Returns null when no salary is set (caller shows "Negotiable").
+ *
+ * Pass [perLabel] — the localized `jobs.per.<period>` string — to have a
+ * non-monthly period appended: "25 000 so'm / soatiga". The period was
+ * collected on the post form and then never rendered anywhere, so an hourly
+ * 25 000 was indistinguishable from a monthly 25 000 on every card and job
+ * page. Monthly stays bare: it is the market default and the suffix on every
+ * listing would be noise that hides the exceptions.
  */
-export function salaryText(job: Job): string | null {
+export function salaryText(job: Job, perLabel?: string | null): string | null {
   const { salaryMin: min, salaryMax: max, currency } = job;
   if (min == null && max == null) return null;
   const cur = currencyLabel(currency);
@@ -33,7 +40,10 @@ export function salaryText(job: Job): string | null {
   if (min != null && max != null) amount = `${fmt(min)} - ${fmt(max)}`;
   else if (min != null) amount = `${fmt(min)}+`;
   else amount = `${fmt(max!)}`;
-  return isUsd ? amount : `${amount} ${cur}`;
+  const withCurrency = isUsd ? amount : `${amount} ${cur}`;
+  return perLabel && job.salaryPeriod && job.salaryPeriod !== "month"
+    ? `${withCurrency} / ${perLabel}`
+    : withCurrency;
 }
 
 /**

@@ -83,8 +83,12 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late String _preferredGender = widget.job?.preferredGender ?? 'any';
   late String? _startAvailability = widget.job?.startAvailability;
   late String _salaryDisplay = widget.job?.salaryDisplay ?? 'exact';
+  // Left empty on a new vacancy. This used to default to '18' and was written
+  // unconditionally, so every mobile posting carried an age floor the employer
+  // never chose — on the same screen that warns them not to discriminate by
+  // age. An empty field means "no limit", which is the honest default.
   late final _ageMin = TextEditingController(
-    text: widget.job?.ageMin?.toString() ?? '18',
+    text: widget.job?.ageMin?.toString(),
   );
   late final _ageMax = TextEditingController(
     text: widget.job?.ageMax?.toString(),

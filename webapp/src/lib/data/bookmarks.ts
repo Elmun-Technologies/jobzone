@@ -92,3 +92,50 @@ export async function isBookmarked(jobId: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Jobs the seeker archived ("not interested"). They are filtered out of every
+ * feed, which made archiving irreversible in practice: the card carrying the
+ * "tap to restore" affordance was exactly the card that had been hidden. This
+ * is the one surface that can show them again.
+ *
+ * Reads `job_feed`, so a job that has since closed or expired drops out on its
+ * own — there is nothing to restore it to.
+ */
+export async function getArchivedJobs(): Promise<Job[]> {
+  if (!hasSupabase()) return [];
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: rowsIds, error } = await supabase
+      .from("dismissed_jobs")
+      .select("job_id, created_at")
+      .eq("profile_id", user.id)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+
+    const ids = (rowsIds ?? []).map((b) =>
+      String((b as { job_id: unknown }).job_id),
+    );
+    if (ids.length === 0) return [];
+
+    const { data: rows, error: jobsError } = await supabase
+      .from("job_feed")
+      .select("*")
+      .eq("status", "open")
+      .in("id", ids);
+    if (jobsError) throw jobsError;
+
+    const order = new Map(ids.map((id, i) => [id, i]));
+    return (rows ?? [])
+      .map(toJob)
+      .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  } catch (e) {
+    console.error("getArchivedJobs failed", e);
+    return [];
+  }
+}

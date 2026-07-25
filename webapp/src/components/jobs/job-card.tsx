@@ -20,10 +20,22 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
+export function JobCard({
+  job,
+  saved = false,
+  archived = false,
+}: {
+  job: Job;
+  saved?: boolean;
+  /** Renders the archive button pressed, so tapping it restores the job. */
+  archived?: boolean;
+}) {
   const t = useTranslations("jobs");
   const nowMs = useNow();
-  const salary = salaryText(job);
+  // `per.*` is only defined for the known periods; a row carrying anything
+  // else falls back to a bare amount rather than throwing on a missing key.
+  const perKey = `per.${job.salaryPeriod}`;
+  const salary = salaryText(job, t.has(perKey) ? t(perKey) : null);
   const loc = locationText(job);
   // Listing-tier visuals from boostKind (legacy boosts map to the nearest tier).
   const glow =
@@ -85,7 +97,9 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
         ) : (
           <div
             className={`bg-primary text-primary-foreground ring-border flex size-13 shrink-0 items-center justify-center rounded-xl text-lg font-bold ring-1 ${
-              glow ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2" : ""
+              glow
+                ? "ring-primary shadow-[0_0_12px_rgba(199,251,0,0.55)] ring-2"
+                : ""
             }`}
           >
             {job.companyName.charAt(0).toUpperCase()}
@@ -122,7 +136,11 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
                 ) : null}
               </div>
             </div>
-            <JobCardActions jobId={job.id} initialSaved={saved} />
+            <JobCardActions
+              jobId={job.id}
+              initialSaved={saved}
+              initialDismissed={archived}
+            />
           </div>
 
           {loc ? (
@@ -167,7 +185,9 @@ export function JobCard({ job, saved = false }: { job: Job; saved?: boolean }) {
           <div className="mt-3 flex items-center justify-between gap-3">
             <span
               className={`text-foreground truncate text-lg font-extrabold sm:text-xl ${
-                salary ? "font-mono" : "text-muted-foreground text-sm font-semibold"
+                salary
+                  ? "font-mono"
+                  : "text-muted-foreground text-sm font-semibold"
               }`}
             >
               {salary ?? t("negotiable")}

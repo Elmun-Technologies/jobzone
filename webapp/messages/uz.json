@@ -242,6 +242,12 @@
     "save": "Saqlash",
     "saved": "Saqlangan"
   },
+  "archived": {
+    "title": "Arxivlangan ishlar",
+    "subtitle": "Siz \"qiziq emas\" deb belgilagan vakansiyalar. Ular tavsiyalarda ko'rinmaydi.",
+    "empty": "Arxivda hech narsa yo'q",
+    "emptyHint": "Vakansiya kartasidagi arxiv tugmasini bossangiz, u shu yerga tushadi."
+  },
   "savedSearches": {
     "title": "Obunalar",
     "subtitle": "Saqlangan qidiruvni istalgan vaqtda qayta ishga tushiring.",
@@ -393,7 +399,8 @@
       "qtype": {
         "text": "Erkin javob",
         "choice": "Variantdan tanlash",
-        "yesno": "Ha / yo'q"
+        "yesno": "Ha / yo'q",
+        "number": "Raqam"
       },
       "optionHint": "Javob varianti",
       "addOption": "Variant qo'shish",
@@ -506,7 +513,7 @@
     "errDuplicate": "Siz bu ishga allaqachon ariza topshirgansiz",
     "errUnknown": "Xatolik yuz berdi",
     "quickApply": "1-klik ariza",
-    "quickApplied": "Ariza yuborildi ✓",
+    "quickApplied": "Ariza yuborildi",
     "quickApplyHint": "Rezyumeingiz bilan darhol yuboriladi.",
     "orAddLetter": "yoki motivatsion xat qo'shing",
     "socialProof": "Bu ishga allaqachon {count} kishi ariza berdi",
@@ -527,8 +534,15 @@
       "interview": "Suhbat",
       "offer": "Taklif",
       "rejected": "Rad etilgan",
-      "hired": "Ishga olingan"
-    }
+      "hired": "Ishga olingan",
+      "withdrawn": "Qaytarib olingan"
+    },
+    "withdraw": "Arizani qaytarib olish",
+    "withdrawConfirm": "Ishonchingiz komilmi?",
+    "withdrawYes": "Ha, qaytarib olaman",
+    "withdrawNo": "Yo'q",
+    "withdrawnToast": "Ariza qaytarib olindi",
+    "withdrawFailed": "Qaytarib olib bo'lmadi. Keyinroq urinib ko'ring."
   },
   "recommended": {
     "title": "Sizga mos ishlar",
@@ -716,8 +730,8 @@
     },
     "workHours": "Ish vaqti",
     "payType": "To'lov turi",
-    "gross": "Gross (soliqqacha)",
-    "net": "Net (qo'lga tegadigan)",
+    "gross": "Soliqdan oldin",
+    "net": "Qo'lga tegadigan",
     "requiredLanguages": "Talab qilinadigan tillar",
     "driverLicense": "Haydovchilik guvohnomasi",
     "contactPhone": "Telefon",
@@ -728,7 +742,15 @@
     },
     "langLevelNative": "ona tili",
     "tierBrand": "Brend",
-    "tierPremium": "Premium"
+    "tierPremium": "Premium",
+    "salaryBasis": "Maosh hisobi",
+    "per": {
+      "hour": "soatiga",
+      "day": "kuniga",
+      "week": "haftasiga",
+      "month": "oyiga",
+      "year": "yiliga"
+    }
   },
   "company": {
     "about": "Kompaniya haqida",

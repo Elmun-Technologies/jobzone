@@ -138,6 +138,9 @@ export async function getEmployerJobDraft(
       salaryMax: numStr(r.salary_max),
       currency: str(r.currency) || "UZS",
       salaryPeriod: str(r.salary_period) || "month",
+      // Legacy rows all carry the column's `true` default even though nobody
+      // chose it; the edit form shows that honestly rather than resetting it.
+      salaryGross: r.salary_gross === false ? "0" : "1",
       city: str(r.city),
       addressText: str(r.address_text),
       lat: typeof r.lat === "number" ? r.lat : null,

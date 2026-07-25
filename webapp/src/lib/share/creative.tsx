@@ -39,18 +39,55 @@ const CHIP_BG = "rgba(10, 10, 10, 0.06)";
 
 type Lang = "uz" | "ru" | "en";
 
-const LABELS: Record<Lang, { pay: string; negotiable: string; cta: string }> = {
+// This file renders into an image, outside next-intl's reach, so it carries
+// its own copy. `per` mirrors messages/*.json `jobs.per` — a share card is
+// often the only thing a candidate sees, so an hourly rate has to say so here
+// too, not just on the job page.
+const LABELS: Record<
+  Lang,
+  {
+    pay: string;
+    negotiable: string;
+    cta: string;
+    per: Record<string, string>;
+  }
+> = {
   uz: {
     pay: "Maosh",
     negotiable: "Kelishilgan",
     cta: "Ilovada ariza topshiring",
+    per: {
+      hour: "soatiga",
+      day: "kuniga",
+      week: "haftasiga",
+      month: "oyiga",
+      year: "yiliga",
+    },
   },
   ru: {
     pay: "Зарплата",
     negotiable: "Договорная",
     cta: "Откликнуться в приложении",
+    per: {
+      hour: "в час",
+      day: "в день",
+      week: "в неделю",
+      month: "в месяц",
+      year: "в год",
+    },
   },
-  en: { pay: "Salary", negotiable: "Negotiable", cta: "Apply in the app" },
+  en: {
+    pay: "Salary",
+    negotiable: "Negotiable",
+    cta: "Apply in the app",
+    per: {
+      hour: "per hour",
+      day: "per day",
+      week: "per week",
+      month: "per month",
+      year: "per year",
+    },
+  },
 };
 
 function lang(locale: string): Lang {
@@ -115,7 +152,7 @@ export async function jobCreative(
   // set of proportions.
   const u = size.width / 1080;
   const isOg = format === "og";
-  const pay = salaryText(job) ?? L.negotiable;
+  const pay = salaryText(job, L.per[job.salaryPeriod]) ?? L.negotiable;
   const loc = creativeLocation(job);
 
   const pad = (isOg ? 64 : 88) * (isOg ? 1 : u);

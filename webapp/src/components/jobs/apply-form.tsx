@@ -149,7 +149,12 @@ export function ApplyForm({
               <option value="yes">{t("yes")}</option>
               <option value="no">{t("no")}</option>
             </select>
-          ) : q.type === "choice" && q.options && q.options.length > 0 ? (
+          ) : /* Mobile posts `multiple_choice` where web posts `choice`; a
+                 candidate on web was shown a blank text box for a
+                 mobile-authored question instead of its options. */
+            (q.type === "choice" || q.type === "multiple_choice") &&
+            q.options &&
+            q.options.length > 0 ? (
             <select
               name={`answer:${q.id}`}
               required={q.required}
@@ -169,6 +174,7 @@ export function ApplyForm({
             <input
               name={`answer:${q.id}`}
               type="text"
+              inputMode={q.type === "number" ? "numeric" : undefined}
               required={q.required}
               defaultValue={restored?.answers[q.id]}
               className={cn(fieldClass, "h-11")}

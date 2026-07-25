@@ -1,4 +1,5 @@
 import {
+  Archive,
   BadgeCheck,
   Bell,
   BellRing,
@@ -102,6 +103,7 @@ export default async function AccountPage({
   const tw = await getTranslations("wallet");
   const tn = await getTranslations("nav");
   const tset = await getTranslations("settings");
+  const tarch = await getTranslations("archived");
   const role = await getMyRole();
   const isEmployer = role === "employer";
 
@@ -142,12 +144,24 @@ export default async function AccountPage({
           label: t("savedSearches"),
           icon: BellRing,
         },
+        // The only route back to an archived job: archiving hides the card
+        // that carries the un-archive button, so without this entry the
+        // action had no undo.
+        {
+          href: "/account/archived",
+          label: tarch("title"),
+          icon: Archive,
+        },
       ];
   const sharedItems: Item[] = [
     { href: "/account/messages", label: t("messages"), icon: MessageSquare },
     { href: "/account/notifications", label: t("notifications"), icon: Bell },
     { href: "/account/profile", label: t("editProfile"), icon: UserCog },
-    { href: "/account/settings", label: tset("linkFromAccount"), icon: Settings },
+    {
+      href: "/account/settings",
+      label: tset("linkFromAccount"),
+      icon: Settings,
+    },
   ];
   const items = [...roleItems, ...sharedItems];
 

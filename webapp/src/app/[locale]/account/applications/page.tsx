@@ -2,6 +2,7 @@ import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { WithdrawApplicationButton } from "@/components/account/withdraw-application-button";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
@@ -37,7 +38,14 @@ const STATUS_CLASS: Record<string, string> = {
   rejected: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
   hired:
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+  // 0059 added this status but the web knew nothing about it, so an
+  // application withdrawn on mobile rendered the raw word "withdrawn" in
+  // "submitted" grey.
+  withdrawn: "bg-muted text-muted-foreground line-through",
 };
+
+/** Statuses past which withdrawing is pointless or impossible. */
+const FINAL_STATUSES = new Set(["withdrawn", "rejected", "hired"]);
 
 export default async function MyApplicationsPage({
   params,
@@ -112,6 +120,7 @@ export default async function MyApplicationsPage({
                 </span>
               </>
             );
+            const canWithdraw = !FINAL_STATUSES.has(a.status);
             return (
               <li key={a.id}>
                 {isOpen ? (
@@ -124,6 +133,14 @@ export default async function MyApplicationsPage({
                 ) : (
                   <div className={cardClass}>{content}</div>
                 )}
+                {/* Outside the card: the card is a link to the vacancy, and a
+                    button nested in an anchor is neither valid nor clickable
+                    the way a user expects. */}
+                {canWithdraw ? (
+                  <div className="mt-1 flex justify-end pr-1">
+                    <WithdrawApplicationButton applicationId={a.id} />
+                  </div>
+                ) : null}
               </li>
             );
           })}
