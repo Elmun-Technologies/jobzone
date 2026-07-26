@@ -170,6 +170,11 @@ class ProfilePage extends ConsumerWidget {
               onTap: () => context.push(Routes.accountApplications),
             ),
             _MenuTile(
+              icon: Icons.archive_outlined,
+              label: l.archivedJobsTitle,
+              onTap: () => context.push(Routes.accountArchived),
+            ),
+            _MenuTile(
               icon: Icons.remove_red_eye_outlined,
               label: l.jobSeekingStatus,
               onTap: () => context.push(Routes.accountSeekingStatus),

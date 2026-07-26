@@ -62,6 +62,7 @@ void invalidateAccountScope(WidgetRef ref) {
   ref.invalidate(bookmarksControllerProvider);
   ref.invalidate(bookmarkedJobsProvider);
   ref.invalidate(dismissedControllerProvider);
+  ref.invalidate(archivedJobsProvider);
   ref.invalidate(recommendedJobsProvider);
   ref.invalidate(savedSearchesControllerProvider);
   ref.invalidate(preferencesControllerProvider);

@@ -49,11 +49,16 @@ migratsiyalar, edge funksiyalar — `supabase/`.
 
 ```bash
 supabase link --project-ref nzxdnsxwxrstcrumwzwu
-supabase db push        # 0072 gача barcha yozilmagan migratsiyalar qo‘llanadi
+supabase db push        # 0074 gача barcha yozilmagan migratsiyalar qo‘llanadi
 ```
 
 Bu content_reports (shikoyat), account_deletion, to‘lov jadvallari va
-qolganlarни bazaga tushiradi. **Tekshiruv:**
+qolganlarни bazaga tushiradi. **Muhim:** `0074` Telegram OTP’dagi jiddiy
+xatoni tuzatadi — kod noto‘g‘ri host’ga (`gateway.telegram.org`, marketing
+sayt) yuborilar edi, u har doim `200 OK` qaytargani uchun xato **butunlay
+sezilmas** edi — foydalanuvchi kod kutadi, lekin hech narsa yuborilmagan.
+Agar bazani oldinroq (shu `db push` yangilanishidan oldin) qo‘llagan
+bo‘lsangiz, qayta ishga tushiring. **Tekshiruv:**
 
 ```sql
 select count(*) from public.content_reports;   -- jadval bor
