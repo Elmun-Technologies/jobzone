@@ -13,9 +13,15 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
-import { useRouter } from "@/i18n/navigation";
+// The plain router, not the locale-aware one from @/i18n/navigation: `next`
+// arrives already locale-prefixed (quick-apply builds `/uz/jobs/<id>/apply`),
+// and pushing that through the i18n router would prefix it twice. Same choice
+// phone-otp-form makes for the same reason — so every path here is written
+// out in full.
+import { useRouter } from "next/navigation";
 import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
+import { safeNext } from "@/lib/auth/safe-next";
 import type {
   CertificateEntry,
   EducationEntry,
@@ -188,7 +194,16 @@ function BirthDatePicker({
   );
 }
 
-export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
+export function ResumeWizard({
+  initial,
+  next: nextParam,
+}: {
+  initial: ResumeDraft;
+  /** Where to send the seeker once the résumé is saved — the job they were
+   * applying to when quick-apply found they had no résumé. Locale-prefixed
+   * and sanitized through safeNext before use. */
+  next?: string;
+}) {
   const t = useTranslations("resume");
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -363,13 +378,19 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
       const res = await saveResume(draft);
       if (res.signedOut) {
         // Auth-last: park the draft and sign in, returning here to finish.
+        // `next` rides along on the return URL, so the job the seeker was
+        // applying to survives the sign-in detour too, not just the draft.
         sessionStorage.setItem(STASH_KEY, JSON.stringify(draft));
-        router.push(
-          `/sign-in?next=${encodeURIComponent(`/${locale}/resumes/new`)}`,
-        );
+        const back =
+          `/${locale}/resumes/new` +
+          (nextParam ? `?next=${encodeURIComponent(nextParam)}` : "");
+        router.push(`/${locale}/sign-in?next=${encodeURIComponent(back)}`);
       } else if (res.error) setError(true);
-      // First time their résumé is saved, land them on the jobs matched to it.
-      else router.push("/account/recommended");
+      // Back to the job they were applying to, if they came from one;
+      // otherwise the jobs matched to the résumé they just saved.
+      else {
+        router.push(safeNext(nextParam, `/${locale}/account/recommended`));
+      }
     });
   }
 
