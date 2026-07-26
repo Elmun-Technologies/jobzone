@@ -859,34 +859,34 @@
     "heroSubtitle": "Thousands of workers search on Yollla. Your first vacancy is free.",
     "tiers": {
       "heading": "Every vacancy — with its own visibility",
-      "sub": "Your first vacancy is free. For the rest, choose the visibility — the more it stands out, the more candidates.",
+      "sub": "Your first vacancy is free. Each level includes everything from the one below — the more it stands out, the more candidates.",
       "firstFree": "First vacancy — free",
       "cta": "Post a vacancy",
       "standard": {
         "name": "Standard",
-        "tagline": "Your vacancy gets published",
-        "f1": "Shown in both apps",
-        "f2": "Fill it in 5 minutes with AI",
-        "f3": "Unlimited applications",
-        "angle": "Cheaper than one day of downtime."
+        "tagline": "Your vacancy goes live",
+        "f1": "In the app and on the web — in its category",
+        "f2": "AI writes the text in 5 minutes",
+        "f3": "Unlimited applicants",
+        "angle": "A single day of an unfilled role costs more than this."
       },
       "brand": {
         "name": "Brand",
-        "badge": "Most popular",
-        "tagline": "Your logo lights up",
-        "f1": "Everything in Standard",
-        "f2": "A bright logo — on cards and the map",
-        "f3": "Trust badge + higher in search",
-        "angle": "A familiar brand earns more trust — ~2× more clicks."
+        "badge": "Most chosen",
+        "tagline": "They recognise your logo",
+        "f1": "Your logo glows in the list and on the map",
+        "f2": "Verified-employer badge",
+        "f3": "Ranked above plain listings in search",
+        "angle": "A familiar logo earns trust — ~2× more clicks."
       },
       "premium": {
         "name": "Premium",
-        "badge": "Fastest results",
-        "tagline": "Stand out from everyone",
-        "f1": "Everything in Brand",
-        "f2": "A volt-highlighted listing",
-        "f3": "Top of the list and the map",
-        "angle": "Grabs attention on sight — ~3× more candidates."
+        "badge": "Fastest result",
+        "tagline": "Right at the top of the list",
+        "f1": "The whole listing stands out in a bright frame",
+        "f2": "First positions in the list and on the map",
+        "f3": "Bigger map pin — visible from further out",
+        "angle": "For an urgent role — ~3× the candidates."
       }
     },
     "benefit1Title": "Fast",

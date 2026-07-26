@@ -859,34 +859,34 @@
     "heroSubtitle": "Minglab ishchi Yollla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
     "tiers": {
       "heading": "Har bir e'lon — o'z ko'rinishi bilan",
-      "sub": "Birinchi e'lon bepul. Keyingilari uchun ko'rinishni tanlang — qancha ko'rinsa, shuncha ko'p nomzod.",
+      "sub": "Birinchi e'lon bepul. Har bir daraja o'zidan pastdagining hamma imkoniyatini o'z ichiga oladi — qancha ko'rinsa, shuncha ko'p nomzod.",
       "firstFree": "Birinchi e'lon — bepul",
       "cta": "E'lon joylash",
       "standard": {
         "name": "Standart",
-        "tagline": "E'loningiz e'lon qilinadi",
-        "f1": "Ikkala ilovada (mobil + web) ko'rinadi",
-        "f2": "AI bilan 5 daqiqada to'ldiring",
-        "f3": "Cheksiz nomzod arizasi",
-        "angle": "Bir kunlik bo'sh ish o'rnidan arzon."
+        "tagline": "E'loningiz ishga tushadi",
+        "f1": "Mobil ilova va saytda — o'z kategoriyangizda",
+        "f2": "Matnni AI 5 daqiqada yozib beradi",
+        "f3": "Nomzodlar soni cheklanmagan",
+        "angle": "Bo'sh turgan ish o'rni bir kunda shundan ko'p zarar keltiradi."
       },
       "brand": {
         "name": "Brend",
-        "badge": "Eng ommabop",
-        "tagline": "Logotipingiz yonib turadi",
-        "f1": "Standart'dagi hamma narsa",
-        "f2": "Yaltiroq logotip — kartada va xaritada",
-        "f3": "Ishonch belgisi + qidiruvda yuqori",
-        "angle": "Tanish brendga ko'proq ishonch — ~2× ko'proq bosiladi."
+        "badge": "Eng ko'p tanlanadi",
+        "tagline": "Logotipingiz bilan tanilib turasiz",
+        "f1": "Logotipingiz ro'yxatda va xaritada yonib turadi",
+        "f2": "Tasdiqlangan ish beruvchi belgisi",
+        "f3": "Qidiruvda oddiy e'lonlardan yuqorida",
+        "angle": "Tanish logotipga ishonch ko'proq — ~2× ko'proq bosiladi."
       },
       "premium": {
         "name": "Premium",
         "badge": "Eng tez natija",
-        "tagline": "Hammadan ajralib turing",
-        "f1": "Brend'dagi hamma narsa",
-        "f2": "Volt bilan ajratilgan e'lon",
-        "f3": "Ro'yxat va xarita tepasida",
-        "angle": "Kirgan zahoti e'tiborni tortadi — ~3× ko'proq nomzod."
+        "tagline": "Ro'yxatning eng tepasida",
+        "f1": "E'lon yorqin ramka bilan butunlay ajralib turadi",
+        "f2": "Ro'yxat va xaritada birinchi o'rinda",
+        "f3": "Xaritada kattaroq belgi — uzoqdan ko'rinadi",
+        "angle": "Shoshilinch ish o'rni uchun — ~3× ko'proq nomzod."
       }
     },
     "benefit1Title": "Tez",
