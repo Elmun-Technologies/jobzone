@@ -51,6 +51,7 @@ import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
 import '../../features/jobs/domain/job.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/jobs/presentation/archived_jobs_page.dart';
 import '../../features/jobs/presentation/bookmarks_page.dart';
 import '../../features/jobs/presentation/job_details_page.dart';
 import '../../features/jobs/presentation/see_all_page.dart';
@@ -505,6 +506,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           application: s.extra as Application?,
           applicationId: s.pathParameters['id'],
         ),
+      ),
+      GoRoute(
+        path: Routes.accountArchived,
+        builder: (c, s) => const ArchivedJobsPage(),
       ),
       GoRoute(
         path: Routes.accountSeekingStatus,

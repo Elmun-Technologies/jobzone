@@ -12,8 +12,18 @@ Work top-to-bottom; each section notes how to verify it.
 ## 1. Database — apply migrations
 
 ```bash
-supabase db push        # applies every migration through 0072
+supabase db push        # applies every migration through 0074
 ```
+
+> ⚠️ **If you already ran `db push` before this checklist mentioned 0074:**
+> re-run it. `0074_telegram_gateway_api_host.sql` fixes a silent bug where
+> Telegram OTP codes were posted to `gateway.telegram.org` (the marketing
+> site, which answers any path with HTML + `200 OK`) instead of the actual
+> API host `gatewayapi.telegram.org` — so every OTP request looked like it
+> succeeded while no code was ever sent. Re-verify per the migration's own
+> comment: request a code, then
+> `select created, status_code, content from net._http_response order by created desc limit 1;`
+> — a working call returns JSON, not HTML.
 
 > Note: the live DB is behind — it has 0065 (security_hardening) and 0067
 > recorded but is missing 0063, 0064, 0066 and everything from 0068 on. A
@@ -34,6 +44,8 @@ Most recent, most likely un-applied:
 | `0049_resume_subtables_lockdown` | closes a pre-existing gap — résumé sub-tables (experiences/educations/certifications/skills) were readable by any signed-in user; now owner or a recruiter with a real relationship only |
 | `0050_recommended_candidates` / `0051_recommended_jobs` | the two-way match: employer sees candidates for a new posting, seeker sees jobs matched to their résumé (same scoring, one shared algorithm per side) |
 | `0052_dismissed_jobs` | lets a seeker archive a job out of their browse feed |
+| `0073_rls_hardening` | closes two residual RLS gaps: an applicant could forge their own application's initial status, and a sender could move their own message into a conversation they're not a member of |
+| `0074_telegram_gateway_api_host` | fixes the silent Telegram OTP failure above — **required for OTP sign-in to work at all** |
 
 **Verify:** `select last_alerted_at from saved_searches limit 1;` resolves, and
 `select count(*) from job_feed;` returns only open, non-expired jobs.
