@@ -1017,5 +1017,14 @@
         "type": "String"
       }
     }
-  }
+  },
+  "certificateFileLabel": "Certificate file",
+  "certificateFileHint": "A photo or PDF of your certificate. An employer can open it for the vacancy you applied to.",
+  "certificateAttachCta": "Attach a file",
+  "certificateAttached": "File attached",
+  "certificateFileStored": "Attached file",
+  "certificateFileNotSavedYet": "Uploads when you save",
+  "certificateFileView": "Open",
+  "certificateFileReplace": "Replace",
+  "certificateFileRemove": "Remove"
 }

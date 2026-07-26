@@ -474,7 +474,8 @@
       "myJobs": "My vacancies",
       "confirmingTitle": "Confirming your payment…",
       "confirmingSub": "This can take a few seconds. This page will update automatically."
-    }
+    },
+    "openCertificate": "Open certificate"
   },
   "wallet": {
     "title": "Wallet",

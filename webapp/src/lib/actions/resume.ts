@@ -113,6 +113,29 @@ export async function saveResume(
   const expOk = await replaceRows(supabase, "experiences", user.id, expRows);
 
   // Replace the user's certificates/courses with the wizard's set.
+  //
+  // These rows are deleted and re-inserted, and the wizard has no field for
+  // the attached scan (0077) — so a certificate whose document was attached in
+  // the mobile app would silently lose it the next time the seeker touched
+  // their résumé here, leaving an orphaned object in the bucket and an
+  // employer with nothing to open. Carry the attachment across by name, the
+  // only key the wizard round-trips.
+  const attachedByName = new Map<string, Record<string, unknown>>();
+  const existingCerts = await supabase
+    .from("certifications")
+    .select("name, file_path, file_size, mime_type")
+    .eq("profile_id", user.id);
+  for (const row of (existingCerts.data ?? []) as Record<string, unknown>[]) {
+    const path = typeof row.file_path === "string" ? row.file_path : "";
+    const name = typeof row.name === "string" ? row.name.trim() : "";
+    if (path && name && !attachedByName.has(name)) {
+      attachedByName.set(name, {
+        file_path: path,
+        file_size: row.file_size ?? null,
+        mime_type: row.mime_type ?? null,
+      });
+    }
+  }
   const certRows = (draft.certificates ?? [])
     .filter((c) => c.name.trim() !== "")
     .map((c) => ({
@@ -121,6 +144,7 @@ export async function saveResume(
       issuer: clean(c.issuer),
       issued_date: year(c.issuedYear),
       expiry_date: year(c.expiryYear),
+      ...(attachedByName.get(c.name.trim()) ?? {}),
     }));
   const certOk = await replaceRows(
     supabase,

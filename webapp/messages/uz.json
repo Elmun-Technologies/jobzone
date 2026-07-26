@@ -474,7 +474,8 @@
       "myJobs": "Mening vakansiyalarim",
       "confirmingTitle": "To‘lovingiz tasdiqlanmoqda…",
       "confirmingSub": "Bu bir necha soniya olishi mumkin. Sahifa avtomatik yangilanadi."
-    }
+    },
+    "openCertificate": "Sertifikatni ochish"
   },
   "wallet": {
     "title": "Hamyon",

@@ -109,11 +109,82 @@ class CvRepository {
     () => _offline.upsertCertification(e),
   );
 
-  Future<void> deleteCertification(String id) => _delete(
-    'certifications',
-    id,
-    () => _offline.certifications.removeWhere((e) => e.id == id),
-  );
+  /// Deletes a certification and the document attached to it. The row goes
+  /// either way — a storage object that fails to delete would otherwise
+  /// strand the entry in the list forever.
+  Future<void> deleteCertification(String id) async {
+    if (_online) {
+      final client = _ref.read(supabaseClientProvider);
+      final row = await client
+          .from('certifications')
+          .select('file_path')
+          .eq('id', id)
+          .maybeSingle();
+      final path = row?['file_path'] as String?;
+      if (path != null && path.isNotEmpty) {
+        await removeCertificateFile(path);
+      }
+    }
+    await _delete(
+      'certifications',
+      id,
+      () => _offline.certifications.removeWhere((e) => e.id == id),
+    );
+  }
+
+  /// Uploads a scanned certificate and returns its storage key, or null
+  /// offline / signed out. Named like the résumé upload it mirrors.
+  Future<String?> uploadCertificateFile({
+    required String fileName,
+    required Uint8List bytes,
+    required String mimeType,
+  }) async {
+    if (!_online) return 'offline/$fileName';
+    final uid = _uid;
+    if (uid == null) return null;
+    final path = '$uid/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+    await _ref
+        .read(supabaseClientProvider)
+        .storage
+        .from('certificates')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: mimeType),
+        );
+    return path;
+  }
+
+  /// Best-effort removal of a stored certificate. Swallows failures: this is
+  /// always called alongside a row change that must not be blocked by an
+  /// orphaned object.
+  Future<void> removeCertificateFile(String path) async {
+    if (!_online || path.isEmpty) return;
+    try {
+      await _ref
+          .read(supabaseClientProvider)
+          .storage
+          .from('certificates')
+          .remove([path]);
+    } catch (_) {
+      // Orphaned object; the row is what the seeker sees.
+    }
+  }
+
+  /// Short-lived signed URL for viewing a stored certificate — the bucket is
+  /// private, so there is no public URL to link to.
+  Future<String?> certificateFileUrl(String path) async {
+    if (!_online || path.isEmpty) return null;
+    try {
+      return await _ref
+          .read(supabaseClientProvider)
+          .storage
+          .from('certificates')
+          .createSignedUrl(path, 60 * 10);
+    } catch (_) {
+      return null;
+    }
+  }
 
   // --- Volunteer -----------------------------------------------------------
   Future<List<Volunteer>> volunteer() async {

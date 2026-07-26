@@ -933,5 +933,14 @@
   "phoneHint": "Номер должен быть зарегистрирован в Telegram",
   "errPaymentRequired": "Чтобы опубликовать эту вакансию, нужно выбрать тариф и оплатить. Опубликуйте её из «Моих вакансий».",
   "payScheduledTitle": "Оплачено — вакансия в расписании",
-  "payScheduledSubtitle": "Выйдет в эфир автоматически {date}. До этого момента она остаётся черновиком."
+  "payScheduledSubtitle": "Выйдет в эфир автоматически {date}. До этого момента она остаётся черновиком.",
+  "certificateFileLabel": "Файл сертификата",
+  "certificateFileHint": "Фото или PDF вашего сертификата. Работодатель увидит его по той вакансии, на которую вы откликнулись.",
+  "certificateAttachCta": "Прикрепить файл",
+  "certificateAttached": "Файл прикреплён",
+  "certificateFileStored": "Прикреплённый файл",
+  "certificateFileNotSavedYet": "Загрузится после сохранения",
+  "certificateFileView": "Открыть",
+  "certificateFileReplace": "Заменить",
+  "certificateFileRemove": "Удалить"
 }
