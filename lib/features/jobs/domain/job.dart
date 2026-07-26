@@ -52,6 +52,7 @@ class Job {
     this.benefits,
     this.applicantsCount = 0,
     this.postedAt,
+    this.firstPublishedAt,
     this.categoryName,
     this.categoryId,
     this.status = 'open',
@@ -139,6 +140,12 @@ class Job {
   final String? benefits;
   final int applicantsCount;
   final DateTime? postedAt;
+
+  /// When this job FIRST went live (0066). Null means it has never been on the
+  /// market, which is what the "first listing free, then pay per listing" gate
+  /// keys off: re-opening a job that was already published is free, so the
+  /// client must not send that employer to the checkout again.
+  final DateTime? firstPublishedAt;
   final String? categoryName;
   final String? categoryId;
 
@@ -314,6 +321,9 @@ class Job {
       postedAt: m['posted_at'] != null
           ? DateTime.tryParse('${m['posted_at']}')
           : null,
+      firstPublishedAt: m['first_published_at'] != null
+          ? DateTime.tryParse('${m['first_published_at']}')
+          : null,
       categoryName: m['category_name'] as String?,
       categoryId: m['category_id'] as String?,
       status: (m['status'] ?? 'open') as String,
@@ -393,6 +403,7 @@ class Job {
     String? benefits,
     int? applicantsCount,
     DateTime? postedAt,
+    DateTime? firstPublishedAt,
     String? categoryName,
     String? categoryId,
     String? status,
@@ -451,6 +462,7 @@ class Job {
     benefits: benefits ?? this.benefits,
     applicantsCount: applicantsCount ?? this.applicantsCount,
     postedAt: postedAt ?? this.postedAt,
+    firstPublishedAt: firstPublishedAt ?? this.firstPublishedAt,
     categoryName: categoryName ?? this.categoryName,
     categoryId: categoryId ?? this.categoryId,
     status: status ?? this.status,

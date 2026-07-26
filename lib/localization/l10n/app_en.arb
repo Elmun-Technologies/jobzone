@@ -1007,5 +1007,15 @@
   "onboardChatOutgoing": "Of course, thank you! 🙌",
   "onboardApplyAccepted": "Your application was accepted",
   "onboardApplyInvited": "You're invited to an interview",
-  "phoneHint": "The number must be registered with Telegram"
+  "phoneHint": "The number must be registered with Telegram",
+  "errPaymentRequired": "Publishing this vacancy needs a tier and a payment. Publish it from “My jobs”.",
+  "payScheduledTitle": "Paid — the vacancy is scheduled",
+  "payScheduledSubtitle": "It goes live automatically on {date}. Until then it stays a draft.",
+  "@payScheduledSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -20,6 +20,7 @@ import '../../../jobs/presentation/category_label.dart';
 import '../../../jobs/presentation/job_details_page.dart';
 import '../../data/ai_content_repository.dart';
 import '../../data/employer_jobs_repository.dart';
+import '../../domain/publish_gate.dart';
 import 'listing_payment_page.dart';
 import 'widgets/job_location_picker.dart';
 
@@ -343,13 +344,34 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       // Direct pay-per-listing: the first published vacancy is free; a 2nd+
       // one is created as a DRAFT and paid per listing (tier + Payme/Click) on
       // the next screen, which publishes it. Offline has no charge path, so the
-      // demo always free-publishes. Scheduled posts are drafts until their time,
-      // so they're not charged here (they run the gate when they go live).
+      // demo always free-publishes.
+      //
+      // The gate keys off the employer's INTENT to enter the market (they hit
+      // "E'lon qilish"), not off the row's effective status — see
+      // isChargeableMarketEntry, which mirrors guard_job_publish() (0066):
+      //
+      //   * a scheduled post is a draft until its time, but it is still a
+      //     market entry. Gating on effectiveStatus meant a 2nd+ scheduled
+      //     vacancy created no order, said "rejalashtirildi", and was then
+      //     parked unpublished by publish_due_jobs() when its time came.
+      //     Charging up front makes publish_due_jobs() find a paid tier order
+      //     and take it live on schedule (0076 keeps payment from publishing
+      //     a scheduled draft early).
+      //   * editing is not exempt either. `!_isEdit` skipped the gate whenever
+      //     a draft was published from THIS screen, so the update wrote
+      //     status='open' directly and the DB guard raised `payment_required`
+      //     — surfacing as a bare "Xatolik yuz berdi" with no way forward.
       final charged =
-          !_isEdit &&
-          effectiveStatus == 'open' &&
           Env.hasSupabase &&
+          isChargeableMarketEntry(
+            wantsToGoLive: status == 'open',
+            isEdit: _isEdit,
+            firstPublishedAt: widget.job?.firstPublishedAt,
+            currentStatus: widget.job?.status,
+          ) &&
           await repo.hasPublishedBefore();
+      // While it is unpaid the row must stay a draft — including the edit
+      // path, which would otherwise trip the guard.
       final createStatus = charged ? 'draft' : effectiveStatus;
       Job? created;
       if (_isEdit) {
@@ -401,7 +423,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             screeningQuestions: _questions
                 .where((q) => q.label.trim().isNotEmpty)
                 .toList(),
-            status: effectiveStatus,
+            status: createStatus,
             publishAt: publishAt,
             educationRequired: _educationRequired,
             workHours: _workHours.text.trim().isEmpty
@@ -463,16 +485,22 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       }
       ref.invalidate(myJobsProvider);
       if (!mounted) return;
-      if (charged && created != null) {
+      if (charged) {
         // 2nd+ vacancy: it's a draft awaiting payment → tier picker + gateway,
         // which publishes it. Leaving the page after either outcome is fine —
         // an unpaid draft simply waits in "My jobs" to be published later.
-        final createdJob = created;
+        // Editing lands here too (publishing a draft from this screen), in
+        // which case the job already exists and keeps its id.
+        final jobId = created?.id ?? widget.job!.id;
+        final jobTitle = created?.title ?? _title.text.trim();
         await Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (_) => ListingPaymentPage(
-              jobId: createdJob.id,
-              jobTitle: createdJob.title,
+              jobId: jobId,
+              jobTitle: jobTitle,
+              // A scheduled vacancy is paid for now but goes live at its own
+              // time, so the checkout must not wait for `status = 'open'`.
+              scheduledFor: scheduled ? _publishAt : null,
             ),
           ),
         );

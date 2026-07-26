@@ -24,10 +24,16 @@ class ListingPaymentPage extends ConsumerStatefulWidget {
     super.key,
     required this.jobId,
     required this.jobTitle,
+    this.scheduledFor,
   });
 
   final String jobId;
   final String jobTitle;
+
+  /// Set when the vacancy is scheduled: it is paid for now but stays a draft
+  /// until this time (0076), so success can't be detected by waiting for
+  /// `status = 'open'` — the paid order is the signal instead.
+  final DateTime? scheduledFor;
 
   @override
   ConsumerState<ListingPaymentPage> createState() => _ListingPaymentPageState();
@@ -105,17 +111,29 @@ class _ListingPaymentPageState extends ConsumerState<ListingPaymentPage> {
     }
   }
 
+  /// Same dd.MM.yyyy HH:mm shape the post screen shows when picking the time,
+  /// so the employer recognises the moment they chose.
+  String _fmtDateTime(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}'
+      '.${d.year} ${d.hour.toString().padLeft(2, '0')}:'
+      '${d.minute.toString().padLeft(2, '0')}';
+
   void _startPolling() {
     _poll?.cancel();
     _poll = Timer.periodic(const Duration(seconds: 3), (_) => _checkStatus());
   }
 
   Future<void> _checkStatus() async {
-    final status = await ref
-        .read(employerJobsRepositoryProvider)
-        .jobStatus(widget.jobId);
+    final repo = ref.read(employerJobsRepositoryProvider);
+    final status = await repo.jobStatus(widget.jobId);
+    // A scheduled vacancy stays a draft after payment, so waiting for 'open'
+    // would poll forever — its paid order is what confirms the purchase.
+    final done =
+        status == 'open' ||
+        (widget.scheduledFor != null &&
+            await repo.hasPaidListingOrder(widget.jobId));
     if (!mounted) return;
-    if (status == 'open') {
+    if (done) {
       _poll?.cancel();
       ref.invalidate(myJobsProvider);
       setState(() => _phase = _Phase.published);
@@ -273,15 +291,24 @@ class _ListingPaymentPageState extends ConsumerState<ListingPaymentPage> {
   Widget _buildPublished(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
+    // A scheduled vacancy is paid for but not live yet — saying "published"
+    // would be a lie, and the employer would go looking for it in the feed.
+    final scheduledAt = widget.scheduledFor;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.check_circle_rounded, size: 72, color: colors.primary),
+          Icon(
+            scheduledAt != null
+                ? Icons.schedule_rounded
+                : Icons.check_circle_rounded,
+            size: 72,
+            color: colors.primary,
+          ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            l.payPublishedTitle,
+            scheduledAt != null ? l.payScheduledTitle : l.payPublishedTitle,
             textAlign: TextAlign.center,
             style: context.text.titleLarge?.copyWith(
               fontWeight: FontWeight.w800,
@@ -289,7 +316,9 @@ class _ListingPaymentPageState extends ConsumerState<ListingPaymentPage> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            l.payPublishedSubtitle,
+            scheduledAt != null
+                ? l.payScheduledSubtitle(_fmtDateTime(scheduledAt))
+                : l.payPublishedSubtitle,
             textAlign: TextAlign.center,
             style: context.text.bodyMedium?.copyWith(
               color: colors.textSecondary,
