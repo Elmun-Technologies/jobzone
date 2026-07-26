@@ -31,15 +31,16 @@ class _ResumeReviewPageState extends ConsumerState<ResumeReviewPage> {
     final repo = ref.read(cvRepositoryProvider);
     setState(() => _saving = true);
     try {
-      if ((p.fullName?.trim().isNotEmpty ?? false) ||
-          (p.headline?.trim().isNotEmpty ?? false) ||
-          (p.bio?.trim().isNotEmpty ?? false)) {
-        await repo.saveAbout(
-          fullName: p.fullName,
-          headline: p.headline,
-          bio: p.bio,
-        );
-      }
+      // mergeAbout, not saveAbout: a null here means the parser found
+      // nothing, not that the seeker wants the field cleared. saveAbout
+      // wrote all three unconditionally, so a PDF that yielded a summary
+      // but no name blanked out an existing full_name — which also
+      // silently disabled one-tap apply, since that gates on the name.
+      await repo.mergeAbout(
+        fullName: p.fullName,
+        headline: p.headline,
+        bio: p.bio,
+      );
       if (p.skills.isNotEmpty) {
         final existing = await repo.skills();
         await repo.setSkills([...existing, ...p.skills]);
