@@ -21,16 +21,24 @@ export async function generateMetadata({
 
 export default async function NewResumePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const sp = await searchParams;
+  // Quick-apply sends a seeker with no résumé here as
+  // `?next=/uz/jobs/<id>/apply`. Reading it is what makes the wizard hand
+  // them back to the job they were applying to; without it they finished
+  // four steps and landed on recommendations with no application made.
+  const next = typeof sp.next === "string" ? sp.next : undefined;
   const initial = await getMyResume();
 
   return (
     <Container className="py-10">
-      <ResumeWizard initial={initial} />
+      <ResumeWizard initial={initial} next={next} />
     </Container>
   );
 }
