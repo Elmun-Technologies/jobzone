@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
+import { buttonVariants } from "@/components/ui/button";
 import { generateJobContent } from "@/lib/actions/ai-content";
 import { track } from "@/lib/analytics/track";
 import {
@@ -20,6 +21,14 @@ import { cn } from "@/lib/utils";
 
 import { LocationPicker } from "../map/location-picker";
 import { ScreeningEditor, type StashedQuestion } from "./screening-editor";
+
+/** The four blocks an AI draft replaces wholesale (see fillWithAi). */
+const AI_TEXT_FIELDS = [
+  "description",
+  "responsibilities",
+  "requirements",
+  "benefits",
+] as const;
 
 const inputClass =
   "h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -290,6 +299,8 @@ export function PostJobForm({
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState(false);
+  /** Asking before an AI draft overwrites text the employer already typed. */
+  const [aiConfirm, setAiConfirm] = useState(false);
   // Set when a GLM key was configured but the call fell back to the template,
   // so the employer knows the output is generic and can fix the key/URL.
   const [aiFellBack, setAiFellBack] = useState<string | null>(null);
@@ -473,7 +484,7 @@ export function PostJobForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restored, isEdit]);
 
-  async function fillWithAi() {
+  async function fillWithAi({ force = false }: { force?: boolean } = {}) {
     const form = formRef.current;
     if (!form) return;
     const title = (
@@ -483,6 +494,21 @@ export function PostJobForm({
       setTitleError(true);
       return;
     }
+    // Generating replaces every text block. If the employer has already
+    // written something there, ask first — the same confirmation the mobile
+    // post screen shows. Without it a single tap silently wiped a description
+    // they had spent minutes on, with no undo. (The structured fields below
+    // already refuse to clobber a deliberate choice; the text blocks were the
+    // inconsistent half.)
+    const hasTyped = AI_TEXT_FIELDS.some((name) => {
+      const el = form.elements.namedItem(name) as HTMLTextAreaElement | null;
+      return !!el?.value.trim();
+    });
+    if (hasTyped && !force) {
+      setAiConfirm(true);
+      return;
+    }
+    setAiConfirm(false);
     setAiPending(true);
     setAiError(false);
     setAiFellBack(null);
@@ -665,7 +691,7 @@ export function PostJobForm({
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={fillWithAi}
+                  onClick={() => fillWithAi()}
                   disabled={aiPending}
                   className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-60"
                 >
@@ -680,6 +706,40 @@ export function PostJobForm({
                   </span>
                 ) : null}
               </div>
+              {aiConfirm ? (
+                <div
+                  role="alertdialog"
+                  aria-label={tp("aiOverwriteTitle")}
+                  className="border-border bg-card mt-3 rounded-xl border p-3"
+                >
+                  <p className="text-foreground text-sm font-semibold">
+                    {tp("aiOverwriteTitle")}
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    {tp("aiOverwriteBody")}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fillWithAi({ force: true })}
+                      className={cn(
+                        buttonVariants({ variant: "primary", size: "sm" }),
+                      )}
+                    >
+                      {tp("aiOverwriteConfirm")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAiConfirm(false)}
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" }),
+                      )}
+                    >
+                      {tp("aiOverwriteCancel")}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               {aiFellBack !== null ? (
                 <p className="text-muted-foreground mt-2 text-xs">
                   {tp("aiFellBack")}
