@@ -201,8 +201,12 @@ class CvRepository {
         ..phone = phone;
       // Same rule as the online write below — an argument the caller never
       // passed must not clear the stored value.
-      if (city != null) offlineProfile.city = city;
-      if (country != null) offlineProfile.country = country;
+      if (city != null) {
+        offlineProfile.city = city;
+      }
+      if (country != null) {
+        offlineProfile.country = country;
+      }
       return;
     }
     final uid = _uid;
@@ -255,11 +259,15 @@ class CvRepository {
     String? bio,
   }) async {
     if (!_online) {
-      if ((fullName ?? '').trim().isNotEmpty)
+      if ((fullName ?? '').trim().isNotEmpty) {
         offlineProfile.fullName = fullName;
-      if ((headline ?? '').trim().isNotEmpty)
+      }
+      if ((headline ?? '').trim().isNotEmpty) {
         offlineProfile.headline = headline;
-      if ((bio ?? '').trim().isNotEmpty) offlineProfile.bio = bio;
+      }
+      if ((bio ?? '').trim().isNotEmpty) {
+        offlineProfile.bio = bio;
+      }
       return;
     }
     final uid = _uid;
