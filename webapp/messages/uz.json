@@ -873,20 +873,20 @@
       "brand": {
         "name": "Brend",
         "badge": "Eng ko'p tanlanadi",
-        "tagline": "Logotipingiz bilan tanilib turasiz",
-        "f1": "Logotipingiz ro'yxatda va xaritada yonib turadi",
-        "f2": "Tasdiqlangan ish beruvchi belgisi",
-        "f3": "Qidiruvda oddiy e'lonlardan yuqorida",
-        "angle": "Tanish logotipga ishonch ko'proq — ~2× ko'proq bosiladi."
+        "tagline": "Ro'yxatda ko'zga tashlanib turasiz",
+        "f1": "Kompaniya belgingiz ro'yxatda yorqin halqa bilan ajraladi",
+        "f2": "Xaritadagi belgingiz ham shunday ajraladi",
+        "f3": "Bepul va Standart e'lonlardan yuqorida turadi",
+        "angle": "Ko'zga tashlangan e'lon ko'proq bosiladi."
       },
       "premium": {
         "name": "Premium",
         "badge": "Eng tez natija",
-        "tagline": "Ro'yxatning eng tepasida",
+        "tagline": "Hammadan ko'zga tashlanadi",
         "f1": "E'lon yorqin ramka bilan butunlay ajralib turadi",
-        "f2": "Ro'yxat va xaritada birinchi o'rinda",
-        "f3": "Xaritada kattaroq belgi — uzoqdan ko'rinadi",
-        "angle": "Shoshilinch ish o'rni uchun — ~3× ko'proq nomzod."
+        "f2": "Xaritada ★ belgisi bilan, kattaroq ko'rinadi",
+        "f3": "Bepul va Standart e'lonlardan yuqorida turadi",
+        "angle": "Shoshilinch ish o'rni uchun — eng ko'zga tashlanadigani."
       }
     },
     "benefit1Title": "Tez",

@@ -873,20 +873,20 @@
       "brand": {
         "name": "Brand",
         "badge": "Most chosen",
-        "tagline": "They recognise your logo",
-        "f1": "Your logo glows in the list and on the map",
-        "f2": "Verified-employer badge",
-        "f3": "Ranked above plain listings in search",
-        "angle": "A familiar logo earns trust — ~2× more clicks."
+        "tagline": "You get noticed in the list",
+        "f1": "Your company mark is ringed in the list",
+        "f2": "Your map pin is highlighted the same way",
+        "f3": "Ranked above free and Standard listings",
+        "angle": "A listing that stands out gets more clicks."
       },
       "premium": {
         "name": "Premium",
         "badge": "Fastest result",
-        "tagline": "Right at the top of the list",
+        "tagline": "The most visible option",
         "f1": "The whole listing stands out in a bright frame",
-        "f2": "First positions in the list and on the map",
-        "f3": "Bigger map pin — visible from further out",
-        "angle": "For an urgent role — ~3× the candidates."
+        "f2": "Starred and larger on the map",
+        "f3": "Ranked above free and Standard listings",
+        "angle": "For an urgent role — the most visible option."
       }
     },
     "benefit1Title": "Fast",
