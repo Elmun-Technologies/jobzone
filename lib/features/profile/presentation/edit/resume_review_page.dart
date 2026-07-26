@@ -31,13 +31,28 @@ class _ResumeReviewPageState extends ConsumerState<ResumeReviewPage> {
     final repo = ref.read(cvRepositoryProvider);
     setState(() => _saving = true);
     try {
-      if ((p.fullName?.trim().isNotEmpty ?? false) ||
-          (p.headline?.trim().isNotEmpty ?? false) ||
-          (p.bio?.trim().isNotEmpty ?? false)) {
+      // saveAbout writes all three columns, so passing a null the model simply
+      // didn't extract would blank the seeker's real value. A CV that yielded
+      // only a bio used to erase their name and headline outright — and
+      // `headline` is the title-match term in recommended_jobs() (0051), so
+      // their job matches went with it. Keep whatever is already on the
+      // profile for anything the parse didn't produce.
+      String? merge(String? parsed, String? existing) {
+        final v = parsed?.trim();
+        return (v != null && v.isNotEmpty) ? v : existing;
+      }
+
+      final parsedAbout = [
+        p.fullName,
+        p.headline,
+        p.bio,
+      ].map((v) => v?.trim() ?? '').any((v) => v.isNotEmpty);
+      if (parsedAbout) {
+        final current = await ref.read(currentProfileProvider.future);
         await repo.saveAbout(
-          fullName: p.fullName,
-          headline: p.headline,
-          bio: p.bio,
+          fullName: merge(p.fullName, current?.fullName),
+          headline: merge(p.headline, current?.headline),
+          bio: merge(p.bio, current?.bio),
         );
       }
       if (p.skills.isNotEmpty) {
