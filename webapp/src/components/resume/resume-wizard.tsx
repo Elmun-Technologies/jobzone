@@ -387,9 +387,14 @@ export function ResumeWizard({
         router.push(`/${locale}/sign-in?next=${encodeURIComponent(back)}`);
       } else if (res.error) setError(true);
       // Back to the job they were applying to, if they came from one;
-      // otherwise the jobs matched to the résumé they just saved.
+      // otherwise the jobs matched to the résumé they just saved. `saved=1`
+      // is what makes that landing say the résumé went through — without it
+      // four steps of typing ended on a jobs list with no acknowledgement at
+      // all, and no way to tell a save from a silent failure.
       else {
-        router.push(safeNext(nextParam, `/${locale}/account/recommended`));
+        router.push(
+          safeNext(nextParam, `/${locale}/account/recommended?saved=1`),
+        );
       }
     });
   }

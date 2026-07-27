@@ -555,7 +555,11 @@
     "empty": "No matching jobs yet",
     "emptyHint": "Fill in your résumé (role, city, skills) for sharper matches — or browse all jobs.",
     "completeResume": "Complete résumé",
-    "browseAll": "Browse all jobs"
+    "browseAll": "Browse all jobs",
+    "savedTitle": "Your résumé is saved",
+    "savedBody": "You can now apply in one tap, and an employer sees your résumé for the vacancy you applied to. Below are the jobs that match it.",
+    "savedEdit": "Edit résumé",
+    "savedAccount": "Go to account"
   },
   "home": {
     "heroTitle": "Find the right job across Uzbekistan",
