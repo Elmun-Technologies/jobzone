@@ -12,19 +12,39 @@ import '../domain/notification.dart';
 /// show exactly what the list row would show, and route to exactly where
 /// tapping the row would go, so keeping one copy is the point of this file.
 
-/// Title in the in-app language (uz/ru/en).
+/// Whether the stored title is content that has to survive, or a
+/// fixed-language server string the client must replace.
 ///
-/// The server stores a fixed-language string (the triggers in 0005 only ever
-/// write one), so titles are re-derived from the type. `review`/`system` are
-/// admin/broadcast copy that is already localized upstream, so they pass
-/// through unchanged.
+/// `applicationUpdate`/`message` come from the 0005 triggers, which write a
+/// literal English title — those are re-derived. `review`/`system` carry
+/// admin-authored broadcast copy already written in its final language.
+///
+/// `jobMatch` is the one that matters: `run_saved_search_alerts()` (0036)
+/// stores the **vacancy's own name** as the title, and `invite_candidate()`
+/// (0050) stores "Ish taklifi". Overwriting both with the generic label left
+/// an alert reading "Yangi mos vakansiya / Elmun · Toshkent" — company and
+/// city, but not what the job actually is, which is the one fact that decides
+/// whether to tap — and turned a direct invitation from an employer into an
+/// anonymous algorithmic suggestion.
+bool usesStoredTitle(NotificationType type, String title) => switch (type) {
+  NotificationType.applicationUpdate || NotificationType.message => false,
+  NotificationType.jobMatch => title.trim().isNotEmpty,
+  NotificationType.review || NotificationType.system => true,
+};
+
+/// Title in the in-app language (uz/ru/en), or the server's own where that is
+/// content rather than copy — see [usesStoredTitle].
 String notificationTitle(BuildContext context, AppNotification n) {
+  if (usesStoredTitle(n.type, n.title)) return n.title;
   final l = context.l10n;
   return switch (n.type) {
     NotificationType.applicationUpdate => l.notifTitleApplicationUpdate,
     NotificationType.message => l.notifTitleMessage,
-    NotificationType.jobMatch => l.notifTitleJobMatch,
-    NotificationType.review || NotificationType.system => n.title,
+    // A job match stored without a title of its own. review/system never
+    // reach here — usesStoredTitle keeps whatever the admin wrote.
+    NotificationType.jobMatch ||
+    NotificationType.review ||
+    NotificationType.system => l.notifTitleJobMatch,
   };
 }
 
