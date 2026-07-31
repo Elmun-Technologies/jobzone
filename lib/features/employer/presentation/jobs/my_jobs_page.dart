@@ -10,6 +10,7 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/presentation/util/job_labels.dart';
 import '../../data/employer_jobs_repository.dart';
+import '../../domain/publish_gate.dart';
 import 'listing_payment_page.dart';
 
 /// The employer's posted jobs, filterable by lifecycle status, with create /
@@ -41,7 +42,26 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
   Future<void> _publishDraft(Job job) async {
     final repo = ref.read(employerJobsRepositoryProvider);
     try {
-      final charged = Env.hasSupabase && await repo.hasPublishedBefore();
+      // Re-opening a job that has already been on the market is free — the DB
+      // guard exempts it via first_published_at (0066), so sending the
+      // employer to the checkout here would charge them for it twice.
+      final charged =
+          Env.hasSupabase &&
+          isChargeableMarketEntry(
+            wantsToGoLive: true,
+            isEdit: true,
+            firstPublishedAt: job.firstPublishedAt,
+            currentStatus: job.status,
+          ) &&
+          await repo.hasPublishedBefore();
+      // This button says "publish", so it means now — the free branch below has
+      // always taken a scheduled draft straight live. Drop a schedule the draft
+      // still carries before charging for it, or 0076 would hold the paid
+      // vacancy back until a date the employer has just decided against.
+      final publishAt = job.publishAt;
+      if (charged && publishAt != null && publishAt.isAfter(DateTime.now())) {
+        await repo.updateJob(job.copyWith(publishAt: null));
+      }
       if (!mounted) return;
       if (charged) {
         await Navigator.of(context).push<bool>(

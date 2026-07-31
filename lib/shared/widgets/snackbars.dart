@@ -24,6 +24,11 @@ String localizedError(BuildContext context, Object error) {
   final l = context.l10n;
   if (error is NoCompanyError) return l.errNoCompany;
   if (error is PostgrestException) {
+    // guard_job_publish() (0066) refuses a 2nd+ market entry that carries no
+    // paid tier order. The clients run the pay flow before they get here, so
+    // this is a backstop — but "Xatolik yuz berdi" would leave the employer
+    // with no idea that a payment is what's missing.
+    if (error.message.contains('payment_required')) return l.errPaymentRequired;
     switch (error.code) {
       case '23502': // not_null_violation — most commonly jobs.company_id
         if ((error.message).contains('company_id')) return l.errNoCompany;

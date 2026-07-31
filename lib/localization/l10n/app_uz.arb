@@ -930,5 +930,8 @@
   "onboardChatOutgoing": "Albatta, rahmat! 🙌",
   "onboardApplyAccepted": "Arizangiz qabul qilindi",
   "onboardApplyInvited": "Suhbatga taklif etildingiz",
-  "phoneHint": "Raqam Telegramga ro'yxatdan o'tgan bo'lishi kerak"
+  "phoneHint": "Raqam Telegramga ro'yxatdan o'tgan bo'lishi kerak",
+  "errPaymentRequired": "Bu vakansiyani chiqarish uchun tarif tanlab to'lash kerak. «Mening vakansiyalarim»dan e'lon qiling.",
+  "payScheduledTitle": "To'landi — vakansiya rejada",
+  "payScheduledSubtitle": "{date} da avtomatik efirga chiqadi. Unutmang: bu vaqtgacha u qoralamada turadi."
 }

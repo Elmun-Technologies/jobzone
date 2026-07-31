@@ -357,6 +357,23 @@ class EmployerJobsRepository {
     return url;
   }
 
+  /// Whether a paid per-listing (tier) order exists for [jobId]. The pay screen
+  /// polls this for a SCHEDULED vacancy, which stays a draft after payment
+  /// (0076) and so never trips the `status = 'open'` check — the paid order is
+  /// what tells the employer their purchase landed. It is also exactly what
+  /// `publish_due_jobs()` looks for when the scheduled time arrives.
+  Future<bool> hasPaidListingOrder(String jobId) async {
+    if (!_live) return false;
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('promotion_orders')
+        .select('id')
+        .eq('job_id', jobId)
+        .eq('status', 'paid')
+        .limit(1);
+    return (rows as List).isNotEmpty;
+  }
+
   /// The current lifecycle status of one of the employer's jobs — polled by the
   /// pay screen to detect when the gateway callback has published the draft.
   Future<String?> jobStatus(String jobId) async {
