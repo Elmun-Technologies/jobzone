@@ -4,6 +4,7 @@ import { Bookmark } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
+import { toast } from "@/components/ui/toast";
 import { toggleBookmark } from "@/lib/actions/bookmark";
 import { track } from "@/lib/analytics/track";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function BookmarkButton({
   className?: string;
 }) {
   const t = useTranslations("bookmarks");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const [saved, setSaved] = useState(initial);
   const [pending, startTransition] = useTransition();
@@ -38,7 +40,14 @@ export function BookmarkButton({
         window.location.href = `/${locale}/sign-in?next=${next}`;
         return;
       }
+      // `result.saved` is the server's truth either way, so a failed write
+      // snaps the icon back rather than leaving it filled on a job that was
+      // never saved.
       setSaved(result.saved);
+      if (result.error) {
+        toast({ title: tc("error"), variant: "error" });
+        return;
+      }
       // Funnel event only on the add (not the remove) — the unsave is a
       // correction, not a retention signal we care to attribute.
       if (result.saved && !initial) {

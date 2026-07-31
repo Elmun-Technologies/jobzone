@@ -4,6 +4,7 @@ import { Archive, Bookmark, Check, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
+import { toast } from "@/components/ui/toast";
 import { toggleBookmark } from "@/lib/actions/bookmark";
 import { toggleDismiss } from "@/lib/actions/dismiss";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ export function JobCardActions({
 }) {
   const t = useTranslations("jobs");
   const tb = useTranslations("bookmarks");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const [saved, setSaved] = useState(initialSaved);
   const [dismissed, setDismissed] = useState(initialDismissed);
@@ -53,7 +55,12 @@ export function JobCardActions({
         window.location.href = `/${locale}/sign-in?next=${next}`;
         return;
       }
+      // `result.saved` is the server's truth either way, so a failed write
+      // snaps the icon back instead of leaving a filled bookmark on a job
+      // that was never saved. Say so too — silently reverting looks like a
+      // misfired tap.
       setSaved(result.saved);
+      if (result.error) toast({ title: tc("error"), variant: "error" });
     });
   }
 
@@ -69,6 +76,7 @@ export function JobCardActions({
         return;
       }
       setDismissed(result.dismissed);
+      if (result.error) toast({ title: tc("error"), variant: "error" });
     });
   }
 
