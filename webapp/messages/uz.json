@@ -264,7 +264,10 @@
     "markAllRead": "Hammasini o'qilgan deb belgilash",
     "emptyTitle": "Hozircha bildirishnomalar yo'q",
     "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga ariza bering — yangiliklar shu yerda ko'rinadi.",
-    "toastAction": "Ko'rish"
+    "toastAction": "Ko'rish",
+    "typeApplicationUpdate": "Ariza holati yangilandi",
+    "typeMessage": "Yangi xabar",
+    "bodyApplicationUpdate": "Arizangiz holati: {status}"
   },
   "employer": {
     "dashboard": "Boshqaruv paneli",

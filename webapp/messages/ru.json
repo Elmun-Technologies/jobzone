@@ -264,7 +264,10 @@
     "markAllRead": "Отметить все прочитанными",
     "emptyTitle": "Пока нет уведомлений",
     "emptyBody": "Сохраните поиск или откликнитесь на вакансии — обновления появятся здесь.",
-    "toastAction": "Открыть"
+    "toastAction": "Открыть",
+    "typeApplicationUpdate": "Статус отклика обновлён",
+    "typeMessage": "Новое сообщение",
+    "bodyApplicationUpdate": "Статус вашего отклика: {status}"
   },
   "employer": {
     "dashboard": "Панель управления",
