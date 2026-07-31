@@ -481,12 +481,13 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
         showInfoSnack(context, context.l10n.jobScheduledToast);
         if (mounted) context.pop();
       } else if (created != null && effectiveStatus == 'open') {
-        // Mobile promote checkout is a dead-end (no wallet-backed spend
+        // Mobile promote checkout is a dead-end (no paid-tier checkout
         // parity with web yet) — showing the promote sheet auto-opens
         // that dead-end after a successful post, which is the worst UX
         // right after the employer completes the full posting flow. Skip
-        // straight to the toast; the web version continues to offer the
-        // promote picker inline where the boost actually works.
+        // straight to the toast; on web the employer can upgrade the live
+        // listing's tier from the promote page, which charges through the
+        // same gateway as the post-time picker.
         showInfoSnack(context, context.l10n.jobSavedToast);
         if (mounted) context.pop();
       } else {

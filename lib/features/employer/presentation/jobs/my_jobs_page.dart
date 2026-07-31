@@ -272,13 +272,15 @@ class _MyJobCard extends StatelessWidget {
                     // A draft's primary action is publishing it (through the
                     // first-free / then-pay-per-listing gate).
                     //
-                    // Promote menu item is hidden on mobile until the
-                    // wallet-backed boost purchase mirrors the web
-                    // PromotePicker flow — today the mobile checkout only
-                    // renders a permanently-disabled "coming soon" Pay
-                    // button, which is a dead-end for real employers. Web
-                    // employers can still promote from /employer/jobs/[id]
-                    // /promote (fully wired to the wallet).
+                    // Promote menu item is hidden on mobile until the tier
+                    // upgrade mirrors the web flow — today the mobile
+                    // checkout only renders a permanently-disabled "coming
+                    // soon" Pay button, which is a dead-end for real
+                    // employers. Web employers upgrade a live listing's tier
+                    // from /employer/jobs/[id]/promote, which pays through
+                    // Payme/Click/Rahmat like the post-time picker (the
+                    // wallet-backed TOP/featured packages it used to sell
+                    // were retired by 0063).
                     if (job.status == 'draft')
                       PopupMenuItem(
                         value: 'publish',
