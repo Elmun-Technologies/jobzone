@@ -5,7 +5,12 @@ import { useEffect, useMemo } from "react";
 
 import { toast } from "@/components/ui/toast";
 import { useRouter } from "@/i18n/navigation";
-import { notificationHref, toNotificationKind } from "@/lib/notifications";
+import {
+  notificationHref,
+  notificationStatus,
+  notificationTitleKey,
+  toNotificationKind,
+} from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -21,6 +26,7 @@ import { createClient } from "@/lib/supabase/client";
  */
 export function NotificationListener({ userId }: { userId: string }) {
   const t = useTranslations("notifications");
+  const ts = useTranslations("applications.status");
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const locale = useLocale();
@@ -46,9 +52,18 @@ export function NotificationListener({ userId }: { userId: string }) {
           // `localePrefix: "always"` — the toast renders a plain anchor, so
           // the prefix has to be added here (Link would do it for us).
           const path = notificationHref(kind, data);
+          // Same rule as the list page: the trigger-raised types carry a
+          // fixed-language title, so the toast localizes them rather than
+          // echoing the column (see notificationTitleKey).
+          const titleKey = notificationTitleKey(kind);
+          const status = notificationStatus(kind, data);
           toast({
-            title: String(row.title ?? t("title")),
-            description: typeof row.body === "string" ? row.body : null,
+            title: titleKey ? t(titleKey) : String(row.title ?? t("title")),
+            description: status
+              ? t("bodyApplicationUpdate", { status: ts(status) })
+              : typeof row.body === "string"
+                ? row.body
+                : null,
             href: path ? `/${locale}${path}` : null,
             actionLabel: t("toastAction"),
           });
@@ -61,7 +76,7 @@ export function NotificationListener({ userId }: { userId: string }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, userId, router, locale, t]);
+  }, [supabase, userId, router, locale, t, ts]);
 
   return null;
 }

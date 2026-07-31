@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { notificationHref, toNotificationKind } from "@/lib/notifications";
+import {
+  notificationHref,
+  notificationStatus,
+  notificationTitleKey,
+  toNotificationKind,
+} from "@/lib/notifications";
 
 // The account list and the realtime toast both route through this, so a
 // regression here silently breaks deep-links in two places at once.
@@ -28,6 +33,50 @@ describe("notificationHref", () => {
     // A malformed payload must not produce "/jobs/undefined".
     expect(notificationHref("job_match", { job_id: 42 })).toBeNull();
     expect(notificationHref("job_match", {})).toBeNull();
+  });
+});
+
+// The list page and the toast both localize through these, so a regression
+// puts English back in front of an Uzbek-speaking seeker in two places.
+describe("notificationTitleKey", () => {
+  it("localizes the types whose title the DB stores in English", () => {
+    // 0005 writes the literal 'Application update' / 'New message'.
+    expect(notificationTitleKey("application_update")).toBe(
+      "typeApplicationUpdate",
+    );
+    expect(notificationTitleKey("message")).toBe("typeMessage");
+  });
+
+  it("keeps the stored title where it is content, not copy", () => {
+    // job_match's title is the vacancy's own name (0036); review/system are
+    // admin-authored broadcast text already written in its final language.
+    expect(notificationTitleKey("job_match")).toBeNull();
+    expect(notificationTitleKey("review")).toBeNull();
+    expect(notificationTitleKey("system")).toBeNull();
+  });
+});
+
+describe("notificationStatus", () => {
+  it("reads the status a application update carries", () => {
+    expect(
+      notificationStatus("application_update", { status: "shortlisted" }),
+    ).toBe("shortlisted");
+  });
+
+  it("keeps the stored body for every other type", () => {
+    // A chat message's body is the message preview — never overwrite it.
+    expect(notificationStatus("message", { status: "hired" })).toBeNull();
+    expect(notificationStatus("job_match", { status: "hired" })).toBeNull();
+  });
+
+  it("falls back to the stored body for a status it has no label for", () => {
+    // A status added to the DB after this build shipped must not render as a
+    // missing-translation error.
+    expect(
+      notificationStatus("application_update", { status: "teleported" }),
+    ).toBeNull();
+    expect(notificationStatus("application_update", {})).toBeNull();
+    expect(notificationStatus("application_update", { status: 7 })).toBeNull();
   });
 });
 

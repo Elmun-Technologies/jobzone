@@ -264,7 +264,10 @@
     "markAllRead": "Mark all as read",
     "emptyTitle": "No notifications yet",
     "emptyBody": "Save a search or apply to jobs — updates will show up here.",
-    "toastAction": "View"
+    "toastAction": "View",
+    "typeApplicationUpdate": "Application update",
+    "typeMessage": "New message",
+    "bodyApplicationUpdate": "Your application is now: {status}"
   },
   "employer": {
     "dashboard": "Dashboard",

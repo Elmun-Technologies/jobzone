@@ -29,6 +29,63 @@ export function toNotificationKind(v: unknown): NotificationKind {
  * deep-links to the vacancy, completing the saved-search alert loop on the web.
  * Returns null for informational rows that have nowhere to go.
  */
+/**
+ * Message key under `notifications.` for a localized title, or null when the
+ * stored title is real content that has to be shown exactly as written.
+ *
+ * The triggers that raise these rows store a fixed-language title — 0005 writes
+ * the literal English "Application update" and "New message" — so rendering the
+ * column verbatim showed an Uzbek-speaking seeker English at the one moment
+ * that matters most to them. The mobile app has re-derived both from the type
+ * since it shipped (`notification_display.dart`); this is the same rule.
+ *
+ * `job_match` is left alone on purpose: its title is the vacancy's own name
+ * (0036), which is content, not copy. `review`/`system` carry admin-authored
+ * broadcast text that is already written in the language it should appear in.
+ */
+export function notificationTitleKey(kind: NotificationKind): string | null {
+  switch (kind) {
+    case "application_update":
+      return "typeApplicationUpdate";
+    case "message":
+      return "typeMessage";
+    default:
+      return null;
+  }
+}
+
+/** Statuses `applications.status.*` has a label for (mirrors the DB enum). */
+const APPLICATION_STATUSES: readonly string[] = [
+  "submitted",
+  "viewed",
+  "shortlisted",
+  "interview",
+  "offer",
+  "rejected",
+  "hired",
+  "withdrawn",
+];
+
+/**
+ * The status an `application_update` row carries, when it is one the UI can
+ * label. Null means "keep the stored body" — for a chat message that is the
+ * message preview, and for an unrecognised status the server sentence is still
+ * better than nothing.
+ *
+ * notify_application_status() (0005) always writes `data.status`, so the null
+ * branch is the guard against a future status the web build predates.
+ */
+export function notificationStatus(
+  kind: NotificationKind,
+  data: Record<string, unknown>,
+): string | null {
+  if (kind !== "application_update") return null;
+  const status = data.status;
+  return typeof status === "string" && APPLICATION_STATUSES.includes(status)
+    ? status
+    : null;
+}
+
 export function notificationHref(
   kind: NotificationKind,
   data: Record<string, unknown>,
