@@ -437,7 +437,11 @@
       "paymentInsufficientHint": "Publishing needs {price}. Top up your Hamyon balance.",
       "paymentTopUp": "Go to Hamyon",
       "publishAndPay": "Publish & pay",
-      "paymentTierNext": "This is a paid vacancy. On the next step, choose a plan (from {price}) and pay with Payme or Click — it goes live right after payment."
+      "paymentTierNext": "This is a paid vacancy. On the next step, choose a plan (from {price}) and pay with Payme or Click — it goes live right after payment.",
+      "aiOverwriteTitle": "This will replace what you wrote",
+      "aiOverwriteBody": "The AI rewrites the description, responsibilities, requirements and benefits from scratch. What you have typed there will not be kept.",
+      "aiOverwriteConfirm": "Yes, rewrite",
+      "aiOverwriteCancel": "No, keep mine"
     },
     "jobPromoted": "Promotion enabled! Your vacancy will be highlighted.",
     "viewResume": "View résumé",

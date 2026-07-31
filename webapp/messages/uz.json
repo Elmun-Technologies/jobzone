@@ -437,7 +437,11 @@
       "paymentInsufficientHint": "Nashr qilish uchun {price} kerak. Hamyonni to'ldiring.",
       "paymentTopUp": "Hamyonga o'tish",
       "publishAndPay": "E’lon qilish va to‘lash",
-      "paymentTierNext": "Bu pullik vakansiya. Keyingi bosqichda tarifni tanlang ({price} dan) va Payme yoki Click orqali to‘lang — to‘lovdan so‘ng darhol efirga chiqadi."
+      "paymentTierNext": "Bu pullik vakansiya. Keyingi bosqichda tarifni tanlang ({price} dan) va Payme yoki Click orqali to‘lang — to‘lovdan so‘ng darhol efirga chiqadi.",
+      "aiOverwriteTitle": "Yozganlaringiz almashtiriladi",
+      "aiOverwriteBody": "AI tavsif, majburiyatlar, talablar va sharoitlar maydonlarini butunlay qayta yozadi. Hozir yozib qo'yganlaringiz saqlanmaydi.",
+      "aiOverwriteConfirm": "Ha, qayta yozilsin",
+      "aiOverwriteCancel": "Yo'q, qolsin"
     },
     "jobPromoted": "Reklama yoqildi! Vakansiyangiz ajratib ko'rsatiladi.",
     "viewResume": "Rezyumeni ko'rish",
