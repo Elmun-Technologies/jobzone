@@ -555,7 +555,11 @@
     "empty": "Hozircha mos ish topilmadi",
     "emptyHint": "Rezyumengizni to'ldiring (lavozim, shahar, ko'nikmalar) — moslik aniqroq bo'ladi. Yoki barcha ishlarni ko'ring.",
     "completeResume": "Rezyumeni to'ldirish",
-    "browseAll": "Barcha ishlar"
+    "browseAll": "Barcha ishlar",
+    "savedTitle": "Rezyumeyingiz saqlandi",
+    "savedBody": "Endi bir bosishda ariza yuborishingiz mumkin, ish beruvchilar esa siz ariza yuborgan vakansiya bo'yicha rezyumeyingizni ko'radi. Quyida — rezyumeyingizga mos ishlar.",
+    "savedEdit": "Rezyumeni tahrirlash",
+    "savedAccount": "Kabinetga o'tish"
   },
   "home": {
     "heroTitle": "O'zbekiston bo'ylab mos ishni toping",
