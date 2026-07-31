@@ -163,15 +163,30 @@ class Certification {
     this.credentialUrl,
     this.issuedDate,
     this.expiryDate,
+    this.filePath,
+    this.fileSize,
+    this.mimeType,
   });
 
   final String? id;
   final String name;
   final String? issuer;
   final String? credentialId;
+
+  /// A link to the issuer's verification page. Covers an online course; a
+  /// welding qualification or a forklift licence has no such page, which is
+  /// what [filePath] is for.
   final String? credentialUrl;
   final DateTime? issuedDate;
   final DateTime? expiryDate;
+
+  /// Storage key of the scanned document in the private `certificates`
+  /// bucket (0077), or null when only the description was entered.
+  final String? filePath;
+  final int? fileSize;
+  final String? mimeType;
+
+  bool get hasFile => (filePath ?? '').isNotEmpty;
 
   factory Certification.fromMap(Map<String, dynamic> m) => Certification(
     id: m['id'] as String?,
@@ -181,6 +196,9 @@ class Certification {
     credentialUrl: m['credential_url'] as String?,
     issuedDate: parseDate(m['issued_date']),
     expiryDate: parseDate(m['expiry_date']),
+    filePath: m['file_path'] as String?,
+    fileSize: (m['file_size'] as num?)?.toInt(),
+    mimeType: m['mime_type'] as String?,
   );
 
   Map<String, dynamic> toMap() => {
@@ -190,7 +208,28 @@ class Certification {
     'credential_url': credentialUrl,
     'issued_date': isoDate(issuedDate),
     'expiry_date': isoDate(expiryDate),
+    'file_path': filePath,
+    'file_size': fileSize,
+    'mime_type': mimeType,
   };
+
+  Certification copyWith({
+    String? filePath,
+    int? fileSize,
+    String? mimeType,
+    bool clearFile = false,
+  }) => Certification(
+    id: id,
+    name: name,
+    issuer: issuer,
+    credentialId: credentialId,
+    credentialUrl: credentialUrl,
+    issuedDate: issuedDate,
+    expiryDate: expiryDate,
+    filePath: clearFile ? null : (filePath ?? this.filePath),
+    fileSize: clearFile ? null : (fileSize ?? this.fileSize),
+    mimeType: clearFile ? null : (mimeType ?? this.mimeType),
+  );
 }
 
 /// Volunteer experience (`public.volunteer_experiences`).

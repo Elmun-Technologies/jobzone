@@ -27,6 +27,13 @@ export interface ApplicantCertificate {
   issuer: string;
   issuedYear: string;
   expiryYear: string;
+  /**
+   * Short-lived signed URL to the scanned certificate (0077), or "" when the
+   * candidate only described it. The bucket is private and readable by a
+   * recruiter the candidate actually applied to (`is_recruiter_of`), so the
+   * URL is minted per request rather than stored.
+   */
+  fileUrl: string;
 }
 
 export interface ApplicantResume {
@@ -102,7 +109,7 @@ export async function getApplicantResume(
         .order("end_date", { ascending: false, nullsFirst: true }),
       supabase
         .from("certifications")
-        .select("name, issuer, issued_date, expiry_date")
+        .select("name, issuer, issued_date, expiry_date, file_path")
         .eq("profile_id", applicantId)
         .order("issued_date", { ascending: false, nullsFirst: false }),
       supabase
@@ -142,15 +149,31 @@ export async function getApplicantResume(
       };
     });
 
-    const certificates: ApplicantCertificate[] = (certR.data ?? []).map((c) => {
-      const row = c as Record<string, unknown>;
-      return {
-        name: str(row.name),
-        issuer: str(row.issuer),
-        issuedYear: yearOf(row.issued_date),
-        expiryYear: yearOf(row.expiry_date),
-      };
-    });
+    // Sign the attached documents in one batch. Best-effort like everything
+    // else here: a DB behind on 0077 has no file_path column, and a storage
+    // hiccup costs the link, not the section.
+    const certRows = (certR.data ?? []) as Record<string, unknown>[];
+    const certUrls = await Promise.all(
+      certRows.map(async (row) => {
+        const path = str(row.file_path);
+        if (!path) return "";
+        try {
+          const { data } = await supabase.storage
+            .from("certificates")
+            .createSignedUrl(path, 60 * 10);
+          return data?.signedUrl ?? "";
+        } catch {
+          return "";
+        }
+      }),
+    );
+    const certificates: ApplicantCertificate[] = certRows.map((row, i) => ({
+      name: str(row.name),
+      issuer: str(row.issuer),
+      issuedYear: yearOf(row.issued_date),
+      expiryYear: yearOf(row.expiry_date),
+      fileUrl: certUrls[i] ?? "",
+    }));
 
     const skills: string[] = (skillR.data ?? [])
       .map((s) => {

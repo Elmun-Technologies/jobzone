@@ -933,5 +933,14 @@
   "phoneHint": "Raqam Telegramga ro'yxatdan o'tgan bo'lishi kerak",
   "errPaymentRequired": "Bu vakansiyani chiqarish uchun tarif tanlab to'lash kerak. «Mening vakansiyalarim»dan e'lon qiling.",
   "payScheduledTitle": "To'landi — vakansiya rejada",
-  "payScheduledSubtitle": "{date} da avtomatik efirga chiqadi. Unutmang: bu vaqtgacha u qoralamada turadi."
+  "payScheduledSubtitle": "{date} da avtomatik efirga chiqadi. Unutmang: bu vaqtgacha u qoralamada turadi.",
+  "certificateFileLabel": "Sertifikat fayli",
+  "certificateFileHint": "Sertifikatingiz surati yoki PDF nusxasi. Ish beruvchi siz ariza yuborgan vakansiya bo'yicha uni ko'ra oladi.",
+  "certificateAttachCta": "Fayl biriktirish",
+  "certificateAttached": "Fayl biriktirilgan",
+  "certificateFileStored": "Biriktirilgan fayl",
+  "certificateFileNotSavedYet": "Saqlaganingizdan keyin yuklanadi",
+  "certificateFileView": "Ochish",
+  "certificateFileReplace": "Almashtirish",
+  "certificateFileRemove": "O'chirish"
 }
