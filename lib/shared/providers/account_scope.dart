@@ -84,6 +84,9 @@ void invalidateAccountScope(WidgetRef ref) {
   ref.invalidate(myJobsProvider);
   ref.invalidate(allApplicantsProvider);
   ref.invalidate(jobApplicantsProvider);
+  // Keyed by the candidate's profile id, but readable only because *this*
+  // account is their recruiter — so it is per-account data despite the key.
+  ref.invalidate(applicantCertificationsProvider);
   ref.invalidate(employerStatsProvider);
   ref.invalidate(walletProvider);
   ref.invalidate(myOrdersProvider);
