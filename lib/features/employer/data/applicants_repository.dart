@@ -4,6 +4,7 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../applications/domain/application.dart';
 import '../../../shared/enums/enums.dart';
+import '../../profile/domain/cv_models.dart';
 import '../domain/applicant.dart';
 import 'mock_applicants.dart';
 
@@ -206,6 +207,27 @@ class ApplicantsRepository {
     return out;
   }
 
+  /// The candidate's certifications, for the applicant screen.
+  ///
+  /// Scoped explicitly to [profileId]: a plain `select()` would lean on RLS,
+  /// which for an employer legitimately covers *every* candidate who applied
+  /// to them — right for the database, wrong for one applicant's screen.
+  ///
+  /// Read access comes from the `is_recruiter_of()` policy in 0077; the
+  /// attached file is signed separately when the employer opens it.
+  Future<List<Certification>> certificationsOf(String profileId) async {
+    if (!_live || profileId.isEmpty) return const [];
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('certifications')
+        .select()
+        .eq('profile_id', profileId)
+        .order('issued_date', ascending: false);
+    return (rows as List)
+        .map((e) => Certification.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
   void _seedOffline() {
     if (_seeded) return;
     _seeded = true;
@@ -227,3 +249,10 @@ final jobApplicantsProvider = FutureProvider.family<List<Applicant>, String>(
   (ref, jobId) =>
       ref.read(applicantsRepositoryProvider).applicantsForJob(jobId),
 );
+
+/// One candidate's certifications, keyed by their profile id.
+final applicantCertificationsProvider =
+    FutureProvider.family<List<Certification>, String>(
+      (ref, profileId) =>
+          ref.read(applicantsRepositoryProvider).certificationsOf(profileId),
+    );

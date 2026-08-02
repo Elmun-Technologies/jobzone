@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../design_system/design_system.dart';
@@ -11,6 +12,8 @@ import '../../../applications/domain/application.dart';
 import '../../../applications/presentation/util/status_label.dart';
 import '../../../chat/data/chat_repository.dart';
 import '../../../chat/domain/chat_models.dart';
+import '../../../profile/data/cv_repository.dart';
+import '../../../profile/presentation/edit/util/cv_format.dart';
 import '../../../reviews/data/worker_reviews_repository.dart';
 import '../../../reviews/domain/worker_review.dart';
 import '../../../reviews/presentation/widgets/star_rating_input.dart';
@@ -337,6 +340,7 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                       children: [for (final s in a.skills) _Chip(s)],
                     ),
                   ],
+                  _Certifications(profileId: a.workerId),
                   if (a.coverLetter != null && a.coverLetter!.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xl),
                     Text(l.applicantCoverLabel, style: context.text.titleSmall),
@@ -551,5 +555,109 @@ class _Chip extends StatelessWidget {
         style: context.text.labelSmall?.copyWith(color: colors.textPrimary),
       ),
     );
+  }
+}
+
+/// The candidate's certifications, with the scan attached to each.
+///
+/// A welding ticket or a forklift licence is the whole basis for hiring in most
+/// of these categories, and the seeker can attach the document itself (0077).
+/// The web applicant screen has shown it since; on mobile — where an employer
+/// in this market is far more likely to be reviewing — the section did not
+/// exist at all, so an uploaded certificate was invisible to the one person it
+/// was uploaded for.
+///
+/// Renders nothing at all while loading, on error, or when the candidate has
+/// no certifications: this sits among optional sections, and an employer
+/// scanning a list is not served by a spinner or an error where a heading
+/// would be.
+class _Certifications extends ConsumerWidget {
+  const _Certifications({required this.profileId});
+  final String profileId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (profileId.isEmpty) return const SizedBox.shrink();
+    final items = ref
+        .watch(applicantCertificationsProvider(profileId))
+        .valueOrNull;
+    if (items == null || items.isEmpty) return const SizedBox.shrink();
+    final l = context.l10n;
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.xl),
+        Text(l.sectionCertifications, style: context.text.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
+        for (final c in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: colors.surfaceVariant,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: colors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    c.name,
+                    style: context.text.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Builder(
+                    builder: (context) {
+                      final sub = [
+                        c.issuer,
+                        if (c.issuedDate != null)
+                          periodText(context, c.issuedDate, null),
+                      ].where((s) => s != null && s.isNotEmpty).join(' • ');
+                      if (sub.isEmpty) return const SizedBox.shrink();
+                      return Text(
+                        sub,
+                        style: context.text.bodySmall?.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      );
+                    },
+                  ),
+                  if (c.hasFile)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => _open(context, ref, c.filePath!),
+                        icon: const Icon(Icons.description_outlined, size: 18),
+                        label: Text(l.certificateFileView),
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// The bucket is private; 0077 lets a recruiter the candidate applied to read
+  /// it, so the URL is signed on demand rather than stored anywhere.
+  Future<void> _open(BuildContext context, WidgetRef ref, String path) async {
+    final url = await ref.read(cvRepositoryProvider).certificateFileUrl(path);
+    if (!context.mounted) return;
+    if (url == null ||
+        !await launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+        )) {
+      if (context.mounted) showErrorSnack(context, context.l10n.errUnknown);
+    }
   }
 }
