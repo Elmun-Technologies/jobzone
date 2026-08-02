@@ -228,6 +228,38 @@ class ApplicantsRepository {
         .toList();
   }
 
+  /// The candidate's work history, most recent first.
+  ///
+  /// Scoped to [profileId] for the same reason as [certificationsOf]: an
+  /// employer's RLS view legitimately spans every candidate who applied to
+  /// them, which is not what one applicant's screen should show.
+  Future<List<Experience>> experiencesOf(String profileId) async {
+    if (!_live || profileId.isEmpty) return const [];
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('experiences')
+        .select()
+        .eq('profile_id', profileId)
+        .order('start_date', ascending: false);
+    return (rows as List)
+        .map((e) => Experience.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// The candidate's education, most recent first.
+  Future<List<Education>> educationsOf(String profileId) async {
+    if (!_live || profileId.isEmpty) return const [];
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('educations')
+        .select()
+        .eq('profile_id', profileId)
+        .order('start_date', ascending: false);
+    return (rows as List)
+        .map((e) => Education.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
   void _seedOffline() {
     if (_seeded) return;
     _seeded = true;
@@ -255,4 +287,18 @@ final applicantCertificationsProvider =
     FutureProvider.family<List<Certification>, String>(
       (ref, profileId) =>
           ref.read(applicantsRepositoryProvider).certificationsOf(profileId),
+    );
+
+/// One candidate's work history, keyed by their profile id.
+final applicantExperiencesProvider =
+    FutureProvider.family<List<Experience>, String>(
+      (ref, profileId) =>
+          ref.read(applicantsRepositoryProvider).experiencesOf(profileId),
+    );
+
+/// One candidate's education, keyed by their profile id.
+final applicantEducationsProvider =
+    FutureProvider.family<List<Education>, String>(
+      (ref, profileId) =>
+          ref.read(applicantsRepositoryProvider).educationsOf(profileId),
     );
