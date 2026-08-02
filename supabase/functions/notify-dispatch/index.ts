@@ -16,6 +16,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { sendFcmToUser } from "../_shared/fcm.ts";
 import { requireEdgeSecret } from "../_shared/auth.ts";
+import {
+  type InviteJob,
+  localizedNotificationText,
+  normalizeLocale,
+} from "../_shared/notification-text.ts";
 
 // Maps a notification type to its notification_settings push column. Types with
 // no column (e.g. 'system') are always delivered.
@@ -61,6 +66,40 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Render in the recipient's language before anything leaves the building.
+  // The in-app clients re-derive this text themselves because the triggers
+  // store a fixed-language string (0005 writes English, invite_candidate()
+  // writes Uzbek); Telegram and push have no client to do that, so without
+  // this step every outward message ignores the language the user picked.
+  const data = (rec?.data ?? {}) as Record<string, unknown>;
+  const { data: profile } = await supa
+    .from("profiles")
+    .select("preferred_locale")
+    .eq("id", recipientId)
+    .maybeSingle();
+
+  // An invitation (0050) stores only `job_id`, so the company and role have to
+  // be fetched to say it in any language other than the one it was written in.
+  let invite: InviteJob | null = null;
+  if (type === "job_match" && data.invited === true && data.job_id) {
+    const { data: job } = await supa
+      .from("jobs")
+      .select("title, companies(name)")
+      .eq("id", data.job_id)
+      .maybeSingle();
+    const company = (job?.companies as { name?: string } | null)?.name;
+    if (job?.title && company) invite = { company, title: job.title };
+  }
+
+  const text = localizedNotificationText(
+    normalizeLocale(profile?.preferred_locale),
+    type,
+    title,
+    body,
+    data,
+    invite,
+  );
+
   // Telegram fan-out (no-op without a bot token or a linked chat).
   let telegram = 0;
   const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -71,7 +110,9 @@ Deno.serve(async (req) => {
       .eq("profile_id", recipientId)
       .maybeSingle();
     if (link?.telegram_chat_id) {
-      const text = body ? `*${title}*\n${body}` : `*${title}*`;
+      const message = text.body
+        ? `*${text.title}*\n${text.body}`
+        : `*${text.title}*`;
       const r = await fetch(
         `https://api.telegram.org/bot${botToken}/sendMessage`,
         {
@@ -79,7 +120,7 @@ Deno.serve(async (req) => {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             chat_id: link.telegram_chat_id,
-            text,
+            text: message,
             parse_mode: "Markdown",
           }),
         },
@@ -93,9 +134,9 @@ Deno.serve(async (req) => {
   const fcm = await sendFcmToUser(
     supa,
     recipientId,
-    title,
-    body,
-    { type, ...(rec?.data ?? {}) } as Record<string, unknown>,
+    text.title,
+    text.body,
+    { type, ...data },
   );
 
   return json({ ok: true, telegram, fcm });
