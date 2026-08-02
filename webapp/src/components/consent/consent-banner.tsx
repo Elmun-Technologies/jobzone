@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Link } from "@/i18n/navigation";
 import {
@@ -9,6 +9,7 @@ import {
   CONSENT_MAX_AGE_SECONDS,
   type ConsentValue,
 } from "@/lib/consent";
+import { LANGUAGE_CHOSEN_EVENT } from "@/lib/locale-choice";
 
 /**
  * Cookie banner. Server layout reads the cookie and forwards it here as
@@ -21,13 +22,25 @@ import {
  */
 export function ConsentBanner({
   initialConsent,
+  deferred = false,
 }: {
   initialConsent: ConsentValue | null;
+  /** True while the first-visit language sheet is up — this bar sits at a
+   * higher z-index and would cover its last option, so it waits its turn. */
+  deferred?: boolean;
 }) {
   const t = useTranslations("consent");
   const [choice, setChoice] = useState<ConsentValue | null>(initialConsent);
+  const [waiting, setWaiting] = useState(deferred);
 
-  if (choice) return null;
+  useEffect(() => {
+    if (!deferred) return;
+    const onChosen = () => setWaiting(false);
+    window.addEventListener(LANGUAGE_CHOSEN_EVENT, onChosen);
+    return () => window.removeEventListener(LANGUAGE_CHOSEN_EVENT, onChosen);
+  }, [deferred]);
+
+  if (choice || waiting) return null;
 
   function persist(value: ConsentValue) {
     document.cookie = `${CONSENT_COOKIE}=${value}; Path=/; Max-Age=${CONSENT_MAX_AGE_SECONDS}; SameSite=Lax`;
@@ -46,8 +59,10 @@ export function ConsentBanner({
   return (
     <div
       // High z so it beats sticky headers and modals; fixed at bottom on
-      // mobile, plate-shaped bar that respects safe-area on iOS.
-      className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-2xl rounded-2xl border border-border bg-background/95 p-4 shadow-2xl backdrop-blur"
+      // mobile, plate-shaped bar that respects safe-area on iOS. On phones it
+      // sits above the fixed tab bar (h-14 + safe area) instead of on top of
+      // it, which would bury the primary navigation until a choice is made.
+      className="fixed inset-x-3 bottom-[calc(0.75rem+var(--tabbar))] z-[100] mx-auto max-w-2xl rounded-2xl border border-border bg-background/95 p-4 shadow-2xl backdrop-blur"
       role="dialog"
       aria-labelledby="consent-title"
       aria-describedby="consent-body"

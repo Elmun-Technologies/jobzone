@@ -31,7 +31,13 @@ export function JobsMap({
   height?: string;
   fullBleed?: boolean;
 }) {
-  const mapHeight = fullBleed ? "calc(100dvh - 4rem)" : (height ?? "70vh");
+  // Full-bleed = viewport minus the 64px header, and on phones minus the 56px
+  // tab bar too (the body reserves that space, so without subtracting it here
+  // the "full screen" map is one tab-bar taller than the screen and the page
+  // scrolls). `--tabbar` is 0 from `md` up, where the bar is hidden.
+  const mapHeight = fullBleed
+    ? "calc(100dvh - 4rem - var(--tabbar))"
+    : (height ?? "70vh");
   return (
     <div
       className={cn(

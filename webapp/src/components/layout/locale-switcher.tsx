@@ -6,6 +6,7 @@ import { useTransition } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { setPreferredLocale } from "@/lib/actions/profile";
+import { rememberLocaleChoice } from "@/lib/locale-choice";
 import { cn } from "@/lib/utils";
 
 /** Full names for the drawer, two-letter codes for the header pill. */
@@ -46,6 +47,9 @@ export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
 
   function switchTo(next: Locale) {
     if (next === locale) return;
+    // An explicit switch here is the same decision the first-visit sheet asks
+    // for — record it so the sheet never interrupts this visitor again.
+    rememberLocaleChoice(next);
     // Fire-and-forget: the backend composes push/Telegram server-side, where
     // the URL prefix and the next-intl cookie are invisible, so the profile is
     // the only place it can learn which language to write in. Not awaited —

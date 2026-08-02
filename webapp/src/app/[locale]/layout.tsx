@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -12,12 +12,15 @@ import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { YandexMetrica } from "@/components/analytics/yandex-metrica";
 import { ConsentBanner } from "@/components/consent/consent-banner";
+import { LanguageSheet } from "@/components/layout/language-sheet";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteTabBar } from "@/components/layout/site-tab-bar";
 import { Toaster } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
+import { LOCALE_CHOICE_COOKIE, shouldAskLanguage } from "@/lib/locale-choice";
 import { THEME_COOKIE, parseTheme, themeCookieString } from "@/lib/theme";
 import { localeAlternates, siteUrl } from "@/lib/seo";
 
@@ -147,6 +150,16 @@ export default async function LocaleLayout({
   // every RSC payload and a locale switch cannot wipe it (see lib/theme.ts).
   const dark = parseTheme(cookieStore.get(THEME_COOKIE)?.value) === "dark";
   const analyticsAllowed = consent === "granted";
+  // The first-visit language sheet. Decided on the server (cookie + request
+  // headers) so a returning visitor never gets a flash of the sheet before a
+  // client effect can hide it.
+  const headerBag = await headers();
+  const askLanguage = shouldAskLanguage({
+    current: locale,
+    chosen: cookieStore.get(LOCALE_CHOICE_COOKIE)?.value,
+    acceptLanguage: headerBag.get("accept-language"),
+    userAgent: headerBag.get("user-agent"),
+  });
 
   return (
     <html
@@ -164,13 +177,17 @@ export default async function LocaleLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="bg-background text-foreground flex min-h-full flex-col font-sans">
+      {/* `pb-[var(--tabbar)]` clears the fixed phone tab bar; the token is 0 from
+          `md` up, where the bar is hidden (see globals.css). */}
+      <body className="bg-background text-foreground flex min-h-full flex-col pb-[var(--tabbar)] font-sans">
         <NextIntlClientProvider>
           <SiteBanner />
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
-          <ConsentBanner initialConsent={consent} />
+          <SiteTabBar />
+          {askLanguage ? <LanguageSheet /> : null}
+          <ConsentBanner initialConsent={consent} deferred={askLanguage} />
           {/* Mounted once for the whole app: toast() pushes to a module-level
               store, so any client component can raise one without a provider
               in its own tree. */}
