@@ -18,6 +18,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { Toaster } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
+import { THEME_COOKIE, parseTheme, themeCookieString } from "@/lib/theme";
 import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
@@ -116,9 +117,13 @@ export async function generateMetadata({
   };
 }
 
-// Applies the saved theme before first paint to avoid a flash (see
-// node_modules/next/dist/docs/.../preventing-flash-before-hydration.md).
-const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+// First visit only: no cookie yet, so only the browser knows the OS
+// preference. Apply it before first paint and write the cookie, after which
+// the server renders the class itself and this is a no-op — which is what
+// makes the theme survive a client-side navigation (see lib/theme.ts).
+// A `theme` value left in localStorage by an earlier build is migrated so
+// nobody loses the choice they already made.
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement;if(/(?:^|; )${THEME_COOKIE}=(dark|light)/.test(document.cookie))return;var t=localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.classList.toggle('dark',t==='dark');document.cookie=t==='dark'?'${themeCookieString("dark")}':'${themeCookieString("light")}';}catch(e){}})();`;
 
 export default async function LocaleLayout({
   children,
@@ -136,13 +141,24 @@ export default async function LocaleLayout({
   // analytics loader so scripts don't reach the browser at all until the
   // visitor has clicked accept. GDPR + UZ personal-data law both require
   // this pattern for non-first-party trackers.
-  const consent = parseConsent((await cookies()).get(CONSENT_COOKIE)?.value);
+  const cookieStore = await cookies();
+  const consent = parseConsent(cookieStore.get(CONSENT_COOKIE)?.value);
+  // Rendered into the markup rather than added by script, so it is part of
+  // every RSC payload and a locale switch cannot wipe it (see lib/theme.ts).
+  const dark = parseTheme(cookieStore.get(THEME_COOKIE)?.value) === "dark";
   const analyticsAllowed = consent === "granted";
 
   return (
     <html
       lang={locale}
-      className={`${archivo.variable} ${spaceMono.variable} h-full antialiased`}
+      className={[
+        archivo.variable,
+        spaceMono.variable,
+        "h-full antialiased",
+        dark ? "dark" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       suppressHydrationWarning
     >
       <head>
