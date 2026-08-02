@@ -51,8 +51,15 @@ export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
     // the only place it can learn which language to write in. Not awaited —
     // the switch must feel instant and must not fail if this does.
     void setPreferredLocale(next);
+    // `usePathname` is next-intl's useBasePathname, which wraps Next's
+    // usePathname — path only, no query. Passing it alone sent a seeker who
+    // had searched /jobs?q=haydovchi&city=Toshkent to a bare /ru/jobs, i.e.
+    // changing language silently cleared their search. Read the live query at
+    // click time (rather than useSearchParams, which would drag a Suspense
+    // requirement into the header on every page) and carry it across.
+    const search = typeof window === "undefined" ? "" : window.location.search;
     startTransition(() => {
-      router.replace(pathname, { locale: next });
+      router.replace(`${pathname}${search}`, { locale: next });
     });
   }
 
