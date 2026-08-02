@@ -23,7 +23,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "pricing": "Pricing",
-    "language": "Language"
+    "language": "Language",
+    "tabBar": "Primary navigation"
   },
   "explore": {
     "title": "Jobs map",
@@ -806,7 +807,10 @@
     "dark": "Dark"
   },
   "localeSwitcher": {
-    "label": "Language"
+    "label": "Language",
+    "sheetTitle": "Choose your language",
+    "sheetBody": "Which language would you like to browse jobs in? You can change it any time in your profile.",
+    "close": "Close"
   },
   "landing": {
     "how": {

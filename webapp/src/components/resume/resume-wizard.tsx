@@ -13,6 +13,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { SuggestInput } from "@/components/ui/suggest-input";
 // The plain router, not the locale-aware one from @/i18n/navigation: `next`
 // arrives already locale-prefixed (quick-apply builds `/uz/jobs/<id>/apply`),
 // and pushing that through the i18n router would prefix it twice. Same choice
@@ -22,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
 import { safeNext } from "@/lib/auth/safe-next";
+import { suggestProfessions } from "@/lib/professions";
 import type {
   CertificateEntry,
   EducationEntry,
@@ -443,11 +445,17 @@ export function ResumeWizard({
         {step === 0 ? (
           <>
             <Field label={t("position")} required>
-              <input
+              {/* Type-and-pick over the curated blue-collar list: the seekers
+                  this product is built for name their trade a dozen different
+                  ways ("prodavets", "sotuvchi konsultant"), and a title that
+                  matches the postings is what makes the two-way résumé match
+                  fire. Free text still wins if their trade isn't listed. */}
+              <SuggestInput
                 className={inputClass}
                 placeholder={t("positionHint")}
                 value={draft.position}
-                onChange={(e) => set("position", e.target.value)}
+                onValueChange={(v) => set("position", v)}
+                suggest={suggestProfessions}
               />
             </Field>
             <Field label={t("fullName")} required>

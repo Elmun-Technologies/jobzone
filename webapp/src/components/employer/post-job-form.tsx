@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { SuggestInput } from "@/components/ui/suggest-input";
 import { generateJobContent } from "@/lib/actions/ai-content";
 import { track } from "@/lib/analytics/track";
 import {
@@ -16,7 +17,7 @@ import {
 import type { JobCategory } from "@/lib/data/types";
 import { groupNumber } from "@/lib/format";
 import { LISTING_TIERS } from "@/lib/listing-tiers";
-import { PROFESSIONS, suggestCategorySlug } from "@/lib/professions";
+import { suggestCategorySlug, suggestProfessions } from "@/lib/professions";
 import { cn } from "@/lib/utils";
 
 import { LocationPicker } from "../map/location-picker";
@@ -643,19 +644,18 @@ export function PostJobForm({
         <div className={cn(step !== 0 && "hidden")}>
           <Section title={tp("sectionBasic")} subtitle={tp("sectionBasicSub")}>
             <Labeled label={t("jobTitle")} required>
-              <input
+              <SuggestInput
                 name="title"
                 defaultValue={d?.title}
                 placeholder={tp("titleHint")}
-                list="pro-titles"
-                autoComplete="off"
-                onChange={(e) => {
+                suggest={suggestProfessions}
+                onValueChange={(v) => {
                   if (titleError) setTitleError(false);
                   // Auto-pick the category from the title, unless one is
                   // already chosen (or restored from a draft).
                   const sel = categoryRef.current;
                   if (!sel || sel.value) return;
-                  const slug = suggestCategorySlug(e.target.value);
+                  const slug = suggestCategorySlug(v);
                   const cat = slug
                     ? categories.find((c) => c.slug === slug)
                     : null;
@@ -663,11 +663,6 @@ export function PostJobForm({
                 }}
                 className={inputClass}
               />
-              <datalist id="pro-titles">
-                {PROFESSIONS.map((p) => (
-                  <option key={p.label} value={p.label} />
-                ))}
-              </datalist>
             </Labeled>
             {/* AI assist: gather the employer's key points, then generate a
                 full professional posting from them. */}

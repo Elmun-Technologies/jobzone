@@ -8,15 +8,18 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { JobCard } from "@/components/jobs/job-card";
+import { RoleToggle } from "@/components/layout/role-toggle";
 import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { AnimatedSearchInput } from "@/components/ui/animated-search-input";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
+import { getCurrentUser } from "@/lib/auth/user";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
 import { getCompanies, getCompanyRatings } from "@/lib/data/companies";
+import { getMyRole } from "@/lib/data/employer";
 import {
   getCities,
   getJobCount,
@@ -57,6 +60,15 @@ export default async function HomePage({
     question: tfaq(`q${i + 1}`),
     answer: tfaq(`a${i + 1}`),
   }));
+
+  // Same rule the header applies to the audience pill: a guest sliding to
+  // "Employer" lands on the guest-first post page, since the dashboard is
+  // gated and would bounce them to sign-in. Both reads are request-memoized.
+  const heroUser = await getCurrentUser();
+  const employerHref =
+    heroUser && (await getMyRole()) === "employer"
+      ? "/employer"
+      : "/employer/jobs/new";
 
   const [
     recent,
@@ -110,6 +122,15 @@ export default async function HomePage({
         <div className="relative isolate overflow-hidden rounded-3xl bg-[#171716] px-5 py-16 sm:px-10 sm:py-24">
           <HeroMapBackdrop />
           <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
+            {/* Seeker ⇄ employer, on phones only: the header hides this pill
+                below `sm` (it doesn't fit next to the logo and the auth
+                buttons), which left the entire employer side of the
+                marketplace reachable only through the drawer. At the top of
+                the hero it is the first thing a visitor sees, which is where
+                the audience split belongs. */}
+            <div className="sm:hidden">
+              <RoleToggle employerHref={employerHref} tone="onDark" />
+            </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-white/80 uppercase backdrop-blur">
               <MapPin className="text-primary size-3.5" />
               {t("heroBadge")}

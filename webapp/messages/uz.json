@@ -23,7 +23,8 @@
     "openMenu": "Menyuni ochish",
     "closeMenu": "Menyuni yopish",
     "pricing": "Narxlar",
-    "language": "Til"
+    "language": "Til",
+    "tabBar": "Asosiy navigatsiya"
   },
   "explore": {
     "title": "Ishlar xaritasi",
@@ -806,7 +807,10 @@
     "dark": "Tungi rejim"
   },
   "localeSwitcher": {
-    "label": "Til"
+    "label": "Til",
+    "sheetTitle": "Tilni tanlang",
+    "sheetBody": "Vakansiyalarni qaysi tilda ko'rishni xohlaysiz? Keyinroq profilda o'zgartirishingiz mumkin.",
+    "close": "Yopish"
   },
   "landing": {
     "how": {

@@ -29,6 +29,18 @@
   /* Admin charts: single-series monochrome (ink on light, volt on dark) —
      both clear 15:1 on their surfaces, so no palette juggling needed. */
   --chart-series: #0a0a0a;
+
+  /* Height of the phone bottom tab bar, including the iOS home-indicator
+     inset. One source of truth for everything that has to sit above it or
+     stop short of it: the body's end padding, the cookie bar, the full-bleed
+     map. Zeroed at `md`, where the bar is hidden. */
+  --tabbar: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --tabbar: 0px;
+  }
 }
 
 /* Dark surfaces are deliberately NOT the brand ink (#0A0A0A).

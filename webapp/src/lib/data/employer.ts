@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { JobDraft } from "@/components/employer/post-job-form";
 import { createClient } from "@/lib/supabase/server";
 
@@ -7,8 +9,14 @@ import { toCompany } from "./mappers";
 import { hasSupabase } from "./supabase-env";
 import type { Company } from "./types";
 
-/** The signed-in user's role (job_seeker | employer), or null. */
-export async function getMyRole(): Promise<string | null> {
+/**
+ * The signed-in user's role (job_seeker | employer), or null.
+ *
+ * Request-memoized: the header and the mobile tab bar both need the role to
+ * decide which mode they render, and they are separate components — without
+ * `cache` that is the same profiles round-trip twice on every page.
+ */
+export const getMyRole = cache(async (): Promise<string | null> => {
   if (!hasSupabase()) return null;
   try {
     const supabase = await createClient();
@@ -27,7 +35,7 @@ export async function getMyRole(): Promise<string | null> {
   } catch {
     return null;
   }
-}
+});
 
 /** The company owned by the signed-in user, or null. */
 export async function getMyCompany(): Promise<Company | null> {
