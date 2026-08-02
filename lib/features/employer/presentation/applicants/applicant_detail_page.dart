@@ -578,9 +578,7 @@ class _Certifications extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (profileId.isEmpty) return const SizedBox.shrink();
-    final items = ref
-        .watch(applicantCertificationsProvider(profileId))
-        .valueOrNull;
+    final items = ref.watch(applicantCertificationsProvider(profileId)).value;
     if (items == null || items.isEmpty) return const SizedBox.shrink();
     final l = context.l10n;
     final colors = context.colors;
@@ -611,7 +609,7 @@ class _Certifications extends ConsumerWidget {
                   ),
                   Builder(
                     builder: (context) {
-                      final sub = [
+                      final sub = <String?>[
                         c.issuer,
                         if (c.issuedDate != null)
                           periodText(context, c.issuedDate, null),
