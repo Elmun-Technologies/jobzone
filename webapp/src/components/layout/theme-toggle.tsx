@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
+import { themeCookieString } from "@/lib/theme";
 
 // Subscribe to <html> class changes so the icon reflects the active theme.
 function subscribe(onChange: () => void) {
@@ -35,6 +36,11 @@ export function ThemeToggle() {
   function toggle() {
     const next = !dark;
     document.documentElement.classList.toggle("dark", next);
+    // The cookie is what matters: the server reads it and renders the class,
+    // so the choice survives a locale switch (which re-renders <html> from the
+    // payload and would drop a class only JS had added). localStorage is kept
+    // in sync as a fallback for browsers refusing the cookie.
+    document.cookie = themeCookieString(next ? "dark" : "light");
     try {
       localStorage.setItem("theme", next ? "dark" : "light");
     } catch {

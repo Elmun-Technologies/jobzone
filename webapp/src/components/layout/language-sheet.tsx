@@ -54,7 +54,13 @@ export function LanguageSheet() {
     // composes push/Telegram copy from the profile, which is the only place
     // it can learn the language — but the navigation must not wait on it.
     void setPreferredLocale(next);
-    start(() => router.replace(pathname, { locale: next }));
+    // Carry the query across, for the same reason the header switcher does:
+    // `usePathname` here is next-intl's, which is path-only, and this sheet
+    // greets exactly the visitor who arrived on a deep link — dropping
+    // `?q=…&city=…` would answer their language question by throwing away
+    // the search that brought them.
+    const search = typeof window === "undefined" ? "" : window.location.search;
+    start(() => router.replace(`${pathname}${search}`, { locale: next }));
   }
 
   function dismiss() {

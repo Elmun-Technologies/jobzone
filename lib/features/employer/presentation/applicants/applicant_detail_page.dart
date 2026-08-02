@@ -340,6 +340,8 @@ class _ApplicantDetailPageState extends ConsumerState<ApplicantDetailPage> {
                       children: [for (final s in a.skills) _Chip(s)],
                     ),
                   ],
+                  _Experiences(profileId: a.workerId),
+                  _Educations(profileId: a.workerId),
                   _Certifications(profileId: a.workerId),
                   if (a.coverLetter != null && a.coverLetter!.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xl),
@@ -657,5 +659,143 @@ class _Certifications extends ConsumerWidget {
         )) {
       if (context.mounted) showErrorSnack(context, context.l10n.errUnknown);
     }
+  }
+}
+
+/// One entry in a CV section — a bold line, an optional grey line under it,
+/// and the candidate's own description if they wrote one. Shared by the
+/// experience and education sections so the two read as one list.
+class _CvEntry extends StatelessWidget {
+  const _CvEntry({required this.title, this.subtitle, this.detail});
+  final String title;
+  final String? subtitle;
+  final String? detail;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final sub = subtitle ?? '';
+    final body = detail ?? '';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: colors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: colors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: context.text.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (sub.isNotEmpty)
+              Text(
+                sub,
+                style: context.text.bodySmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            if (body.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(body, style: context.text.bodySmall),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Heading + entries, or nothing at all. Same rule as [_Certifications]: an
+/// employer working through a queue is not served by a spinner or an error
+/// where a heading would be, so a section only exists once it has content.
+class _CvSection extends StatelessWidget {
+  const _CvSection({required this.title, required this.children});
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (children.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.xl),
+        Text(title, style: context.text.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
+        ...children,
+      ],
+    );
+  }
+}
+
+/// The candidate's work history.
+///
+/// Until now the applicant screen showed skills, a cover letter and screening
+/// answers — never where the person had actually worked. An employer deciding
+/// on a driver or a welder from their phone was choosing without the one thing
+/// the résumé is mostly made of; the web applicant screen has always had it.
+class _Experiences extends ConsumerWidget {
+  const _Experiences({required this.profileId});
+  final String profileId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (profileId.isEmpty) return const SizedBox.shrink();
+    final items = ref.watch(applicantExperiencesProvider(profileId)).value;
+    if (items == null || items.isEmpty) return const SizedBox.shrink();
+    return _CvSection(
+      title: context.l10n.sectionExperience,
+      children: [
+        for (final e in items)
+          _CvEntry(
+            title: e.title,
+            // Same shape the seeker sees on their own profile, so an employer
+            // and a candidate are reading the identical entry.
+            subtitle: <String?>[
+              e.companyName,
+              periodText(context, e.startDate, e.endDate, current: e.isCurrent),
+            ].where((s) => s != null && s.isNotEmpty).join(' • '),
+            detail: e.description,
+          ),
+      ],
+    );
+  }
+}
+
+/// The candidate's education.
+class _Educations extends ConsumerWidget {
+  const _Educations({required this.profileId});
+  final String profileId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (profileId.isEmpty) return const SizedBox.shrink();
+    final items = ref.watch(applicantEducationsProvider(profileId)).value;
+    if (items == null || items.isEmpty) return const SizedBox.shrink();
+    return _CvSection(
+      title: context.l10n.sectionEducation,
+      children: [
+        for (final e in items)
+          _CvEntry(
+            title: e.school,
+            subtitle: <String>[
+              <String?>[
+                e.degree,
+                e.field,
+              ].where((s) => s != null && s.isNotEmpty).join(', '),
+              periodText(context, e.startDate, e.endDate),
+            ].where((s) => s.isNotEmpty).join(' • '),
+            detail: e.description,
+          ),
+      ],
+    );
   }
 }
