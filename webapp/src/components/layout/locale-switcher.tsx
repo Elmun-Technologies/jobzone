@@ -6,6 +6,7 @@ import { useTransition } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { setPreferredLocale } from "@/lib/actions/profile";
+import { captureDrafts } from "@/lib/draft-stash";
 import { rememberLocaleChoice } from "@/lib/locale-choice";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,10 @@ export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
     // click time (rather than useSearchParams, which would drag a Suspense
     // requirement into the header on every page) and carry it across.
     const search = typeof window === "undefined" ? "" : window.location.search;
+    // The locale change rebuilds everything under `[locale]`, so any form on
+    // screen goes back to empty. Park the drafts first; each form restores its
+    // own on mount, the same way it already does after the sign-in detour.
+    captureDrafts();
     startTransition(() => {
       router.replace(`${pathname}${search}`, { locale: next });
     });
