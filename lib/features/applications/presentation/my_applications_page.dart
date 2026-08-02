@@ -232,10 +232,17 @@ class _ApplicationCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        job.companyName,
+                        // The vacancy being gone is the first thing this row
+                        // has to say — it explains why nothing is moving, and
+                        // the web list has said it since it shipped.
+                        job.status == 'open'
+                            ? job.companyName
+                            : '${job.companyName} · ${context.l10n.positionClosed}',
                         style: context.text.bodySmall?.copyWith(
                           color: colors.textSecondary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
