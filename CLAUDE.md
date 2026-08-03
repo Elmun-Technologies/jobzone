@@ -148,7 +148,7 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 
 ## Backend (`supabase/`)
 
-- **Schema domains** (82 migrations, 0001–0082): profiles/CV (experiences, educations,
+- **Schema domains** (84 migrations, 0001–0084): profiles/CV (experiences, educations,
   skills, resumes…), companies (+people/gallery/reviews), job_categories
   (seeded blue-collar set incl. Foreign-jobs), jobs (rich blue-collar fields +
   screening_questions jsonb + boost + expiry + publish_at), applications
@@ -161,7 +161,10 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   **admin foundation** (0037–0057: audit log, moderation, admin grants, finance,
   broadcast, category CMS, platform settings), then legal/compliance
   (content_reports, account_deletion), the per-vacancy paid listing tiers
-  (0063–0065, 0072, 0075–0076) and the résumé/matching work (0077, 0082).
+  (0063–0065, 0072, 0075–0076), the résumé/matching work (0077, 0082) and the
+  **email channel** (0084: per-category email switches + unsubscribe token,
+  `email_deliveries` send log, alert payloads for the digest, followed-company
+  alerts, welcome-mail triggers on `auth.users`).
 - **Numbering a new migration:** take the next free version — never reuse one.
   The version is the PK of `supabase_migrations.schema_migrations`, so a
   duplicate makes `db push` **silently skip** the second file; this has bitten
@@ -181,10 +184,14 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   go through `application_status_history` inserts — never write
   `current_status` directly.
 - **Notification pipeline:** INSERT into `notifications` → pg_net AFTER-INSERT
-  trigger (0026, reads `app.notify_dispatch_url` + `app.edge_shared_secret`) →
-  `notify-dispatch` fn → Telegram (if linked) + FCM (if configured), honoring
-  `notification_settings`. So any feature notifies all channels by inserting
-  one row.
+  trigger (0026, reads `private.app_secrets`) → `notify-dispatch` fn → Telegram
+  (if linked) + FCM (if configured) + **email** (if `RESEND_API_KEY` is set),
+  honoring `notification_settings` — `push_*` mutes the instant channels,
+  `email_*` the inbox, independently. So any feature notifies every channel by
+  inserting one row. Saved-search/followed-company alerts are the exception:
+  they carry `data.alert = true`, and the email for them is the grouped digest
+  sent by `saved-search-alerts` (one mail per person per run, never one per
+  vacancy).
 - **Saved-search alerts (0036):** `run_saved_search_alerts()` matches jobs
   posted since each search's `last_alerted_at` (keywords ILIKE
   title/company/category + city), inserts `job_match` notifications
@@ -197,7 +204,8 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   delivery, Standard-Webhooks-verified), `telegram-webhook` (/start link),
   `push-dispatch` (FCM), `payment-webhook` (Click/Payme stub),
   `generate-job-content` (AI seam — templates now, Claude when
-  `ANTHROPIC_API_KEY` set), `agora-token` (calls), `send-notification`, and the
+  `ANTHROPIC_API_KEY` set), `lifecycle-email` (welcome mail, fired by the
+  `auth.users` triggers), `agora-token` (calls), `send-notification`, and the
   legacy Meili trio (`meili-sync`/`meili-reindex`/`search-jobs`). All
   server-to-server ones are gated by `EDGE_SHARED_SECRET` (fail closed).
 
@@ -264,9 +272,10 @@ call the same RPC), one-tap apply from any job card (web + mobile), a seeker's
 (moderation/finance/categories/broadcast/audit/settings), and the go-live
 runbook (`docs/go-live-checklist.md`).
 
-**Go-live is ops, not code** (user's side): `supabase db push` (→0082),
+**Go-live is ops, not code** (user's side): `supabase db push` (→0084),
 secrets (`EDGE_SHARED_SECRET`, `TELEGRAM_GATEWAY_TOKEN`, `SEND_SMS_HOOK_SECRET`,
-`TELEGRAM_BOT_TOKEN`…, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), deploy
+`TELEGRAM_BOT_TOKEN`…, `RESEND_API_KEY` + `EMAIL_FROM` + a DKIM/SPF/DMARC-verified
+sending domain for email, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), deploy
 edge fns, enable Phone auth + register the Send-SMS hook, schedule the cron (§5),
 Vercel envs, store submission.
 
