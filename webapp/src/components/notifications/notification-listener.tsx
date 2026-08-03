@@ -6,6 +6,7 @@ import { useEffect, useMemo } from "react";
 import { toast } from "@/components/ui/toast";
 import { useRouter } from "@/i18n/navigation";
 import {
+  inviteParts,
   isJobClosed,
   notificationHref,
   notificationStatus,
@@ -59,15 +60,18 @@ export function NotificationListener({ userId }: { userId: string }) {
           const titleKey = notificationTitleKey(kind, data);
           const status = notificationStatus(kind, data);
           const closed = isJobClosed(data);
+          const invite = inviteParts(kind, data);
           toast({
             title: titleKey ? t(titleKey) : String(row.title ?? t("title")),
             description: closed
               ? t("bodyJobClosed", { title: String(row.body ?? "") })
-              : status
-                ? t("bodyApplicationUpdate", { status: ts(status) })
-                : typeof row.body === "string"
-                  ? row.body
-                  : null,
+              : invite
+                ? t("bodyJobInvite", invite)
+                : status
+                  ? t("bodyApplicationUpdate", { status: ts(status) })
+                  : typeof row.body === "string"
+                    ? row.body
+                    : null,
             href: path ? `/${locale}${path}` : null,
             actionLabel: t("toastAction"),
           });

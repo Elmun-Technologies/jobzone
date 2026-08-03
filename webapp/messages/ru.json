@@ -270,6 +270,8 @@
     "typeMessage": "Новое сообщение",
     "typeJobClosed": "Вакансия закрыта",
     "bodyJobClosed": "«{title}» больше не принимает отклики.",
+    "typeJobInvite": "Приглашение на работу",
+    "bodyJobInvite": "{company} приглашает вас на должность «{title}».",
     "bodyApplicationUpdate": "Статус вашего отклика: {status}"
   },
   "employer": {

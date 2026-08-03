@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/states";
 import { markAllNotificationsRead } from "@/lib/actions/notifications";
 import { getNotifications } from "@/lib/data/notifications";
 import {
+  inviteParts,
   isJobClosed,
   notificationHref,
   notificationStatus,
@@ -85,6 +86,9 @@ export default async function NotificationsPage({
               // 0078 stores the vacancy's title as the body; the sentence
               // around it is written here, in the reader's language.
               const closed = isJobClosed(n.data);
+              // 0079 carries the company and role, so the invitation reads in
+              // the seeker's language rather than the one 0050 wrote it in.
+              const invite = inviteParts(n.kind, n.data);
               return (
                 <NotificationRow
                   key={n.id}
@@ -94,9 +98,11 @@ export default async function NotificationsPage({
                   body={
                     closed
                       ? t("bodyJobClosed", { title: n.body ?? "" })
-                      : status
-                        ? t("bodyApplicationUpdate", { status: ts(status) })
-                        : n.body
+                      : invite
+                        ? t("bodyJobInvite", invite)
+                        : status
+                          ? t("bodyApplicationUpdate", { status: ts(status) })
+                          : n.body
                   }
                   meta={
                     n.createdAt
