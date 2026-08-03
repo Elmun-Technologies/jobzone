@@ -128,7 +128,14 @@
       "sections": "{done}/{total} bo'lim to'ldirilgan",
       "build": "Rezyumeni to'ldirish",
       "edit": "Rezyumeni tahrirlash",
-      "seen": "Ish beruvchilar rezyumengizni ko'radi"
+      "seen": "Ish beruvchilar rezyumengizni ko'radi",
+      "photoAdd": "Rezyumega foto qo'shing",
+      "photoChange": "Rezyume fotosi",
+      "photoHint": "JPG yoki PNG, 5 MB gacha. Fotoli rezyume ko'proq e'tibor tortadi.",
+      "photoCta": "Foto yuklash",
+      "photoSaved": "Foto saqlandi",
+      "photoFailed": "Fotoni yuklab bo'lmadi. Qayta urinib ko'ring.",
+      "photoInvalid": "JPG yoki PNG, 5 MB gacha bo'lsin."
     }
   },
   "chat": {
@@ -155,8 +162,8 @@
     "stepPersonal": "Shaxsiy ma'lumotlar",
     "stepExperience": "Ish tajribasi",
     "stepContacts": "Kontaktlar",
-    "position": "Qaysi lavozim uchun rezyume?",
-    "positionHint": "Lavozim nomini yozing",
+    "position": "Qaysi lavozimlar uchun rezyume?",
+    "positionHint": "Lavozim nomini yozing va tanlang",
     "fullName": "To'liq ism",
     "city": "Hudud / shahar",
     "birthDate": "Tug'ilgan sana",
@@ -235,7 +242,14 @@
     "expiryHint": "Muddatsiz bo'lsa — bo'sh qoldiring",
     "addCertificate": "Sertifikat qo'shish",
     "addLanguage": "Qo'shish",
-    "addLanguageHint": "Boshqa til (masalan, Arabcha)"
+    "addLanguageHint": "Boshqa til (masalan, Arabcha)",
+    "positionsHelp": "{max} tagacha lavozim. Taklifdan tanlang yoki o'zingiznikini yozing.",
+    "fullNameHelp": "Ism va familiyani pasportdagidek lotin harflarida yozing.",
+    "region": "Ishlamoqchi bo'lgan hudud",
+    "regionAny": "Farqi yo'q",
+    "district": "Tuman / shahar",
+    "districtAny": "Farqi yo'q",
+    "workHistoryNudge": "Ish tajribasi ko'rsatilgan rezyumelar tezroq javob oladi."
   },
   "bookmarks": {
     "title": "Saqlangan ishlar",

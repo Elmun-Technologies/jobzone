@@ -25,6 +25,9 @@ export function SuggestInput({
   value,
   defaultValue = "",
   onValueChange,
+  onPick,
+  onSubmitValue,
+  onBlur,
   name,
   id,
   placeholder,
@@ -37,6 +40,17 @@ export function SuggestInput({
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
+  /** Fired only when a suggestion is chosen from the list — not on typing, so
+   * a caller can tell "they picked Sotuvchi" from "they have typed as far as
+   * S-o-t-u-v-c-h-i and may keep going". */
+  onPick?: (value: string) => void;
+  /** Enter with no suggestion highlighted: commit whatever is typed. Gives the
+   * field a keyboard equivalent of the picker for a title we don't list. */
+  onSubmitValue?: (value: string) => void;
+  /** Leaving the field with text in it. Selecting a suggestion does not blur
+   * (the list swallows the pointerdown), so this only sees text the visitor
+   * typed and walked away from. */
+  onBlur?: (value: string) => void;
   name?: string;
   id?: string;
   placeholder?: string;
@@ -78,6 +92,7 @@ export function SuggestInput({
     commit(label);
     setTyping(false);
     setActive(-1);
+    onPick?.(label);
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -86,19 +101,27 @@ export function SuggestInput({
       setActive(-1);
       return;
     }
+    if (e.key === "Enter") {
+      // Enter selects the highlighted suggestion. With nothing highlighted it
+      // commits what was typed if the caller takes free text; otherwise it
+      // falls through, so the wizard's "next" button keeps working from the
+      // keyboard and free text is never overwritten by a guess.
+      if (open && active >= 0) {
+        e.preventDefault();
+        pick(items[active]);
+      } else if (onSubmitValue && current.trim() !== "") {
+        e.preventDefault();
+        setTyping(false);
+        setActive(-1);
+        onSubmitValue(current.trim());
+      }
+      return;
+    }
     if (!open) return;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       const step = e.key === "ArrowDown" ? 1 : -1;
       setActive((i) => (i + step + items.length) % items.length);
-      return;
-    }
-    // Enter selects the highlighted suggestion; with nothing highlighted it
-    // falls through so the wizard's "next" button keeps working from the
-    // keyboard and free text is never overwritten by a guess.
-    if (e.key === "Enter" && active >= 0) {
-      e.preventDefault();
-      pick(items[active]);
     }
   }
 
@@ -125,6 +148,11 @@ export function SuggestInput({
           commit(e.target.value);
         }}
         onKeyDown={onKeyDown}
+        onBlur={() => {
+          setTyping(false);
+          setActive(-1);
+          if (current.trim() !== "") onBlur?.(current.trim());
+        }}
         className={className}
       />
       {open ? (
@@ -140,10 +168,21 @@ export function SuggestInput({
                 type="button"
                 role="option"
                 aria-selected={i === active}
-                // The field must not blur before the tap is handled, or the
-                // list unmounts under the finger and the tap hits the page.
-                onPointerDown={(e) => e.preventDefault()}
-                onClick={() => pick(label)}
+                // Selection happens on pointerdown, not click.
+                //
+                // Two things go wrong otherwise, and they pull in opposite
+                // directions: without `preventDefault` the input blurs first,
+                // the list unmounts under the finger, and the tap lands on
+                // whatever is now underneath; WITH it on a touch screen, the
+                // browser suppresses the synthesized `click` entirely, so a
+                // phone tap selected nothing at all (keyboard still worked,
+                // which is what made it easy to miss). Doing the work in
+                // pointerdown — before either blur or click — is the one
+                // ordering that holds for mouse, touch and pen alike.
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  pick(label);
+                }}
                 onMouseEnter={() => setActive(i)}
                 className={cn(
                   "block w-full px-4 py-2.5 text-left text-sm transition-colors",

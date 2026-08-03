@@ -19,6 +19,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { AvatarUpload } from "@/components/account/avatar-upload";
 import { PageEvent } from "@/components/analytics/page-event";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -66,7 +67,7 @@ function resumeReadiness(r: ResumeDraft): {
   pct: number;
 } {
   const checks = [
-    Boolean(r.fullName && r.position && r.city),
+    Boolean(r.fullName && r.positions.length > 0 && r.city),
     Boolean(r.summary),
     r.experiences.length > 0 || Boolean(r.experienceLevel),
     r.educations.length > 0,
@@ -333,6 +334,11 @@ export default async function AccountPage({
             })}{" "}
             · {trc("seen")}
           </p>
+          {/* The photo the résumé wizard cannot ask for: it runs guest-first,
+              and Storage only accepts a write from the account that owns the
+              path. Here the seeker is signed in, so this is the first moment
+              the picture can actually be stored. */}
+          <AvatarUpload current={profile?.avatarUrl || null} />
         </div>
       ) : null}
 

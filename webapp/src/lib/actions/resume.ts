@@ -44,12 +44,22 @@ export async function saveResume(
   if (!user) return { signedOut: true };
 
   const pay = Number(draft.expectedSalary);
+  // Up to three, trimmed and de-duplicated — the DB check constraint (0078)
+  // rejects a longer array outright, which would fail the whole save.
+  const positions = Array.from(
+    new Set((draft.positions ?? []).map((p) => p.trim()).filter(Boolean)),
+  ).slice(0, 3);
+  // `city` is derived, not typed: the wizard asks for a canonical region and
+  // district, and the district (or the region, if that's all they picked) is
+  // what the cards show and what pre-0078 rows are matched on.
+  const city = draft.district.trim() || draft.region.trim();
   const { error } = await supabase
     .from("profiles")
     .update({
       full_name: clean(draft.fullName),
-      headline: clean(draft.position),
-      city: clean(draft.city),
+      // Position #1 stays the headline every card and chat header renders.
+      headline: positions[0] ?? null,
+      city: clean(city),
       gender: clean(draft.gender),
       birth_date: clean(draft.birthDate),
       marital_status: clean(draft.maritalStatus),
@@ -64,6 +74,19 @@ export async function saveResume(
     .eq("id", user.id);
 
   if (error) return { error: true };
+
+  // The 0078 columns ride their own best-effort write, like summary below: a DB
+  // that hasn't taken the migration yet still saves the rest of the résumé
+  // (headline + city above already carry the same information in the old
+  // shape), instead of failing the save with an unknown-column error.
+  await supabase
+    .from("profiles")
+    .update({
+      desired_positions: positions.length > 0 ? positions : null,
+      desired_region: clean(draft.region),
+      desired_district: clean(draft.district),
+    })
+    .eq("id", user.id);
 
   // Summary (+ its AI flag) ride a separate best-effort write: profiles.summary
   // (0044) and summary_ai_generated (0046) are late columns, so a DB behind on
