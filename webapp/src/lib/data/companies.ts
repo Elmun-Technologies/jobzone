@@ -5,7 +5,7 @@ import { unstable_cache } from "next/cache";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 import { getOpenJobs } from "./jobs";
-import { toCompany, toReview } from "./mappers";
+import { toCompany, toJob, toReview } from "./mappers";
 import { hasSupabase } from "./supabase-env";
 import type { Company, CompanyReview, CompanyWithJobs, Job } from "./types";
 
@@ -124,11 +124,16 @@ export async function getCompanies(opts?: {
   }
 }
 
-/** A company profile by id, or null. */
-export async function getCompanyById(id: string): Promise<Company | null> {
-  if (!hasSupabase()) return null;
-  try {
-    const supabase = await createClient();
+// Everything a company's public profile shows is the same for every visitor,
+// so all three reads below go through the anon client and a shared cache
+// window. Reading them through the session client is what kept that page —
+// one of the site's indexable surfaces — rendering per request. Company edits
+// flush "companies"; a publish, close or edit flushes "jobs".
+const COMPANY_REVALIDATE = 300;
+
+const _getCompanyById = unstable_cache(
+  async (id: string): Promise<Company | null> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("companies")
       .select("*")
@@ -136,17 +141,25 @@ export async function getCompanyById(id: string): Promise<Company | null> {
       .maybeSingle();
     if (error) throw error;
     return data ? toCompany(data) : null;
+  },
+  ["company"],
+  { tags: ["companies"], revalidate: COMPANY_REVALIDATE },
+);
+
+/** A company profile by id, or null. */
+export async function getCompanyById(id: string): Promise<Company | null> {
+  if (!hasSupabase()) return null;
+  try {
+    return await _getCompanyById(id);
   } catch (e) {
     console.error("getCompanyById failed", e);
     return null;
   }
 }
 
-/** Open jobs posted by a company. */
-export async function getCompanyJobs(companyId: string): Promise<Job[]> {
-  if (!hasSupabase()) return [];
-  try {
-    const supabase = await createClient();
+const _getCompanyJobs = unstable_cache(
+  async (companyId: string): Promise<Job[]> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("job_feed")
       .select("*")
@@ -154,21 +167,26 @@ export async function getCompanyJobs(companyId: string): Promise<Job[]> {
       .eq("status", "open")
       .order("posted_at", { ascending: false });
     if (error) throw error;
-    const { toJob } = await import("./mappers");
     return (data ?? []).map(toJob);
+  },
+  ["company-jobs"],
+  { tags: ["jobs"], revalidate: COMPANY_REVALIDATE },
+);
+
+/** Open jobs posted by a company. */
+export async function getCompanyJobs(companyId: string): Promise<Job[]> {
+  if (!hasSupabase()) return [];
+  try {
+    return await _getCompanyJobs(companyId);
   } catch (e) {
     console.error("getCompanyJobs failed", e);
     return [];
   }
 }
 
-/** Public reviews for a company (author names require auth, so omitted). */
-export async function getCompanyReviews(
-  companyId: string,
-): Promise<CompanyReview[]> {
-  if (!hasSupabase()) return [];
-  try {
-    const supabase = await createClient();
+const _getCompanyReviews = unstable_cache(
+  async (companyId: string): Promise<CompanyReview[]> => {
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("company_reviews")
       .select("id, rating, body, created_at")
@@ -177,6 +195,18 @@ export async function getCompanyReviews(
       .limit(20);
     if (error) throw error;
     return (data ?? []).map(toReview);
+  },
+  ["company-reviews"],
+  { tags: ["reviews"], revalidate: COMPANY_REVALIDATE },
+);
+
+/** Public reviews for a company (author names require auth, so omitted). */
+export async function getCompanyReviews(
+  companyId: string,
+): Promise<CompanyReview[]> {
+  if (!hasSupabase()) return [];
+  try {
+    return await _getCompanyReviews(companyId);
   } catch (e) {
     console.error("getCompanyReviews failed", e);
     return [];

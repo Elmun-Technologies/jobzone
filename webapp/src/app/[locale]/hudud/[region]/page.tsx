@@ -41,6 +41,18 @@ function resolveRegion(slug: string): string | null {
   return UZ_REGION_NAMES.find((r) => slugify(r) === slug) ?? null;
 }
 
+/**
+ * Rebuilt at most every five minutes, and immediately whenever an employer
+ * publishes, closes, edits or boosts a vacancy (`revalidateTag("jobs")`).
+ *
+ * The tag flush is what makes invariant #3 hold — a new posting is visible at
+ * once. This window is the safety net under it: publishing also happens where
+ * no server action runs, from the `publish_due_jobs()` cron and the payment
+ * webhook, and vacancies expire on a timestamp nobody flushes. Without a
+ * window those changes would sit behind stale HTML indefinitely.
+ */
+export const revalidate = 300;
+
 // The fourteen regions are a fixed list, so every one of these pages is built
 // once and served from the edge instead of rendered per request.
 export function generateStaticParams() {

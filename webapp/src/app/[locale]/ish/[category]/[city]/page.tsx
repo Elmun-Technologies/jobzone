@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
 import { getCategoryBySlug } from "@/lib/data/categories";
-import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
+import { getCities, getPublicJobCount, getPublicJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
 import { groupNumber, salaryRangeUzsText } from "@/lib/format";
 import { latestPostedAt, uzsSalaryRange } from "@/lib/geo-stats";
@@ -22,10 +22,36 @@ import {
 import { slugify } from "@/lib/slug";
 
 // Cached public data only, no per-visitor read — so this can be prerendered
-// and served from the CDN. A new posting still surfaces within the readers'
-// revalidate window (and immediately on the "jobs" tag flush), which is what
-// invariant #3 requires.
+// and served from the CDN. A new posting surfaces immediately via the "jobs"
+// tag flush (and within the readers' window otherwise), which is what
+// invariant #3 requires. Like the category landing above it, this shows the
+// whole market: a vacancy a seeker archived is still listed here.
 const LANDING_LIMIT = 30;
+
+/**
+ * Rebuilt at most every five minutes, and immediately whenever an employer
+ * publishes, closes, edits or boosts a vacancy (`revalidateTag("jobs")`).
+ *
+ * The tag flush is what makes invariant #3 hold — a new posting is visible at
+ * once. This window is the safety net under it: publishing also happens where
+ * no server action runs, from the `publish_due_jobs()` cron and the payment
+ * webhook, and vacancies expire on a timestamp nobody flushes. Without a
+ * window those changes would sit behind stale HTML indefinitely.
+ */
+export const revalidate = 300;
+
+/**
+ * Rendered on first request, then cached — deliberately not prebuilt.
+ *
+ * This is a trade × city matrix: a couple of dozen categories against every
+ * city with a posting, most of which nobody will ever ask for. Building all of
+ * them would cost minutes and megabytes to serve a long tail on the off
+ * chance; building the ones that are actually visited costs one slow request
+ * each. Next needs the export to treat the route as prerenderable at all.
+ */
+export function generateStaticParams() {
+  return [];
+}
 
 /** Resolve a city slug back to the canonical city string used in the jobs
  * table. Returns null when the slug matches nothing on the platform, so the
@@ -85,12 +111,12 @@ export default async function CategoryCityLandingPage({
   const faqHeading = tfaq("heading", { category: cat.name });
 
   const [jobs, count, cities] = await Promise.all([
-    getOpenJobs({
+    getPublicJobs({
       category: cat.name,
       city: cityName,
       limit: LANDING_LIMIT,
     }),
-    getJobCount({ category: cat.name, city: cityName }),
+    getPublicJobCount({ category: cat.name, city: cityName }),
     getCities(),
   ]);
 
