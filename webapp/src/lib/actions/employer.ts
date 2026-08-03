@@ -182,6 +182,12 @@ export async function updateCompany(
     return { error: "unknown" };
   }
 
+  // The company's public profile is prerendered from a cached read — without
+  // this, a renamed company would keep its old name on /companies/[id] (and on
+  // every vacancy card that carries it) until the window expired.
+  revalidateTag("companies", "max");
+  revalidateTag("jobs", "max");
+
   redirect(`/${locale}/employer`);
 }
 
@@ -616,6 +622,11 @@ export async function updateJob(
     );
   }
 
+  // The vacancy page and every listing that shows this job are prerendered
+  // from cached reads, so an edit has to flush them — otherwise a corrected
+  // salary or title would sit stale until the window expired.
+  revalidateTag("jobs", "max");
+
   redirect(`/${locale}/employer/jobs?updated=1`);
 }
 
@@ -652,6 +663,11 @@ export async function promoteJob(
     console.error("promoteJob failed", error);
     return { error: "unknown", detail: dbDetail(error) };
   }
+
+  // A boost is a paid change to where this vacancy sits in every feed, and
+  // those feeds are prerendered — flush them so the employer gets what they
+  // just bought immediately.
+  revalidateTag("jobs", "max");
 
   redirect(`/${locale}/employer/jobs?promoted=1`);
 }
