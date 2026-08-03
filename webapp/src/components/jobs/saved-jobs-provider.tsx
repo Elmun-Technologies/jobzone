@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { createClient } from "@/lib/supabase/client";
+import { hasAuthCookie } from "@/lib/auth/browser-session";
 
 /** `null` until we know — a signed-out visitor settles on an empty set. */
 const SavedJobsContext = createContext<Set<string> | null>(null);
@@ -26,8 +26,21 @@ export function SavedJobsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Nobody signed in, nothing saved — and no reason to download a database
+    // client to be told so. Most visitors arrive from a search result and
+    // never sign in; this is the difference between them paying for the
+    // feature and not.
+    if (!hasAuthCookie()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSaved(new Set());
+      return;
+    }
     (async () => {
       try {
+        // Dynamic, like the session provider's: this wraps every page, and a
+        // static import would put the whole Supabase client in the bundle
+        // that has to parse before a prerendered page can do anything.
+        const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
         const {
           data: { user },

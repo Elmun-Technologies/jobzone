@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -9,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import { createClient } from "@/lib/supabase/client";
+import { hasAuthCookie, isAuthRoute } from "@/lib/auth/browser-session";
 
 export interface SessionState {
   /** `null` while the browser is still asking — render neutral, not "guest". */
@@ -105,6 +106,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   // `router.refresh()` could repaint.
   const [nonce, setNonce] = useState(0);
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
+  const pathname = usePathname();
+  // A cookieless visitor on an ordinary page is a guest, and we can say so
+  // without downloading anything. On the auth routes we load regardless, so
+  // that a sign-in completed without a document load is still noticed.
+  const needsClient = isAuthRoute(pathname) || hasAuthCookie();
 
   useEffect(() => {
     let cancelled = false;
@@ -116,15 +122,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (hint) setState(hint);
 
-    let supabase: ReturnType<typeof createClient>;
-    try {
-      supabase = createClient();
-    } catch {
-      // No backend configured (a preview build without the envs). Settle on
-      // the guest shape rather than leaving the header in limbo forever.
-      setState(GUEST);
-      return;
-    }
+    // Imported here rather than at the top of the file, because this provider
+    // wraps every page: a static import puts 244 KB of Supabase in the bundle
+    // that has to parse before anything else runs, on a page whose whole point
+    // is that it came off the CDN ready to paint. As a dynamic import it is a
+    // separate chunk the browser fetches while the page is already on screen —
+    // which is exactly the shape of the work (the header fills in a beat
+    // later either way).
+    let supabase: Awaited<
+      ReturnType<typeof import("@/lib/supabase/client").createClient>
+    >;
 
     async function load() {
       try {
@@ -167,15 +174,41 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    void load();
-    // Sign-in and sign-out happen without a reload (OTP, Google, the sign-out
-    // action), so follow the auth state rather than only reading it once.
-    const { data: sub } = supabase.auth.onAuthStateChange(() => void load());
+    if (!needsClient) {
+      setState(GUEST);
+      writeHint(GUEST);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    let unsubscribe: (() => void) | undefined;
+    void (async () => {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        supabase = createClient();
+      } catch {
+        // No backend configured (a preview build without the envs). Settle on
+        // the guest shape rather than leaving the header in limbo forever.
+        if (!cancelled) setState(GUEST);
+        return;
+      }
+      if (cancelled) return;
+      await load();
+      // Sign-in and sign-out happen without a reload (OTP, Google, the
+      // sign-out action), so follow the auth state rather than only reading
+      // it once.
+      const { data: sub } = supabase.auth.onAuthStateChange(() => void load());
+      unsubscribe = () => sub.subscription.unsubscribe();
+      // The effect may have been torn down while the chunk was in flight.
+      if (cancelled) unsubscribe();
+    })();
+
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
-  }, [nonce]);
+  }, [nonce, needsClient]);
 
   const value = useMemo<SessionValue>(
     () => ({ ...state, refresh }),
