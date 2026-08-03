@@ -24,12 +24,18 @@ import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
 import { safeNext } from "@/lib/auth/safe-next";
 import { suggestProfessions } from "@/lib/professions";
-import type {
-  CertificateEntry,
-  EducationEntry,
-  ExperienceEntry,
-  ResumeDraft,
-} from "@/lib/data/resume";
+import { districtsFor } from "@/lib/uz-districts";
+import { UZ_REGIONS } from "@/lib/uz-regions";
+// The client-safe half of the résumé module — `data/resume` itself is
+// `server-only` (it holds the Supabase reads), and importing it from here
+// pulls the server client into the browser bundle.
+import {
+  EMPTY_RESUME,
+  type CertificateEntry,
+  type EducationEntry,
+  type ExperienceEntry,
+  type ResumeDraft,
+} from "@/lib/data/resume-draft";
 import { cn } from "@/lib/utils";
 
 const inputClass =
@@ -124,6 +130,110 @@ function ChipGroup({
 
 /** Groups a digit string for display: "15000000" -> "15 000 000". */
 const groupDigits = (s: string) => s.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+/** How many job titles one résumé may carry (mirrors the 0078 constraint). */
+const MAX_POSITIONS = 3;
+
+/**
+ * The résumé's desired job titles, as removable chips over a suggestion field.
+ *
+ * A blue-collar seeker is rarely one title: the same person is "Sotuvchi",
+ * "Kassir" and "Sotuvchi-konsultant", and with a single headline they matched
+ * only the vacancies that happened to use their one word. Three is the cap —
+ * enough to cover a trade, few enough that the list still means something.
+ */
+function PositionsField({
+  values,
+  onChange,
+  placeholder,
+  removeLabel,
+}: {
+  values: string[];
+  onChange: (next: string[]) => void;
+  placeholder: string;
+  removeLabel: string;
+}) {
+  const [text, setText] = useState("");
+  const full = values.length >= MAX_POSITIONS;
+
+  function add(raw: string) {
+    const value = raw.trim();
+    if (!value || full) return;
+    // Case-insensitive de-dupe: "Sotuvchi" and "sotuvchi" are one title.
+    if (values.some((v) => v.toLowerCase() === value.toLowerCase())) {
+      setText("");
+      return;
+    }
+    onChange([...values, value]);
+    setText("");
+  }
+
+  return (
+    <div>
+      {values.length > 0 ? (
+        <ul className="mb-2 flex flex-wrap gap-2">
+          {values.map((v) => (
+            <li key={v}>
+              <span className="border-primary/40 bg-accent text-accent-foreground inline-flex items-center gap-1.5 rounded-full border py-1.5 pr-2 pl-3 text-sm font-medium">
+                {v}
+                <button
+                  type="button"
+                  onClick={() => onChange(values.filter((x) => x !== v))}
+                  aria-label={`${removeLabel}: ${v}`}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <X className="size-4" />
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {!full ? (
+        <SuggestInput
+          className={inputClass}
+          placeholder={placeholder}
+          value={text}
+          onValueChange={setText}
+          // Picking from the list is the choice — no extra "add" tap after it.
+          // Enter commits a title we don't list; blur keeps the text so a
+          // half-typed trade isn't thrown away by tapping elsewhere.
+          onPick={add}
+          onSubmitValue={add}
+          onBlur={add}
+          suggest={suggestProfessions}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Restores a stashed draft written by an older build.
+ *
+ * A guest who was filling the wizard when the deploy landed comes back from
+ * sign-in with `{ position: "Sotuvchi", city: "Toshkent" }` in sessionStorage —
+ * the pre-0078 shape. Without this the wizard would remount straight onto
+ * `draft.positions.length` and blank-screen them at the exact moment they
+ * finally signed in, which is the one moment auth-last cannot afford to lose.
+ */
+function reviveDraft(raw: unknown): ResumeDraft {
+  const d = (raw ?? {}) as Partial<ResumeDraft> & { position?: unknown };
+  const positions = Array.isArray(d.positions)
+    ? d.positions.filter(
+        (p): p is string => typeof p === "string" && !!p.trim(),
+      )
+    : typeof d.position === "string" && d.position.trim() !== ""
+      ? [d.position.trim()]
+      : [];
+  return {
+    ...EMPTY_RESUME,
+    ...d,
+    positions,
+    region: typeof d.region === "string" ? d.region : "",
+    district: typeof d.district === "string" ? d.district : "",
+  };
+}
 
 /** Day / month / year dropdowns for a birth date — far clearer than the native
  * date picker's endless year scroll. Value + onChange are "YYYY-MM-DD" (or ""
@@ -225,7 +335,7 @@ export function ResumeWizard({
     // initializer would desync SSR hydration).
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraft(JSON.parse(saved) as ResumeDraft);
+      setDraft(reviveDraft(JSON.parse(saved)));
       setStep(3);
     } catch {
       // Ignore a malformed stash.
@@ -248,7 +358,8 @@ export function ResumeWizard({
     setAiFellBack(false);
     try {
       const res = await generateResumeSummary({
-        position: draft.position,
+        // The AI writes about one role — the first title is the headline.
+        position: draft.positions[0] ?? "",
         experienceLevel: draft.experienceLevel || null,
         city: draft.city || null,
         notes: draft.summary || null,
@@ -362,7 +473,7 @@ export function ResumeWizard({
 
   const valid =
     step === 0
-      ? draft.position.trim() !== "" && draft.fullName.trim() !== ""
+      ? draft.positions.length > 0 && draft.fullName.trim() !== ""
       : step === 1
         ? draft.experienceLevel !== ""
         : step === 3
@@ -434,8 +545,15 @@ export function ResumeWizard({
             >
               {label}
             </span>
+            {/* The connector fills in behind you, so progress reads at a
+                glance on a phone, where the step labels are hidden. */}
             {i < steps.length - 1 ? (
-              <span className="bg-border mx-1 h-px w-6" />
+              <span
+                className={cn(
+                  "mx-1 h-px w-6 transition-colors",
+                  i < step ? "bg-primary" : "bg-border",
+                )}
+              />
             ) : null}
           </li>
         ))}
@@ -450,13 +568,15 @@ export function ResumeWizard({
                   ways ("prodavets", "sotuvchi konsultant"), and a title that
                   matches the postings is what makes the two-way résumé match
                   fire. Free text still wins if their trade isn't listed. */}
-              <SuggestInput
-                className={inputClass}
+              <PositionsField
+                values={draft.positions}
+                onChange={(v) => set("positions", v)}
                 placeholder={t("positionHint")}
-                value={draft.position}
-                onValueChange={(v) => set("position", v)}
-                suggest={suggestProfessions}
+                removeLabel={t("remove")}
               />
+              <p className="text-muted-foreground mt-1.5 text-xs">
+                {t("positionsHelp", { max: MAX_POSITIONS })}
+              </p>
             </Field>
             <Field label={t("fullName")} required>
               <input
@@ -464,6 +584,12 @@ export function ResumeWizard({
                 value={draft.fullName}
                 onChange={(e) => set("fullName", e.target.value)}
               />
+              {/* Uzbek passports are in Latin script; an employer comparing a
+                  Cyrillic résumé name against a passport at the door is a real
+                  first-day problem, so ask for it the way the document has it. */}
+              <p className="text-muted-foreground mt-1.5 text-xs">
+                {t("fullNameHelp")}
+              </p>
             </Field>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field label={t("birthDate")}>
@@ -489,13 +615,50 @@ export function ResumeWizard({
                 />
               </Field>
             </div>
-            <Field label={t("city")}>
-              <input
-                className={inputClass}
-                value={draft.city}
-                onChange={(e) => set("city", e.target.value)}
-              />
-            </Field>
+            {/* Where they want to work, from the same viloyat/tuman list the
+                employer form writes into jobs.region/district — typed city
+                names ("Ташкент" vs "Toshkent" vs "toshkent sh.") compared
+                equal to nothing, which is most of why location matching used
+                to miss. District is optional: plenty of seekers will take the
+                whole region. */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label={t("region")}>
+                <select
+                  className={inputClass}
+                  value={draft.region}
+                  onChange={(e) =>
+                    // A new region invalidates the district under it.
+                    setDraft((d) => ({
+                      ...d,
+                      region: e.target.value,
+                      district: "",
+                    }))
+                  }
+                >
+                  <option value="">{t("regionAny")}</option>
+                  {UZ_REGIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={t("district")}>
+                <select
+                  className={inputClass}
+                  value={draft.district}
+                  disabled={!draft.region}
+                  onChange={(e) => set("district", e.target.value)}
+                >
+                  <option value="">{t("districtAny")}</option>
+                  {districtsFor(draft.region).map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
             <Field label={t("maritalStatus")}>
               <ChipGroup
                 value={draft.maritalStatus}
@@ -518,8 +681,14 @@ export function ResumeWizard({
 
             {/* Real work history — one card per job (experiences table). */}
             <div>
-              <p className="text-foreground mb-2 text-sm font-medium">
+              <p className="text-foreground text-sm font-medium">
                 {t("workHistory")}
+              </p>
+              {/* Why it's worth the typing: a past job title is a matching
+                  signal in its own right (recommended_jobs scores it), so this
+                  is a promise the product actually keeps, not a nag. */}
+              <p className="text-muted-foreground mt-0.5 mb-2 text-xs">
+                {t("workHistoryNudge")}
               </p>
               {draft.experiences.map((exp, i) => (
                 <div

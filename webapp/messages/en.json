@@ -128,7 +128,14 @@
       "sections": "{done}/{total} sections filled",
       "build": "Complete résumé",
       "edit": "Edit résumé",
-      "seen": "Employers can see your résumé"
+      "seen": "Employers can see your résumé",
+      "photoAdd": "Add a photo to your resume",
+      "photoChange": "Resume photo",
+      "photoHint": "JPG or PNG, up to 5 MB. Resumes with a photo get noticed more.",
+      "photoCta": "Upload photo",
+      "photoSaved": "Photo saved",
+      "photoFailed": "Could not upload the photo. Try again.",
+      "photoInvalid": "Use a JPG or PNG under 5 MB."
     }
   },
   "chat": {
@@ -155,8 +162,8 @@
     "stepPersonal": "Personal details",
     "stepExperience": "Work experience",
     "stepContacts": "Contacts",
-    "position": "What position is this resume for?",
-    "positionHint": "Enter a job title",
+    "position": "What positions is this resume for?",
+    "positionHint": "Type a job title and pick it",
     "fullName": "Full name",
     "city": "Region / city",
     "birthDate": "Date of birth",
@@ -235,7 +242,14 @@
     "expiryHint": "Leave blank if it never expires",
     "addCertificate": "Add certificate",
     "addLanguage": "Add",
-    "addLanguageHint": "Another language (e.g. Arabic)"
+    "addLanguageHint": "Another language (e.g. Arabic)",
+    "positionsHelp": "Up to {max} positions. Pick from the suggestions or write your own.",
+    "fullNameHelp": "Enter your first and last name in Latin script, as in your passport.",
+    "region": "Preferred region",
+    "regionAny": "Any region",
+    "district": "District / city",
+    "districtAny": "Any district",
+    "workHistoryNudge": "Resumes with work history get replies faster."
   },
   "bookmarks": {
     "title": "Saved jobs",

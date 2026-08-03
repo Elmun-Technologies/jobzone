@@ -11,6 +11,8 @@ export interface ProfileDetails {
   phone: string;
   city: string;
   country: string;
+  /** Public Storage URL, or "" — the résumé photo (see AvatarUpload). */
+  avatarUrl: string;
 }
 
 const EMPTY: ProfileDetails = {
@@ -20,6 +22,7 @@ const EMPTY: ProfileDetails = {
   phone: "",
   city: "",
   country: "",
+  avatarUrl: "",
 };
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -35,7 +38,7 @@ export async function getMyProfileDetails(): Promise<ProfileDetails | null> {
     if (!user) return null;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, headline, bio, phone, city, country")
+      .select("full_name, headline, bio, phone, city, country, avatar_url")
       .eq("id", user.id)
       .maybeSingle();
     if (!data) return EMPTY;
@@ -47,6 +50,7 @@ export async function getMyProfileDetails(): Promise<ProfileDetails | null> {
       phone: str(r.phone),
       city: str(r.city),
       country: str(r.country),
+      avatarUrl: str(r.avatar_url),
     };
   } catch {
     return EMPTY;
