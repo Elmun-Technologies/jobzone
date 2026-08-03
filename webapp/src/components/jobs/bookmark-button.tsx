@@ -79,7 +79,15 @@ export function BookmarkButton({
         className,
       )}
     >
-      <Bookmark className="size-4" fill={shown ? "currentColor" : "none"} />
+      {/* Keyed on the state so React remounts the icon and the pop replays on
+          every toggle — without the key the animation only ever runs once.
+          Only after a tap: the provider filling hearts in on load would
+          otherwise set the whole list popping. */}
+      <Bookmark
+        key={touched ? `saved-${shown}` : "initial"}
+        className={cn("size-4", touched && "tap-pop")}
+        fill={shown ? "currentColor" : "none"}
+      />
       {shown ? t("saved") : t("save")}
     </button>
   );
