@@ -3,10 +3,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { setPreferredLocale } from "@/lib/actions/profile";
 import { captureDrafts } from "@/lib/draft-stash";
+import { goToLocale } from "@/lib/locale-nav";
 import { rememberLocaleChoice } from "@/lib/locale-choice";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +43,6 @@ const inactive = "text-muted-foreground hover:text-foreground";
 export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
   const locale = useLocale();
   const t = useTranslations("nav");
-  const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
@@ -62,14 +62,15 @@ export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
     // changing language silently cleared their search. Read the live query at
     // click time (rather than useSearchParams, which would drag a Suspense
     // requirement into the header on every page) and carry it across.
-    const search = typeof window === "undefined" ? "" : window.location.search;
     // The locale change rebuilds everything under `[locale]`, so any form on
     // screen goes back to empty. Park the drafts first; each form restores its
     // own on mount, the same way it already does after the sign-in detour.
     captureDrafts();
-    startTransition(() => {
-      router.replace(`${pathname}${search}`, { locale: next });
-    });
+    // A document load, not a client navigation — see lib/locale-nav.ts for why
+    // the whole app's rendering model depends on that distinction. The query
+    // (and hash) ride along, so a seeker who had searched
+    // /jobs?q=haydovchi&city=Toshkent keeps their search.
+    startTransition(() => goToLocale(next, pathname));
   }
 
   return (

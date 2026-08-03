@@ -7,7 +7,6 @@ import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
-import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoryBySlug } from "@/lib/data/categories";
 import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
@@ -22,7 +21,10 @@ import {
 } from "@/lib/seo";
 import { slugify } from "@/lib/slug";
 
-export const dynamic = "force-dynamic";
+// Cached public data only, no per-visitor read — so this can be prerendered
+// and served from the CDN. A new posting still surfaces within the readers'
+// revalidate window (and immediately on the "jobs" tag flush), which is what
+// invariant #3 requires.
 const LANDING_LIMIT = 30;
 
 /** Resolve a city slug back to the canonical city string used in the jobs
@@ -82,7 +84,7 @@ export default async function CategoryCityLandingPage({
   }));
   const faqHeading = tfaq("heading", { category: cat.name });
 
-  const [jobs, count, cities, savedIds] = await Promise.all([
+  const [jobs, count, cities] = await Promise.all([
     getOpenJobs({
       category: cat.name,
       city: cityName,
@@ -90,7 +92,6 @@ export default async function CategoryCityLandingPage({
     }),
     getJobCount({ category: cat.name, city: cityName }),
     getCities(),
-    getBookmarkedJobIds(),
   ]);
 
   const base = siteUrl();
@@ -142,10 +143,7 @@ export default async function CategoryCityLandingPage({
             {t("breadcrumbJobs")}
           </Link>
           <span aria-hidden>/</span>
-          <Link
-            href={`/ish/${category}`}
-            className="hover:text-foreground"
-          >
+          <Link href={`/ish/${category}`} className="hover:text-foreground">
             {cat.name}
           </Link>
           <span aria-hidden>/</span>
@@ -193,7 +191,7 @@ export default async function CategoryCityLandingPage({
           <ul className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
+                <JobCard job={job} />
               </li>
             ))}
           </ul>
@@ -205,9 +203,7 @@ export default async function CategoryCityLandingPage({
 
         {cities.length > 1 ? (
           <section className="mt-14">
-            <h2 className="text-foreground text-xl font-bold">
-              {t("byCity")}
-            </h2>
+            <h2 className="text-foreground text-xl font-bold">{t("byCity")}</h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {cities
                 .filter((c) => slugify(c) !== city)

@@ -1,21 +1,26 @@
 /**
- * Light/dark theme — stored in a cookie so the **server** renders it.
+ * Light/dark theme — chosen by the visitor, applied before first paint.
  *
- * It used to live in `localStorage` alone, applied by an inline script that
- * added a `dark` class to <html> before first paint. That works on a hard load
- * and nowhere else: switching language is a client-side navigation, React
- * re-renders <html> from the RSC payload — which has no `dark` in it, because
- * the class was added imperatively — and the class is dropped. The page turned
- * white mid-session and only a refresh brought the theme back. Next's own guide
- * says as much: "Scripts inserted via DOM updates don't execute in the browser.
- * On client-side navigations, React renders the component from the RSC payload
- * and the script won't run."
+ * History matters here, because this has been round-tripped twice. It started
+ * in `localStorage`, applied by an inline script. That broke on a language
+ * switch: the switch was a client navigation, React re-rendered `<html>` from
+ * the RSC payload, and a class only JS had added was dropped — the page turned
+ * white mid-session. The fix was to move the choice into a cookie so the root
+ * layout could render the class itself.
  *
- * With the choice in a cookie the root layout puts `dark` in the markup itself,
- * so it is part of every payload and survives any navigation. The inline script
- * stays for exactly one job: the first visit, where there is no cookie yet and
- * only the browser knows the OS preference — it applies it and writes the
- * cookie, so from then on the server is the one deciding.
+ * That fix worked, and it cost the entire site its static shell: a layout that
+ * reads a cookie is dynamic, and a dynamic root layout makes every route in the
+ * app dynamic, so nothing could be served from the CDN and every visit paid for
+ * a serverless render. The trade is not worth it for a preference toggle.
+ *
+ * So the class is applied by the inline script again — and the language switch
+ * is now a document load (see lib/locale-nav.ts), which is what makes that
+ * safe: the script runs on every load, so the theme survives the one navigation
+ * that used to lose it. Verified both ways in a browser.
+ *
+ * The cookie is still written. Nothing on the server reads it today; it is kept
+ * because it costs nothing and any future non-JS surface (an email preview, a
+ * WebView) can read the choice without guessing.
  *
  * Strictly functional: a UI preference the visitor set themselves, no
  * identifier, nothing sent to a third party — so it sits outside the analytics

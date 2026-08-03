@@ -1,27 +1,21 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
-import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { GoogleAnalytics } from "@/components/analytics/google-analytics";
-import { MetaPixel } from "@/components/analytics/meta-pixel";
-import { PostHogProvider } from "@/components/analytics/posthog-provider";
-import { YandexMetrica } from "@/components/analytics/yandex-metrica";
-import { ConsentBanner } from "@/components/consent/consent-banner";
-import { LanguageSheet } from "@/components/layout/language-sheet";
+import { SavedJobsProvider } from "@/components/jobs/saved-jobs-provider";
+import { FirstVisitShell } from "@/components/layout/first-visit-shell";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteTabBar } from "@/components/layout/site-tab-bar";
 import { Toaster } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
-import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
-import { LOCALE_CHOICE_COOKIE, shouldAskLanguage } from "@/lib/locale-choice";
-import { THEME_COOKIE, parseTheme, themeCookieString } from "@/lib/theme";
+import { THEME_COOKIE, themeCookieString } from "@/lib/theme";
 import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
@@ -72,9 +66,6 @@ const OG_LOCALE: Record<string, string> = {
 const GOOGLE_SITE_VERIFICATION =
   process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "";
 const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
-const YANDEX_METRICA_ID = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "";
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
 
 export async function generateMetadata({
   params,
@@ -120,13 +111,18 @@ export async function generateMetadata({
   };
 }
 
-// First visit only: no cookie yet, so only the browser knows the OS
-// preference. Apply it before first paint and write the cookie, after which
-// the server renders the class itself and this is a no-op — which is what
-// makes the theme survive a client-side navigation (see lib/theme.ts).
-// A `theme` value left in localStorage by an earlier build is migrated so
-// nobody loses the choice they already made.
-const THEME_SCRIPT = `(function(){try{var d=document.documentElement;if(/(?:^|; )${THEME_COOKIE}=(dark|light)/.test(document.cookie))return;var t=localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.classList.toggle('dark',t==='dark');document.cookie=t==='dark'?'${themeCookieString("dark")}':'${themeCookieString("light")}';}catch(e){}})();`;
+// The theme, applied before first paint on every document load. The server
+// deliberately does not render it: reading the cookie here would make this
+// layout dynamic and, with it, every route in the app (see lib/theme.ts).
+// The language switch is a document load precisely so this script gets to run
+// again and the choice survives it (lib/locale-nav.ts).
+//
+// It reads the cookie FIRST and localStorage second, and it never bails early:
+// an earlier version returned as soon as it saw a cookie, on the assumption
+// that the server had already rendered the class — with the server out of that
+// business, that early return meant every returning dark-mode visitor got a
+// white page until they toggled again.
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement;var m=/(?:^|; )${THEME_COOKIE}=(dark|light)/.exec(document.cookie);var t=m?m[1]:localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.classList.toggle('dark',t==='dark');try{localStorage.setItem('theme',t);}catch(e){}document.cookie=t==='dark'?'${themeCookieString("dark")}':'${themeCookieString("light")}';}catch(e){}})();`;
 
 export default async function LocaleLayout({
   children,
@@ -139,39 +135,10 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
-  // Consent gate: read the cookie once, use it to (a) hide the banner
-  // when the visitor already chose and (b) gate every third-party
-  // analytics loader so scripts don't reach the browser at all until the
-  // visitor has clicked accept. GDPR + UZ personal-data law both require
-  // this pattern for non-first-party trackers.
-  const cookieStore = await cookies();
-  const consent = parseConsent(cookieStore.get(CONSENT_COOKIE)?.value);
-  // Rendered into the markup rather than added by script, so it is part of
-  // every RSC payload and a locale switch cannot wipe it (see lib/theme.ts).
-  const dark = parseTheme(cookieStore.get(THEME_COOKIE)?.value) === "dark";
-  const analyticsAllowed = consent === "granted";
-  // The first-visit language sheet. Decided on the server (cookie + request
-  // headers) so a returning visitor never gets a flash of the sheet before a
-  // client effect can hide it.
-  const headerBag = await headers();
-  const askLanguage = shouldAskLanguage({
-    current: locale,
-    chosen: cookieStore.get(LOCALE_CHOICE_COOKIE)?.value,
-    acceptLanguage: headerBag.get("accept-language"),
-    userAgent: headerBag.get("user-agent"),
-  });
-
   return (
     <html
       lang={locale}
-      className={[
-        archivo.variable,
-        spaceMono.variable,
-        "h-full antialiased",
-        dark ? "dark" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={`${archivo.variable} ${spaceMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -181,26 +148,28 @@ export default async function LocaleLayout({
           `md` up, where the bar is hidden (see globals.css). */}
       <body className="bg-background text-foreground flex min-h-full flex-col pb-[var(--tabbar)] font-sans">
         <NextIntlClientProvider>
-          <SiteBanner />
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-          <SiteTabBar />
-          {askLanguage ? <LanguageSheet /> : null}
-          <ConsentBanner initialConsent={consent} deferred={askLanguage} />
-          {/* Mounted once for the whole app: toast() pushes to a module-level
+          {/* Saved-job state is fetched in the browser (see the provider) so
+              that public pages don't have to read the session — that single
+              per-visitor read is what used to keep them off the CDN. */}
+          <SavedJobsProvider>
+            <SiteBanner />
+            <SiteHeader />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+            <SiteTabBar />
+            {/* Cookie bar, first-visit language sheet and the trackers they
+              gate — the only parts of the shell that read the request. Behind
+              a boundary they are a hole in a static page instead of the reason
+              the whole app renders per request. */}
+            <Suspense fallback={null}>
+              <FirstVisitShell locale={locale} />
+            </Suspense>
+            {/* Mounted once for the whole app: toast() pushes to a module-level
               store, so any client component can raise one without a provider
               in its own tree. */}
-          <Toaster />
+            <Toaster />
+          </SavedJobsProvider>
         </NextIntlClientProvider>
-        {analyticsAllowed ? (
-          <>
-            <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
-            <YandexMetrica counterId={YANDEX_METRICA_ID} />
-            <MetaPixel pixelId={META_PIXEL_ID} />
-            <PostHogProvider />
-          </>
-        ) : null}
         {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
             Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
             banner needed, no third-party host. Both no-op in dev. */}

@@ -4,10 +4,11 @@ import { Check, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { setPreferredLocale } from "@/lib/actions/profile";
 import { captureDrafts } from "@/lib/draft-stash";
+import { goToLocale } from "@/lib/locale-nav";
 import {
   LANGUAGE_CHOSEN_EVENT,
   rememberLocaleChoice,
@@ -42,7 +43,6 @@ const FLAGS: Record<Locale, string> = {
 export function LanguageSheet() {
   const active = useLocale() as Locale;
   const t = useTranslations("localeSwitcher");
-  const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
   const [pending, start] = useTransition();
@@ -55,17 +55,14 @@ export function LanguageSheet() {
     // composes push/Telegram copy from the profile, which is the only place
     // it can learn the language — but the navigation must not wait on it.
     void setPreferredLocale(next);
-    // Carry the query across, for the same reason the header switcher does:
-    // `usePathname` here is next-intl's, which is path-only, and this sheet
-    // greets exactly the visitor who arrived on a deep link — dropping
-    // `?q=…&city=…` would answer their language question by throwing away
-    // the search that brought them.
-    const search = typeof window === "undefined" ? "" : window.location.search;
-    // And park any draft on screen, for the same reason again: this navigation
-    // rebuilds everything under `[locale]`, so an unparked form comes back
-    // empty. The sheet can appear over a half-filled application.
+    // Park any draft on screen: this navigation rebuilds everything under
+    // `[locale]`, so an unparked form comes back empty, and the sheet can
+    // appear over a half-filled application.
     captureDrafts();
-    start(() => router.replace(`${pathname}${search}`, { locale: next }));
+    // Full document load, like the header switcher — the query and hash ride
+    // along, and the theme survives because the pre-paint script runs again
+    // (see lib/locale-nav.ts).
+    start(() => goToLocale(next, pathname));
   }
 
   function dismiss() {

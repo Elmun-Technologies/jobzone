@@ -7,7 +7,6 @@ import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
-import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getRegionJobs, getRegionSnapshot } from "@/lib/data/regions";
 import { Link } from "@/i18n/navigation";
 import { groupNumber } from "@/lib/format";
@@ -81,10 +80,9 @@ export default async function RegionLandingPage({
   const tl = await getTranslations("landingPage");
   const tfaq = await getTranslations("regionFaq");
 
-  const [snapshot, jobs, savedIds] = await Promise.all([
+  const [snapshot, jobs] = await Promise.all([
     getRegionSnapshot(name),
     getRegionJobs(name, LANDING_LIMIT),
-    getBookmarkedJobIds(),
   ]);
 
   const faqItems = Array.from({ length: 5 }, (_, i) => ({
@@ -188,7 +186,7 @@ export default async function RegionLandingPage({
             <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
               {jobs.map((job) => (
                 <li key={job.id}>
-                  <JobCard job={job} saved={savedIds.has(job.id)} />
+                  <JobCard job={job} />
                 </li>
               ))}
             </ul>

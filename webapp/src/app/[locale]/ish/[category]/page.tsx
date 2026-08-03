@@ -7,7 +7,6 @@ import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
-import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import {
   getCategoryByHistoricalSlug,
   getCategoryBySlug,
@@ -25,8 +24,11 @@ import {
 } from "@/lib/seo";
 import { slugify } from "@/lib/slug";
 
-// Live feed — new postings must show here immediately (invariant #3).
-export const dynamic = "force-dynamic";
+// No `force-dynamic` any more: the page reads only cached public data (the
+// feed readers carry a short revalidate window and are flushed by the "jobs"
+// tag on publish/close), and nothing per-visitor. That is what lets it be
+// prerendered and served from the CDN — while a new posting still shows up
+// within the cache window, which is what invariant #3 actually requires.
 // Cap: enough to satisfy the ItemList schema without blowing up TTFB when a
 // hot category has thousands of postings. Deeper browsing goes through /jobs.
 const LANDING_LIMIT = 30;
@@ -79,7 +81,7 @@ export default async function CategoryLandingPage({
   }));
   const faqHeading = tfaq("heading", { category: cat.name });
 
-  const [jobs, count, cities, savedIds] = await Promise.all([
+  const [jobs, count, cities] = await Promise.all([
     getOpenJobs({ category: cat.name, limit: LANDING_LIMIT }),
     getJobCount({ category: cat.name }),
     // Every city already has at least one job on the platform (getCities()
@@ -88,7 +90,6 @@ export default async function CategoryLandingPage({
     // filtering to "cities with this category" would require N extra head
     // counts and doesn't move the SEO needle.
     getCities(),
-    getBookmarkedJobIds(),
   ]);
 
   const base = siteUrl();
@@ -183,7 +184,7 @@ export default async function CategoryLandingPage({
           <ul className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
+                <JobCard job={job} />
               </li>
             ))}
           </ul>
@@ -197,9 +198,7 @@ export default async function CategoryLandingPage({
             This is the mesh Google crawls to discover the deep landing set. */}
         {cities.length > 0 ? (
           <section className="mt-14">
-            <h2 className="text-foreground text-xl font-bold">
-              {t("byCity")}
-            </h2>
+            <h2 className="text-foreground text-xl font-bold">{t("byCity")}</h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {cities.map((c) => (
                 <li key={c}>
