@@ -653,6 +653,7 @@
     "factCitiesNa": "—"
   },
   "jobs": {
+    "positionClosed": "Position closed",
     "title": "Jobs",
     "searchPlaceholder": "Title or company",
     "search": "Search",

@@ -19,6 +19,9 @@ export interface JobLanguage {
 
 export interface Job {
   id: string;
+  /** Lifecycle status. Everything read through `job_feed` is "open"; the
+   * saved list (0080) also surfaces closed ones, marked rather than dropped. */
+  status: string;
   title: string;
   description: string | null;
   responsibilities: string | null;

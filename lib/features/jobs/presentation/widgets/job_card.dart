@@ -81,6 +81,10 @@ class JobCard extends ConsumerWidget {
     // feedback on the app's most-tapped surface (raw Listener, so it never
     // steals the InkWell's tap or the toggles' taps).
     final tierBadge = _tierBadge(context);
+    // Only reachable from the saved list, whose reader (0080) deliberately
+    // keeps vacancies that have left the market. Saying so is the whole point
+    // of keeping them: a card that just vanished told the seeker nothing.
+    final closed = job.status != 'open';
     return JzPressable(
       child: Container(
         width: width,
@@ -112,7 +116,14 @@ class JobCard extends ConsumerWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => context.push(Routes.jobDetails(job.id)),
+            // A closed vacancy is not in `job_feed` for anyone but its owner,
+            // so opening it would land on the empty-search screen — the dead
+            // end #331 removed from the applications screen. Only the saved
+            // list can show one (every other list reads job_feed), and there
+            // the record is the point, not the link.
+            onTap: closed
+                ? null
+                : () => context.push(Routes.jobDetails(job.id)),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
@@ -188,7 +199,9 @@ class JobCard extends ConsumerWidget {
                               children: [
                                 Flexible(
                                   child: Text(
-                                    job.companyName,
+                                    closed
+                                        ? '${job.companyName} · ${l.positionClosed}'
+                                        : job.companyName,
                                     style: context.text.bodySmall?.copyWith(
                                       color: colors.textSecondary,
                                     ),
