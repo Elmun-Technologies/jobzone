@@ -12,7 +12,7 @@ Work top-to-bottom; each section notes how to verify it.
 ## 1. Database — apply migrations
 
 ```bash
-supabase db push        # applies every migration through 0075
+supabase db push        # applies every migration through 0082
 ```
 
 > ⚠️ **If you already ran `db push` before this checklist mentioned 0074:**
@@ -31,6 +31,26 @@ supabase db push        # applies every migration through 0075
 > later migration never runs before the one it depends on. The old duplicate
 > `0065_rahmat_provider` was renumbered to `0072` so it actually applies (two
 > files shared version 0065, so it was silently skipped).
+
+> ⚠️ **Two more duplicate versions were found and renumbered — re-run
+> `db push`.** `0070` was shared by `account_deletion` and `scale_indexes`, and
+> `0078` by `notify_applicants_on_close` and `resume_positions_and_location`.
+> The version is the primary key of `supabase_migrations.schema_migrations`, so
+> in each pair only the alphabetically-first file was ever recorded and the
+> other was **silently skipped** — exactly the 0065 failure above, twice more.
+> They are now `0081_scale_indexes.sql` and
+> `0082_resume_positions_and_location.sql`. Both are written with
+> `if not exists` / `create or replace` throughout, so re-applying them costs
+> nothing if they somehow did land. Verify after the push:
+>
+> ```sql
+> select indexname from pg_indexes where indexname = 'jobs_open_feed_idx';
+> select column_name from information_schema.columns
+>  where table_name = 'profiles' and column_name = 'desired_positions';
+> ```
+>
+> Both must return one row. `scripts/check-migrations.sh` (run by CI on every
+> PR) now blocks a duplicate version from being merged again.
 
 Most recent, most likely un-applied:
 

@@ -44,14 +44,14 @@ export async function saveResume(
   if (!user) return { signedOut: true };
 
   const pay = Number(draft.expectedSalary);
-  // Up to three, trimmed and de-duplicated — the DB check constraint (0078)
+  // Up to three, trimmed and de-duplicated — the DB check constraint (0082)
   // rejects a longer array outright, which would fail the whole save.
   const positions = Array.from(
     new Set((draft.positions ?? []).map((p) => p.trim()).filter(Boolean)),
   ).slice(0, 3);
   // `city` is derived, not typed: the wizard asks for a canonical region and
   // district, and the district (or the region, if that's all they picked) is
-  // what the cards show and what pre-0078 rows are matched on.
+  // what the cards show and what pre-0082 rows are matched on.
   const city = draft.district.trim() || draft.region.trim();
   const { error } = await supabase
     .from("profiles")
@@ -75,7 +75,7 @@ export async function saveResume(
 
   if (error) return { error: true };
 
-  // The 0078 columns ride their own best-effort write, like summary below: a DB
+  // The 0082 columns ride their own best-effort write, like summary below: a DB
   // that hasn't taken the migration yet still saves the rest of the résumé
   // (headline + city above already carry the same information in the old
   // shape), instead of failing the save with an unknown-column error.

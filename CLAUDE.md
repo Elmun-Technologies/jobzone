@@ -148,7 +148,7 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 
 ## Backend (`supabase/`)
 
-- **Schema domains** (57 migrations, 0001–0057): profiles/CV (experiences, educations,
+- **Schema domains** (82 migrations, 0001–0082): profiles/CV (experiences, educations,
   skills, resumes…), companies (+people/gallery/reviews), job_categories
   (seeded blue-collar set incl. Foreign-jobs), jobs (rich blue-collar fields +
   screening_questions jsonb + boost + expiry + publish_at), applications
@@ -159,7 +159,15 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   interview_confirmations, telegram_links, saved_searches (+ alert watermark),
   recommendations (recommended_candidates/jobs), dismissed_jobs, and the
   **admin foundation** (0037–0057: audit log, moderation, admin grants, finance,
-  broadcast, category CMS, platform settings).
+  broadcast, category CMS, platform settings), then legal/compliance
+  (content_reports, account_deletion), the per-vacancy paid listing tiers
+  (0063–0065, 0072, 0075–0076) and the résumé/matching work (0077, 0082).
+- **Numbering a new migration:** take the next free version — never reuse one.
+  The version is the PK of `supabase_migrations.schema_migrations`, so a
+  duplicate makes `db push` **silently skip** the second file; this has bitten
+  the project three times (0065, 0070, 0078). `scripts/check-migrations.sh`
+  (CI, every PR) now blocks it. Rebase before numbering: another open branch may
+  already have claimed the number.
 - **`job_feed` view — the one feed contract** (0034/0036 era): jobs ⋈ companies
   ⋈ categories, `boost_active` computed, **filters expiry only**; RLS
   (`status='open'` readable by all, owners see their own everything) plus the
@@ -256,7 +264,7 @@ call the same RPC), one-tap apply from any job card (web + mobile), a seeker's
 (moderation/finance/categories/broadcast/audit/settings), and the go-live
 runbook (`docs/go-live-checklist.md`).
 
-**Go-live is ops, not code** (user's side): `supabase db push` (→0057),
+**Go-live is ops, not code** (user's side): `supabase db push` (→0082),
 secrets (`EDGE_SHARED_SECRET`, `TELEGRAM_GATEWAY_TOKEN`, `SEND_SMS_HOOK_SECRET`,
 `TELEGRAM_BOT_TOKEN`…, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), deploy
 edge fns, enable Phone auth + register the Send-SMS hook, schedule the cron (§5),

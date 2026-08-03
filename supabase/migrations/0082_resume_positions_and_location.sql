@@ -1,4 +1,4 @@
--- 0078_resume_positions_and_location.sql
+-- 0082_resume_positions_and_location.sql
 -- Seeker résumé, two fields the local job apps have and we did not:
 --
 --   1. Up to THREE desired positions instead of one headline. A blue-collar
