@@ -25,10 +25,11 @@ export async function SiteHeader() {
     ? await Promise.all([getUnreadNotificationCount(), getMyRole()])
     : [0, null];
   const isEmployerAccount = role === "employer";
-  // A guest sliding to "Employer" should land on the guest-first post page —
-  // the dashboard is gated, so it would otherwise bounce to sign-in.
-  const employerHref =
-    user && isEmployerAccount ? "/employer" : "/employer/jobs/new";
+  // One destination for both: /employer renders the dashboard for a signed-in
+  // employer and the landing for everyone else. It used to send guests
+  // straight to the empty post form, which asked for work before saying what
+  // hiring here gets you.
+  const employerHref = "/employer";
 
   return (
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">

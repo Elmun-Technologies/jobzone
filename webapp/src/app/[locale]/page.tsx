@@ -15,11 +15,9 @@ import { AnimatedSearchInput } from "@/components/ui/animated-search-input";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
-import { getCurrentUser } from "@/lib/auth/user";
 import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
 import { getCompanies, getCompanyRatings } from "@/lib/data/companies";
-import { getMyRole } from "@/lib/data/employer";
 import {
   getCities,
   getJobCount,
@@ -60,15 +58,6 @@ export default async function HomePage({
     question: tfaq(`q${i + 1}`),
     answer: tfaq(`a${i + 1}`),
   }));
-
-  // Same rule the header applies to the audience pill: a guest sliding to
-  // "Employer" lands on the guest-first post page, since the dashboard is
-  // gated and would bounce them to sign-in. Both reads are request-memoized.
-  const heroUser = await getCurrentUser();
-  const employerHref =
-    heroUser && (await getMyRole()) === "employer"
-      ? "/employer"
-      : "/employer/jobs/new";
 
   const [
     recent,
@@ -129,7 +118,7 @@ export default async function HomePage({
                 the hero it is the first thing a visitor sees, which is where
                 the audience split belongs. */}
             <div className="sm:hidden">
-              <RoleToggle employerHref={employerHref} tone="onDark" />
+              <RoleToggle tone="onDark" />
             </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-white/80 uppercase backdrop-blur">
               <MapPin className="text-primary size-3.5" />
@@ -249,29 +238,29 @@ export default async function HomePage({
           <Container className="py-16">
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {activeCategories.map((c) => (
-              <li key={c.id}>
-                <Link
-                  // Deep-link into the SEO landing (/ish/[category]) instead
-                  // of a faceted /jobs?category= URL — the landing has its
-                  // own H1, canonical, and JSON-LD, and inbound internal
-                  // links from the home page are how Google ranks it.
-                  href={`/ish/${c.slug}`}
-                  className="border-border bg-card hover:border-primary/40 flex h-full flex-col gap-2 rounded-xl border p-4 transition-all hover:shadow-sm"
-                >
-                  <span className="text-3xl leading-none">
-                    {categoryEmoji(c)}
-                  </span>
-                  <span className="text-foreground leading-snug font-semibold">
-                    {c.name}
-                  </span>
-                  <span className="text-muted-foreground mt-auto text-sm">
-                    {t("vacancyCount", { count: groupNumber(c.count) })}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Container>
+                <li key={c.id}>
+                  <Link
+                    // Deep-link into the SEO landing (/ish/[category]) instead
+                    // of a faceted /jobs?category= URL — the landing has its
+                    // own H1, canonical, and JSON-LD, and inbound internal
+                    // links from the home page are how Google ranks it.
+                    href={`/ish/${c.slug}`}
+                    className="border-border bg-card hover:border-primary/40 flex h-full flex-col gap-2 rounded-xl border p-4 transition-all hover:shadow-sm"
+                  >
+                    <span className="text-3xl leading-none">
+                      {categoryEmoji(c)}
+                    </span>
+                    <span className="text-foreground leading-snug font-semibold">
+                      {c.name}
+                    </span>
+                    <span className="text-muted-foreground mt-auto text-sm">
+                      {t("vacancyCount", { count: groupNumber(c.count) })}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Container>
         ) : null;
       })()}
 

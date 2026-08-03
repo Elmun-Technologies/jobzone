@@ -142,3 +142,58 @@ export async function getRegionJobs(
 export function regionNames(): string[] {
   return UZ_REGION_NAMES;
 }
+
+export interface MarketplaceStats {
+  /** Open vacancies across the country. */
+  openJobs: number;
+  /** Companies with at least one open vacancy — employers actually hiring. */
+  hiringCompanies: number;
+  /** Regions with at least one open vacancy. */
+  activeRegions: number;
+}
+
+const _getMarketplaceStats = unstable_cache(
+  async (): Promise<MarketplaceStats> => {
+    const supabase = createPublicClient();
+    // One pass over the open feed: three numbers from the same rows rather
+    // than three count queries. The employer page shows these as its only
+    // "proof" figures, so they must be the real feed, not a claim.
+    const { data, error } = await supabase
+      .from("job_feed")
+      .select("company_id, region, city")
+      .eq("status", "open")
+      .limit(20000);
+    if (error) throw error;
+    const companies = new Set<string>();
+    const regions = new Set<string>();
+    for (const row of data ?? []) {
+      const r = row as { company_id?: string; region?: string; city?: string };
+      if (r.company_id) companies.add(r.company_id);
+      const place = r.region ?? r.city;
+      if (place) regions.add(place.toLowerCase().trim());
+    }
+    return {
+      openJobs: data?.length ?? 0,
+      hiringCompanies: companies.size,
+      activeRegions: regions.size,
+    };
+  },
+  ["marketplace-stats"],
+  { tags: ["jobs"], revalidate: REVALIDATE },
+);
+
+/** Live totals for the employer page's proof figures. */
+export async function getMarketplaceStats(): Promise<MarketplaceStats> {
+  const empty: MarketplaceStats = {
+    openJobs: 0,
+    hiringCompanies: 0,
+    activeRegions: 0,
+  };
+  if (!hasSupabase()) return empty;
+  try {
+    return await _getMarketplaceStats();
+  } catch (e) {
+    console.error("getMarketplaceStats failed", e);
+    return empty;
+  }
+}
