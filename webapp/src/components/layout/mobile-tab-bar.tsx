@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useSession } from "@/components/auth/session-provider";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -37,16 +38,16 @@ interface Tab {
  * this is the fixed destination bar, and the two are allowed to differ (a bar
  * with five items and a shifting layout is exactly what makes bottom nav feel
  * unreliable).
+ *
+ * Mounted from the layout rather than from `SiteHeader`, because the header is
+ * `sticky` with `backdrop-blur` — that creates a containing block, and a
+ * `fixed` child of it is positioned against the 64px header instead of the
+ * viewport (the same trap that made the drawer portal to `<body>`).
  */
-export function MobileTabBar({
-  signedIn,
-  isEmployerAccount,
-}: {
-  signedIn: boolean;
-  isEmployerAccount: boolean;
-}) {
+export function MobileTabBar() {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const { signedIn, isEmployer } = useSession();
 
   // The admin panel is a desktop tool with its own chrome — no consumer bar.
   if (pathname.startsWith("/admin")) return null;
@@ -54,7 +55,7 @@ export function MobileTabBar({
   // A signed-in employer gets the hiring bar; guests and seekers get the
   // seeker bar even while browsing /employer/jobs/new (guest-first posting),
   // because every hiring destination behind it is gated.
-  const tabs: Tab[] = isEmployerAccount
+  const tabs: Tab[] = isEmployer
     ? [
         { href: "/employer", labelKey: "dashboard", Icon: LayoutDashboard },
         {
@@ -77,8 +78,11 @@ export function MobileTabBar({
         },
         {
           // Auth-last: a guest tapping "Account" gets the sign-in page, not a
-          // gated redirect bounce.
-          href: signedIn ? "/account" : "/sign-in",
+          // gated redirect bounce. Until the browser has resolved the session
+          // (`null`), /account is the safer target — it redirects a guest to
+          // sign-in anyway, whereas the reverse would bounce a signed-in user
+          // through a sign-in page they don't need.
+          href: signedIn === false ? "/sign-in" : "/account",
           labelKey: "account",
           Icon: User,
         },

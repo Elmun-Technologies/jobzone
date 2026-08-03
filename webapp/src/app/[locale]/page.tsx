@@ -29,12 +29,15 @@ import { Link } from "@/i18n/navigation";
 import { orgJsonLd, websiteJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
-// Reads per-user bookmarks + the auth-aware header and the live job feed, but
-// getCurrentUser()'s try/catch swallows the cookies() dynamic signal — so
-// without this the homepage bakes as static logged-out HTML: a signed-out
-// header for logged-in users, saved jobs shown as unsaved, and a job list/map
-// frozen at build time (new postings must appear immediately — invariant #3).
-// Render per request, matching the gated pages' pattern.
+// Still per request, but for one reason only now: the job feed itself. The
+// header no longer asks the server who is looking, and the saved hearts fill
+// in from the browser — what remains is `getRecentJobs`/`getOpenJobs`, which
+// read through the session client to hide the vacancies this seeker archived
+// (0052). Until that filter moves to the browser too, prerendering this page
+// would bake one visitor's archive into everyone's homepage, and freeze the
+// list at build time besides (new postings must appear immediately —
+// invariant #3). getCurrentUser()'s try/catch swallows the cookies() signal,
+// so the opt-out has to be explicit.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage({

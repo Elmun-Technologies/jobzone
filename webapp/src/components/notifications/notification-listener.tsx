@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 
+import { useSession } from "@/components/auth/session-provider";
 import { toast } from "@/components/ui/toast";
 import { useRouter } from "@/i18n/navigation";
 import {
@@ -23,8 +24,8 @@ import { createClient } from "@/lib/supabase/client";
  * set explicitly anyway: without it the client subscribes to every INSERT and
  * relies on the server dropping the ones it may not see.
  *
- * Rendered from SiteHeader, which already resolved the user — this keeps the
- * subscription out of the layout and off guest pages entirely.
+ * Rendered from the header's auth cluster, which already resolved the user —
+ * this keeps the subscription out of the layout and off guest pages entirely.
  */
 export function NotificationListener({ userId }: { userId: string }) {
   const t = useTranslations("notifications");
@@ -32,6 +33,7 @@ export function NotificationListener({ userId }: { userId: string }) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const locale = useLocale();
+  const { refresh } = useSession();
 
   useEffect(() => {
     const channel = supabase
@@ -75,8 +77,11 @@ export function NotificationListener({ userId }: { userId: string }) {
             href: path ? `/${locale}${path}` : null,
             actionLabel: t("toastAction"),
           });
-          // Repaint the server components so the header bell's unread badge
-          // moves with the toast instead of waiting for the next navigation.
+          // Move the header bell's unread badge with the toast instead of
+          // waiting for the next navigation — the count lives in the session
+          // context now, and router.refresh() repaints any server-rendered
+          // list (the notifications page) that is on screen behind it.
+          refresh();
           router.refresh();
         },
       )
@@ -84,7 +89,7 @@ export function NotificationListener({ userId }: { userId: string }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, userId, router, locale, t, ts]);
+  }, [supabase, userId, router, locale, t, ts, refresh]);
 
   return null;
 }
