@@ -1,4 +1,4 @@
--- 0069: indexes for the hot read paths, so the feed and search stay fast as the
+-- 0081: indexes for the hot read paths, so the feed and search stay fast as the
 -- jobs table grows from hundreds to 100k+ rows. Today the jobs table is small,
 -- so plain (non-CONCURRENT) CREATE INDEX is instant; on a large live table you'd
 -- reach for CREATE INDEX CONCURRENTLY (which can't run inside a migration txn).

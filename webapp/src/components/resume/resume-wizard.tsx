@@ -138,7 +138,7 @@ function ChipGroup({
 /** Groups a digit string for display: "15000000" -> "15 000 000". */
 const groupDigits = (s: string) => s.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-/** How many job titles one résumé may carry (mirrors the 0078 constraint). */
+/** How many job titles one résumé may carry (mirrors the 0082 constraint). */
 const MAX_POSITIONS = 3;
 
 /**
@@ -220,7 +220,7 @@ function PositionsField({
  *
  * A guest who was filling the wizard when the deploy landed comes back from
  * sign-in with `{ position: "Sotuvchi", city: "Toshkent" }` in sessionStorage —
- * the pre-0078 shape. Without this the wizard would remount straight onto
+ * the pre-0082 shape. Without this the wizard would remount straight onto
  * `draft.positions.length` and blank-screen them at the exact moment they
  * finally signed in, which is the one moment auth-last cannot afford to lose.
  */

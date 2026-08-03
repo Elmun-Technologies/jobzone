@@ -39,17 +39,17 @@ export interface CertificateEntry {
 
 /** The fields the /resumes/new wizard collects. */
 export interface ResumeDraft {
-  /** Up to three desired job titles (profiles.desired_positions, 0078). The
+  /** Up to three desired job titles (profiles.desired_positions, 0082). The
    * first one is also written to `headline`, which stays the single title every
    * card, chat header and applicant row renders. */
   positions: string[];
   fullName: string;
-  /** Canonical viloyat from UZ_DISTRICTS (profiles.desired_region, 0078). */
+  /** Canonical viloyat from UZ_DISTRICTS (profiles.desired_region, 0082). */
   region: string;
-  /** Canonical tuman inside `region` (profiles.desired_district, 0078). */
+  /** Canonical tuman inside `region` (profiles.desired_district, 0082). */
   district: string;
   /** Derived at save time as district || region — kept because `profiles.city`
-   * is what the cards show and what pre-0078 rows match on. */
+   * is what the cards show and what pre-0082 rows match on. */
   city: string;
   gender: string; // "" | "male" | "female"
   birthDate: string; // "YYYY-MM-DD" | ""
