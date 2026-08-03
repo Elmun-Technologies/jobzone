@@ -19,6 +19,7 @@ const bool = (v: unknown): boolean => v === true;
 export function toJob(r: Row): Job {
   return {
     id: String(r.id),
+    status: String(r.status ?? "open"),
     title: String(r.title ?? ""),
     description: str(r.description),
     responsibilities: str(r.responsibilities),

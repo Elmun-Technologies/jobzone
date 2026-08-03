@@ -6,7 +6,39 @@ import { toJob } from "./mappers";
 import { hasSupabase } from "./supabase-env";
 import type { Job } from "./types";
 
-/** The signed-in user's bookmarked open jobs, newest-saved first. */
+/**
+ * Minimal Job stand-ins for saved vacancies no longer in `job_feed`, read from
+ * the `my_bookmarked_jobs` definer view (0080). Only what the card renders.
+ */
+async function closedBookmarks(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ids: string[],
+): Promise<Job[]> {
+  try {
+    const { data, error } = await supabase
+      .from("my_bookmarked_jobs")
+      .select("id, title, status, company_name")
+      .in("id", ids);
+    if (error) throw error;
+    return (data ?? []).map((r) => {
+      const row = r as Record<string, unknown>;
+      return toJob({
+        id: row.id,
+        title: row.title,
+        status: row.status ?? "closed",
+        company_name: row.company_name,
+      });
+    });
+  } catch (e) {
+    // A database behind on 0080 has no such view. Degrade to the old
+    // behaviour (the row is dropped) rather than failing the whole list.
+    console.error("closedBookmarks failed", e);
+    return [];
+  }
+}
+
+/** The signed-in user's bookmarked jobs, newest-saved first — including any
+ * that have since closed, which are marked rather than dropped. */
 export async function getBookmarkedJobs(): Promise<Job[]> {
   if (!hasSupabase()) return [];
   try {
@@ -34,11 +66,20 @@ export async function getBookmarkedJobs(): Promise<Job[]> {
       .in("id", ids);
     if (jobsError) throw jobsError;
 
-    // Preserve bookmark (most-recent-first) order; job_feed only has open jobs.
-    const order = new Map(ids.map((id, i) => [id, i]));
-    return (rows ?? [])
-      .map(toJob)
-      .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+    const live = (rows ?? []).map(toJob);
+    // Whatever job_feed withheld is a vacancy that has left the market — it
+    // only shows non-owners status='open'. Dropping those made a saved job
+    // silently disappear while its bookmark row sat in the database; the
+    // definer view (0080) carries just enough to keep the record on screen,
+    // marked closed, exactly as the applications list has since 0048.
+    const missing = ids.filter((id) => !live.some((j) => j.id === id));
+    const closed = missing.length
+      ? await closedBookmarks(supabase, missing)
+      : [];
+
+    // Preserve bookmark (most-recent-first) order across both sources.
+    const byId = new Map([...live, ...closed].map((j) => [j.id, j]));
+    return ids.map((id) => byId.get(id)).filter((j): j is Job => Boolean(j));
   } catch (e) {
     console.error("getBookmarkedJobs failed", e);
     return [];

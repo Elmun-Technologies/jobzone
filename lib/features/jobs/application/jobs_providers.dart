@@ -24,9 +24,10 @@ final jobByIdProvider = FutureProvider.family<Job?, String>(
 );
 
 /// Jobs the user has bookmarked (re-resolves when the bookmark set changes).
+/// Keeps the ones that have since closed — see [JobsRepository.bookmarkedByIds].
 final bookmarkedJobsProvider = FutureProvider<List<Job>>((ref) async {
   final ids = await ref.watch(bookmarksControllerProvider.future);
-  return ref.watch(jobsRepositoryProvider).byIds(ids);
+  return ref.watch(jobsRepositoryProvider).bookmarkedByIds(ids);
 });
 
 /// Jobs the user archived ("not interested" — excluded from every feed).

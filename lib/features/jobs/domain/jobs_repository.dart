@@ -19,6 +19,15 @@ abstract interface class JobsRepository {
 
   Future<Job?> byId(String id);
   Future<List<Job>> byIds(Iterable<String> ids);
+
+  /// Like [byIds], but keeps vacancies that have since been closed.
+  ///
+  /// `job_feed` shows non-owners only `status='open'`, so a saved job that the
+  /// employer closes stops resolving and drops out of the list — the bookmark
+  /// row is still there, the seeker just never sees it again. The saved list
+  /// renders those with a marker instead, exactly as the applications list has
+  /// since 0048, so the fallback is only wanted here.
+  Future<List<Job>> bookmarkedByIds(Iterable<String> ids);
   Future<List<Job>> byCompany(String companyId, {int limit});
 
   /// Open jobs in a single category (matched by the joined category name), read
