@@ -54,6 +54,11 @@ export function notificationTitleKey(
       return isJobClosed(data) ? "typeJobClosed" : "typeApplicationUpdate";
     case "message":
       return "typeMessage";
+    case "job_match":
+      // An invitation is an employer addressing this person directly, not the
+      // saved-search alert job_match otherwise means — and 0050 wrote its
+      // heading in Uzbek only.
+      return inviteParts(kind, data) ? "typeJobInvite" : null;
     default:
       return null;
   }
@@ -69,6 +74,26 @@ export function notificationTitleKey(
  */
 export function isJobClosed(data: Record<string, unknown>): boolean {
   return data.event === "job_closed";
+}
+
+/**
+ * The company and role an invitation names, when the payload carries them
+ * (0079). Null for a `job_match` that is a saved-search alert rather than an
+ * invitation, and for invitations written before 0079 — those keep the Uzbek
+ * sentence invite_candidate() stored, which is what they show today.
+ */
+export function inviteParts(
+  kind: NotificationKind,
+  data: Record<string, unknown>,
+): { company: string; title: string } | null {
+  if (kind !== "job_match" || data.invited !== true) return null;
+  const { company, title } = data;
+  return typeof company === "string" &&
+    company &&
+    typeof title === "string" &&
+    title
+    ? { company, title }
+    : null;
 }
 
 /** Statuses `applications.status.*` has a label for (mirrors the DB enum). */

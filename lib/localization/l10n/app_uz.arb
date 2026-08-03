@@ -870,6 +870,8 @@
   "notifTitleJobMatch": "Yangi mos vakansiya",
   "notifTitleJobClosed": "Vakansiya yopildi",
   "notifBodyJobClosed": "«{title}» endi ariza qabul qilmayapti.",
+  "notifTitleJobInvite": "Ish taklifi",
+  "notifBodyJobInvite": "{company} sizni «{title}» lavozimiga taklif qilmoqda.",
   "notifBodyApplicationUpdate": "Ariza holati «{status}» ga oʻzgardi",
   "emailHint": "misol@gmail.com",
   "promoStartName": "Start",
