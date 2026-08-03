@@ -12,22 +12,28 @@ import {
 import { LANGUAGE_CHOSEN_EVENT } from "@/lib/locale-choice";
 
 /**
- * Cookie banner. Server layout reads the cookie and forwards it here as
- * `initialConsent`; if that's null (visitor hasn't chosen yet) we mount
- * the sticky bar. When the visitor clicks accept/reject we persist to
- * the cookie AND to localStorage so the mobile app's WebView (if we ever
- * add one) can inherit the choice, then reload — analytics loaders are
- * server-rendered `<Script>`s gated on the cookie, and a full refresh is
- * the cheapest way to actually run them once the visitor opts in.
+ * Cookie banner. `FirstVisitShell` reads the cookie in the browser and
+ * forwards it here as `initialConsent`; if that's null (visitor hasn't chosen
+ * yet) we mount the sticky bar. When the visitor clicks accept/reject we
+ * persist to the cookie AND to localStorage so the mobile app's WebView (if we
+ * ever add one) can inherit the choice, then report the choice upward so the
+ * analytics loaders mount immediately. This used to reload the page instead —
+ * the loaders were server-rendered and gated on the cookie, so a full document
+ * load was the only way to run them; now they are a sibling of this component
+ * and a state change is enough.
  */
 export function ConsentBanner({
   initialConsent,
   deferred = false,
+  onChoice,
 }: {
   initialConsent: ConsentValue | null;
   /** True while the first-visit language sheet is up — this bar sits at a
    * higher z-index and would cover its last option, so it waits its turn. */
   deferred?: boolean;
+  /** Called after the choice is persisted, so the caller can mount (or keep
+   * withholding) the trackers without a reload. */
+  onChoice?: (value: ConsentValue) => void;
 }) {
   const t = useTranslations("consent");
   const [choice, setChoice] = useState<ConsentValue | null>(initialConsent);
@@ -51,9 +57,7 @@ export function ConsentBanner({
       // source of truth so this is a nice-to-have only.
     }
     setChoice(value);
-    // Reload so the server layout re-reads the cookie and this time mounts
-    // the analytics <Script> tags.
-    window.location.reload();
+    onChoice?.(value);
   }
 
   return (
@@ -62,14 +66,17 @@ export function ConsentBanner({
       // mobile, plate-shaped bar that respects safe-area on iOS. On phones it
       // sits above the fixed tab bar (h-14 + safe area) instead of on top of
       // it, which would bury the primary navigation until a choice is made.
-      className="fixed inset-x-3 bottom-[calc(0.75rem+var(--tabbar))] z-[100] mx-auto max-w-2xl rounded-2xl border border-border bg-background/95 p-4 shadow-2xl backdrop-blur"
+      className="border-border bg-background/95 fixed inset-x-3 bottom-[calc(0.75rem+var(--tabbar))] z-[100] mx-auto max-w-2xl rounded-2xl border p-4 shadow-2xl backdrop-blur"
       role="dialog"
       aria-labelledby="consent-title"
       aria-describedby="consent-body"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex-1">
-          <p id="consent-title" className="text-foreground text-sm font-semibold">
+          <p
+            id="consent-title"
+            className="text-foreground text-sm font-semibold"
+          >
             {t("title")}
           </p>
           <p
@@ -89,7 +96,7 @@ export function ConsentBanner({
           <button
             type="button"
             onClick={() => persist("denied")}
-            className="text-muted-foreground rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+            className="text-muted-foreground border-border hover:bg-muted rounded-md border px-3 py-1.5 text-xs font-medium"
           >
             {t("reject")}
           </button>

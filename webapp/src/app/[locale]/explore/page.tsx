@@ -10,9 +10,10 @@ import { Link } from "@/i18n/navigation";
 import { localeAlternates } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
-// The map reads the live open-job feed; a static prerender would freeze the pins
-// at build time — new postings must show immediately (invariant #3) — and bake a
-// logged-out header for signed-in users. Render per request.
+// The map reads the live open-job feed through the session client (it hides
+// the vacancies this seeker archived), so a static prerender would both freeze
+// the pins at build time — new postings must show immediately (invariant #3) —
+// and bake one visitor's archive into everyone's map. Render per request.
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({

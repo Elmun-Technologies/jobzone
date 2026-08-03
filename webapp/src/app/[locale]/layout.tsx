@@ -1,18 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import { SessionProvider } from "@/components/auth/session-provider";
 import { SavedJobsProvider } from "@/components/jobs/saved-jobs-provider";
 import { FirstVisitShell } from "@/components/layout/first-visit-shell";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { SiteTabBar } from "@/components/layout/site-tab-bar";
 import { Toaster } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
 import { THEME_COOKIE, themeCookieString } from "@/lib/theme";
@@ -148,27 +148,29 @@ export default async function LocaleLayout({
           `md` up, where the bar is hidden (see globals.css). */}
       <body className="bg-background text-foreground flex min-h-full flex-col pb-[var(--tabbar)] font-sans">
         <NextIntlClientProvider>
-          {/* Saved-job state is fetched in the browser (see the provider) so
-              that public pages don't have to read the session — that single
-              per-visitor read is what used to keep them off the CDN. */}
-          <SavedJobsProvider>
-            <SiteBanner />
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
-            <SiteTabBar />
-            {/* Cookie bar, first-visit language sheet and the trackers they
-              gate — the only parts of the shell that read the request. Behind
-              a boundary they are a hole in a static page instead of the reason
-              the whole app renders per request. */}
-            <Suspense fallback={null}>
+          {/* Both providers resolve who is looking in the browser: the session
+              (header, drawer, tab bar) and the visitor's saved jobs. Asking the
+              server for either is what used to keep every page — including the
+              vacancy pages Google crawls — off the CDN, because one
+              per-visitor read anywhere in this tree makes the whole route
+              render per request. */}
+          <SessionProvider>
+            <SavedJobsProvider>
+              <SiteBanner />
+              <SiteHeader />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
+              <MobileTabBar />
+              {/* Cookie bar, first-visit language sheet and the trackers they
+                gate — all read from document.cookie / navigator, one tick after
+                hydration. Nothing here paints above the fold. */}
               <FirstVisitShell locale={locale} />
-            </Suspense>
-            {/* Mounted once for the whole app: toast() pushes to a module-level
-              store, so any client component can raise one without a provider
-              in its own tree. */}
-            <Toaster />
-          </SavedJobsProvider>
+              {/* Mounted once for the whole app: toast() pushes to a
+                module-level store, so any client component can raise one
+                without a provider in its own tree. */}
+              <Toaster />
+            </SavedJobsProvider>
+          </SessionProvider>
         </NextIntlClientProvider>
         {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
             Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
