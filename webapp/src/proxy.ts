@@ -18,7 +18,10 @@ const LOCALE = "(?:uz|ru|en)";
 // résumé, submit an application, publish a job), handled in each action +
 // form. The account hub and the rest of the employer area stay gated.
 const PROTECTED = new RegExp(`^/${LOCALE}/(?:account|employer|admin)(?:/|$)`);
-const GUEST_OK = new RegExp(`^/${LOCALE}/employer/jobs/new(?:/|$)`);
+// `/employer` itself is the public employer landing (the dashboard lives at
+// the same URL but only renders for a signed-in employer — see its page), and
+// `/employer/jobs/new` is the guest-first post form.
+const GUEST_OK = new RegExp(`^/${LOCALE}/employer(?:/jobs/new(?:/|$)|/?$)`);
 const AUTH_PAGES = new RegExp(`^/${LOCALE}/(?:sign-in|sign-up)(?:/|$)`);
 // Technical-team-only panel: optimistic non-admin bounce here; the secure,
 // invisible check is requireAdmin()'s notFound() in every admin page.
