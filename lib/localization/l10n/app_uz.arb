@@ -868,6 +868,8 @@
   "notifTitleApplicationUpdate": "Ariza holati yangilandi",
   "notifTitleMessage": "Yangi xabar",
   "notifTitleJobMatch": "Yangi mos vakansiya",
+  "notifTitleJobClosed": "Vakansiya yopildi",
+  "notifBodyJobClosed": "«{title}» endi ariza qabul qilmayapti.",
   "notifBodyApplicationUpdate": "Ariza holati «{status}» ga oʻzgardi",
   "emailHint": "misol@gmail.com",
   "promoStartName": "Start",
