@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { UzPhoneInput } from "@/components/ui/uz-phone-input";
 import { updateProfile, type ProfileFormState } from "@/lib/actions/profile";
 import type { ProfileDetails } from "@/lib/data/profile";
 import { cn } from "@/lib/utils";
@@ -65,12 +66,14 @@ export function ProfileForm({ initial }: { initial: ProfileDetails }) {
       </label>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Field
-          name="phone"
-          label={t("phone")}
-          value={initial.phone}
-          type="tel"
-        />
+        {/* Same pinned-+998 field as the résumé wizard, so the phone an
+            employer dials has one shape wherever it was entered. */}
+        <label className="block">
+          <span className="text-foreground mb-1 block text-sm font-medium">
+            {t("phone")}
+          </span>
+          <UzPhoneInput name="phone" defaultValue={initial.phone} />
+        </label>
         <Field name="city" label={t("city")} value={initial.city} />
         <Field name="country" label={t("country")} value={initial.country} />
       </div>

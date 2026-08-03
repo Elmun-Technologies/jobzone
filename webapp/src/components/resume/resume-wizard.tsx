@@ -14,6 +14,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { SuggestInput } from "@/components/ui/suggest-input";
+import { UzPhoneInput } from "@/components/ui/uz-phone-input";
 // The plain router, not the locale-aware one from @/i18n/navigation: `next`
 // arrives already locale-prefixed (quick-apply builds `/uz/jobs/<id>/apply`),
 // and pushing that through the i18n router would prefix it twice. Same choice
@@ -25,6 +26,7 @@ import { saveResume } from "@/lib/actions/resume";
 import { registerDraftCapture } from "@/lib/draft-stash";
 import { safeNext } from "@/lib/auth/safe-next";
 import { suggestProfessions } from "@/lib/professions";
+import { isCompleteUzPhone } from "@/lib/uz-phone";
 import { districtsFor } from "@/lib/uz-districts";
 import { UZ_REGIONS } from "@/lib/uz-regions";
 // The client-safe half of the résumé module — `data/resume` itself is
@@ -238,6 +240,51 @@ function reviveDraft(raw: unknown): ResumeDraft {
     region: typeof d.region === "string" ? d.region : "",
     district: typeof d.district === "string" ? d.district : "",
   };
+}
+
+/**
+ * Year picker for the history sections (worked / studied / certified from–to).
+ *
+ * These were free numeric inputs, which accept "20026" and "1899" as happily
+ * as a real year — and the value is stored as a date (`YYYY-01-01`), so a typo
+ * lands in the database and then sorts the seeker's own history wrongly. The
+ * range runs from this year back 60, newest first: nearly every entry a seeker
+ * adds is recent, and the one they want should be at the top of the list.
+ */
+function YearSelect({
+  value,
+  onChange,
+  label,
+  disabled,
+  future = 0,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label: string;
+  disabled?: boolean;
+  /** Years ahead of today to offer (a certificate's expiry is in the future). */
+  future?: number;
+}) {
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: 61 + future }, (_, i) =>
+    String(thisYear + future - i),
+  );
+  return (
+    <select
+      className={inputClass}
+      value={disabled ? "" : value}
+      disabled={disabled}
+      aria-label={label}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">{label}</option>
+      {years.map((y) => (
+        <option key={y} value={y}>
+          {y}
+        </option>
+      ))}
+    </select>
+  );
 }
 
 /** Day / month / year dropdowns for a birth date — far clearer than the native
@@ -510,7 +557,7 @@ export function ResumeWizard({
       : step === 1
         ? draft.experienceLevel !== ""
         : step === 3
-          ? draft.phone.trim() !== ""
+          ? isCompleteUzPhone(draft.phone)
           : true;
 
   function next() {
@@ -755,20 +802,16 @@ export function ResumeWizard({
                       onChange={(e) => setExp(i, "companyName", e.target.value)}
                     />
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <input
-                        className={inputClass}
-                        inputMode="numeric"
-                        placeholder={t("startYear")}
+                      <YearSelect
+                        label={t("startYear")}
                         value={exp.startYear}
-                        onChange={(e) => setExp(i, "startYear", e.target.value)}
+                        onChange={(v) => setExp(i, "startYear", v)}
                       />
-                      <input
-                        className={inputClass}
-                        inputMode="numeric"
-                        placeholder={t("endYear")}
+                      <YearSelect
+                        label={t("endYear")}
+                        value={exp.endYear}
                         disabled={exp.isCurrent}
-                        value={exp.isCurrent ? "" : exp.endYear}
-                        onChange={(e) => setExp(i, "endYear", e.target.value)}
+                        onChange={(v) => setExp(i, "endYear", v)}
                       />
                     </div>
                     <label className="text-foreground flex items-center gap-2 text-sm">
@@ -931,20 +974,16 @@ export function ResumeWizard({
                     />
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <input
-                      className={inputClass}
-                      inputMode="numeric"
-                      placeholder={t("startYear")}
+                    <YearSelect
+                      label={t("startYear")}
                       value={edu.startYear}
-                      onChange={(e) => setEdu(i, "startYear", e.target.value)}
+                      onChange={(v) => setEdu(i, "startYear", v)}
                     />
-                    <input
-                      className={inputClass}
-                      inputMode="numeric"
-                      placeholder={t("endYear")}
+                    <YearSelect
+                      label={t("endYear")}
+                      value={edu.endYear}
                       disabled={edu.isCurrent}
-                      value={edu.isCurrent ? "" : edu.endYear}
-                      onChange={(e) => setEdu(i, "endYear", e.target.value)}
+                      onChange={(v) => setEdu(i, "endYear", v)}
                     />
                   </div>
                   <label className="text-foreground flex items-center gap-2 text-sm">
@@ -1003,23 +1042,18 @@ export function ResumeWizard({
                       onChange={(e) => setCert(i, "issuer", e.target.value)}
                     />
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <input
-                        className={inputClass}
-                        inputMode="numeric"
-                        placeholder={t("issuedYear")}
+                      <YearSelect
+                        label={t("issuedYear")}
                         value={cert.issuedYear}
-                        onChange={(e) =>
-                          setCert(i, "issuedYear", e.target.value)
-                        }
+                        onChange={(v) => setCert(i, "issuedYear", v)}
                       />
-                      <input
-                        className={inputClass}
-                        inputMode="numeric"
-                        placeholder={t("expiryYear")}
+                      {/* Certificates may expire after today, unlike a job or
+                          a degree — so this one list runs forward as well. */}
+                      <YearSelect
+                        label={t("expiryYear")}
                         value={cert.expiryYear}
-                        onChange={(e) =>
-                          setCert(i, "expiryYear", e.target.value)
-                        }
+                        future={10}
+                        onChange={(v) => setCert(i, "expiryYear", v)}
                       />
                     </div>
                     <p className="text-muted-foreground text-xs">
@@ -1143,12 +1177,13 @@ export function ResumeWizard({
         {step === 3 ? (
           <>
             <Field label={t("phone")} required>
-              <input
-                type="tel"
-                className={inputClass}
-                placeholder="+998 90 123 45 67"
+              {/* The number an employer will actually dial — see uz-phone.ts
+                  for why it is collected as nine digits behind a pinned +998
+                  rather than as free text. */}
+              <UzPhoneInput
                 value={draft.phone}
-                onChange={(e) => set("phone", e.target.value)}
+                onChange={(v) => set("phone", v)}
+                required
               />
             </Field>
             <Field label={t("email")}>
