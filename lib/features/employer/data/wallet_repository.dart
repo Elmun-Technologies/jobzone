@@ -85,6 +85,42 @@ class WalletRepository {
     });
   }
 
+  /// Opens (or re-uses) a pending top-up and returns the id the gateway
+  /// checkout addresses, plus the amount the server actually accepted.
+  ///
+  /// `create_topup_order` (0085) bounds the amount server-side and hands back
+  /// the same pending row for a repeated same-amount request — so two payment
+  /// attempts settle one row and a single intent can never be credited twice.
+  /// The provider's callback flips the row to `completed`, which is what moves
+  /// the balance; the client never writes that itself.
+  Future<({String orderId, int amountUzs})> createTopUpOrder(
+    num amountUzs,
+  ) async {
+    // Round here too, so the offline substrate records exactly what the RPC
+    // would: the gateways charge whole so'm, and a fractional row would make
+    // the ledger and the checkout disagree about the amount.
+    final rounded = amountUzs.round();
+    if (!_live) {
+      await requestTopUp(rounded);
+      return (
+        orderId: 'ord-${DateTime.now().microsecondsSinceEpoch}',
+        amountUzs: rounded,
+      );
+    }
+    final client = _ref.read(supabaseClientProvider);
+    final data = await client.rpc(
+      'create_topup_order',
+      params: {'p_amount_uzs': rounded},
+    );
+    final row = data is List
+        ? (data.first as Map<String, dynamic>)
+        : (data as Map<String, dynamic>);
+    return (
+      orderId: row['order_id'].toString(),
+      amountUzs: (row['amount_uzs'] as num).toInt(),
+    );
+  }
+
   /// Offline-only: applies an immediate completed debit to the demo wallet, so
   /// buying a promotion visibly lowers the balance — matching the effect the
   /// live `buy_promotion` RPC has server-side. No-op live (the RPC itself

@@ -255,6 +255,11 @@ class _CompanyView extends StatelessWidget {
           label: l.promotionsTitle,
           onTap: () => context.push(Routes.employerPromotions),
         ),
+        _ManageRow(
+          icon: Icons.account_balance_wallet_outlined,
+          label: l.walletTitle,
+          onTap: () => context.push(Routes.employerWallet),
+        ),
         if (company.about != null && company.about!.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.xl),
           Text(l.companyAboutLabel, style: context.text.titleSmall),
