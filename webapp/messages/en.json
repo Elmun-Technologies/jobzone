@@ -828,6 +828,10 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "sound": {
+    "mute": "Turn sound off",
+    "unmute": "Turn sound on"
+  },
   "localeSwitcher": {
     "label": "Language",
     "sheetTitle": "Choose your language",

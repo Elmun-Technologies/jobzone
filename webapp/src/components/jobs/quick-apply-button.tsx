@@ -7,6 +7,7 @@ import { useState, useTransition } from "react";
 
 import { quickApply } from "@/lib/actions/apply";
 import { track } from "@/lib/analytics/track";
+import { playSuccess } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 
 /**
@@ -69,6 +70,10 @@ export function QuickApplyButton({
           duplicate: res.duplicate === true,
         });
         setApplied(true);
+        // Only for a real send. A duplicate means they had already applied —
+        // congratulating them again for one tap would be a lie about what
+        // just happened.
+        if (res.ok && !res.duplicate) playSuccess();
       } else {
         // Unexpected failure — fall back to the full form.
         router.push(formHref);
@@ -81,7 +86,7 @@ export function QuickApplyButton({
       <span
         className={cn(
           base,
-          "bg-primary text-primary-foreground cursor-default",
+          "success-pop bg-primary text-primary-foreground cursor-default",
           className,
         )}
       >

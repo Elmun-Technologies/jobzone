@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { JobStatusPill } from "@/components/employer/job-status-pill";
 import { buttonVariants } from "@/components/ui/button";
+import { Celebrate } from "@/components/ui/celebrate";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { updateJobStatus } from "@/lib/actions/employer";
@@ -70,7 +71,12 @@ export default async function MyJobsPage({
   return (
     <Container className="max-w-3xl py-10">
       {banner ? (
-        <div className="border-primary/40 bg-accent mb-5 rounded-xl border px-4 py-3">
+        <div className="border-primary/40 bg-accent success-pop mb-5 rounded-xl border px-4 py-3">
+          {/* Publishing is the employer's payoff and it arrives by redirect,
+              so the confirmation carries the sound the tap couldn't. Only for
+              a vacancy that actually went live — a saved draft is a
+              checkpoint, not an achievement. */}
+          {posted === "open" ? <Celebrate /> : null}
           <p className="text-accent-foreground flex items-center gap-2 text-sm font-medium">
             <span aria-hidden>🎉</span>
             {banner}

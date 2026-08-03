@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui/container";
+import { SoundToggle } from "@/components/ui/sound-toggle";
 import { Link } from "@/i18n/navigation";
 
 import { HeaderAuth } from "./header-auth";
@@ -53,6 +54,7 @@ export function SiteHeader() {
           <div className="hidden items-center gap-4 xl:flex">
             <LocaleSwitcher />
             <ThemeToggle />
+            <SoundToggle />
           </div>
 
           <HeaderAuth />

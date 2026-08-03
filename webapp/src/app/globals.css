@@ -263,6 +263,52 @@ body {
   }
 }
 
+/* Confirmations. The "you applied" / "vacancy published" states arrive by
+   swap or redirect, so without this they simply blink into existence — the
+   overshoot is what makes the change read as a result of the tap rather than
+   a re-render. Paired with the sound in lib/sound.ts. */
+@keyframes successPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.success-pop {
+  animation: successPop 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Save/unsave: the icon alone reacts, so the button doesn't jump under the
+   thumb that is still on it. Short enough to survive a fast double-tap. */
+@keyframes tapPop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.tap-pop {
+  animation: tapPop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .success-pop,
+  .tap-pop {
+    animation: none;
+  }
+}
+
 /* Toasts (see components/ui/toast.tsx): slide in from the edge they're
    anchored to — bottom on phones, right from `sm:` up. */
 @keyframes toastIn {

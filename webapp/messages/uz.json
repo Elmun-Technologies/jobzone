@@ -828,6 +828,10 @@
     "light": "Yorug' rejim",
     "dark": "Tungi rejim"
   },
+  "sound": {
+    "mute": "Ovozni o'chirish",
+    "unmute": "Ovozni yoqish"
+  },
   "localeSwitcher": {
     "label": "Til",
     "sheetTitle": "Tilni tanlang",

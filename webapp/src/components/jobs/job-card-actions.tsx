@@ -130,7 +130,13 @@ export function JobCardActions({
         aria-label={shown ? tb("saved") : tb("save")}
         className={cn(iconButton, shown && "text-primary hover:text-primary")}
       >
-        <Bookmark className="size-4" fill={shown ? "currentColor" : "none"} />
+        {/* Keyed so the pop replays on each toggle, and only after a tap —
+            see BookmarkButton for why the provider's fill must stay silent. */}
+        <Bookmark
+          key={touched ? `saved-${shown}` : "initial"}
+          className={cn("size-4", touched && "tap-pop")}
+          fill={shown ? "currentColor" : "none"}
+        />
       </button>
       <button
         type="button"

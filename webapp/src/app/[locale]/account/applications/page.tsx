@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { WithdrawApplicationButton } from "@/components/account/withdraw-application-button";
 import { buttonVariants } from "@/components/ui/button";
+import { Celebrate } from "@/components/ui/celebrate";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { getMyApplications } from "@/lib/data/applications";
@@ -69,7 +70,10 @@ export default async function MyApplicationsPage({
       <h1 className="text-foreground mb-6 text-2xl font-bold">{t("title")}</h1>
 
       {justApplied ? (
-        <div className="border-primary/40 bg-accent text-accent-foreground mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium">
+        <div className="border-primary/40 bg-accent text-accent-foreground success-pop mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium">
+          {/* Sends the confirmation chime — the seeker landed here from a
+              redirect, so the tap that earned it is already gone. */}
+          <Celebrate />
           <CheckCircle2 className="text-primary size-5 shrink-0" />
           {t("appliedBanner")}
         </div>
