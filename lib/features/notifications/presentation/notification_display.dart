@@ -37,6 +37,9 @@ bool usesStoredTitle(NotificationType type, String title) => switch (type) {
 String notificationTitle(BuildContext context, AppNotification n) {
   if (usesStoredTitle(n.type, n.title)) return n.title;
   final l = context.l10n;
+  // A vacancy closing is not a decision on the application, so it gets its own
+  // heading rather than the generic "your application changed".
+  if (isJobClosed(n)) return l.notifTitleJobClosed;
   return switch (n.type) {
     NotificationType.applicationUpdate => l.notifTitleApplicationUpdate,
     NotificationType.message => l.notifTitleMessage,
@@ -55,7 +58,18 @@ String notificationTitle(BuildContext context, AppNotification n) {
 /// notify_application_status_change()) the same way the title is. Every other
 /// type's body is either literal user content (a chat message preview) or
 /// already-localized system copy, so it passes through unchanged.
+/// Whether this row is the "the vacancy you applied to was closed" notice
+/// raised by 0078, rather than an ordinary status change.
+///
+/// The trigger stores the vacancy's title as the body and marks the row with
+/// `event`, precisely so the sentence around that title can be written in the
+/// reader's own language here instead of being fixed in SQL.
+bool isJobClosed(AppNotification n) => n.data['event'] == 'job_closed';
+
 String? notificationBody(BuildContext context, AppNotification n) {
+  if (isJobClosed(n)) {
+    return context.l10n.notifBodyJobClosed(n.body ?? '');
+  }
   if (n.type == NotificationType.applicationUpdate) {
     final status = ApplicationStatus.fromWire(n.data['status'] as String?);
     if (status != null) {

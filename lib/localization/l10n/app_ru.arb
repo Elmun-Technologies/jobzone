@@ -868,6 +868,8 @@
   "notifTitleApplicationUpdate": "Обновление заявки",
   "notifTitleMessage": "Новое сообщение",
   "notifTitleJobMatch": "Новая подходящая вакансия",
+  "notifTitleJobClosed": "Вакансия закрыта",
+  "notifBodyJobClosed": "«{title}» больше не принимает отклики.",
   "notifBodyApplicationUpdate": "Статус вашей заявки изменён на «{status}»",
   "emailHint": "example@gmail.com",
   "promoStartName": "Старт",
