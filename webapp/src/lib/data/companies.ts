@@ -87,7 +87,10 @@ export async function getCompanies(opts?: {
   if (!hasSupabase()) return [];
 
   try {
-    const supabase = await createClient();
+    // The public client, not the request-scoped one: the company directory is
+    // the same for every visitor, and a reader that touches the session makes
+    // its page impossible to prerender.
+    const supabase = createPublicClient();
     let req = supabase
       .from("companies")
       .select("*")
