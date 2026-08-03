@@ -1,0 +1,185 @@
+<!doctype html>
+<!--
+  Supabase Auth "Reset password" template. The link lands on /auth/callback,
+  which mints the short-lived session the /reset-password form needs.
+  Vars: .ConfirmationURL, .Token, .Email.
+-->
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Yolla</title>
+  </head>
+  <body style="margin: 0; padding: 0; background: #f4f4f2">
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="background: #f4f4f2; padding: 24px 12px"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="
+              width: 100%;
+              max-width: 600px;
+              font-family: Archivo, 'Helvetica Neue', Helvetica, Arial,
+                sans-serif;
+            "
+          >
+            <tr>
+              <td
+                style="
+                  background: #0a0a0a;
+                  border-radius: 18px 18px 0 0;
+                  padding: 22px 28px;
+                "
+              >
+                <span
+                  style="
+                    display: inline-block;
+                    background: #c7fb00;
+                    color: #0a0a0a;
+                    font-size: 18px;
+                    font-weight: 800;
+                    line-height: 1;
+                    padding: 8px 10px;
+                    border-radius: 10px 10px 10px 2px;
+                  "
+                  >yo</span
+                >
+                <span
+                  style="
+                    color: #ffffff;
+                    font-size: 20px;
+                    font-weight: 800;
+                    padding-left: 8px;
+                    vertical-align: middle;
+                  "
+                  >Yolla</span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td style="background: #ffffff; padding: 28px">
+                <h1
+                  style="
+                    margin: 0 0 16px;
+                    font-size: 22px;
+                    line-height: 30px;
+                    color: #0a0a0a;
+                    font-weight: 800;
+                  "
+                >
+                  Parolni tiklash
+                </h1>
+                <p
+                  style="
+                    margin: 0 0 14px;
+                    font-size: 16px;
+                    line-height: 26px;
+                    color: #0a0a0a;
+                  "
+                >
+                  Parolni tiklash so'rovi keldi. Yangi parol o'rnatish uchun quyidagi
+                  tugmani bosing. Havola 1 soat davomida amal qiladi.
+                </p>
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  style="margin: 22px 0 10px"
+                >
+                  <tr>
+                    <td style="border-radius: 12px; background: #c7fb00">
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="
+                          display: inline-block;
+                          padding: 14px 26px;
+                          font-family: Archivo, 'Helvetica Neue', Helvetica,
+                            Arial, sans-serif;
+                          font-size: 16px;
+                          font-weight: 700;
+                          color: #0a0a0a;
+                          text-decoration: none;
+                          border-radius: 12px;
+                        "
+                        >Yangi parol o'rnatish</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+                <p
+                  style="
+                    margin: 0 0 6px;
+                    font-size: 14px;
+                    line-height: 22px;
+                    color: #6b6b66;
+                  "
+                >
+                  Kod bilan tiklash uchun:
+                </p>
+                <p
+                  style="
+                    margin: 0 0 18px;
+                    font-size: 26px;
+                    letter-spacing: 6px;
+                    font-weight: 800;
+                    color: #0a0a0a;
+                  "
+                >
+                  {{ .Token }}
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 14px;
+                    line-height: 22px;
+                    color: #6b6b66;
+                  "
+                >
+                  Запрошено восстановление пароля. Нажмите кнопку выше, чтобы задать
+                  новый пароль. Ссылка действует 1 час.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="
+                  background: #ffffff;
+                  border-radius: 0 0 18px 18px;
+                  border-top: 1px solid #e4e4e0;
+                  padding: 20px 28px 26px;
+                "
+              >
+                <p
+                  style="
+                    margin: 0;
+                    font-size: 12px;
+                    line-height: 20px;
+                    color: #6b6b66;
+                  "
+                >
+                  Bu xat {{ .Email }} manziliga yuborildi. Agar parolni tiklashni
+                  so'ramagan bo'lsangiz, xatni e'tiborsiz qoldiring — parolingiz
+                  o'zgarmaydi.
+                  <br />Yolla — ish qidirish va xodim topish platformasi.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

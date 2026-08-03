@@ -41,7 +41,37 @@ enable_signup = true
 
 [auth.email]
 enable_signup = true
-enable_confirmations = false
+# Confirm the address before the account is usable: it keeps typo'd and
+# throwaway addresses out of the seeker base (an employer writing to a candidate
+# has to reach a real inbox) and it is what earns a sending domain its
+# reputation. The web sign-up handles both branches — with confirmations on,
+# signUpAction lands the user on /sign-in?notice=confirm and the confirmation
+# link comes back through /auth/callback. Migration 0084 turns the confirmation
+# into the welcome email.
+enable_confirmations = true
+
+# Branded, Uzbek-first auth mail. Without these Supabase sends its own English
+# default, which is the one email every single user is guaranteed to see.
+# `supabase config push` (or the dashboard's Email Templates page) applies them.
+[auth.email.template.confirmation]
+subject = "Yolla — email manzilingizni tasdiqlang"
+content_path = "./templates/confirmation.html"
+
+[auth.email.template.magic_link]
+subject = "Yolla — kirish kodingiz"
+content_path = "./templates/magic_link.html"
+
+[auth.email.template.recovery]
+subject = "Yolla — parolni tiklash"
+content_path = "./templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Yolla — yangi email manzilni tasdiqlang"
+content_path = "./templates/email_change.html"
+
+[auth.email.template.invite]
+subject = "Yolla — sizni taklif qilishdi"
+content_path = "./templates/invite.html"
 
 [edge_runtime]
 enabled = true
@@ -84,6 +114,11 @@ verify_jwt = false
 # Invoked by a scheduler (cron/pg_net) with no user JWT; gated by the
 # fail-closed EDGE_SHARED_SECRET instead.
 [functions.saved-search-alerts]
+verify_jwt = false
+
+# Invoked by the auth.users signup/confirm triggers (pg_net, migration 0084)
+# with no user JWT; gated by the fail-closed EDGE_SHARED_SECRET instead.
+[functions.lifecycle-email]
 verify_jwt = false
 
 # Invoked by the jobs AFTER-INSERT/UPDATE trigger (pg_net, migration 0058)

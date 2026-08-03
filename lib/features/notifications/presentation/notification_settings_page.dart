@@ -11,8 +11,10 @@ import '../data/notifications_repository.dart';
 import '../data/telegram_repository.dart';
 import '../domain/notification.dart';
 
-/// Toggle notification preferences. The design's five switches map onto the
-/// existing [NotificationSettings] channels.
+/// Toggle notification preferences: which categories reach the phone (push /
+/// Telegram) and which reach the inbox. Each switch maps to one
+/// [NotificationSettings] column, and the two channels are independent — the
+/// backend reads `push_*` and `email_*` separately (0084).
 class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({super.key});
 
@@ -69,37 +71,68 @@ class _NotificationSettingsPageState
                 ),
                 data: (loaded) {
                   final s = _settings ?? loaded;
+                  // Two independent channels, grouped by the category the user
+                  // actually thinks in: the same "new jobs" row appears under
+                  // both, because switching push off must not silence the
+                  // email digest (and vice versa) — that's how the backend
+                  // reads them too.
                   return ListView(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg,
                     ),
                     children: [
+                      _SectionHeader(title: l.pushNotifications),
                       _Toggle(
-                        title: l.notifGeneral,
-                        value: s.pushMessages,
-                        onChanged: (v) => _update(s.copyWith(pushMessages: v)),
-                      ),
-                      _Toggle(
-                        title: l.notifJobAvailable,
+                        title: l.notifJobMatches,
                         value: s.pushJobMatch,
                         onChanged: (v) => _update(s.copyWith(pushJobMatch: v)),
                       ),
                       _Toggle(
-                        title: l.notifJobInvitation,
+                        title: l.notifApplications,
                         value: s.pushApplication,
                         onChanged: (v) =>
                             _update(s.copyWith(pushApplication: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifMessages,
+                        value: s.pushMessages,
+                        onChanged: (v) => _update(s.copyWith(pushMessages: v)),
                       ),
                       _Toggle(
                         title: l.notifReviews,
                         value: s.pushReviews,
                         onChanged: (v) => _update(s.copyWith(pushReviews: v)),
                       ),
+                      const Divider(height: AppSpacing.xl),
+                      _SectionHeader(title: l.emailNotifications),
                       _Toggle(
-                        title: l.notifEmailApplicationUpdates,
+                        title: l.notifJobMatches,
+                        subtitle: l.notifEmailDigestHint,
+                        value: s.emailJobMatch,
+                        onChanged: (v) => _update(s.copyWith(emailJobMatch: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifApplications,
                         value: s.emailApplication,
                         onChanged: (v) =>
                             _update(s.copyWith(emailApplication: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifMessages,
+                        value: s.emailMessages,
+                        onChanged: (v) => _update(s.copyWith(emailMessages: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifReviews,
+                        value: s.emailReviews,
+                        onChanged: (v) => _update(s.copyWith(emailReviews: v)),
+                      ),
+                      _Toggle(
+                        title: l.notifEmailMarketing,
+                        subtitle: l.notifEmailMarketingHint,
+                        value: s.emailMarketing,
+                        onChanged: (v) =>
+                            _update(s.copyWith(emailMarketing: v)),
                       ),
                       const Divider(height: AppSpacing.xl),
                       const _TelegramTile(),
@@ -115,23 +148,60 @@ class _NotificationSettingsPageState
   }
 }
 
+/// Groups the switches by delivery channel (push vs email).
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.xs),
+      child: Text(
+        title.toUpperCase(),
+        style: context.text.labelSmall?.copyWith(
+          color: context.colors.textSecondary,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+}
+
 class _Toggle extends StatelessWidget {
   const _Toggle({
     required this.title,
     required this.value,
     required this.onChanged,
+    this.subtitle,
   });
   final String title;
+  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final subtitle = this.subtitle;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: context.text.bodyLarge)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.text.bodyLarge),
+                if (subtitle != null)
+                  Text(
+                    subtitle,
+                    style: context.text.bodySmall?.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
           Switch(value: value, onChanged: onChanged),
         ],
       ),

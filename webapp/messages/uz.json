@@ -997,7 +997,26 @@
     "deleteInProgress": "O'chirilmoqda…",
     "deleteErrConfirm": "Tasdiqlash uchun aynan DELETE deb yozing.",
     "deleteErrSession": "Siz kirmagansiz.",
-    "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
+    "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring.",
+    "notifTitle": "Bildirishnomalar va email",
+    "notifSubtitle": "Qaysi xabarlar telefoningizga, qaysilari pochtangizga kelishini o'zingiz tanlaysiz.",
+    "notifPushGroup": "Ilova bildirishnomalari",
+    "notifEmailGroup": "Email xabarlar",
+    "notifJobMatch": "Yangi mos vakansiyalar",
+    "notifJobMatchHint": "Saqlagan qidiruvingiz yoki obuna bo'lgan kompaniyangiz bo'yicha yangi ish chiqqanda.",
+    "notifApplication": "Ariza holati o'zgarishi",
+    "notifMessages": "Yangi xabarlar",
+    "notifReviews": "Sharhlar",
+    "emailJobMatch": "Yangi vakansiyalar haqida email",
+    "emailJobMatchHint": "Kuniga bir marta, bitta xatda — har bir vakansiya uchun alohida emas.",
+    "emailApplication": "Ariza holati haqida email",
+    "emailMessages": "Yangi xabarlar haqida email",
+    "emailReviews": "Sharhlar haqida email",
+    "emailMarketing": "Yolla yangiliklari va tavsiyalari",
+    "emailMarketingHint": "Platforma yangiliklari, foydali maslahatlar. Istalgan vaqtda bekor qilishingiz mumkin.",
+    "notifSave": "Saqlash",
+    "notifSaving": "Saqlanmoqda…",
+    "notifSaved": "Saqlandi"
   },
   "regionPage": {
     "title": "{region}da ish va bo'sh ish o'rinlari",
@@ -1062,5 +1081,25 @@
     "a4": "Vakansiya joylaganingizdan so'ng tizim mos nomzodlarni o'zi tanlab, ro'yxat qilib beradi — lavozim, tajriba va hudud bo'yicha. Har birini bir bosishda ishga taklif qilishingiz mumkin.",
     "q5": "E'lon qancha turadi?",
     "a5": "E'lon siz belgilagan muddatgacha ochiq turadi va muddati tugagach avtomatik yopiladi. Xohlagan payt qo'lda yopishingiz yoki tahrirlashingiz mumkin."
+  },
+  "unsubscribe": {
+    "title": "Email xabarlardan chiqish",
+    "subtitle": "Hisobingizga kirish shart emas — quyidagi tugma yetarli.",
+    "confirm": "{scope} bo'yicha email xabarlarni to'xtataylikmi?",
+    "unsubscribeCta": "Ha, to'xtating",
+    "undoCta": "Qaytarish",
+    "manageCta": "Barcha sozlamalar",
+    "done": "Bo'ldi — bu turdagi xatlarni endi yubormaymiz. Ilova ichidagi bildirishnomalar saqlanib qoladi.",
+    "resubscribed": "Obuna tiklandi — xatlar yana keladi.",
+    "working": "Bajarilmoqda…",
+    "invalidLink": "Havola eskirgan yoki noto'g'ri. Sozlamalarni hisobingizdan o'zgartiring.",
+    "failed": "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.",
+    "unknownState": "Joriy sozlamalarni o'qib bo'lmadi, lekin tugma baribir ishlaydi.",
+    "scope_all": "Barcha",
+    "scope_job_match": "Yangi vakansiyalar",
+    "scope_marketing": "Yangiliklar va tavsiyalar",
+    "scope_messages": "Yangi xabarlar",
+    "scope_application": "Ariza holati",
+    "scope_reviews": "Sharhlar"
   }
 }

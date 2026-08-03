@@ -997,7 +997,26 @@
     "deleteInProgress": "Deleting…",
     "deleteErrConfirm": "Type DELETE exactly to confirm.",
     "deleteErrSession": "You are not signed in.",
-    "deleteErrUnknown": "Something went wrong. Please try again."
+    "deleteErrUnknown": "Something went wrong. Please try again.",
+    "notifTitle": "Notifications and email",
+    "notifSubtitle": "You decide what reaches your phone and what reaches your inbox.",
+    "notifPushGroup": "In-app notifications",
+    "notifEmailGroup": "Emails",
+    "notifJobMatch": "New matching jobs",
+    "notifJobMatchHint": "When a job matches a search you saved or comes from a company you follow.",
+    "notifApplication": "Application status changes",
+    "notifMessages": "New messages",
+    "notifReviews": "Reviews",
+    "emailJobMatch": "Email me about new jobs",
+    "emailJobMatchHint": "One email with all the matches — not one per vacancy.",
+    "emailApplication": "Email me about application updates",
+    "emailMessages": "Email me about new messages",
+    "emailReviews": "Email me about reviews",
+    "emailMarketing": "Yolla news and tips",
+    "emailMarketingHint": "Product news and useful tips. You can unsubscribe at any time.",
+    "notifSave": "Save",
+    "notifSaving": "Saving…",
+    "notifSaved": "Saved"
   },
   "regionPage": {
     "title": "Jobs and vacancies in {region}",
@@ -1062,5 +1081,25 @@
     "a4": "Once you publish, the platform assembles a list of matching candidates by title, experience and region. Each one can be invited in a single tap.",
     "q5": "How long does a listing stay up?",
     "a5": "Until the date you set; it closes automatically when that passes. You can close or edit it at any time."
+  },
+  "unsubscribe": {
+    "title": "Unsubscribe from emails",
+    "subtitle": "No sign-in needed — the button below is enough.",
+    "confirm": "Stop sending “{scope}” emails?",
+    "unsubscribeCta": "Yes, unsubscribe",
+    "undoCta": "Undo",
+    "manageCta": "All settings",
+    "done": "Done — we won't send these emails any more. In-app notifications stay on.",
+    "resubscribed": "Subscribed again — the emails will resume.",
+    "working": "Working…",
+    "invalidLink": "This link is expired or invalid. Change the settings from your account instead.",
+    "failed": "Something went wrong. Please try again in a moment.",
+    "unknownState": "We couldn't read your current settings, but the button still works.",
+    "scope_all": "All emails",
+    "scope_job_match": "New jobs",
+    "scope_marketing": "News and tips",
+    "scope_messages": "New messages",
+    "scope_application": "Application status",
+    "scope_reviews": "Reviews"
   }
 }

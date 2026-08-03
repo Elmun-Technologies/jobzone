@@ -93,6 +93,21 @@ export default async function AdminBroadcastPage({
             <input name="city" placeholder={s.cityHint} className={inputClass} />
           </label>
         </div>
+        <label className="border-border bg-card flex cursor-pointer items-start gap-3 rounded-xl border p-3">
+          <input
+            type="checkbox"
+            name="send_email"
+            className="accent-primary mt-0.5 size-4 cursor-pointer"
+          />
+          <span>
+            <span className="text-foreground block text-sm font-medium">
+              {s.sendEmail}
+            </span>
+            <span className="text-muted-foreground block text-xs">
+              {s.sendEmailHint}
+            </span>
+          </span>
+        </label>
         <div>
           <ConfirmSubmit>{s.send}</ConfirmSubmit>
         </div>
