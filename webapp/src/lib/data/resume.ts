@@ -125,7 +125,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
     if (typeof sr.summary === "string") summary = sr.summary;
     if (sr.summary_ai_generated === true) summaryAiGenerated = true;
 
-    // desired_positions / desired_region / desired_district are 0078 columns —
+    // desired_positions / desired_region / desired_district are 0082 columns —
     // read separately, same as summary above, so a DB that hasn't taken the
     // migration yet still returns a working résumé instead of erroring out.
     let positions: string[] = [];
@@ -146,7 +146,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
       region = str(lr.desired_region);
       district = str(lr.desired_district);
     }
-    // Pre-0078 résumés (and DBs behind on it) only have the headline.
+    // Pre-0082 résumés (and DBs behind on it) only have the headline.
     if (positions.length === 0 && str(r.headline).trim() !== "") {
       positions = [str(r.headline)];
     }

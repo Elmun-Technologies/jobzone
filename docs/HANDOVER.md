@@ -49,11 +49,11 @@ migratsiyalar, edge funksiyalar — `supabase/`.
 
 ```bash
 supabase link --project-ref nzxdnsxwxrstcrumwzwu
-supabase db push        # 0074 gача barcha yozilmagan migratsiyalar qo‘llanadi
+supabase db push        # 0082 gacha barcha yozilmagan migratsiyalar qo‘llanadi
 ```
 
 Bu content_reports (shikoyat), account_deletion, to‘lov jadvallari va
-qolganlarни bazaga tushiradi. **Muhim:** `0074` Telegram OTP’dagi jiddiy
+qolganlarni bazaga tushiradi. **Muhim:** `0074` Telegram OTP’dagi jiddiy
 xatoni tuzatadi — kod noto‘g‘ri host’ga (`gateway.telegram.org`, marketing
 sayt) yuborilar edi, u har doim `200 OK` qaytargani uchun xato **butunlay
 sezilmas** edi — foydalanuvchi kod kutadi, lekin hech narsa yuborilmagan.
@@ -64,6 +64,28 @@ bo‘lsangiz, qayta ishga tushiring. **Tekshiruv:**
 select count(*) from public.content_reports;   -- jadval bor
 select count(*) from job_feed;                 -- faqat ochiq, muddati o‘tmagan
 ```
+
+> ⚠️ **Ikkita migratsiya bir xil raqamga ega bo‘lib qolgan edi — `db push`ni
+> qayta ishga tushiring.** `0070` raqamini `account_deletion` va
+> `scale_indexes` bo‘lishgan, `0078` ni esa `notify_applicants_on_close` va
+> `resume_positions_and_location`. Supabase migratsiya raqamini birlamchi kalit
+> sifatida saqlaydi, shuning uchun har juftlikdan faqat alifbo bo‘yicha
+> birinchisi bazaga yozilgan, ikkinchisi esa **hech qanday xatosiz, jimgina
+> o‘tkazib yuborilgan** — ya’ni indekslar va rezyumening “3 ta lavozim +
+> viloyat/tuman” maydonlari bazada umuman yo‘q. Ular endi
+> `0081_scale_indexes.sql` va `0082_resume_positions_and_location.sql`.
+> Ikkalasi ham `if not exists` bilan yozilgan, qayta qo‘llanishi zarar
+> qilmaydi. **Tekshiruv:**
+>
+> ```sql
+> select indexname from pg_indexes where indexname = 'jobs_open_feed_idx';
+> select column_name from information_schema.columns
+>  where table_name = 'profiles' and column_name = 'desired_positions';
+> ```
+>
+> Ikkalasi ham bittadan qator qaytarishi kerak. Bundan keyin bunday xato
+> takrorlanmasligi uchun CI har PR’da `scripts/check-migrations.sh` ni ishga
+> tushiradi.
 
 ---
 
