@@ -6,6 +6,8 @@ import { useEffect, useMemo } from "react";
 import { toast } from "@/components/ui/toast";
 import { useRouter } from "@/i18n/navigation";
 import {
+  inviteParts,
+  isJobClosed,
   notificationHref,
   notificationStatus,
   notificationTitleKey,
@@ -55,15 +57,21 @@ export function NotificationListener({ userId }: { userId: string }) {
           // Same rule as the list page: the trigger-raised types carry a
           // fixed-language title, so the toast localizes them rather than
           // echoing the column (see notificationTitleKey).
-          const titleKey = notificationTitleKey(kind);
+          const titleKey = notificationTitleKey(kind, data);
           const status = notificationStatus(kind, data);
+          const closed = isJobClosed(data);
+          const invite = inviteParts(kind, data);
           toast({
             title: titleKey ? t(titleKey) : String(row.title ?? t("title")),
-            description: status
-              ? t("bodyApplicationUpdate", { status: ts(status) })
-              : typeof row.body === "string"
-                ? row.body
-                : null,
+            description: closed
+              ? t("bodyJobClosed", { title: String(row.body ?? "") })
+              : invite
+                ? t("bodyJobInvite", invite)
+                : status
+                  ? t("bodyApplicationUpdate", { status: ts(status) })
+                  : typeof row.body === "string"
+                    ? row.body
+                    : null,
             href: path ? `/${locale}${path}` : null,
             actionLabel: t("toastAction"),
           });

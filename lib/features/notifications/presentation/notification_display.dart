@@ -35,8 +35,15 @@ bool usesStoredTitle(NotificationType type, String title) => switch (type) {
 /// Title in the in-app language (uz/ru/en), or the server's own where that is
 /// content rather than copy — see [usesStoredTitle].
 String notificationTitle(BuildContext context, AppNotification n) {
+  // An invitation is an employer addressing this person directly, not the
+  // saved-search alert jobMatch otherwise means — and 0050 wrote its heading
+  // in Uzbek only, so it is copy, not content, whenever we can rebuild it.
+  if (inviteParts(n) != null) return context.l10n.notifTitleJobInvite;
   if (usesStoredTitle(n.type, n.title)) return n.title;
   final l = context.l10n;
+  // A vacancy closing is not a decision on the application, so it gets its own
+  // heading rather than the generic "your application changed".
+  if (isJobClosed(n)) return l.notifTitleJobClosed;
   return switch (n.type) {
     NotificationType.applicationUpdate => l.notifTitleApplicationUpdate,
     NotificationType.message => l.notifTitleMessage,
@@ -55,7 +62,37 @@ String notificationTitle(BuildContext context, AppNotification n) {
 /// notify_application_status_change()) the same way the title is. Every other
 /// type's body is either literal user content (a chat message preview) or
 /// already-localized system copy, so it passes through unchanged.
+/// Whether this row is the "the vacancy you applied to was closed" notice
+/// raised by 0078, rather than an ordinary status change.
+///
+/// The trigger stores the vacancy's title as the body and marks the row with
+/// `event`, precisely so the sentence around that title can be written in the
+/// reader's own language here instead of being fixed in SQL.
+bool isJobClosed(AppNotification n) => n.data['event'] == 'job_closed';
+
+/// The company and role an invitation names, when the payload carries them
+/// (0079). Null for a saved-search `job_match`, and for invitations written
+/// before 0079 — those keep the Uzbek sentence invite_candidate() stored,
+/// which is exactly what they show today.
+({String company, String title})? inviteParts(AppNotification n) {
+  if (n.type != NotificationType.jobMatch || n.data['invited'] != true) {
+    return null;
+  }
+  final company = n.data['company'];
+  final title = n.data['title'];
+  if (company is! String || company.isEmpty) return null;
+  if (title is! String || title.isEmpty) return null;
+  return (company: company, title: title);
+}
+
 String? notificationBody(BuildContext context, AppNotification n) {
+  final invite = inviteParts(n);
+  if (invite != null) {
+    return context.l10n.notifBodyJobInvite(invite.company, invite.title);
+  }
+  if (isJobClosed(n)) {
+    return context.l10n.notifBodyJobClosed(n.body ?? '');
+  }
   if (n.type == NotificationType.applicationUpdate) {
     final status = ApplicationStatus.fromWire(n.data['status'] as String?);
     if (status != null) {

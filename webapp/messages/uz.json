@@ -282,6 +282,10 @@
     "toastAction": "Ko'rish",
     "typeApplicationUpdate": "Ariza holati yangilandi",
     "typeMessage": "Yangi xabar",
+    "typeJobClosed": "Vakansiya yopildi",
+    "bodyJobClosed": "«{title}» endi ariza qabul qilmayapti.",
+    "typeJobInvite": "Ish taklifi",
+    "bodyJobInvite": "{company} sizni «{title}» lavozimiga taklif qilmoqda.",
     "bodyApplicationUpdate": "Arizangiz holati: {status}"
   },
   "employer": {

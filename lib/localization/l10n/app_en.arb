@@ -917,6 +917,27 @@
   "notifTitleApplicationUpdate": "Application update",
   "notifTitleMessage": "New message",
   "notifTitleJobMatch": "New job match",
+  "notifTitleJobClosed": "Vacancy closed",
+  "notifBodyJobClosed": "\u201c{title}\u201d is no longer accepting applications.",
+  "@notifBodyJobClosed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "notifTitleJobInvite": "Job invitation",
+  "notifBodyJobInvite": "{company} is inviting you to apply for \u201c{title}\u201d.",
+  "@notifBodyJobInvite": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "notifBodyApplicationUpdate": "Your application status changed to {status}",
   "@notifBodyApplicationUpdate": {
     "placeholders": {

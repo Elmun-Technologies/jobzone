@@ -9,6 +9,8 @@ import { EmptyState } from "@/components/ui/states";
 import { markAllNotificationsRead } from "@/lib/actions/notifications";
 import { getNotifications } from "@/lib/data/notifications";
 import {
+  inviteParts,
+  isJobClosed,
   notificationHref,
   notificationStatus,
   notificationTitleKey,
@@ -79,8 +81,14 @@ export default async function NotificationsPage({
             {items.map((n) => {
               // The DB stores a fixed-language title for the trigger-raised
               // types; only content-bearing rows keep what the server wrote.
-              const titleKey = notificationTitleKey(n.kind);
+              const titleKey = notificationTitleKey(n.kind, n.data);
               const status = notificationStatus(n.kind, n.data);
+              // 0078 stores the vacancy's title as the body; the sentence
+              // around it is written here, in the reader's language.
+              const closed = isJobClosed(n.data);
+              // 0079 carries the company and role, so the invitation reads in
+              // the seeker's language rather than the one 0050 wrote it in.
+              const invite = inviteParts(n.kind, n.data);
               return (
                 <NotificationRow
                   key={n.id}
@@ -88,9 +96,13 @@ export default async function NotificationsPage({
                   kind={n.kind}
                   title={titleKey ? t(titleKey) : n.title}
                   body={
-                    status
-                      ? t("bodyApplicationUpdate", { status: ts(status) })
-                      : n.body
+                    closed
+                      ? t("bodyJobClosed", { title: n.body ?? "" })
+                      : invite
+                        ? t("bodyJobInvite", invite)
+                        : status
+                          ? t("bodyApplicationUpdate", { status: ts(status) })
+                          : n.body
                   }
                   meta={
                     n.createdAt

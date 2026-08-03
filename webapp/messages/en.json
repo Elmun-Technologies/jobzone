@@ -282,6 +282,10 @@
     "toastAction": "View",
     "typeApplicationUpdate": "Application update",
     "typeMessage": "New message",
+    "typeJobClosed": "Vacancy closed",
+    "bodyJobClosed": "\u201c{title}\u201d is no longer accepting applications.",
+    "typeJobInvite": "Job invitation",
+    "bodyJobInvite": "{company} is inviting you to apply for \u201c{title}\u201d.",
     "bodyApplicationUpdate": "Your application is now: {status}"
   },
   "employer": {

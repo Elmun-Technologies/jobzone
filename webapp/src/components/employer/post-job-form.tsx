@@ -15,6 +15,7 @@ import {
   type JobFormState,
 } from "@/lib/actions/employer";
 import type { JobCategory } from "@/lib/data/types";
+import { registerDraftCapture } from "@/lib/draft-stash";
 import { groupNumber } from "@/lib/format";
 import { LISTING_TIERS } from "@/lib/listing-tiers";
 import { suggestCategorySlug, suggestProfessions } from "@/lib/professions";
@@ -338,6 +339,18 @@ export function PostJobForm({
     return () => clearTimeout(t);
     // isEdit is derived from a prop and stable for the form's lifetime, so this
     // still runs once on mount (the guard just skips the stash in edit mode).
+  }, [isEdit]);
+
+  // Changing language rebuilds this form and empties every field, so park the
+  // draft first — the remount restores it through the effect above. Not in
+  // edit mode: that stash key belongs to "post a job", and writing an edit
+  // into it would surface someone's edits in a later fresh post.
+  useEffect(() => {
+    if (isEdit) return;
+    return registerDraftCapture(() => {
+      if (!formRef.current) return;
+      stashDraft(draftFromFormData(new FormData(formRef.current)));
+    });
   }, [isEdit]);
 
   // The map pin and city hint are React-controlled (not uncontrolled DOM

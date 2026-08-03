@@ -2,7 +2,13 @@
 
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 // Locale-aware router so the sign-in detour keeps the active locale (the plain
 // next/navigation router dropped the prefix → /uz guest landed on a re-resolved
@@ -13,6 +19,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { applyToJob, type ApplyState } from "@/lib/actions/apply";
 import { track } from "@/lib/analytics/track";
 import type { ScreeningQuestion } from "@/lib/data/types";
+import { registerDraftCapture } from "@/lib/draft-stash";
 import { cn } from "@/lib/utils";
 
 const fieldClass =
@@ -63,8 +70,10 @@ export function ApplyForm({
     }
   }, [jobId]);
 
-  useEffect(() => {
-    if (!state.signedOut || !formRef.current) return;
+  // Reads the fields as they stand right now. Used both by the sign-in detour
+  // below and by the locale switcher, which rebuilds this form from scratch.
+  const stashCurrent = useCallback(() => {
+    if (!formRef.current) return;
     const data = new FormData(formRef.current);
     const answers: Record<string, string> = {};
     for (const [key, value] of data.entries()) {
@@ -78,10 +87,19 @@ export function ApplyForm({
         answers,
       }),
     );
+  }, [jobId]);
+
+  // Changing language remounts this form; park the draft so the remount
+  // restores it through the effect above.
+  useEffect(() => registerDraftCapture(stashCurrent), [stashCurrent]);
+
+  useEffect(() => {
+    if (!state.signedOut || !formRef.current) return;
+    stashCurrent();
     router.push(
       `/sign-in?next=${encodeURIComponent(`/${locale}/jobs/${jobId}/apply`)}`,
     );
-  }, [state.signedOut, jobId, locale, router]);
+  }, [state.signedOut, jobId, locale, router, stashCurrent]);
 
   // The success path redirects (server-side) so we never see an `ok`
   // state — fire the conversion at submit-intent time via onSubmit
@@ -152,7 +170,7 @@ export function ApplyForm({
           ) : /* Mobile posts `multiple_choice` where web posts `choice`; a
                  candidate on web was shown a blank text box for a
                  mobile-authored question instead of its options. */
-            (q.type === "choice" || q.type === "multiple_choice") &&
+          (q.type === "choice" || q.type === "multiple_choice") &&
             q.options &&
             q.options.length > 0 ? (
             <select

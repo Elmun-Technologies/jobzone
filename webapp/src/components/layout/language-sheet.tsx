@@ -7,6 +7,7 @@ import { useState, useTransition } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { setPreferredLocale } from "@/lib/actions/profile";
+import { captureDrafts } from "@/lib/draft-stash";
 import {
   LANGUAGE_CHOSEN_EVENT,
   rememberLocaleChoice,
@@ -60,6 +61,10 @@ export function LanguageSheet() {
     // `?q=…&city=…` would answer their language question by throwing away
     // the search that brought them.
     const search = typeof window === "undefined" ? "" : window.location.search;
+    // And park any draft on screen, for the same reason again: this navigation
+    // rebuilds everything under `[locale]`, so an unparked form comes back
+    // empty. The sheet can appear over a half-filled application.
+    captureDrafts();
     start(() => router.replace(`${pathname}${search}`, { locale: next }));
   }
 
