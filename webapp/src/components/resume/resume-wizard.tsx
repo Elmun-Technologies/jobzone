@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { SuggestInput } from "@/components/ui/suggest-input";
@@ -22,6 +22,7 @@ import { SuggestInput } from "@/components/ui/suggest-input";
 import { useRouter } from "next/navigation";
 import { generateResumeSummary } from "@/lib/actions/ai-resume";
 import { saveResume } from "@/lib/actions/resume";
+import { registerDraftCapture } from "@/lib/draft-stash";
 import { safeNext } from "@/lib/auth/safe-next";
 import { suggestProfessions } from "@/lib/professions";
 import type {
@@ -42,6 +43,10 @@ const LEVELS = ["none", "a1_a2", "b1_b2", "c1_c2", "native"] as const;
 
 // Where an in-progress résumé is parked while a guest signs in at save-time.
 const STASH_KEY = "yolla-resume-draft";
+// …and which step they were on, written only when the wizard is parked
+// mid-flow (a language switch). The sign-in detour happens at save-time and
+// deliberately returns to the last step, so it leaves this unset.
+const STASH_STEP_KEY = "yolla-resume-draft-step";
 
 const EMPTY_EDU: EducationEntry = {
   school: "",
@@ -210,6 +215,15 @@ export function ResumeWizard({
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ResumeDraft>(initial);
+  // The draft-capture callback is registered once, so it would close over the
+  // first render's values. These mirrors give it what is on screen right now,
+  // written in an effect rather than during render (refs are not render state).
+  const draftRef = useRef(draft);
+  const stepRef = useRef(step);
+  useEffect(() => {
+    draftRef.current = draft;
+    stepRef.current = step;
+  }, [draft, step]);
   const [error, setError] = useState(false);
   const [pending, start] = useTransition();
   const locale = useLocale();
@@ -220,17 +234,36 @@ export function ResumeWizard({
   useEffect(() => {
     const saved = sessionStorage.getItem(STASH_KEY);
     if (!saved) return;
+    const savedStep = sessionStorage.getItem(STASH_STEP_KEY);
     sessionStorage.removeItem(STASH_KEY);
+    sessionStorage.removeItem(STASH_STEP_KEY);
     // Restoring client-only storage after mount is intentional here (a lazy
     // initializer would desync SSR hydration).
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft(JSON.parse(saved) as ResumeDraft);
-      setStep(3);
+      // A parked step means the wizard was interrupted mid-flow (a language
+      // switch) — put them back where they were. Without one this is the
+      // sign-in detour, which happens at save-time and returns to the end.
+      const parsed = savedStep === null ? NaN : Number(savedStep);
+      setStep(
+        Number.isInteger(parsed) && parsed >= 0 && parsed <= 3 ? parsed : 3,
+      );
     } catch {
       // Ignore a malformed stash.
     }
   }, []);
+
+  // Changing language rebuilds the wizard; park the draft and the step so the
+  // remount picks both back up through the effect above.
+  useEffect(
+    () =>
+      registerDraftCapture(() => {
+        sessionStorage.setItem(STASH_KEY, JSON.stringify(draftRef.current));
+        sessionStorage.setItem(STASH_STEP_KEY, String(stepRef.current));
+      }),
+    [],
+  );
 
   const set = <K extends keyof ResumeDraft>(key: K, value: ResumeDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
