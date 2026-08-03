@@ -1,4 +1,4 @@
--- 0079_public_telegram_channels.sql
+-- 0083_public_telegram_channels.sql
 -- Let the public employer page show where a vacancy actually goes.
 --
 -- 0058 built the auto-posting pipeline (a vacancy that turns 'open' is pushed
