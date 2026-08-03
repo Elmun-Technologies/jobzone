@@ -800,7 +800,10 @@
     "tagline": "Ishonchli ish bozori.",
     "rights": "Barcha huquqlar himoyalangan.",
     "privacy": "Maxfiylik",
-    "terms": "Shartlar"
+    "terms": "Shartlar",
+    "byRegion": "Hududlar bo'yicha ish",
+    "byCategory": "Sohalar bo'yicha",
+    "aboutHeading": "Yollla"
   },
   "common": {
     "loading": "Yuklanmoqda…",
@@ -995,5 +998,28 @@
     "deleteErrConfirm": "Tasdiqlash uchun aynan DELETE deb yozing.",
     "deleteErrSession": "Siz kirmagansiz.",
     "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
+  },
+  "regionPage": {
+    "title": "{region}da ish va bo'sh ish o'rinlari",
+    "metaTitle": "{region}da ish — bo'sh ish o'rinlari",
+    "metaDescription": "{region}dagi ochiq vakansiyalar: maosh, jadval va ish beruvchi haqida to'liq ma'lumot. Ro'yxatdan o'tmasdan ariza topshiring — Yollla.",
+    "intro": "{region}dagi barcha ochiq vakansiyalar bir joyda. Soha bo'yicha tanlang yoki eng yangi e'lonlarni ko'ring — maosh va jadval kartaning ustida, ariza esa ikki bosishda.",
+    "latest": "{region}dagi eng yangi vakansiyalar",
+    "otherRegions": "Boshqa hududlar",
+    "allCategories": "Barcha sohalar",
+    "vacancyCount": "{count} ta vakansiya"
+  },
+  "regionFaq": {
+    "heading": "{region}da ish topish — savol-javob",
+    "q1": "{region}da qanday ish topsa bo'ladi?",
+    "a1": "Sahifadagi soha kartalaridan o'zingizga mosini tanlang: har bir kartada shu hududdagi ochiq vakansiyalar soni ko'rsatilgan. Kartani bosganingizda faqat o'sha soha va shu hudud bo'yicha e'lonlar chiqadi.",
+    "q2": "Ariza topshirish uchun ro'yxatdan o'tish shartmi?",
+    "a2": "Yo'q. Vakansiyani ko'rish va ariza shaklini to'ldirish uchun hisob kerak emas — tizimga kirish faqat oxirgi bosqichda, arizani yuborishda so'raladi va yozganlaringiz saqlanib qoladi.",
+    "q3": "{region}da eng ko'p qaysi sohada ish bor?",
+    "a3": "Bu sahifadagi kartalar ochiq vakansiyalar soni bo'yicha tartiblangan — eng yuqoridagi soha ayni paytda shu hududda eng ko'p odam qidirayotgan yo'nalish. Raqamlar jonli, ya'ni yangi e'lon joylanishi bilan yangilanadi.",
+    "q4": "Vakansiyalar qanchalik yangi?",
+    "a4": "Ro'yxat ish beruvchilar joylagan tartibda yangilanadi va muddati o'tganlari avtomatik chiqib ketadi. Eng yangi e'lonlar ushbu sahifaning \"eng yangi vakansiyalar\" bo'limida turadi.",
+    "q5": "Maosh ko'rsatilganmi?",
+    "a5": "Ha, Yollla qoidasi bo'yicha har bir e'londa maosh ko'rsatiladi — aniq summa yoki oraliq. Bundan tashqari ish jadvali, rasmiylashtirish va qo'shimcha shartlar ham kartada ko'rinadi."
   }
 }

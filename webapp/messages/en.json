@@ -283,9 +283,9 @@
     "typeApplicationUpdate": "Application update",
     "typeMessage": "New message",
     "typeJobClosed": "Vacancy closed",
-    "bodyJobClosed": "\u201c{title}\u201d is no longer accepting applications.",
+    "bodyJobClosed": "“{title}” is no longer accepting applications.",
     "typeJobInvite": "Job invitation",
-    "bodyJobInvite": "{company} is inviting you to apply for \u201c{title}\u201d.",
+    "bodyJobInvite": "{company} is inviting you to apply for “{title}”.",
     "bodyApplicationUpdate": "Your application is now: {status}"
   },
   "employer": {
@@ -800,7 +800,10 @@
     "tagline": "The trusted job marketplace.",
     "rights": "All rights reserved.",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "byRegion": "Jobs by region",
+    "byCategory": "By industry",
+    "aboutHeading": "Yollla"
   },
   "common": {
     "loading": "Loading…",
@@ -995,5 +998,28 @@
     "deleteErrConfirm": "Type DELETE exactly to confirm.",
     "deleteErrSession": "You are not signed in.",
     "deleteErrUnknown": "Something went wrong. Please try again."
+  },
+  "regionPage": {
+    "title": "Jobs and vacancies in {region}",
+    "metaTitle": "Jobs in {region} — open vacancies",
+    "metaDescription": "Open vacancies in {region}: pay, schedule and employer details on every listing. Apply without signing up first — Yollla.",
+    "intro": "Every open vacancy in {region}, in one place. Pick an industry or browse the newest postings — pay and schedule are on the card, and applying takes two taps.",
+    "latest": "Newest vacancies in {region}",
+    "otherRegions": "Other regions",
+    "allCategories": "All industries",
+    "vacancyCount": "{count} vacancies"
+  },
+  "regionFaq": {
+    "heading": "Working in {region} — questions and answers",
+    "q1": "How do I find a job in {region}?",
+    "a1": "Pick an industry from the cards above: each one shows how many vacancies are open in this region right now. Opening a card narrows the list to that industry in this region only.",
+    "q2": "Do I need an account to apply?",
+    "a2": "No. Browsing vacancies and filling in the application form works without one — you are asked to sign in only at the final step, and nothing you typed is lost.",
+    "q3": "Which industry has the most vacancies in {region}?",
+    "a3": "The cards on this page are ordered by open vacancies, so the top one is where this region is hiring hardest today. The numbers are live and move as employers post.",
+    "q4": "How fresh are these vacancies?",
+    "a4": "The list updates as employers publish, and expired postings drop out on their own. The newest ones are collected in the \"newest vacancies\" block on this page.",
+    "q5": "Is the salary shown?",
+    "a5": "Yes — Yollla requires pay on every posting, either an exact figure or a range. The schedule, formal-employment status and extra conditions are on the card too."
   }
 }

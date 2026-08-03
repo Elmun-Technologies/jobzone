@@ -207,3 +207,18 @@ export function districtsFor(region: string | null | undefined): string[] {
   if (!region) return [];
   return UZ_DISTRICTS[region] ?? [];
 }
+
+/**
+ * Every stored place name that should count as "inside this region".
+ *
+ * A vacancy can name its region three ways: `jobs.region` (the mobile employer
+ * form writes a canonical viloyat), `jobs.district` (likewise), or nothing but
+ * a typed `jobs.city` — which in practice is either the region, its capital or
+ * one of its districts. A region page that only matched `region = X` would
+ * therefore show a fraction of what is actually there.
+ */
+export function regionMatchValues(region: string): string[] {
+  const districts = districtsFor(region);
+  const bare = region.replace(/\s+(shahri|viloyati)$/i, "").trim();
+  return Array.from(new Set([region, bare, ...districts].filter(Boolean)));
+}
