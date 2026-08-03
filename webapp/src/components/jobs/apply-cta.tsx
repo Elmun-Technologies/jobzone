@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 import { useSession } from "@/components/auth/session-provider";
 import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
-import { createClient } from "@/lib/supabase/client";
 
 /**
  * The vacancy page's primary action: "apply", or "you already applied".
@@ -38,6 +37,10 @@ export function ApplyCta({
     let cancelled = false;
     (async () => {
       try {
+        // Dynamic: the vacancy page is the site's biggest indexable surface
+        // and most of its visitors are signed out, so the Supabase client is
+        // fetched only inside the branch that actually needs it.
+        const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
         // Scoped to the caller explicitly, not left to RLS: the policy also
         // lets a job's owner read every application for it (0003), so filtering

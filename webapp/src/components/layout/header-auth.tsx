@@ -1,13 +1,28 @@
 "use client";
 
 import { Bell, CircleUser } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
 import { useSession } from "@/components/auth/session-provider";
-import { NotificationListener } from "@/components/notifications/notification-listener";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+
+/**
+ * Lazy on purpose. The listener opens a Realtime subscription, so it pulls the
+ * whole Supabase client in with it — 244 KB that every page in the app was
+ * shipping because this component sits in the header, including to the guest
+ * arriving from a search result who has no notifications to listen for. As a
+ * dynamic import it is fetched by the people it is for.
+ */
+const NotificationListener = dynamic(
+  () =>
+    import("@/components/notifications/notification-listener").then(
+      (m) => m.NotificationListener,
+    ),
+  { ssr: false },
+);
 
 /**
  * The right-hand end of the header: notifications + account for a signed-in

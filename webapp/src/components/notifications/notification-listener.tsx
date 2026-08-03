@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { useSession } from "@/components/auth/session-provider";
 import { toast } from "@/components/ui/toast";
@@ -34,6 +34,10 @@ export function NotificationListener({ userId }: { userId: string }) {
   const router = useRouter();
   const locale = useLocale();
   const { refresh } = useSession();
+  // At most one reconciliation per mount — see the subscribe callback below.
+  // A ref, not state: it must survive the effect re-running without ever
+  // letting a re-subscribe turn into a refresh/re-subscribe loop.
+  const reconciled = useRef(false);
 
   useEffect(() => {
     const channel = supabase
@@ -85,7 +89,21 @@ export function NotificationListener({ userId }: { userId: string }) {
           router.refresh();
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        // Close the gap between "unread counted" and "listening".
+        //
+        // The session provider counts unread the moment it resolves the user;
+        // this component is only mounted once that has happened, and it is a
+        // lazy chunk, so on a slow connection there is a window — a fetch plus
+        // a WebSocket handshake wide — in which a notification can land
+        // unseen. It gets no toast (it is in the list either way) and, worse,
+        // the bell would keep showing a count taken before it arrived. One
+        // re-count on connect covers whatever happened in between.
+        if (status === "SUBSCRIBED" && !reconciled.current) {
+          reconciled.current = true;
+          refresh();
+        }
+      });
     return () => {
       supabase.removeChannel(channel);
     };
