@@ -49,10 +49,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   // false, _submit returned, and the button just looked dead. Flutter's
   // ExpansionTile is otherwise uncontrolled, so without this there is no way
   // to open a section from outside a user tap.
-  final _sectionControllers = List.generate(
-    7,
-    (_) => ExpansionTileController(),
-  );
+  final _sectionControllers = List.generate(7, (_) => ExpansibleController());
   late final _title = TextEditingController(text: widget.job?.title);
   late final _city = TextEditingController(text: widget.job?.city);
   late final _min = TextEditingController(
@@ -1306,7 +1303,7 @@ class _FormSection extends StatelessWidget {
 
   /// Lets the parent force this section open — e.g. when a validator inside
   /// it fails but the user never opened it to see the error.
-  final ExpansionTileController? controller;
+  final ExpansibleController? controller;
 
   @override
   Widget build(BuildContext context) {
