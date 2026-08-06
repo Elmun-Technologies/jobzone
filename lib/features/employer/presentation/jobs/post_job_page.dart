@@ -148,6 +148,28 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     super.dispose();
   }
 
+  /// The value that goes into `jobs.city`.
+  ///
+  /// Used to be `_district ?? _city.text.trim()` — the picked DISTRICT
+  /// (e.g. `'Chilonzor'`) whenever one was selected, which is a different
+  /// vocabulary than what the seeker's city filter, the onboarding city
+  /// picker and `recommended_jobs()` compare against (see
+  /// `regionToCityOption`'s doc comment). `district` is already written to
+  /// its own column right alongside this, so nothing about the district
+  /// choice is lost by not also overloading `city` with it.
+  ///
+  /// Prefers whatever the employer actually typed into the free-text City
+  /// field (respects real intent, e.g. a specific neighbourhood name);
+  /// otherwise the region's matching filter option for the 7 regions that
+  /// have one; otherwise the bare region name — still wrong for an exact
+  /// seeker-filter match, but at least a real, consistent place name instead
+  /// of an arbitrary district that could belong to any region.
+  String _effectiveCity() {
+    final typed = _city.text.trim();
+    if (typed.isNotEmpty) return typed;
+    return regionToCityOption[_region] ?? _region ?? '';
+  }
+
   Future<void> _pickLocation() async {
     final picked = await Navigator.of(context).push<LatLng>(
       MaterialPageRoute(
@@ -303,7 +325,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       contactPhone: _contactPhone.text.trim(),
       region: _region,
       district: _district,
-      city: _district ?? _city.text.trim(),
+      city: _effectiveCity(),
       lat: _lat,
       lng: _lng,
       addressText: _address.text.trim(),
@@ -430,7 +452,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             lat: _lat,
             lng: _lng,
             addressText: _address.text.trim(),
-            city: _district ?? _city.text.trim(),
+            city: _effectiveCity(),
             region: _region,
             district: _district,
             skills: skills,
@@ -499,7 +521,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           lat: _lat,
           lng: _lng,
           addressText: _address.text.trim(),
-          city: _district ?? _city.text.trim(),
+          city: _effectiveCity(),
           region: _region,
           district: _district,
           skills: skills,
