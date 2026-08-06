@@ -44,6 +44,21 @@ String? resolveRedirect({
   // Chat + calls (`/chat/:id/call/...`) are shared by both roles — employers
   // message candidates from there too.
   final inShared = location.startsWith(Routes.chat);
+  // The role-agnostic slice of /account/* — delete-account (App Store
+  // 5.1.1(v) requires this be reachable in-app for any account-creating
+  // role), notifications, password, language, help, privacy. Deliberately
+  // NOT the seeker-only rest of /account/* (résumé, applications, seeking
+  // status, saved searches, subscriptions) — an employer has no business
+  // reaching those. EmployerShell has no tab that leads here; CompanyManagePage
+  // pushes Routes.accountSettings directly.
+  final inAccountSettings = const {
+    Routes.accountSettings,
+    Routes.accountNotificationSettings,
+    Routes.accountLanguage,
+    Routes.accountPassword,
+    Routes.accountHelp,
+    Routes.accountPrivacy,
+  }.contains(location);
 
   // The allowed "setup" zone differs by role: seekers run the preference +
   // permission chain; employers complete their profile then create a company.
@@ -80,7 +95,10 @@ String? resolveRedirect({
   // Past setup: keep each role inside its own area, but allow the shared chat
   // surface and the password-reset screen for both.
   if (isEmployer) {
-    if (inEmployerArea || inShared || location == Routes.newPassword) {
+    if (inEmployerArea ||
+        inShared ||
+        inAccountSettings ||
+        location == Routes.newPassword) {
       return null;
     }
     return Routes.employerDashboard;

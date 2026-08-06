@@ -115,7 +115,16 @@ class CompanyManagePage extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
-                  const SizedBox(width: 40),
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    tooltip: l.settings,
+                    // EmployerShell has no account tab at all, so this is the
+                    // employer's only path to notification/password settings,
+                    // language, help, privacy — and delete-account, which
+                    // App Store Review Guideline 5.1.1(v) requires stay
+                    // reachable in-app for any account-creating role.
+                    onPressed: () => context.push(Routes.accountSettings),
+                  ),
                   Expanded(
                     child: Center(
                       child: Text(l.navCompany, style: context.text.titleLarge),
