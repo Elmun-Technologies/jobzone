@@ -14,7 +14,9 @@ import { useEffect, useState, useTransition } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { generateResumeSummary } from "@/lib/actions/ai-resume";
+import { safeNext } from "@/lib/auth/safe-next";
 import { saveResume } from "@/lib/actions/resume";
 import type {
   CertificateEntry,
@@ -34,6 +36,17 @@ const LEVELS = ["none", "a1_a2", "b1_b2", "c1_c2", "native"] as const;
 
 // Where an in-progress résumé is parked while a guest signs in at save-time.
 const STASH_KEY = "yolla-resume-draft";
+
+// `next` arrives locale-prefixed (quick-apply-button.tsx builds it as
+// `/${locale}/jobs/${id}/apply` for its own plain-router push), but this
+// file's router is next-intl's locale-aware one, which expects — and would
+// double-prefix without this — a locale-agnostic path.
+function stripLocalePrefix(path: string): string {
+  const seg = path.split("/")[1];
+  return (routing.locales as readonly string[]).includes(seg)
+    ? path.slice(seg.length + 1) || "/"
+    : path;
+}
 
 const EMPTY_EDU: EducationEntry = {
   school: "",
@@ -188,7 +201,21 @@ function BirthDatePicker({
   );
 }
 
-export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
+export function ResumeWizard({
+  initial,
+  applyNext,
+}: {
+  initial: ResumeDraft;
+  /**
+   * Locale-prefixed path to return to once the résumé is saved — set when a
+   * seeker arrived here because quick-apply needed a résumé first (see
+   * quick-apply-button.tsx). Without this the seeker who just built a résumé
+   * specifically to apply to one job was dropped on a generic recommendations
+   * list instead: the highest-intent moment in the product converted to
+   * nothing, and there was no indication anything had gone wrong.
+   */
+  applyNext?: string;
+}) {
   const t = useTranslations("resume");
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -363,13 +390,22 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
       const res = await saveResume(draft);
       if (res.signedOut) {
         // Auth-last: park the draft and sign in, returning here to finish.
+        // `applyNext` rides along as this page's OWN next param (nested), so
+        // the job the seeker was trying to reach survives a sign-in round
+        // trip on top of the résumé-save round trip.
         sessionStorage.setItem(STASH_KEY, JSON.stringify(draft));
-        router.push(
-          `/sign-in?next=${encodeURIComponent(`/${locale}/resumes/new`)}`,
-        );
+        const resumeNext = applyNext
+          ? `/${locale}/resumes/new?next=${encodeURIComponent(applyNext)}`
+          : `/${locale}/resumes/new`;
+        router.push(`/sign-in?next=${encodeURIComponent(resumeNext)}`);
       } else if (res.error) setError(true);
-      // First time their résumé is saved, land them on the jobs matched to it.
-      else router.push("/account/recommended");
+      // First time their résumé is saved: back to the job they were trying to
+      // apply to, if that's why they're here — otherwise the jobs matched to
+      // what they just built.
+      else {
+        const dest = applyNext ? stripLocalePrefix(applyNext) : undefined;
+        router.push(safeNext(dest, "/account/recommended"));
+      }
     });
   }
 

@@ -21,16 +21,25 @@ export async function generateMetadata({
 
 export default async function NewResumePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const initial = await getMyResume();
+  const sp = await searchParams;
+  // Quick-apply sends a seeker with no résumé here before it can apply for
+  // them, carrying the job's apply page as `next` — read but never wired
+  // through, so finishing the résumé always dropped the seeker on a generic
+  // recommendations list instead of back on the job they tapped Apply on.
+  // Validated with safeNext() client-side, right before it's used.
+  const next = typeof sp.next === "string" ? sp.next : undefined;
 
   return (
     <Container className="py-10">
-      <ResumeWizard initial={initial} />
+      <ResumeWizard initial={initial} applyNext={next} />
     </Container>
   );
 }
