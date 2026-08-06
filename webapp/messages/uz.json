@@ -208,6 +208,8 @@
       "native": "Ona tili"
     },
     "errSave": "Saqlashda xatolik yuz berdi",
+    "errConflict": "Bu hisobda allaqachon rezyume mavjud. O'zgarishlar yo'qolmasligi uchun avval saqlangan rezyumeni ochamiz.",
+    "errConflictReload": "Sahifani yangilash",
     "summaryLabel": "Men haqimda",
     "summaryHint": "O'zingiz, tajribangiz va kuchli tomonlaringiz haqida qisqacha yozing",
     "aiWrite": "AI bilan yozish",

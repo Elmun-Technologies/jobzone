@@ -221,6 +221,7 @@ export function ResumeWizard({
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<ResumeDraft>(initial);
   const [error, setError] = useState(false);
+  const [conflict, setConflict] = useState(false);
   const [pending, start] = useTransition();
   const locale = useLocale();
 
@@ -386,6 +387,7 @@ export function ResumeWizard({
       return;
     }
     setError(false);
+    setConflict(false);
     start(async () => {
       const res = await saveResume(draft);
       if (res.signedOut) {
@@ -398,6 +400,14 @@ export function ResumeWizard({
           ? `/${locale}/resumes/new?next=${encodeURIComponent(applyNext)}`
           : `/${locale}/resumes/new`;
         router.push(`/sign-in?next=${encodeURIComponent(resumeNext)}`);
+      } else if (res.conflict) {
+        // This draft never saw the account's real data (a guest path — see
+        // ResumeDraft.resumeExists) and the now-signed-in account already has
+        // one. Refused rather than overwritten; drop the stash so a retry
+        // can't loop back into the same conflict, and hard-reload so the
+        // page re-fetches and shows the real, untouched résumé.
+        sessionStorage.removeItem(STASH_KEY);
+        setConflict(true);
       } else if (res.error) setError(true);
       // First time their résumé is saved: back to the job they were trying to
       // apply to, if that's why they're here — otherwise the jobs matched to
@@ -964,6 +974,18 @@ export function ResumeWizard({
 
         {error ? (
           <p className="text-destructive text-sm">{t("errSave")}</p>
+        ) : null}
+        {conflict ? (
+          <div className="border-destructive/30 bg-destructive/10 rounded-lg border p-3">
+            <p className="text-destructive text-sm">{t("errConflict")}</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="text-destructive mt-2 text-sm font-semibold underline underline-offset-4"
+            >
+              {t("errConflictReload")}
+            </button>
+          </div>
         ) : null}
       </div>
 

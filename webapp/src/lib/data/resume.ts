@@ -5,6 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { hasSupabase } from "./supabase-env";
 
 export interface EducationEntry {
+  /** Set for a row that already exists in `educations`; absent for one the
+   * wizard is about to create. Lets saveResume() update the existing row in
+   * place — preserving mobile-only columns this form doesn't show (`grade`,
+   * `description`) — instead of deleting and recreating it. */
+  id?: string;
   school: string;
   degree: string;
   field: string;
@@ -15,6 +20,8 @@ export interface EducationEntry {
 
 /** One job in the seeker's work history (the `experiences` table). */
 export interface ExperienceEntry {
+  /** See EducationEntry.id — preserves mobile-only `location` on update. */
+  id?: string;
   title: string; // position held
   companyName: string;
   startYear: string;
@@ -25,6 +32,9 @@ export interface ExperienceEntry {
 
 /** A certificate / course (the `certifications` table). */
 export interface CertificateEntry {
+  /** See EducationEntry.id — preserves mobile-only `credential_id` /
+   * `credential_url` on update. */
+  id?: string;
   name: string;
   issuer: string;
   issuedYear: string;
@@ -56,6 +66,20 @@ export interface ResumeDraft {
   experiences: ExperienceEntry[];
   educations: EducationEntry[];
   certificates: CertificateEntry[];
+  /**
+   * True only when this draft was built from a real, signed-in fetch of the
+   * account's own data (getMyResume() below). False for the blank slate a
+   * signed-out guest starts from (EMPTY_RESUME) — a draft that has never
+   * seen ANY account's real data.
+   *
+   * saveResume() uses this to tell "a signed-in seeker editing their own
+   * résumé" apart from "a guest who filled the public wizard, then signed
+   * into an account that already has one" — the latter used to blind-
+   * delete-then-insert using only the guest's rows, silently destroying
+   * every experience/education/certification the real account had (see the
+   * commit that added this field for the full incident).
+   */
+  resumeExists: boolean;
 }
 
 export const EMPTY_RESUME: ResumeDraft = {
@@ -76,6 +100,7 @@ export const EMPTY_RESUME: ResumeDraft = {
   experiences: [],
   educations: [],
   certificates: [],
+  resumeExists: false,
 };
 
 function yearOf(v: unknown): string {
@@ -104,12 +129,13 @@ export async function getMyResume(): Promise<ResumeDraft> {
 
     const { data: eduRows } = await supabase
       .from("educations")
-      .select("school, degree, field, start_date, end_date, is_current")
+      .select("id, school, degree, field, start_date, end_date, is_current")
       .eq("profile_id", user.id)
       .order("end_date", { ascending: false, nullsFirst: false });
     const educations: EducationEntry[] = (eduRows ?? []).map((e) => {
       const row = e as Record<string, unknown>;
       return {
+        id: str(row.id) || undefined,
         school: str(row.school),
         degree: str(row.degree),
         field: str(row.field),
@@ -122,13 +148,14 @@ export async function getMyResume(): Promise<ResumeDraft> {
     const { data: expRows } = await supabase
       .from("experiences")
       .select(
-        "title, company_name, start_date, end_date, is_current, description",
+        "id, title, company_name, start_date, end_date, is_current, description",
       )
       .eq("profile_id", user.id)
       .order("end_date", { ascending: false, nullsFirst: false });
     const experiences: ExperienceEntry[] = (expRows ?? []).map((e) => {
       const row = e as Record<string, unknown>;
       return {
+        id: str(row.id) || undefined,
         title: str(row.title),
         companyName: str(row.company_name),
         startYear: yearOf(row.start_date),
@@ -140,12 +167,13 @@ export async function getMyResume(): Promise<ResumeDraft> {
 
     const { data: certRows } = await supabase
       .from("certifications")
-      .select("name, issuer, issued_date, expiry_date")
+      .select("id, name, issuer, issued_date, expiry_date")
       .eq("profile_id", user.id)
       .order("issued_date", { ascending: false, nullsFirst: false });
     const certificates: CertificateEntry[] = (certRows ?? []).map((c) => {
       const row = c as Record<string, unknown>;
       return {
+        id: str(row.id) || undefined,
         name: str(row.name),
         issuer: str(row.issuer),
         issuedYear: yearOf(row.issued_date),
@@ -201,6 +229,7 @@ export async function getMyResume(): Promise<ResumeDraft> {
       experiences,
       educations,
       certificates,
+      resumeExists: true,
     };
   } catch {
     return EMPTY_RESUME;

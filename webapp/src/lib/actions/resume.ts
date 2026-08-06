@@ -1,12 +1,22 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ResumeDraft } from "@/lib/data/resume";
+import type {
+  CertificateEntry,
+  EducationEntry,
+  ExperienceEntry,
+  ResumeDraft,
+} from "@/lib/data/resume";
 
 export interface SaveResumeResult {
   ok?: boolean;
   signedOut?: boolean;
   error?: boolean;
+  /** The signed-in account already has a résumé, but this draft never saw
+   * it (a guest-built draft, see ResumeDraft.resumeExists) — refused rather
+   * than silently overwritten. The caller should discard the draft and
+   * reload the real one. */
+  conflict?: boolean;
 }
 
 const clean = (v: string) => {
@@ -15,22 +25,52 @@ const clean = (v: string) => {
 };
 
 /**
- * Replaces a profile's rows in a résumé sub-table (delete-then-insert) and
- * reports whether BOTH steps actually succeeded — used to be fire-and-forget,
- * so a failed insert (after the delete already went through) silently lost the
- * seeker's section while the wizard still reported "saved."
+ * Reconciles a profile's rows in a résumé sub-table against [rows] instead of
+ * blindly replacing all of them.
+ *
+ * Each row with an `id` updates that row with exactly the columns [toRow]
+ * returns — an `upsert` only ever touches the columns present in the payload,
+ * so a column this form doesn't know about (mobile-only fields like
+ * `experiences.location`, `educations.grade`/`description`,
+ * `certifications.credential_id`/`credential_url`) is left exactly as it
+ * was. A row with no `id` is a fresh insert (`id` defaults to
+ * `gen_random_uuid()`). Any EXISTING row whose id isn't present in [rows] was
+ * removed by the seeker in the wizard and is deleted.
+ *
+ * This used to be delete-everything-then-insert-only-what-the-wizard-knows,
+ * which silently destroyed every mobile-only column on every save.
  */
-async function replaceRows(
+async function reconcileRows<T extends { id?: string }>(
   supabase: Awaited<ReturnType<typeof createClient>>,
   table: string,
   profileId: string,
-  rows: Record<string, unknown>[],
+  rows: T[],
+  toRow: (row: T) => Record<string, unknown>,
 ): Promise<boolean> {
-  const del = await supabase.from(table).delete().eq("profile_id", profileId);
-  if (del.error) return false;
+  const { data: existingRows, error: selErr } = await supabase
+    .from(table)
+    .select("id")
+    .eq("profile_id", profileId);
+  if (selErr) return false;
+
+  const keepIds = new Set(
+    rows.map((r) => r.id).filter((id): id is string => Boolean(id)),
+  );
+  const toDelete = (existingRows ?? [])
+    .map((r) => String((r as { id: unknown }).id))
+    .filter((id) => !keepIds.has(id));
+  if (toDelete.length) {
+    const del = await supabase.from(table).delete().in("id", toDelete);
+    if (del.error) return false;
+  }
+
   if (rows.length === 0) return true;
-  const ins = await supabase.from(table).insert(rows);
-  return !ins.error;
+  const payload = rows.map((r) => ({
+    ...toRow(r),
+    ...(r.id ? { id: r.id } : {}),
+  }));
+  const ups = await supabase.from(table).upsert(payload, { onConflict: "id" });
+  return !ups.error;
 }
 
 /** Persists the resume wizard to the signed-in user's `profiles` row. */
@@ -42,6 +82,36 @@ export async function saveResume(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { signedOut: true };
+
+  // This draft never saw the account's real data (built from EMPTY_RESUME
+  // while signed out — e.g. quick-apply's guest path, or a session that
+  // expired mid-wizard). If the NOW-authenticated account already has a
+  // résumé, saving this draft as-is would delete/overwrite it with rows and
+  // ids it knows nothing about. Refuse instead of guessing.
+  if (!draft.resumeExists) {
+    const [edu, exp, cert] = await Promise.all([
+      supabase
+        .from("educations")
+        .select("id")
+        .eq("profile_id", user.id)
+        .limit(1),
+      supabase
+        .from("experiences")
+        .select("id")
+        .eq("profile_id", user.id)
+        .limit(1),
+      supabase
+        .from("certifications")
+        .select("id")
+        .eq("profile_id", user.id)
+        .limit(1),
+    ]);
+    const hasExistingRows =
+      (edu.data?.length ?? 0) > 0 ||
+      (exp.data?.length ?? 0) > 0 ||
+      (cert.data?.length ?? 0) > 0;
+    if (hasExistingRows) return { conflict: true };
+  }
 
   const pay = Number(draft.expectedSalary);
   const { error } = await supabase
@@ -83,11 +153,17 @@ export async function saveResume(
       .eq("id", user.id);
   }
 
-  // Replace the user's education entries with the wizard's set.
   const year = (y: string) => (/^\d{4}$/.test(y) ? `${y}-01-01` : null);
-  const rows = (draft.educations ?? [])
-    .filter((e) => e.school.trim() !== "")
-    .map((e) => ({
+
+  const eduRows = (draft.educations ?? []).filter(
+    (e) => e.school.trim() !== "",
+  );
+  const eduOk = await reconcileRows<EducationEntry>(
+    supabase,
+    "educations",
+    user.id,
+    eduRows,
+    (e) => ({
       profile_id: user.id,
       school: e.school.trim(),
       degree: clean(e.degree),
@@ -95,13 +171,18 @@ export async function saveResume(
       start_date: year(e.startYear),
       end_date: e.isCurrent ? null : year(e.endYear),
       is_current: e.isCurrent,
-    }));
-  const eduOk = await replaceRows(supabase, "educations", user.id, rows);
+    }),
+  );
 
-  // Replace the user's work-experience entries with the wizard's set.
-  const expRows = (draft.experiences ?? [])
-    .filter((e) => e.title.trim() !== "")
-    .map((e) => ({
+  const expRows = (draft.experiences ?? []).filter(
+    (e) => e.title.trim() !== "",
+  );
+  const expOk = await reconcileRows<ExperienceEntry>(
+    supabase,
+    "experiences",
+    user.id,
+    expRows,
+    (e) => ({
       profile_id: user.id,
       title: e.title.trim(),
       company_name: clean(e.companyName),
@@ -109,24 +190,24 @@ export async function saveResume(
       end_date: e.isCurrent ? null : year(e.endYear),
       is_current: e.isCurrent,
       description: clean(e.description),
-    }));
-  const expOk = await replaceRows(supabase, "experiences", user.id, expRows);
+    }),
+  );
 
-  // Replace the user's certificates/courses with the wizard's set.
-  const certRows = (draft.certificates ?? [])
-    .filter((c) => c.name.trim() !== "")
-    .map((c) => ({
+  const certRows = (draft.certificates ?? []).filter(
+    (c) => c.name.trim() !== "",
+  );
+  const certOk = await reconcileRows<CertificateEntry>(
+    supabase,
+    "certifications",
+    user.id,
+    certRows,
+    (c) => ({
       profile_id: user.id,
       name: c.name.trim(),
       issuer: clean(c.issuer),
       issued_date: year(c.issuedYear),
       expiry_date: year(c.expiryYear),
-    }));
-  const certOk = await replaceRows(
-    supabase,
-    "certifications",
-    user.id,
-    certRows,
+    }),
   );
 
   if (!eduOk || !expOk || !certOk) return { error: true };

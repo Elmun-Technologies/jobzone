@@ -208,6 +208,8 @@
       "native": "Native"
     },
     "errSave": "Couldn't save",
+    "errConflict": "This account already has a résumé. To avoid losing anything, we'll open the saved one first.",
+    "errConflictReload": "Reload the page",
     "summaryLabel": "About me",
     "summaryHint": "A few lines about you, your experience and strengths",
     "aiWrite": "Write with AI",
