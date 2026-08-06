@@ -68,15 +68,22 @@ const EMPTY: ApplicantResume = {
 /**
  * The full résumé of a candidate who applied to one of the caller's jobs.
  *
- * The sub-tables (experiences/educations/certifications/profile_skills) are
- * `selectable by authenticated` (0001) and read directly; the profile-level
- * fields (summary + AI flag, languages, experience level, expected pay) live on
- * the owner-only `profiles` table (0027) and come through the
- * `is_job_owner`-gated `applicant_profiles` view (0047). Everything is additive
- * and best-effort — a DB behind on 0047 still returns the sub-table sections.
+ * Goes through the `get_applicant_resume` RPC (0075) — a single SECURITY
+ * DEFINER call scoped to one applicant id — rather than reading
+ * experiences/educations/certifications/profile_skills/applicant_profiles
+ * directly. Those objects used to grant recruiters row-level access via an
+ * `is_recruiter_of`/`is_job_owner` predicate (0047/0049), which is correct
+ * for WHICH rows are visible but not for the query SHAPE: an unfiltered REST
+ * call under that policy returned every applicant across every one of the
+ * caller's jobs in one response — a bulk-scrape side channel this app never
+ * used (this reader has always queried one `profile_id` at a time) but which
+ * anyone with the recruiter's JWT could exploit directly. The RPC closes that
+ * off by construction: it only ever answers for the one id it's given.
  *
  * This reader does NOT enforce ownership on its own; the résumé page gates the
  * route (requireEmployer + the application must belong to the owner's job).
+ * The RPC re-checks `is_recruiter_of` independently, so a bug in the page
+ * gate can't turn into a cross-tenant read.
  */
 export async function getApplicantResume(
   applicantId: string,
@@ -85,40 +92,15 @@ export async function getApplicantResume(
   try {
     const supabase = await createClient();
 
-    const [expR, eduR, certR, skillR, profR] = await Promise.all([
-      supabase
-        .from("experiences")
-        .select(
-          "title, company_name, start_date, end_date, is_current, description",
-        )
-        .eq("profile_id", applicantId)
-        // nullsFirst: an ongoing role has end_date=null and is the most recent —
-        // it must sort to the TOP, not the bottom.
-        .order("end_date", { ascending: false, nullsFirst: true }),
-      supabase
-        .from("educations")
-        .select("school, degree, field, start_date, end_date, is_current")
-        .eq("profile_id", applicantId)
-        .order("end_date", { ascending: false, nullsFirst: true }),
-      supabase
-        .from("certifications")
-        .select("name, issuer, issued_date, expiry_date")
-        .eq("profile_id", applicantId)
-        .order("issued_date", { ascending: false, nullsFirst: false }),
-      supabase
-        .from("profile_skills")
-        .select("skills(name)")
-        .eq("profile_id", applicantId),
-      supabase
-        .from("applicant_profiles")
-        .select(
-          "summary, summary_ai_generated, languages, experience_level, desired_pay_min, desired_pay_currency",
-        )
-        .eq("applicant_id", applicantId)
-        .maybeSingle(),
-    ]);
+    const { data, error } = await supabase.rpc("get_applicant_resume", {
+      p_applicant_id: applicantId,
+    });
+    if (error || !data) return EMPTY;
+    const payload = data as Record<string, unknown>;
 
-    const experiences: ApplicantExperience[] = (expR.data ?? []).map((e) => {
+    const experiences: ApplicantExperience[] = (
+      (payload.experiences as unknown[]) ?? []
+    ).map((e) => {
       const row = e as Record<string, unknown>;
       return {
         title: str(row.title),
@@ -130,7 +112,9 @@ export async function getApplicantResume(
       };
     });
 
-    const educations: ApplicantEducation[] = (eduR.data ?? []).map((e) => {
+    const educations: ApplicantEducation[] = (
+      (payload.educations as unknown[]) ?? []
+    ).map((e) => {
       const row = e as Record<string, unknown>;
       return {
         school: str(row.school),
@@ -142,7 +126,9 @@ export async function getApplicantResume(
       };
     });
 
-    const certificates: ApplicantCertificate[] = (certR.data ?? []).map((c) => {
+    const certificates: ApplicantCertificate[] = (
+      (payload.certificates as unknown[]) ?? []
+    ).map((c) => {
       const row = c as Record<string, unknown>;
       return {
         name: str(row.name),
@@ -152,25 +138,18 @@ export async function getApplicantResume(
       };
     });
 
-    const skills: string[] = (skillR.data ?? [])
-      .map((s) => {
-        const sk = (s as Record<string, unknown>).skills as Record<
-          string,
-          unknown
-        > | null;
-        return sk && typeof sk.name === "string" ? sk.name : "";
-      })
-      .filter((n): n is string => n !== "");
+    const skills: string[] = ((payload.skills as unknown[]) ?? []).filter(
+      (n): n is string => typeof n === "string" && n !== "",
+    );
 
-    const pr = (profR.data ?? {}) as Record<string, unknown>;
     const languages =
-      pr.languages && typeof pr.languages === "object"
-        ? (pr.languages as Record<string, string>)
+      payload.languages && typeof payload.languages === "object"
+        ? (payload.languages as Record<string, string>)
         : {};
-    const summary = str(pr.summary);
-    const experienceLevel = str(pr.experience_level);
+    const summary = str(payload.summary);
+    const experienceLevel = str(payload.experience_level);
     const expectedSalary =
-      pr.desired_pay_min != null ? String(pr.desired_pay_min) : "";
+      payload.desired_pay_min != null ? String(payload.desired_pay_min) : "";
 
     const hasAny =
       summary !== "" ||
@@ -184,10 +163,10 @@ export async function getApplicantResume(
 
     return {
       summary,
-      summaryAiGenerated: pr.summary_ai_generated === true,
+      summaryAiGenerated: payload.summary_ai_generated === true,
       experienceLevel,
       expectedSalary,
-      currency: str(pr.desired_pay_currency) || "UZS",
+      currency: str(payload.desired_pay_currency) || "UZS",
       languages,
       experiences,
       educations,
