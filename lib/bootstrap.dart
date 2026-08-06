@@ -46,8 +46,16 @@ Future<void> bootstrap() async {
   try {
     await Firebase.initializeApp();
     firebaseReady = true;
-  } catch (_) {
+  } catch (e, st) {
     firebaseReady = false;
+    // This used to be swallowed silently, which made a genuinely broken
+    // native config (e.g. GoogleService-Info.plist present on disk but never
+    // registered in the Xcode project's Resources build phase, so it never
+    // reaches the .app bundle) look identical to "push not configured yet" —
+    // both degrade to NoopPushService with zero signal. Report it so a
+    // regression here is visible instead of silently indistinguishable from
+    // working-as-designed.
+    await Sentry.captureException(e, stackTrace: st);
   }
 
   // Map SDK init: on mobile this boots the official Yandex MapKit (must run
