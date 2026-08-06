@@ -100,6 +100,7 @@
   "skip": "Пропустить",
   "next": "Далее",
   "valRequired": "Обязательное поле",
+  "formHasErrors": "В форме есть ошибки — проверьте отмеченные поля",
   "valEmail": "Введите корректный email",
   "valPasswordShort": "Минимум 8 символов",
   "valPasswordMismatch": "Пароли не совпадают",

@@ -40,6 +40,19 @@ class PostJobPage extends ConsumerStatefulWidget {
 
 class _PostJobPageState extends ConsumerState<PostJobPage> {
   final _formKey = GlobalKey<FormState>();
+
+  // One controller per collapsible _FormSection, so a failed validate() can
+  // force every section open. Every section keeps its fields mounted while
+  // collapsed specifically so validators still run (see _FormSection's own
+  // comment) — but a validator failing inside a section nobody opened, e.g.
+  // the required salary field, used to be invisible: validate() returned
+  // false, _submit returned, and the button just looked dead. Flutter's
+  // ExpansionTile is otherwise uncontrolled, so without this there is no way
+  // to open a section from outside a user tap.
+  final _sectionControllers = List.generate(
+    7,
+    (_) => ExpansionTileController(),
+  );
   late final _title = TextEditingController(text: widget.job?.title);
   late final _city = TextEditingController(text: widget.job?.city);
   late final _min = TextEditingController(
@@ -311,7 +324,19 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   }
 
   Future<void> _submit(String status) async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      // Every section keeps its fields mounted while collapsed so validators
+      // still run against them — but a failing field the user never opened
+      // (the required salary is the common case) rendered its error text
+      // inside an invisible tile, and the "E'lon qilish" button just looked
+      // dead. Force every section open and say plainly that something needs
+      // attention.
+      for (final c in _sectionControllers) {
+        if (!c.isExpanded) c.expand();
+      }
+      showErrorSnack(context, context.l10n.formHasErrors);
+      return;
+    }
     if (_salaryDisplay == 'exact') {
       final min = num.tryParse(_min.text);
       final max = num.tryParse(_max.text);
@@ -345,14 +370,29 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
       // the next screen, which publishes it. Offline has no charge path, so the
       // demo always free-publishes. Scheduled posts are drafts until their time,
       // so they're not charged here (they run the gate when they go live).
+      //
+      // `wasOpen` (not `!_isEdit`) is what actually distinguishes "entering
+      // the market for the first time" from "editing a listing that's already
+      // live" — a brand-new job is never open yet, so this still covers
+      // create. Without it, publishing a draft from the EDIT screen skipped
+      // the charge check entirely: updateJob() used to drop `status` outright
+      // (silently doing nothing), and even after fixing that, flipping
+      // straight to 'open' here would have hit the DB's payment guard and
+      // failed with a raw error instead of routing to checkout the way the
+      // create path and My Jobs' "Publish" already do.
+      final wasOpen = widget.job?.status == 'open';
       final charged =
-          !_isEdit &&
           effectiveStatus == 'open' &&
+          !wasOpen &&
           Env.hasSupabase &&
           await repo.hasPublishedBefore();
       final createStatus = charged ? 'draft' : effectiveStatus;
       Job? created;
       if (_isEdit) {
+        // Keep the job a draft when charged — the fields still save, but the
+        // status transition to 'open' happens only once payment clears, on
+        // the same ListingPaymentPage the create path uses below.
+        final updateStatus = charged ? 'draft' : effectiveStatus;
         await repo.updateJob(
           widget.job!.copyWith(
             title: _title.text.trim(),
@@ -401,7 +441,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
             screeningQuestions: _questions
                 .where((q) => q.label.trim().isNotEmpty)
                 .toList(),
-            status: effectiveStatus,
+            status: updateStatus,
             publishAt: publishAt,
             educationRequired: _educationRequired,
             workHours: _workHours.text.trim().isEmpty
@@ -409,6 +449,23 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                 : _workHours.text.trim(),
           ),
         );
+        if (!mounted) return;
+        if (charged) {
+          // Same checkout as a brand-new 2nd+ vacancy: the edited fields are
+          // already saved (as a draft, above); this only needs to flip status
+          // once payment clears.
+          await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (_) => ListingPaymentPage(
+                jobId: widget.job!.id,
+                jobTitle: _title.text.trim(),
+              ),
+            ),
+          );
+          ref.invalidate(myJobsProvider);
+          if (mounted) context.pop();
+          return;
+        }
       } else {
         created = await repo.createJob(
           title: _title.text.trim(),
@@ -557,6 +614,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 1. Bandlik (Employment) ──────────────────────────────
                     _FormSection(
+                      controller: _sectionControllers[0],
                       title: l.sectionEmployment,
                       initiallyExpanded: true,
                       children: [
@@ -659,6 +717,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 2. Nomzodlarga talablar (Candidate requirements) ─────
                     _FormSection(
+                      controller: _sectionControllers[1],
                       title: l.candidateRequirementsSection,
                       children: [
                         Row(
@@ -794,6 +853,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 3. Maosh (Salary) ────────────────────────────────────
                     _FormSection(
+                      controller: _sectionControllers[2],
                       title: l.sectionSalary,
                       children: [
                         _Dropdown(
@@ -902,6 +962,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 4. Joylashuv (Location) ──────────────────────────────
                     _FormSection(
+                      controller: _sectionControllers[3],
                       title: l.sectionLocation,
                       children: [
                         _Dropdown(
@@ -953,6 +1014,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 5. Ish haqida (About the job) ───────────────────────
                     _FormSection(
+                      controller: _sectionControllers[4],
                       title: l.sectionAboutJob,
                       children: [
                         JzTextField(label: l.fieldSkills, controller: _skills),
@@ -1040,6 +1102,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 6. Saralash savollari (Screening questions) ──────────
                     _FormSection(
+                      controller: _sectionControllers[5],
                       title: l.screeningSection,
                       children: [
                         _ScreeningEditor(
@@ -1051,6 +1114,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
 
                     // ── 7. Javob sozlamalari (Response settings) ─────────────
                     _FormSection(
+                      controller: _sectionControllers[6],
                       title: l.responseSettingsSection,
                       children: [
                         SwitchListTile(
@@ -1117,30 +1181,47 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
                   AppSpacing.lg,
                   AppSpacing.lg,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _saving ? null : () => _submit('draft'),
-                        style: OutlinedButton.styleFrom(
-                          shape: const StadiumBorder(),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.md,
-                          ),
-                        ),
-                        child: Text(l.saveDraft),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: JzPrimaryButton(
-                        label: l.publishJob,
+                // A job that's already live (open/closed) gets one "Save
+                // changes" button that keeps its current status. The
+                // draft/publish pair used to render unconditionally here, so
+                // an employer fixing a typo in a live vacancy who tapped the
+                // natural-looking left button ("Qoralama saqlash") silently
+                // unpublished it — status flipped to draft, the job left
+                // job_feed, and the only feedback was a generic "saved" toast.
+                // Editing an actual draft still gets the real choice, since
+                // that's the point of a draft.
+                child: (_isEdit && widget.job!.status != 'draft')
+                    ? JzPrimaryButton(
+                        label: l.saveChanges,
                         loading: _saving,
-                        onPressed: () => _submit('open'),
+                        onPressed: () => _submit(widget.job!.status),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _saving
+                                  ? null
+                                  : () => _submit('draft'),
+                              style: OutlinedButton.styleFrom(
+                                shape: const StadiumBorder(),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.md,
+                                ),
+                              ),
+                              child: Text(l.saveDraft),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: JzPrimaryButton(
+                              label: l.publishJob,
+                              loading: _saving,
+                              onPressed: () => _submit('open'),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],
@@ -1194,11 +1275,16 @@ class _FormSection extends StatelessWidget {
     required this.title,
     required this.children,
     this.initiallyExpanded = false,
+    this.controller,
   });
 
   final String title;
   final List<Widget> children;
   final bool initiallyExpanded;
+
+  /// Lets the parent force this section open — e.g. when a validator inside
+  /// it fails but the user never opened it to see the error.
+  final ExpansionTileController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -1206,6 +1292,7 @@ class _FormSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
+        controller: controller,
         title: Text(
           title,
           style: context.text.titleSmall?.copyWith(fontWeight: FontWeight.w700),

@@ -237,6 +237,15 @@ class EmployerJobsRepository {
     final row = await client
         .from('jobs')
         .update({
+          // Without this, a caller that computed a status transition (e.g.
+          // publishing a draft, or saving an open job back to draft) had it
+          // silently dropped: PostJobPage's edit flow always toasted "Saqlandi"
+          // and popped back to the list, believing the transition happened,
+          // while the row's status never moved. The trg_guard_job_publish
+          // trigger (0066) still enforces the pay-per-listing rule on this
+          // write exactly as it does for setStatus() below — adding the
+          // column doesn't bypass it.
+          'status': job.status,
           'title': job.title,
           'job_type': job.jobType,
           'experience_level': job.experienceLevel,
