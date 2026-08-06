@@ -53,7 +53,7 @@ export default async function SignUpPage({
         {t("haveAccount")}{" "}
         <Link
           href={signInHref}
-          className="text-primary font-semibold hover:underline"
+          className="text-primary-ink font-semibold hover:underline"
         >
           {t("signIn")}
         </Link>

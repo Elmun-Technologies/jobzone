@@ -84,7 +84,7 @@ export function SignUpForm({
               <Link
                 href="/terms"
                 target="_blank"
-                className="text-primary font-medium hover:underline"
+                className="text-primary-ink font-medium hover:underline"
               >
                 {chunks}
               </Link>
@@ -93,7 +93,7 @@ export function SignUpForm({
               <Link
                 href="/privacy"
                 target="_blank"
-                className="text-primary font-medium hover:underline"
+                className="text-primary-ink font-medium hover:underline"
               >
                 {chunks}
               </Link>

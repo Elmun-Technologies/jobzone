@@ -125,7 +125,7 @@ export default async function ApplicantResumePage({
               <p className="text-foreground flex items-center gap-1 text-lg font-bold">
                 <span className="truncate">{applicant.name}</span>
                 {applicant.workerVerified ? (
-                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                  <BadgeCheck className="text-primary-ink size-4 shrink-0" />
                 ) : null}
               </p>
               {applicant.headline ? (

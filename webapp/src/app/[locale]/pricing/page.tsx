@@ -63,7 +63,7 @@ export default async function PricingPage({
           {t("heroSubtitle")}
         </p>
         <p className="border-primary/40 bg-accent text-foreground mt-5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold">
-          <Sparkles className="text-primary size-4" />
+          <Sparkles className="text-primary-ink size-4" />
           {t("tiers.firstFree")}
         </p>
       </div>
@@ -124,7 +124,7 @@ export default async function PricingPage({
                       key={f}
                       className="text-foreground flex items-start gap-2 text-sm"
                     >
-                      <Check className="text-primary mt-0.5 size-4 shrink-0" />
+                      <Check className="text-primary-ink mt-0.5 size-4 shrink-0" />
                       {t(`tiers.${tier.code}.${f}`)}
                     </li>
                   ))}
@@ -165,7 +165,7 @@ export default async function PricingPage({
             className="rise-in border-border bg-card rounded-2xl border p-5"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <b.Icon className="text-primary size-5" />
+            <b.Icon className="text-primary-ink size-5" />
             <p className="text-foreground mt-2 font-semibold">{b.title}</p>
             <p className="text-muted-foreground mt-1 text-sm">{b.desc}</p>
           </div>

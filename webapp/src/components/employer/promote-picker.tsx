@@ -102,12 +102,12 @@ export function PromotePicker({
                   </span>
                 ) : null}
                 <span className="flex items-center gap-2">
-                  <Icon className="text-primary size-4 shrink-0" />
+                  <Icon className="text-primary-ink size-4 shrink-0" />
                   <span className="text-foreground font-semibold">
                     {p.name}
                   </span>
                   {isSel ? (
-                    <Check className="text-primary ml-auto size-5 shrink-0" />
+                    <Check className="text-primary-ink ml-auto size-5 shrink-0" />
                   ) : null}
                 </span>
                 {p.description ? (
@@ -147,7 +147,7 @@ export function PromotePicker({
         </p>
         <div className="space-y-2">
           <div className="border-primary bg-card flex items-center gap-2 rounded-xl border-2 p-3 shadow-sm">
-            <ArrowUp className="text-primary size-4 shrink-0" />
+            <ArrowUp className="text-primary-ink size-4 shrink-0" />
             <span className="text-foreground truncate text-sm font-semibold">
               {jobTitle}
             </span>

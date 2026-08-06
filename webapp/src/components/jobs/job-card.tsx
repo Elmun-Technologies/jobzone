@@ -132,7 +132,7 @@ export function JobCard({
               <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-sm">
                 <span className="truncate">{job.companyName}</span>
                 {job.companyVerified ? (
-                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                  <BadgeCheck className="text-primary-ink size-4 shrink-0" />
                 ) : null}
               </div>
             </div>

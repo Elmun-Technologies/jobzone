@@ -68,7 +68,7 @@ export default async function SignInPage({
         {t("noAccount")}{" "}
         <Link
           href={signUpHref}
-          className="text-primary font-semibold hover:underline"
+          className="text-primary-ink font-semibold hover:underline"
         >
           {t("createAccount")}
         </Link>

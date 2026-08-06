@@ -111,6 +111,10 @@ export default async function HomePage({
           <HeroMapBackdrop />
           <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-white/80 uppercase backdrop-blur">
+              {/* Inside the hero card, which is a literal #171716 background
+                  regardless of site theme — not the page surface `--primary-ink`
+                  is calibrated against. Pure volt is correct and already
+                  ~13:1 here. */}
               <MapPin className="text-primary size-3.5" />
               {t("heroBadge")}
             </span>
@@ -290,7 +294,7 @@ export default async function HomePage({
             </h2>
             <Link
               href="/jobs"
-              className="text-primary text-sm font-semibold hover:underline"
+              className="text-primary-ink text-sm font-semibold hover:underline"
             >
               {t("viewAll")}
             </Link>
@@ -314,7 +318,7 @@ export default async function HomePage({
             </h2>
             <Link
               href="/companies"
-              className="text-primary text-sm font-semibold hover:underline"
+              className="text-primary-ink text-sm font-semibold hover:underline"
             >
               {t("viewAll")}
             </Link>

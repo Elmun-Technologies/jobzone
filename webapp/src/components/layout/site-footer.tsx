@@ -19,25 +19,25 @@ export async function SiteFooter() {
           <span>— {t("tagline")}</span>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-          <Link href="/jobs" className="hover:text-primary transition-colors">
+          <Link href="/jobs" className="hover:text-primary-ink transition-colors">
             {tn("jobs")}
           </Link>
           <Link
             href="/companies"
-            className="hover:text-primary transition-colors"
+            className="hover:text-primary-ink transition-colors"
           >
             {tn("companies")}
           </Link>
           <Link
             href="/privacy"
-            className="hover:text-primary transition-colors"
+            className="hover:text-primary-ink transition-colors"
           >
             {t("privacy")}
           </Link>
-          <Link href="/terms" className="hover:text-primary transition-colors">
+          <Link href="/terms" className="hover:text-primary-ink transition-colors">
             {t("terms")}
           </Link>
-          <CookieSettingsButton className="hover:text-primary cursor-pointer transition-colors" />
+          <CookieSettingsButton className="hover:text-primary-ink cursor-pointer transition-colors" />
         </nav>
         <p>
           © {year} Yollla. {t("rights")}

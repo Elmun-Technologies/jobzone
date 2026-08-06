@@ -143,7 +143,7 @@ export default async function MyJobsPage({
                     href={`/employer/jobs/${job.id}/applicants`}
                     className="min-w-0 flex-1"
                   >
-                    <p className="text-foreground hover:text-primary truncate font-semibold transition-colors">
+                    <p className="text-foreground hover:text-primary-ink truncate font-semibold transition-colors">
                       {job.title}
                     </p>
                     <p className="text-muted-foreground text-sm">

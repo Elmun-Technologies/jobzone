@@ -101,7 +101,7 @@ export function JobCardActions({
         className={iconButton}
       >
         {copied ? (
-          <Check className="text-primary size-4" />
+          <Check className="text-primary-ink size-4" />
         ) : (
           <Share2 className="size-4" />
         )}
@@ -112,7 +112,7 @@ export function JobCardActions({
         disabled={pending}
         aria-pressed={saved}
         aria-label={saved ? tb("saved") : tb("save")}
-        className={cn(iconButton, saved && "text-primary hover:text-primary")}
+        className={cn(iconButton, saved && "text-primary-ink hover:text-primary-ink")}
       >
         <Bookmark className="size-4" fill={saved ? "currentColor" : "none"} />
       </button>
@@ -125,7 +125,7 @@ export function JobCardActions({
         title={dismissed ? t("dismissed") : t("dismiss")}
         className={cn(
           iconButton,
-          dismissed && "text-primary hover:text-primary",
+          dismissed && "text-primary-ink hover:text-primary-ink",
         )}
       >
         <Archive className="size-4" />

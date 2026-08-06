@@ -73,7 +73,7 @@ function Field({
     <label className="block">
       <span className="text-foreground mb-1.5 block text-sm font-medium">
         {label}
-        {required ? <span className="text-primary"> *</span> : null}
+        {required ? <span className="text-primary-ink"> *</span> : null}
       </span>
       {children}
     </label>
@@ -392,7 +392,7 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
                 i < step
                   ? "bg-primary text-primary-foreground"
                   : i === step
-                    ? "border-primary text-primary border-2"
+                    ? "border-primary text-primary-ink border-2"
                     : "border-border text-muted-foreground border",
               )}
             >
@@ -642,7 +642,7 @@ export function ResumeWizard({ initial }: { initial: ResumeDraft }) {
               </div>
               {/* Keep it honest — the AI is a helper, not a fabricator. */}
               <p className="text-muted-foreground mt-2 flex items-start gap-1.5 text-xs">
-                <ShieldCheck className="text-primary mt-px size-3.5 shrink-0" />
+                <ShieldCheck className="text-primary-ink mt-px size-3.5 shrink-0" />
                 {draft.summaryAiGenerated
                   ? t("aiRealityCheckOn")
                   : t("aiRealityCheck")}

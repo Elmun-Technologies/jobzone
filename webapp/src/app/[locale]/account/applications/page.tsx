@@ -70,7 +70,7 @@ export default async function MyApplicationsPage({
 
       {justApplied ? (
         <div className="border-primary/40 bg-accent text-accent-foreground mb-6 flex items-center gap-2 rounded-xl border p-4 text-sm font-medium">
-          <CheckCircle2 className="text-primary size-5 shrink-0" />
+          <CheckCircle2 className="text-primary-ink size-5 shrink-0" />
           {t("appliedBanner")}
         </div>
       ) : null}

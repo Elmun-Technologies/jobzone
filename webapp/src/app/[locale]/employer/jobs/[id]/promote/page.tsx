@@ -103,7 +103,7 @@ export default async function PromoteJobPage({
                 className="rise-in border-border bg-card flex items-center gap-3 rounded-2xl border p-4"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <b.Icon className="text-primary size-5 shrink-0" />
+                <b.Icon className="text-primary-ink size-5 shrink-0" />
                 <span className="text-foreground text-sm font-medium">
                   {b.label}
                 </span>

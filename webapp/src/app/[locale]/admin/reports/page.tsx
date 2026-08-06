@@ -83,7 +83,7 @@ export default async function AdminReportsPage({
           </div>
           <Link
             href={TARGET_HREF[r.targetType](r.targetId)}
-            className="text-primary text-xs hover:underline"
+            className="text-primary-ink text-xs hover:underline"
           >
             {r.targetId.slice(0, 8)}…
           </Link>

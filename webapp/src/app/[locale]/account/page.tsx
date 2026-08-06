@@ -225,7 +225,7 @@ export default async function AccountPage({
               <p className="text-foreground flex items-center gap-1 font-semibold">
                 <span className="truncate">{company.name}</span>
                 {company.isVerified ? (
-                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                  <BadgeCheck className="text-primary-ink size-4 shrink-0" />
                 ) : null}
               </p>
               {rating && rating.count > 0 ? (

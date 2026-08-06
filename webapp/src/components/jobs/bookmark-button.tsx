@@ -56,7 +56,7 @@ export function BookmarkButton({
       aria-label={saved ? t("saved") : t("save")}
       className={cn(
         "border-border hover:bg-muted inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors disabled:opacity-60",
-        saved ? "text-primary" : "text-foreground",
+        saved ? "text-primary-ink" : "text-foreground",
         className,
       )}
     >

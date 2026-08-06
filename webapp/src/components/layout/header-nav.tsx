@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { navModel } from "./nav-model";
 
 const navLink =
-  "text-foreground hover:text-primary text-sm font-medium transition-colors";
+  "text-foreground hover:text-primary-ink text-sm font-medium transition-colors";
 // Responsive overrides must come AFTER buttonVariants: tailwind-merge keeps
 // the last display utility, so "hidden" before the variants' "inline-flex"
 // would be silently discarded and the CTA would never leave the phone header.

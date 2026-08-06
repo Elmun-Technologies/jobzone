@@ -102,7 +102,7 @@ export default async function CompanyPage({
           <h1 className="text-foreground flex items-center gap-2 text-2xl font-bold">
             {company.name}
             {company.isVerified ? (
-              <BadgeCheck className="text-primary size-5" />
+              <BadgeCheck className="text-primary-ink size-5" />
             ) : null}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
@@ -124,7 +124,7 @@ export default async function CompanyPage({
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary flex items-center gap-1 hover:underline"
+                className="text-primary-ink flex items-center gap-1 hover:underline"
               >
                 <Globe className="size-4" />
                 {t("visitWebsite")}
