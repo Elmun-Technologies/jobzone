@@ -135,7 +135,8 @@
     "empty": "Hali suhbatlar yo'q",
     "message": "Xabar yozish",
     "messagePlaceholder": "Xabar yozing…",
-    "send": "Yuborish"
+    "send": "Yuborish",
+    "startFailed": "Suhbatni boshlab bo'lmadi. Qaytadan urinib ko'ring."
   },
   "profile": {
     "title": "Profilni tahrirlash",

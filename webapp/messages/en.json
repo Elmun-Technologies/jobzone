@@ -135,7 +135,8 @@
     "empty": "No conversations yet",
     "message": "Message",
     "messagePlaceholder": "Type a message…",
-    "send": "Send"
+    "send": "Send",
+    "startFailed": "Couldn't start the conversation. Please try again."
   },
   "profile": {
     "title": "Edit profile",
