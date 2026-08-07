@@ -144,6 +144,38 @@ OTP SMS : 112233
   `{ok:true, idempotent:true}` and leave the order unchanged. A tampered
   signature must return `401 bad_signature` (nothing written to the DB).
 
+## 5. Wallet top-ups (Hamyon)
+
+A top-up is charged on exactly the same rails as a vacancy, so there is nothing
+extra to register with the providers — same endpoints, same secrets.
+
+- `create_topup_order` (migration 0085) opens — or re-uses — the pending
+  `wallet_transactions` credit and returns its id; the client builds the
+  checkout URL from that id exactly as it does for a vacancy order. Re-using a
+  same-amount pending row is deliberate: two attempts settle one row, so one
+  intent can never be credited twice.
+- The callbacks resolve whatever the id names through `gateway_order` and
+  settle it through `gateway_settle_order`. A promotion/listing order flips to
+  `paid` (its trigger publishes the vacancy or applies the boost); a top-up
+  flips to `completed`, which is what moves `wallet_balances`.
+- `payment_transactions.order_kind` records which of the two a transaction
+  paid for. The old FK to `promotion_orders` is gone (0085) — a gateway
+  transaction is a financial record and outlives the order.
+- Amount bounds live server-side: **5 000 – 50 000 000 so'm** per top-up. The
+  web form and the mobile wallet screen share the same rule so the UI never
+  offers a charge the RPC would reject.
+- Cancel-after-perform on a top-up (Payme state `-2`) reverses the credit only
+  while the balance can absorb it; otherwise the money stays put and the
+  finance panel settles it as a refund — a company must never be pushed
+  negative by a callback.
+
+**Sandbox test:** open *Hamyon* (mobile: Kompaniya → Hamyon; web:
+`/employer/wallet`), enter 10 000, pay with the sandbox card. The pending row
+must flip to `completed`, the balance must rise by exactly the amount, and a
+re-delivered callback must leave both unchanged. Then buy a TOP promotion — the
+balance drops and the vacancy gets its boost in one atomic step
+(`buy_promotion`, 0043).
+
 ## Notes
 - Both endpoints return HTTP 200 with the provider's own error envelope
   (JSON-RPC for Payme, `{error, error_note}` for Click) — that's the protocol,
@@ -153,6 +185,9 @@ OTP SMS : 112233
 - Refund/cancel marks the order `refunded`/`cancelled`; an already-published
   vacancy is left live (un-publishing on refund is a business decision, not
   automated).
+- Both merchant endpoints (and `rahmat-invoice`) go through the two definer
+  RPCs above rather than touching tables, so adding a third thing to sell means
+  teaching `gateway_order` about it — not editing four edge functions.
 - The old `payment-webhook` scaffold (shared-secret, marks a promotion order
   paid) stays for manual/admin confirmation and internal testing; the two
   provider functions above are the production path.

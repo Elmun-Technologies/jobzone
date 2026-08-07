@@ -511,7 +511,7 @@
     "topUpSub": "Choose an amount and add funds to your balance.",
     "topUpPending": "Top-up request received — your balance updates once payment is confirmed.",
     "amountHint": "Amount",
-    "errAmount": "Enter an amount of at least 1 000",
+    "errAmount": "Enter at least 5 000 so'm",
     "errUnknown": "Something went wrong",
     "history": "Transactions",
     "historyEmpty": "No transactions yet",
@@ -524,7 +524,9 @@
     "status": {
       "pending": "Pending",
       "cancelled": "Cancelled"
-    }
+    },
+    "payWith": "Pay with {provider}",
+    "payNote": "Your balance updates automatically once the payment is confirmed."
   },
   "apply": {
     "applyTo": "Apply for a job",

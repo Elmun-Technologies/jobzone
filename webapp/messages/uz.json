@@ -511,7 +511,7 @@
     "topUpSub": "Summani tanlang va hisobingizni to'ldiring.",
     "topUpPending": "To'ldirish so'rovi qabul qilindi — to'lov tasdiqlangach balans yangilanadi.",
     "amountHint": "Summa",
-    "errAmount": "Kamida 1 000 miqdorida summa kiriting",
+    "errAmount": "Kamida 5 000 so'm kiriting",
     "errUnknown": "Xatolik yuz berdi",
     "history": "Tranzaksiyalar",
     "historyEmpty": "Hali tranzaksiyalar yo'q",
@@ -524,7 +524,9 @@
     "status": {
       "pending": "Kutilmoqda",
       "cancelled": "Bekor qilingan"
-    }
+    },
+    "payWith": "{provider} orqali to'lash",
+    "payNote": "To'lov tasdiqlangach balans avtomatik yangilanadi."
   },
   "apply": {
     "applyTo": "Ariza topshirish",

@@ -726,7 +726,12 @@
   "walletTopUp": "Top up",
   "walletTopUpSub": "Choose or enter an amount",
   "walletAmountHint": "Amount",
-  "walletErrAmount": "Enter an amount of at least 1,000",
+  "walletErrAmount": "Enter at least 5 000 so'm",
+  "walletToppedUp": "Wallet topped up",
+  "walletPayNote": "Your balance updates automatically once the payment is confirmed.",
+  "walletInsufficient": "Not enough balance. Top up your wallet first.",
+  "checkoutPayFromWallet": "Pay from wallet",
+  "checkoutPaid": "Promotion activated",
   "walletTopUpPending": "Top-up request received — the balance updates once payment is confirmed",
   "walletHistory": "Transactions",
   "walletHistoryEmpty": "No transactions yet",
@@ -921,7 +926,7 @@
   "notifTitleMessage": "New message",
   "notifTitleJobMatch": "New job match",
   "notifTitleJobClosed": "Vacancy closed",
-  "notifBodyJobClosed": "\u201c{title}\u201d is no longer accepting applications.",
+  "notifBodyJobClosed": "“{title}” is no longer accepting applications.",
   "@notifBodyJobClosed": {
     "placeholders": {
       "title": {
@@ -930,7 +935,7 @@
     }
   },
   "notifTitleJobInvite": "Job invitation",
-  "notifBodyJobInvite": "{company} is inviting you to apply for \u201c{title}\u201d.",
+  "notifBodyJobInvite": "{company} is inviting you to apply for “{title}”.",
   "@notifBodyJobInvite": {
     "placeholders": {
       "company": {

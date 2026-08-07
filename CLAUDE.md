@@ -102,7 +102,8 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   languages, pay basis, screening questions editor, markdown description, OSM
   location picker, scheduled publish), applicants pipeline with status history,
   distance sort + applicants map (official Yandex SDK on device, OSM on web),
-  company/people/gallery admin, monetization (promote sheet, wallet).
+  company/people/gallery admin, monetization (promote sheet, Hamyon wallet with
+  gateway top-up, pay-per-vacancy tiers).
 - **l10n:** `lib/localization/l10n/app_{en,ru,uz}.arb` → `flutter gen-l10n`.
   `test/localization/arb_parity_test.dart` enforces identical keys across the
   three files, **ignoring `@`-metadata** — so placeholder metadata lives in the
@@ -135,7 +136,8 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   `docs/go-live-checklist.md` §2–4.
 - **Employer web:** onboarding (creating a company promotes `profiles.role` to
   employer), post vacancy (guest-first), my jobs, applicants, company edit,
-  wallet (Hamyon) with top-up form (records pending transactions only).
+  wallet (Hamyon) with a real top-up (Payme/Click/Rahmat → the gateway callback
+  completes the credit).
 - **Admin panel (`/admin`, web-only):** dashboard (aggregate stats RPC), jobs /
   companies / reviews moderation, users, orders, finance (top-ups, promotion
   orders, pricing), category CMS, broadcast (one notification to an audience),
@@ -148,7 +150,7 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 
 ## Backend (`supabase/`)
 
-- **Schema domains** (84 migrations, 0001–0084): profiles/CV (experiences, educations,
+- **Schema domains** (85 migrations, 0001–0085): profiles/CV (experiences, educations,
   skills, resumes…), companies (+people/gallery/reviews), job_categories
   (seeded blue-collar set incl. Foreign-jobs), jobs (rich blue-collar fields +
   screening_questions jsonb + boost + expiry + publish_at), applications
@@ -164,7 +166,10 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   (0063–0065, 0072, 0075–0076), the résumé/matching work (0077, 0082) and the
   **email channel** (0084: per-category email switches + unsubscribe token,
   `email_deliveries` send log, alert payloads for the digest, followed-company
-  alerts, welcome-mail triggers on `auth.users`).
+  alerts, welcome-mail triggers on `auth.users`) and the **payable wallet**
+  (0085: `create_topup_order` + the shared `gateway_order` /
+  `gateway_settle_order` every merchant callback settles through, so a Hamyon
+  top-up is charged on the same rails as a vacancy).
 - **Numbering a new migration:** take the next free version — never reuse one.
   The version is the PK of `supabase_migrations.schema_migrations`, so a
   duplicate makes `db push` **silently skip** the second file; this has bitten
@@ -279,8 +284,9 @@ sending domain for email, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), depl
 edge fns, enable Phone auth + register the Send-SMS hook, schedule the cron (§5),
 Vercel envs, store submission.
 
-**Queued next (genuinely needs third-party ops, not just code):** real
-payments via `payment-webhook` (Click/Payme merchant accounts), FCM runtime
+**Queued next (genuinely needs third-party ops, not just code):** live merchant
+accounts for Payme/Click/Rahmat (the code path is complete on both clients —
+vacancies, promotions and wallet top-ups), FCM runtime
 (the code + Firebase config are wired — needs a live Firebase project's
 `google-services.json`/`GoogleService-Info.plist` to send real pushes), Agora
 calls (a real Agora project + app credentials).

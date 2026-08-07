@@ -43,6 +43,7 @@ import '../../features/employer/presentation/company/manage_gallery_page.dart';
 import '../../features/employer/presentation/company/manage_people_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
+import '../../features/employer/presentation/wallet_page.dart';
 import '../../features/monetization/presentation/checkout_page.dart';
 import '../../features/monetization/presentation/promotions_history_page.dart';
 import '../../features/monetization/presentation/tiers_page.dart';
@@ -346,6 +347,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.employerPromotions,
         builder: (c, s) => const PromotionsHistoryPage(),
+      ),
+      GoRoute(
+        // `extra` carries the shortfall from the promote flow, so the amount
+        // the employer needs is already typed in when they land here.
+        path: Routes.employerWallet,
+        builder: (c, s) => WalletPage(initialAmount: s.extra as int?),
       ),
       GoRoute(path: Routes.employerTiers, builder: (c, s) => const TiersPage()),
       GoRoute(

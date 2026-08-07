@@ -12,7 +12,7 @@ Work top-to-bottom; each section notes how to verify it.
 ## 1. Database — apply migrations
 
 ```bash
-supabase db push        # applies every migration through 0084
+supabase db push        # applies every migration through 0085
 ```
 
 > ⚠️ **If you already ran `db push` before this checklist mentioned 0074:**
@@ -66,6 +66,7 @@ Most recent, most likely un-applied:
 | `0052_dismissed_jobs` | lets a seeker archive a job out of their browse feed |
 | `0073_rls_hardening` | closes two residual RLS gaps: an applicant could forge their own application's initial status, and a sender could move their own message into a conversation they're not a member of |
 | `0074_telegram_gateway_api_host` | fixes the silent Telegram OTP failure above — **required for OTP sign-in to work at all** |
+| `0085_wallet_topup_payments` | makes a wallet top-up payable by Payme/Click/Rahmat: `create_topup_order`, the shared `gateway_order` / `gateway_settle_order` used by every merchant callback, `payment_transactions.order_kind` |
 | `0084_email_channel` | the email channel: per-category email switches + unsubscribe token, `email_deliveries` send log, `set_email_pref_by_token()`, alert payloads for the digest, `run_company_follow_alerts()`, welcome-mail triggers on `auth.users`, `admin_broadcast(… p_send_email)` |
 | `0075_listing_tier_upgrade` | lets an employer buy a higher tier for a vacancy that is already live (until this, `create_listing_order` accepted drafts only, so the web "Reklama" page on every open vacancy could sell nothing) |
 
