@@ -12,27 +12,27 @@ export async function EmployerCta() {
   const t = await getTranslations("landing");
   return (
     <Container className="py-12 sm:py-16">
-      <div className="bg-primary text-primary-foreground rounded-3xl px-6 py-12 text-center sm:px-12">
-        <span className="text-primary-foreground/70 font-mono text-xs font-semibold tracking-wider uppercase">
+      <div className="bg-foreground text-background rounded-3xl px-6 py-12 text-center sm:px-12">
+        <span className="text-background/70 font-mono text-xs font-semibold tracking-wider uppercase">
           {t("employers.eyebrow")}
         </span>
         <h2 className="mt-3 text-2xl font-bold tracking-tight text-balance sm:text-3xl">
           {t("employers.title")}
         </h2>
-        <p className="text-primary-foreground/80 mx-auto mt-3 max-w-xl text-sm text-pretty">
+        <p className="text-background/80 mx-auto mt-3 max-w-xl text-sm text-pretty">
           {t("employers.body")}
         </p>
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             href="/employer/jobs/new"
-            className="bg-foreground text-background inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 font-semibold transition-opacity hover:opacity-90"
+            className="bg-primary text-primary-foreground inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 font-semibold transition-opacity hover:opacity-90"
           >
             {t("employers.cta")}
             <ArrowRight className="size-4" />
           </Link>
           <Link
             href="/pricing"
-            className="border-primary-foreground/30 hover:bg-primary-foreground/10 inline-flex h-11 items-center justify-center rounded-full border px-6 font-semibold transition-colors"
+            className="border-background/30 hover:bg-background/10 inline-flex h-11 items-center justify-center rounded-full border px-6 font-semibold transition-colors"
           >
             {t("pricing.eyebrow")}
           </Link>

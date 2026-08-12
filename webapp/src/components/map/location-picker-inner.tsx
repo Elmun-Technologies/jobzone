@@ -155,7 +155,7 @@ export default function LocationPickerInner({
         <button
           type="button"
           onClick={request}
-          className="text-primary font-medium hover:underline"
+          className="text-foreground font-medium hover:underline"
         >
           {status === "locating" ? t("locating") : `📍 ${t("useMyLocation")}`}
         </button>

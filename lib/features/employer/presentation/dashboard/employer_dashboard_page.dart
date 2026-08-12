@@ -88,7 +88,7 @@ class EmployerDashboardPage extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Hiring Conversion Rate",
+                                  l.hiringConversionTitle,
                                   style: context.text.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: context.colors.primary,
@@ -96,9 +96,13 @@ class EmployerDashboardPage extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  s.totalApplicants > 0 
-                                      ? "${((s.interviews / s.totalApplicants) * 100).toStringAsFixed(1)}% of applicants reached interview"
-                                      : "Post active vacancies to track conversion",
+                                  s.totalApplicants > 0
+                                      ? l.hiringConversionBody(
+                                          ((s.interviews / s.totalApplicants) *
+                                                  100)
+                                              .toStringAsFixed(1),
+                                        )
+                                      : l.hiringConversionEmpty,
                                   style: context.text.bodySmall?.copyWith(
                                     color: context.colors.textSecondary,
                                   ),

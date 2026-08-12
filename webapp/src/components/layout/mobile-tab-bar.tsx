@@ -109,11 +109,11 @@ export function MobileTabBar() {
                 className={cn(
                   "flex h-14 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
                   active
-                    ? "text-primary"
+                    ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className={cn("size-5", active && "fill-primary/15")} />
+                <Icon className={cn("size-5", active && "fill-foreground/20")} />
                 <span className="max-w-full truncate px-1">{t(labelKey)}</span>
               </Link>
             </li>

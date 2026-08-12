@@ -37,9 +37,9 @@ class _ChatListPageState extends ConsumerState<ChatListPage> {
               AppSpacing.lg,
               AppSpacing.xl,
             ),
-            decoration: BoxDecoration(
-              color: colors.primary,
-              borderRadius: const BorderRadius.vertical(
+            decoration: const BoxDecoration(
+              color: JzColors.brandInk,
+              borderRadius: BorderRadius.vertical(
                 bottom: Radius.circular(28),
               ),
             ),
@@ -148,7 +148,7 @@ class _ConversationCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _Avatar(url: convo.avatarUrl, online: !hasUnread),
+              _Avatar(url: convo.avatarUrl),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -222,44 +222,21 @@ class _ConversationCard extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({this.url, this.online = false});
+  const _Avatar({this.url});
   final String? url;
-  final bool online;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return SizedBox(
-      width: 52,
-      height: 52,
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: colors.surfaceVariant,
-            backgroundImage: (url != null && url!.isNotEmpty)
-                ? CachedNetworkImageProvider(url!)
-                : null,
-            child: (url == null || url!.isEmpty)
-                ? Icon(Icons.person_rounded, color: colors.textSecondary)
-                : null,
-          ),
-          if (online)
-            Positioned(
-              right: 1,
-              bottom: 1,
-              child: Container(
-                width: 13,
-                height: 13,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF22C55E),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: colors.surface, width: 2),
-                ),
-              ),
-            ),
-        ],
-      ),
+    return CircleAvatar(
+      radius: 26,
+      backgroundColor: colors.surfaceVariant,
+      backgroundImage: (url != null && url!.isNotEmpty)
+          ? CachedNetworkImageProvider(url!)
+          : null,
+      child: (url == null || url!.isEmpty)
+          ? Icon(Icons.person_rounded, color: colors.textSecondary)
+          : null,
     );
   }
 }

@@ -16,9 +16,11 @@
   --border: #e2e2de;
   --input: #e2e2de;
 
-  /* Yolla Volt — accent / CTA only (buttons, verified, active state). */
+  /* Yolla Volt — FILL only (buttons, badges, rings). Never as running
+     text on white: #C7FB00 on #fff is ~1.4:1. Links/icons use foreground. */
   --primary: #c7fb00;
   --primary-foreground: #0a0a0a;
+  --volt: #c7fb00;
   --accent: #f3f3f1;
   --accent-foreground: #0a0a0a;
   --ring: #c7fb00;

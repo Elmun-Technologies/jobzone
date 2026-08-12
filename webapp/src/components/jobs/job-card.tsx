@@ -140,7 +140,7 @@ export function JobCard({
                     : job.companyName}
                 </span>
                 {job.companyVerified ? (
-                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                  <BadgeCheck className="text-foreground size-4 shrink-0" />
                 ) : null}
               </div>
             </div>

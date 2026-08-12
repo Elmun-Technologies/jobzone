@@ -384,7 +384,7 @@ export default async function JobDetailsPage({
                 ) : null}
                 <Link
                   href={`/companies/${company.id}`}
-                  className="text-primary mt-3 inline-flex text-sm font-semibold hover:underline"
+                  className="text-foreground mt-3 inline-flex text-sm font-semibold hover:underline"
                 >
                   {t("viewCompany")}
                 </Link>

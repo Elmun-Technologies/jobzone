@@ -91,17 +91,22 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                   Text(l.locationLabel, style: _sectionStyle(context)),
                   const SizedBox(height: AppSpacing.sm),
                   DropdownButtonFormField<String>(
-                    initialValue: _draft.city,
+                    initialValue: _draft.city ?? '',
                     isExpanded: true,
-                    hint: Text(l.searchLocationHint),
-                    // Localized city labels over stable wire values ("Remote"
-                    // was dropped — it's a working model, not a city).
+                    hint: Text(l.anyCity),
                     items: [
+                      DropdownMenuItem<String>(
+                        value: '',
+                        child: Text(l.anyCity),
+                      ),
                       for (final c in cityOptions(l).entries)
                         DropdownMenuItem(value: c.key, child: Text(c.value)),
                     ],
-                    onChanged: (v) =>
-                        setState(() => _draft = _draft.copyWith(city: v)),
+                    onChanged: (v) => setState(
+                      () => _draft = v == null || v.isEmpty
+                          ? _draft.copyWith(clearCity: true)
+                          : _draft.copyWith(city: v),
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text(l.salaryLabel, style: _sectionStyle(context)),
@@ -203,21 +208,73 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l.fieldNightShift,
-                          style: _sectionStyle(context),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l.fieldNightShift, style: _sectionStyle(context)),
+                    value: _draft.nightShift,
+                    onChanged: (v) => setState(
+                      () => _draft = _draft.copyWith(nightShift: v),
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      l.fieldWomenFriendly,
+                      style: _sectionStyle(context),
+                    ),
+                    value: _draft.womenFriendly,
+                    onChanged: (v) => setState(
+                      () => _draft = _draft.copyWith(womenFriendly: v),
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      l.fieldDisabilityFriendly,
+                      style: _sectionStyle(context),
+                    ),
+                    value: _draft.disabilityFriendly,
+                    onChanged: (v) => setState(
+                      () => _draft = _draft.copyWith(disabilityFriendly: v),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(l.sortBy, style: _sectionStyle(context)),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _Chip(
+                          label: l.sortNewest,
+                          selected: _draft.sort == SearchSort.newest,
+                          onTap: () => setState(
+                            () => _draft = _draft.copyWith(
+                              sort: SearchSort.newest,
+                            ),
+                          ),
                         ),
-                      ),
-                      Switch(
-                        value: _draft.nightShift,
-                        onChanged: (v) => setState(
-                          () => _draft = _draft.copyWith(nightShift: v),
+                        _Chip(
+                          label: l.sortSalaryHigh,
+                          selected: _draft.sort == SearchSort.salaryHigh,
+                          onTap: () => setState(
+                            () => _draft = _draft.copyWith(
+                              sort: SearchSort.salaryHigh,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        _Chip(
+                          label: l.sortSalaryLow,
+                          selected: _draft.sort == SearchSort.salaryLow,
+                          onTap: () => setState(
+                            () => _draft = _draft.copyWith(
+                              sort: SearchSort.salaryLow,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text(l.postedWithinLabel, style: _sectionStyle(context)),

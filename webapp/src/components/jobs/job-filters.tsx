@@ -80,7 +80,7 @@ export function JobFilters({ cities }: { cities: string[] }) {
             <button
               type="button"
               onClick={clearAll}
-              className="text-primary inline-flex items-center gap-1 text-sm font-medium hover:underline"
+              className="text-foreground inline-flex items-center gap-1 text-sm font-medium hover:underline"
             >
               <X className="size-3.5" />
               {t("clear")}

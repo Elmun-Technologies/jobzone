@@ -13,6 +13,7 @@ import '../../jobs/domain/job.dart';
 import '../../jobs/presentation/category_label.dart';
 import '../../jobs/presentation/widgets/job_card.dart';
 import '../../notifications/application/notifications_providers.dart';
+import '../../profile/data/profile_repository.dart';
 import '../../search/presentation/category_results_page.dart';
 import 'widgets/collection_card.dart';
 
@@ -139,6 +140,10 @@ class _HomeHeader extends ConsumerWidget {
     final l = context.l10n;
     final colors = context.colors;
     final unread = ref.watch(unreadNotificationsCountProvider);
+    final profile = ref.watch(currentProfileProvider).value;
+    final location = (profile?.locationText.isNotEmpty ?? false)
+        ? profile!.locationText
+        : l.homeLocationDefault;
     final topPad = MediaQuery.of(context).padding.top;
 
     return Container(
@@ -148,57 +153,66 @@ class _HomeHeader extends ConsumerWidget {
         AppSpacing.lg,
         AppSpacing.xl,
       ),
-      decoration: BoxDecoration(
-        color: colors.primary,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+      decoration: const BoxDecoration(
+        color: JzColors.brandInk,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.locationLabel,
-                      style: context.text.bodySmall?.copyWith(
-                        color: Colors.white70,
+                child: InkWell(
+                  onTap: () => context.push(Routes.permLocationManual),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.locationLabel,
+                        style: context.text.bodySmall?.copyWith(
+                          color: Colors.white70,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_rounded,
-                          color: colors.gold,
-                          size: 18,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Flexible(
-                          child: Text(
-                            context.l10n.homeLocationDefault,
-                            style: context.text.titleSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_rounded,
+                            color: colors.gold,
+                            size: 18,
                           ),
-                        ),
-                        // Chevron removed: it implied a location switcher that
-                        // didn't exist (no handler). Restore it only when a real
-                        // city picker is wired.
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: AppSpacing.xs),
+                          Flexible(
+                            child: Text(
+                              location,
+                              style: context.text.titleSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: Colors.white70,
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               _IconSquare(
                 color: Colors.white,
                 icon: Icons.notifications_none_rounded,
-                iconColor: colors.primary,
+                iconColor: JzColors.brandInk,
                 showDot: unread > 0,
+                semanticLabel: unread > 0
+                    ? '${l.notifications} ($unread)'
+                    : l.notifications,
                 onTap: () => context.push(Routes.notifications),
               ),
             ],
@@ -238,6 +252,7 @@ class _HomeHeader extends ConsumerWidget {
                 color: colors.gold,
                 icon: Icons.tune_rounded,
                 iconColor: colors.onGold,
+                semanticLabel: l.filterTitle,
                 onTap: () => context.push(Routes.filter),
               ),
             ],
@@ -255,6 +270,7 @@ class _IconSquare extends StatelessWidget {
     required this.iconColor,
     required this.onTap,
     this.showDot = false,
+    this.semanticLabel,
   });
 
   final Color color;
@@ -262,41 +278,45 @@ class _IconSquare extends StatelessWidget {
   final Color iconColor;
   final VoidCallback onTap;
   final bool showDot;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            height: 52,
-            width: 52,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(AppRadius.md),
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              height: 52,
+              width: 52,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(icon, color: iconColor),
             ),
-            child: Icon(icon, color: iconColor),
-          ),
-          if (showDot)
-            Positioned(
-              right: 10,
-              top: 10,
-              // A soft pulse pulls the eye to unread notifications.
-              child: JzPulse(
-                child: Container(
-                  width: 9,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    color: context.colors.danger,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: color, width: 1.5),
+            if (showDot)
+              Positioned(
+                right: 10,
+                top: 10,
+                child: JzPulse(
+                  child: Container(
+                    width: 9,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: context.colors.danger,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color, width: 1.5),
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

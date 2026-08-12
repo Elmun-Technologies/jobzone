@@ -10,6 +10,7 @@ import '../../../localization/l10n_extension.dart';
 import '../application/cv_providers.dart';
 import '../data/profile_repository.dart';
 import '../domain/cv_models.dart';
+import '../domain/profile_completion.dart';
 import '../domain/user_profile.dart';
 import 'widgets/phone_verify_sheet.dart';
 import 'widgets/worker_card.dart';
@@ -81,18 +82,7 @@ class _ProfileCards extends ConsumerWidget {
 
     final contactFilled =
         (p?.email?.isNotEmpty ?? false) || (p?.phone?.isNotEmpty ?? false);
-    final filled = [
-      contactFilled,
-      p?.bio?.isNotEmpty ?? false,
-      experiences.isNotEmpty,
-      educations.isNotEmpty,
-      projects.isNotEmpty,
-      certs.isNotEmpty,
-      vols.isNotEmpty,
-      awards.isNotEmpty,
-      skills.isNotEmpty,
-      resumes.isNotEmpty,
-    ].where((b) => b).length;
+    final filled = ProfileCompletion.filled(p);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -132,7 +122,7 @@ class _ProfileCards extends ConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppRadius.pill),
                 child: LinearProgressIndicator(
-                  value: filled / 10,
+                  value: filled / ProfileCompletion.total,
                   minHeight: 6,
                   backgroundColor: colors.surfaceVariant,
                   color: colors.primary,

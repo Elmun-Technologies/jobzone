@@ -164,7 +164,7 @@ export default async function EmployerHomePage({
           {jobs.length > recentJobs.length ? (
             <Link
               href="/employer/jobs"
-              className="text-primary text-sm font-medium hover:underline"
+              className="text-foreground text-sm font-medium hover:underline"
             >
               {t("viewAll")}
             </Link>

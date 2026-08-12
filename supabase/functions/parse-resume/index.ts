@@ -12,6 +12,7 @@
 //   ANTHROPIC_API_KEY  — enables parsing (else { available: false })
 
 import { corsHeaders, json } from "../_shared/cors.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 // Currently issued Anthropic model id. `claude-opus-4-8` was a placeholder
@@ -95,6 +96,11 @@ Deno.serve(async (req) => {
   const secret = Deno.env.get("EDGE_SHARED_SECRET");
   if (!secret || req.headers.get("x-edge-secret") !== secret) {
     return json({ ok: false, error: "unauthorized" }, 401);
+  }
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
+  const rl = checkRateLimit(`parse:${ip}`, 10, 60);
+  if (!rl.allowed) {
+    return json({ ok: false, error: "rate_limited", retryAfter: rl.retryAfter }, 429);
   }
 
   if (!ANTHROPIC_API_KEY) return json({ available: false });

@@ -443,7 +443,7 @@
   "notifReviews": "Sharhlar",
   "notifEmailApplicationUpdates": "Email: ariza holati yangilanishi",
   "notifEmailDigestHint": "Kuniga bir marta, bitta xatda — har bir vakansiya uchun alohida emas.",
-  "notifEmailMarketing": "Yolla yangiliklari va tavsiyalari",
+  "notifEmailMarketing": "Yollla yangiliklari va tavsiyalari",
   "notifEmailMarketingHint": "Platforma yangiliklari va foydali maslahatlar. Istalgan vaqtda o'chirasiz.",
   "pushNotifications": "Push bildirishnomalar",
   "emailNotifications": "Email bildirishnomalar",
@@ -955,5 +955,16 @@
   "certificateFileNotSavedYet": "Saqlaganingizdan keyin yuklanadi",
   "certificateFileView": "Ochish",
   "certificateFileReplace": "Almashtirish",
-  "certificateFileRemove": "O'chirish"
+  "certificateFileRemove": "O'chirish",
+  "hiringConversionTitle": "Suhbatga o'tish",
+  "hiringConversionBody": "Nomzodlarning {rate}% i suhbatgacha yetdi",
+  "@hiringConversionBody": {
+    "placeholders": {
+      "rate": { "type": "String" }
+    }
+  },
+  "hiringConversionEmpty": "Konversiyani ko'rish uchun faol vakansiya joylang",
+  "discardChangesTitle": "O'zgarishlar bekor qilinsinmi?",
+  "discardChangesBody": "Saqlanmagan o'zgarishlar bor. Chiqib ketsangiz, ular yo'qoladi.",
+  "anyCity": "Har qanday shahar"
 }

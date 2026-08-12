@@ -19,7 +19,7 @@ export default function NotFound() {
   const t = useTranslations("common");
   return (
     <Container className="flex flex-col items-center gap-4 py-24 text-center">
-      <p className="text-primary text-5xl font-bold">404</p>
+      <p className="text-foreground text-5xl font-bold">404</p>
       <p className="text-foreground text-lg font-semibold">{t("notFound")}</p>
       <Link
         href="/"

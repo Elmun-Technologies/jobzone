@@ -12,26 +12,14 @@ import '../../../shared/widgets/snackbars.dart';
 import '../../notifications/application/push_providers.dart';
 import '../data/cv_repository.dart';
 import '../data/profile_repository.dart';
+import '../domain/profile_completion.dart';
 import '../domain/user_profile.dart';
 
 /// Profile tab — the account hub.
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
-  double _completion(UserProfile? p) {
-    if (p == null) return 0;
-    final flags = [
-      p.fullName?.isNotEmpty ?? false,
-      p.bio?.isNotEmpty ?? false,
-      p.phone?.isNotEmpty ?? false,
-      p.email?.isNotEmpty ?? false,
-      p.locationText.isNotEmpty,
-      p.experiences.isNotEmpty,
-      p.educations.isNotEmpty,
-      p.skills.isNotEmpty,
-    ];
-    return flags.where((b) => b).length / flags.length;
-  }
+  double _completion(UserProfile? p) => ProfileCompletion.ratio(p);
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;

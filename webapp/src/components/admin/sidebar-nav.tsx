@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 
 import type { AdminNavGroup } from "@/lib/admin/nav";
-import { adminStrings } from "@/lib/admin/strings";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -62,19 +61,7 @@ export function SidebarNav({ groups }: { groups: AdminNavGroup[] }) {
                 item.href === "/admin"
                   ? pathname === "/admin"
                   : pathname.startsWith(item.href);
-              if (!item.enabled) {
-                return (
-                  <li key={item.key}>
-                    <span
-                      className="flex cursor-not-allowed items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[#5c5c57]"
-                      title={adminStrings.comingSoon}
-                    >
-                      <Icon className="size-4 shrink-0" aria-hidden />
-                      {item.label}
-                    </span>
-                  </li>
-                );
-              }
+              if (!item.enabled) return null;
               return (
                 <li key={item.key}>
                   <Link

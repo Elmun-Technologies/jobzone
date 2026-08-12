@@ -113,8 +113,33 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
   late final _workHours = TextEditingController(text: widget.job?.workHours);
   bool _saving = false;
   bool _generating = false;
+  bool _dirty = false;
 
   bool get _isEdit => widget.job != null && !widget.duplicate;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final c in [
+      _title,
+      _city,
+      _min,
+      _max,
+      _skills,
+      _description,
+      _requirements,
+      _responsibilities,
+      _benefits,
+      _address,
+      _contactPhone,
+    ]) {
+      c.addListener(_markDirty);
+    }
+  }
+
+  void _markDirty() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
 
   @override
   void dispose() {
@@ -538,7 +563,30 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
     final l = context.l10n;
     final cats =
         ref.watch(jobCategoriesProvider).value ?? const <JobCategory>[];
-    return Scaffold(
+    return PopScope(
+      canPop: !_dirty || _saving,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop || !_dirty) return;
+        final leave = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l.discardChangesTitle),
+            content: Text(l.discardChangesBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(l.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(l.yesRemove),
+              ),
+            ],
+          ),
+        );
+        if (leave == true && context.mounted) Navigator.of(context).pop();
+      },
+      child: Scaffold(
       body: SafeArea(
         child: Column(
           children: [
@@ -1175,6 +1223,7 @@ class _PostJobPageState extends ConsumerState<PostJobPage> {
           ],
         ),
       ),
+    ),
     );
   }
 }
