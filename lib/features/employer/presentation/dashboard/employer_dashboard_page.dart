@@ -75,13 +75,19 @@ class EmployerDashboardPage extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: context.colors.primary.withOpacity(0.06),
+                        color: context.colors.primary.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(color: context.colors.primary.withOpacity(0.15)),
+                        border: Border.all(
+                          color: context.colors.primary.withValues(alpha: 0.15),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.insights_rounded, color: context.colors.primary, size: 28),
+                          Icon(
+                            Icons.insights_rounded,
+                            color: context.colors.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Column(
@@ -96,7 +102,7 @@ class EmployerDashboardPage extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  s.totalApplicants > 0 
+                                  s.totalApplicants > 0
                                       ? "${((s.interviews / s.totalApplicants) * 100).toStringAsFixed(1)}% of applicants reached interview"
                                       : "Post active vacancies to track conversion",
                                   style: context.text.bodySmall?.copyWith(

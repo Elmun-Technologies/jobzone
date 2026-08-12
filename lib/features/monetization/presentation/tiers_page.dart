@@ -148,7 +148,10 @@ class _TierCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: info.isPremium
             ? LinearGradient(
-                colors: [colors.primary.withOpacity(0.12), colors.surface],
+                colors: [
+                  colors.primary.withValues(alpha: 0.12),
+                  colors.surface,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
@@ -160,10 +163,10 @@ class _TierCard extends StatelessWidget {
         boxShadow: emphasized
             ? [
                 BoxShadow(
-                  color: colors.primary.withOpacity(0.15),
+                  color: colors.primary.withValues(alpha: 0.15),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
-                )
+                ),
               ]
             : null,
         border: Border.all(
