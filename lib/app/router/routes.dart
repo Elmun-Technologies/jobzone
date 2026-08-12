@@ -88,6 +88,7 @@ abstract final class Routes {
   static const accountAnalytics = '/account/analytics';
   static const accountApplications = '/account/my-applications';
   static String applicationStatus(String id) => '/account/my-applications/$id';
+  static const accountArchived = '/account/archived';
   static const accountSeekingStatus = '/account/seeking-status';
   static const savedSearches = '/account/saved-searches';
   static const subscriptions = '/account/subscriptions';
@@ -125,6 +126,7 @@ abstract final class Routes {
   static const employerCompanyPeople = '/employer/company/people';
   static const employerCompanyGallery = '/employer/company/gallery';
   static const employerPromotions = '/employer/promotions';
+  static const employerWallet = '/employer/wallet';
   static const employerTiers = '/employer/tiers';
   static String checkout(String jobId, String code) =>
       '/employer/checkout/$jobId/$code';

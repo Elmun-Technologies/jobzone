@@ -10,6 +10,7 @@ import '../../../../shared/widgets/snackbars.dart';
 import '../../../jobs/domain/job.dart';
 import '../../../jobs/presentation/util/job_labels.dart';
 import '../../data/employer_jobs_repository.dart';
+import '../../domain/publish_gate.dart';
 import 'listing_payment_page.dart';
 
 /// The employer's posted jobs, filterable by lifecycle status, with create /
@@ -41,7 +42,26 @@ class _MyJobsPageState extends ConsumerState<MyJobsPage> {
   Future<void> _publishDraft(Job job) async {
     final repo = ref.read(employerJobsRepositoryProvider);
     try {
-      final charged = Env.hasSupabase && await repo.hasPublishedBefore();
+      // Re-opening a job that has already been on the market is free — the DB
+      // guard exempts it via first_published_at (0066), so sending the
+      // employer to the checkout here would charge them for it twice.
+      final charged =
+          Env.hasSupabase &&
+          isChargeableMarketEntry(
+            wantsToGoLive: true,
+            isEdit: true,
+            firstPublishedAt: job.firstPublishedAt,
+            currentStatus: job.status,
+          ) &&
+          await repo.hasPublishedBefore();
+      // This button says "publish", so it means now — the free branch below has
+      // always taken a scheduled draft straight live. Drop a schedule the draft
+      // still carries before charging for it, or 0076 would hold the paid
+      // vacancy back until a date the employer has just decided against.
+      final publishAt = job.publishAt;
+      if (charged && publishAt != null && publishAt.isAfter(DateTime.now())) {
+        await repo.updateJob(job.copyWith(publishAt: null));
+      }
       if (!mounted) return;
       if (charged) {
         await Navigator.of(context).push<bool>(
@@ -272,13 +292,15 @@ class _MyJobCard extends StatelessWidget {
                     // A draft's primary action is publishing it (through the
                     // first-free / then-pay-per-listing gate).
                     //
-                    // Promote menu item is hidden on mobile until the
-                    // wallet-backed boost purchase mirrors the web
-                    // PromotePicker flow — today the mobile checkout only
-                    // renders a permanently-disabled "coming soon" Pay
-                    // button, which is a dead-end for real employers. Web
-                    // employers can still promote from /employer/jobs/[id]
-                    // /promote (fully wired to the wallet).
+                    // Promote menu item is hidden on mobile until the tier
+                    // upgrade mirrors the web flow — today the mobile
+                    // checkout only renders a permanently-disabled "coming
+                    // soon" Pay button, which is a dead-end for real
+                    // employers. Web employers upgrade a live listing's tier
+                    // from /employer/jobs/[id]/promote, which pays through
+                    // Payme/Click/Rahmat like the post-time picker (the
+                    // wallet-backed TOP/featured packages it used to sell
+                    // were retired by 0063).
                     if (job.status == 'draft')
                       PopupMenuItem(
                         value: 'publish',

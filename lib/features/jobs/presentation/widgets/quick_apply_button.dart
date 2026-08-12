@@ -8,8 +8,10 @@ import '../../../../design_system/design_system.dart';
 import '../../../../localization/l10n_extension.dart';
 import '../../../../shared/widgets/snackbars.dart';
 import '../../../applications/application/applications_controller.dart';
+import '../../../profile/application/cv_providers.dart';
 import '../../../profile/data/profile_repository.dart';
 import '../../domain/job.dart';
+import 'resume_pick_sheet.dart';
 
 /// One-tap "apply with my profile" action for a job card — no cover letter, no
 /// screening form. Mirrors the web QuickApplyButton's gating exactly, so both
@@ -48,16 +50,43 @@ class _QuickApplyButtonState extends ConsumerState<QuickApplyButton> {
     setState(() => _pending = true);
     try {
       final profile = await ref.read(currentProfileProvider.future);
-      final hasResume = (profile?.fullName ?? '').trim().isNotEmpty;
+      final hasProfile = (profile?.fullName ?? '').trim().isNotEmpty;
       if (!mounted) return;
-      if (!hasResume) {
+      if (!hasProfile) {
         setState(() => _pending = false);
         context.push(Routes.profile);
         return;
       }
+
+      // Which CV goes with this application. One tap used to send *none*:
+      // `resume_id` stayed null even for a seeker with CVs on file, so the
+      // employer got an application with nothing attached. Now: exactly one
+      // saved CV attaches itself; several ask first, because a seeker keeps
+      // separate CVs deliberately and guessing sends the wrong one to a real
+      // employer. No saved CV at all keeps the old profile-only apply.
+      final resumes = await ref.read(resumesControllerProvider.future);
+      final usable = resumes.where((r) => r.id != null).toList();
+      String? resumeId;
+      if (usable.length == 1) {
+        resumeId = usable.single.id;
+      } else if (usable.length > 1) {
+        if (!mounted) return;
+        // Drop the spinner while the sheet owns the screen, so the button
+        // isn't stuck pending behind it (and can't be double-fired).
+        setState(() => _pending = false);
+        final picked = await showResumePickSheet(context, usable);
+        if (picked == null) return; // dismissed — nothing sent
+        if (!mounted) return;
+        setState(() => _pending = true);
+        resumeId = picked.id;
+      }
+
       await ref
           .read(applicationsControllerProvider.notifier)
-          .apply(job: widget.job);
+          .apply(job: widget.job, resumeId: resumeId);
+      if (mounted) {
+        showSuccessSnack(context, "Ariza muvaffaqiyatli yuborildi!");
+      }
     } on PostgrestException catch (e) {
       // 23505 = unique(job_id, applicant_id) — already applied is a success
       // state here, not an error.

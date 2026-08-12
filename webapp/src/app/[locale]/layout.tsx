@@ -1,23 +1,21 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Space_Mono } from "next/font/google";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { GoogleAnalytics } from "@/components/analytics/google-analytics";
-import { MetaPixel } from "@/components/analytics/meta-pixel";
-import { PostHogProvider } from "@/components/analytics/posthog-provider";
-import { YandexMetrica } from "@/components/analytics/yandex-metrica";
-import { ConsentBanner } from "@/components/consent/consent-banner";
+import { SessionProvider } from "@/components/auth/session-provider";
+import { SavedJobsProvider } from "@/components/jobs/saved-jobs-provider";
+import { FirstVisitShell } from "@/components/layout/first-visit-shell";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
 import { SiteBanner } from "@/components/layout/site-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Toaster } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
-import { CONSENT_COOKIE, parseConsent } from "@/lib/consent";
+import { THEME_COOKIE, themeCookieString } from "@/lib/theme";
 import { localeAlternates, siteUrl } from "@/lib/seo";
 
 import "../globals.css";
@@ -68,9 +66,6 @@ const OG_LOCALE: Record<string, string> = {
 const GOOGLE_SITE_VERIFICATION =
   process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "";
 const YANDEX_VERIFICATION = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "";
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
-const YANDEX_METRICA_ID = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID ?? "";
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
 
 export async function generateMetadata({
   params,
@@ -116,9 +111,18 @@ export async function generateMetadata({
   };
 }
 
-// Applies the saved theme before first paint to avoid a flash (see
-// node_modules/next/dist/docs/.../preventing-flash-before-hydration.md).
-const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+// The theme, applied before first paint on every document load. The server
+// deliberately does not render it: reading the cookie here would make this
+// layout dynamic and, with it, every route in the app (see lib/theme.ts).
+// The language switch is a document load precisely so this script gets to run
+// again and the choice survives it (lib/locale-nav.ts).
+//
+// It reads the cookie FIRST and localStorage second, and it never bails early:
+// an earlier version returned as soon as it saw a cookie, on the assumption
+// that the server had already rendered the class — with the server out of that
+// business, that early return meant every returning dark-mode visitor got a
+// white page until they toggled again.
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement;var m=/(?:^|; )${THEME_COOKIE}=(dark|light)/.exec(document.cookie);var t=m?m[1]:localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.classList.toggle('dark',t==='dark');try{localStorage.setItem('theme',t);}catch(e){}document.cookie=t==='dark'?'${themeCookieString("dark")}':'${themeCookieString("light")}';}catch(e){}})();`;
 
 export default async function LocaleLayout({
   children,
@@ -131,14 +135,6 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
-  // Consent gate: read the cookie once, use it to (a) hide the banner
-  // when the visitor already chose and (b) gate every third-party
-  // analytics loader so scripts don't reach the browser at all until the
-  // visitor has clicked accept. GDPR + UZ personal-data law both require
-  // this pattern for non-first-party trackers.
-  const consent = parseConsent((await cookies()).get(CONSENT_COOKIE)?.value);
-  const analyticsAllowed = consent === "granted";
-
   return (
     <html
       lang={locale}
@@ -148,26 +144,34 @@ export default async function LocaleLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="bg-background text-foreground flex min-h-full flex-col font-sans">
+      {/* `pb-[var(--tabbar)]` clears the fixed phone tab bar; the token is 0 from
+          `md` up, where the bar is hidden (see globals.css). */}
+      <body className="bg-background text-foreground flex min-h-full flex-col pb-[var(--tabbar)] font-sans">
         <NextIntlClientProvider>
-          <SiteBanner />
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-          <ConsentBanner initialConsent={consent} />
-          {/* Mounted once for the whole app: toast() pushes to a module-level
-              store, so any client component can raise one without a provider
-              in its own tree. */}
-          <Toaster />
+          {/* Both providers resolve who is looking in the browser: the session
+              (header, drawer, tab bar) and the visitor's saved jobs. Asking the
+              server for either is what used to keep every page — including the
+              vacancy pages Google crawls — off the CDN, because one
+              per-visitor read anywhere in this tree makes the whole route
+              render per request. */}
+          <SessionProvider>
+            <SavedJobsProvider>
+              <SiteBanner />
+              <SiteHeader />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
+              <MobileTabBar />
+              {/* Cookie bar, first-visit language sheet and the trackers they
+                gate — all read from document.cookie / navigator, one tick after
+                hydration. Nothing here paints above the fold. */}
+              <FirstVisitShell locale={locale} />
+              {/* Mounted once for the whole app: toast() pushes to a
+                module-level store, so any client component can raise one
+                without a provider in its own tree. */}
+              <Toaster />
+            </SavedJobsProvider>
+          </SessionProvider>
         </NextIntlClientProvider>
-        {analyticsAllowed ? (
-          <>
-            <GoogleAnalytics measurementId={GA_MEASUREMENT_ID} />
-            <YandexMetrica counterId={YANDEX_METRICA_ID} />
-            <MetaPixel pixelId={META_PIXEL_ID} />
-            <PostHogProvider />
-          </>
-        ) : null}
         {/* Vercel first-party analytics: Web Analytics (traffic) + Speed
             Insights (real-user Core Web Vitals — LCP/INP/CLS). No cookie
             banner needed, no third-party host. Both no-op in dev. */}

@@ -28,6 +28,10 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
   const body = field(formData, "body");
   const audience = field(formData, "audience");
   const city = field(formData, "city");
+  // Opt-in per send: the in-app notification always goes out, the email only
+  // when the admin ticked the box (and then only to recipients who haven't
+  // switched marketing email off — notify-dispatch enforces that).
+  const sendEmail = formData.get("send_email") !== null;
   if (!title || !AUDIENCES.has(audience)) redirect(`${backTo}?notice=err`);
 
   if (!hasSupabase()) {
@@ -39,6 +43,7 @@ export async function sendBroadcast(formData: FormData): Promise<void> {
     p_body: body || null,
     p_audience: audience,
     p_city: city || null,
+    p_send_email: sendEmail,
   });
   if (error) {
     console.error("admin_broadcast failed", error);

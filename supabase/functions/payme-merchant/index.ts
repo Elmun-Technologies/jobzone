@@ -135,6 +135,7 @@ async function createTransaction(supa: Supa, params: P, id: unknown) {
       provider: "payme",
       provider_txn_id: paymeId,
       order_id: order.orderId,
+      order_kind: order.orderKind,
       amount_uzs: order.expectedUzs,
       state: 1,
       create_time: createTime,
@@ -163,13 +164,16 @@ async function performTransaction(supa: Supa, params: P, id: unknown) {
     .from("payment_transactions")
     .update({ state: 2, perform_time: performTime })
     .eq("id", txn.id);
-  // Flip the order to paid → the apply_promotion trigger publishes the draft
-  // vacancy and stamps its tier. Only touch a still-pending order (idempotent).
-  await supa
-    .from("promotion_orders")
-    .update({ status: "paid", paid_at: new Date().toISOString(), external_ref: txn.id })
-    .eq("id", txn.order_id)
-    .eq("status", "pending");
+  // Settle the order: a promotion/listing order flips to paid (the
+  // apply_promotion trigger then publishes the draft vacancy and stamps its
+  // tier); a wallet top-up becomes a completed credit, which is what moves the
+  // balance. Only a still-pending order is touched, so a replayed Perform is a
+  // no-op rather than a double credit.
+  await supa.rpc("gateway_settle_order", {
+    p_order_id: txn.order_id,
+    p_status: "paid",
+    p_external_ref: txn.id,
+  });
   return rpcOk(id, { transaction: txn.id, perform_time: performTime, state: 2 });
 }
 
@@ -192,11 +196,13 @@ async function cancelTransaction(supa: Supa, params: P, id: unknown) {
     .eq("id", txn.id);
   // A cancelled/refunded order: leave a published (already-paid) vacancy live —
   // a refund is a business decision — but mark the order so it isn't re-paid.
-  await supa
-    .from("promotion_orders")
-    .update({ status: txn.state === 2 ? "refunded" : "cancelled" })
-    .eq("id", txn.order_id)
-    .in("status", ["pending", "paid"]);
+  // For a top-up, `refunded` reverses the credit when the balance can still
+  // absorb it, and otherwise leaves it for the finance panel (see 0085).
+  await supa.rpc("gateway_settle_order", {
+    p_order_id: txn.order_id,
+    p_status: txn.state === 2 ? "refunded" : "cancelled",
+    p_external_ref: txn.id,
+  });
   return rpcOk(id, { transaction: txn.id, cancel_time: cancelTime, state: newState });
 }
 
@@ -242,36 +248,35 @@ async function getStatement(supa: Supa, params: P, id: unknown) {
 type Supa = ReturnType<typeof createClient>;
 type P = Record<string, unknown>;
 
-/** Resolve + validate the order named by `account.order_id`; compute the
- * expected charge from the CATALOG price (never trust a stored/client amount). */
+/** Resolve + validate the order named by `account.order_id`. `gateway_order`
+ * (0085) answers for both kinds we sell — a promotion/listing order, whose
+ * charge is the CATALOG price, and a wallet top-up, whose amount was bounded
+ * server-side when it was created. Either way the amount comes from the
+ * database, never from the caller. */
 async function resolveOrder(supa: Supa, params: P) {
   const account = (params.account ?? {}) as Record<string, unknown>;
   const orderId = String(account.order_id ?? "");
   if (!orderId) {
     return { error: E.ORDER, message: MSG("Buyurtma yo'q", "Нет заказа", "No order") };
   }
-  const { data: order } = await supa
-    .from("promotion_orders")
-    .select("id, status, product_code")
-    .eq("id", orderId)
-    .maybeSingle();
+  const { data } = await supa.rpc("gateway_order", { p_order_id: orderId });
+  const order = (Array.isArray(data) ? data[0] : data) as
+    | { order_id: string; kind: string; amount_uzs: number; status: string }
+    | null
+    | undefined;
   if (!order) {
     return { error: E.ORDER, message: MSG("Topilmadi", "Не найдено", "Order not found") };
   }
   if (order.status !== "pending") {
     return { error: E.ORDER, message: MSG("To'langan", "Оплачено", "Already handled") };
   }
-  const { data: product } = await supa
-    .from("promotion_products")
-    .select("price_uzs")
-    .eq("code", order.product_code)
-    .maybeSingle();
-  const expectedUzs = Number(product?.price_uzs ?? 0);
+  const expectedUzs = Number(order.amount_uzs ?? 0);
   if (!(expectedUzs > 0)) {
     return { error: E.ORDER, message: MSG("Narx yo'q", "Нет цены", "No price") };
   }
   return {
-    orderId: order.id as string,
+    orderId: order.order_id,
+    orderKind: order.kind === "topup" ? "topup" : "promotion",
     expectedUzs,
     expectedTiyin: Math.round(expectedUzs * 100),
   };

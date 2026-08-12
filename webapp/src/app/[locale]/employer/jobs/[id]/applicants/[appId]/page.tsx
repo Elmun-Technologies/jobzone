@@ -1,4 +1,4 @@
-import { BadgeCheck, MapPin, Sparkles } from "lucide-react";
+import { BadgeCheck, FileText, MapPin, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -290,6 +290,19 @@ export default async function ApplicantResumePage({
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
+                  {/* The scan itself — for a welding ticket or a forklift
+                      licence this is the only proof that exists. */}
+                  {c.fileUrl ? (
+                    <a
+                      href={c.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary mt-1 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                    >
+                      <FileText className="size-3.5" />
+                      {t("openCertificate")}
+                    </a>
+                  ) : null}
                 </li>
               ))}
             </ul>

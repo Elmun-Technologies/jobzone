@@ -109,11 +109,82 @@ class CvRepository {
     () => _offline.upsertCertification(e),
   );
 
-  Future<void> deleteCertification(String id) => _delete(
-    'certifications',
-    id,
-    () => _offline.certifications.removeWhere((e) => e.id == id),
-  );
+  /// Deletes a certification and the document attached to it. The row goes
+  /// either way — a storage object that fails to delete would otherwise
+  /// strand the entry in the list forever.
+  Future<void> deleteCertification(String id) async {
+    if (_online) {
+      final client = _ref.read(supabaseClientProvider);
+      final row = await client
+          .from('certifications')
+          .select('file_path')
+          .eq('id', id)
+          .maybeSingle();
+      final path = row?['file_path'] as String?;
+      if (path != null && path.isNotEmpty) {
+        await removeCertificateFile(path);
+      }
+    }
+    await _delete(
+      'certifications',
+      id,
+      () => _offline.certifications.removeWhere((e) => e.id == id),
+    );
+  }
+
+  /// Uploads a scanned certificate and returns its storage key, or null
+  /// offline / signed out. Named like the résumé upload it mirrors.
+  Future<String?> uploadCertificateFile({
+    required String fileName,
+    required Uint8List bytes,
+    required String mimeType,
+  }) async {
+    if (!_online) return 'offline/$fileName';
+    final uid = _uid;
+    if (uid == null) return null;
+    final path = '$uid/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+    await _ref
+        .read(supabaseClientProvider)
+        .storage
+        .from('certificates')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: mimeType),
+        );
+    return path;
+  }
+
+  /// Best-effort removal of a stored certificate. Swallows failures: this is
+  /// always called alongside a row change that must not be blocked by an
+  /// orphaned object.
+  Future<void> removeCertificateFile(String path) async {
+    if (!_online || path.isEmpty) return;
+    try {
+      await _ref
+          .read(supabaseClientProvider)
+          .storage
+          .from('certificates')
+          .remove([path]);
+    } catch (_) {
+      // Orphaned object; the row is what the seeker sees.
+    }
+  }
+
+  /// Short-lived signed URL for viewing a stored certificate — the bucket is
+  /// private, so there is no public URL to link to.
+  Future<String?> certificateFileUrl(String path) async {
+    if (!_online || path.isEmpty) return null;
+    try {
+      return await _ref
+          .read(supabaseClientProvider)
+          .storage
+          .from('certificates')
+          .createSignedUrl(path, 60 * 10);
+    } catch (_) {
+      return null;
+    }
+  }
 
   // --- Volunteer -----------------------------------------------------------
   Future<List<Volunteer>> volunteer() async {
@@ -202,9 +273,15 @@ class CvRepository {
     if (!_online) {
       offlineProfile
         ..fullName = fullName
-        ..phone = phone
-        ..city = city
-        ..country = country;
+        ..phone = phone;
+      // Same rule as the online write below — an argument the caller never
+      // passed must not clear the stored value.
+      if (city != null) {
+        offlineProfile.city = city;
+      }
+      if (country != null) {
+        offlineProfile.country = country;
+      }
       return;
     }
     final uid = _uid;
@@ -240,10 +317,56 @@ class CvRepository {
         .update({
           'full_name': fullName,
           'phone': phone,
+          // `?` (omit when null), like avatar_url: the Personal Information
+          // screen has no city/country inputs and never passes them, so
+          // writing them unconditionally set both to NULL on every save.
+          // The city is collected once during onboarding and nowhere else,
+          // so that loss was permanent — the location row simply vanished
+          // from the profile and the worker card.
           'city': ?city,
           'country': ?country,
           'avatar_url': ?avatarUrl,
         })
+        .eq('id', uid);
+  }
+
+  /// Writes only the About fields the résumé parser actually extracted.
+  ///
+  /// Distinct from [saveAbout] on purpose: there, a null means *the user
+  /// cleared this field*, which is exactly right for the About edit form.
+  /// The AI autofill path has the opposite meaning — a null is *the parser
+  /// did not find this* — so routing it through saveAbout let a PDF that
+  /// yielded a summary but no name blank out `full_name`. That also broke
+  /// one-tap apply, which gates on the name being non-empty.
+  Future<void> mergeAbout({
+    String? fullName,
+    String? headline,
+    String? bio,
+  }) async {
+    if (!_online) {
+      if ((fullName ?? '').trim().isNotEmpty) {
+        offlineProfile.fullName = fullName;
+      }
+      if ((headline ?? '').trim().isNotEmpty) {
+        offlineProfile.headline = headline;
+      }
+      if ((bio ?? '').trim().isNotEmpty) {
+        offlineProfile.bio = bio;
+      }
+      return;
+    }
+    final uid = _uid;
+    if (uid == null) return;
+    final values = <String, dynamic>{
+      if ((fullName ?? '').trim().isNotEmpty) 'full_name': fullName,
+      if ((headline ?? '').trim().isNotEmpty) 'headline': headline,
+      if ((bio ?? '').trim().isNotEmpty) 'bio': bio,
+    };
+    if (values.isEmpty) return;
+    await _ref
+        .read(supabaseClientProvider)
+        .from('profiles')
+        .update(values)
         .eq('id', uid);
   }
 

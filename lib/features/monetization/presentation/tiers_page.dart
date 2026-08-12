@@ -146,13 +146,29 @@ class _TierCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
+        gradient: info.isPremium
+            ? LinearGradient(
+                colors: [colors.primary.withOpacity(0.12), colors.surface],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
         color: info.isPremium
-            ? colors.primary.withValues(alpha: 0.08)
+            ? null
             : (info.featured ? colors.chipBackground : colors.surface),
         borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: emphasized
+            ? [
+                BoxShadow(
+                  color: colors.primary.withOpacity(0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : null,
         border: Border.all(
           color: emphasized ? colors.primary : colors.border,
-          width: emphasized ? 1.8 : 1,
+          width: emphasized ? 2 : 1,
         ),
       ),
       child: Column(

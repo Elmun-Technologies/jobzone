@@ -1,15 +1,8 @@
-import { Bell, CircleUser } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-
-import { NotificationListener } from "@/components/notifications/notification-listener";
-import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { getCurrentUser } from "@/lib/auth/user";
-import { getMyRole } from "@/lib/data/employer";
-import { getUnreadNotificationCount } from "@/lib/data/notifications";
+import { SoundToggle } from "@/components/ui/sound-toggle";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 
+import { HeaderAuth } from "./header-auth";
 import { HeaderNav } from "./header-nav";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileMenu } from "./mobile-menu";
@@ -17,19 +10,22 @@ import { RoleToggle } from "./role-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { YollaLogo } from "./yolla-logo";
 
-/** Top navigation: brand + audience toggle, mode-aware links + CTA, auth. */
-export async function SiteHeader() {
-  const t = await getTranslations("nav");
-  const user = await getCurrentUser();
-  const [unread, role] = user
-    ? await Promise.all([getUnreadNotificationCount(), getMyRole()])
-    : [0, null];
-  const isEmployerAccount = role === "employer";
-  // A guest sliding to "Employer" should land on the guest-first post page —
-  // the dashboard is gated, so it would otherwise bounce to sign-in.
-  const employerHref =
-    user && isEmployerAccount ? "/employer" : "/employer/jobs/new";
+// One destination for both audiences: /employer renders the dashboard for a
+// signed-in employer and the landing for everyone else. It used to send guests
+// straight to the empty post form, which asked for work before saying what
+// hiring here gets you.
+const EMPLOYER_HREF = "/employer";
 
+/**
+ * Top navigation: brand + audience toggle, mode-aware links + CTA, auth.
+ *
+ * Nothing here touches the request. Who is signed in is resolved in the
+ * browser (SessionProvider) and consumed by the three parts that care —
+ * HeaderNav, HeaderAuth and MobileMenu. That is what lets a vacancy page or a
+ * category landing be prerendered and served from the CDN: a single session
+ * read in this component made every route in the app render per request.
+ */
+export function SiteHeader() {
   return (
     <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
@@ -46,65 +42,24 @@ export async function SiteHeader() {
             <YollaLogo />
           </Link>
           <div className="hidden sm:block">
-            <RoleToggle employerHref={employerHref} />
+            <RoleToggle employerHref={EMPLOYER_HREF} />
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <HeaderNav signedIn={!!user} isEmployerAccount={isEmployerAccount} />
+          <HeaderNav />
 
           {/* Below xl these live in the mobile drawer (see header-nav.tsx for
               why xl, not lg) — otherwise the header overflows sideways. */}
           <div className="hidden items-center gap-4 xl:flex">
             <LocaleSwitcher />
             <ThemeToggle />
+            <SoundToggle />
           </div>
 
-          {user ? (
-            <>
-              {/* Renders nothing; subscribes to this user's notifications and
-                  pops a toast for each one that arrives live. */}
-              <NotificationListener userId={user.id} />
-              <Link
-                href="/account/notifications"
-                aria-label={t("notifications")}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  "relative px-2.5",
-                )}
-              >
-                <Bell className="size-4" />
-                {unread > 0 ? (
-                  <span className="bg-primary text-primary-foreground absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold">
-                    {unread > 9 ? "9+" : unread}
-                  </span>
-                ) : null}
-              </Link>
-              <Link
-                href="/account"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  "gap-1.5",
-                )}
-              >
-                <CircleUser className="size-4" />
-                <span className="hidden sm:inline">{t("account")}</span>
-              </Link>
-            </>
-          ) : (
-            <Link
-              href="/sign-in"
-              className={cn(buttonVariants({ variant: "primary", size: "sm" }))}
-            >
-              {t("signIn")}
-            </Link>
-          )}
+          <HeaderAuth />
 
-          <MobileMenu
-            signedIn={!!user}
-            isEmployerAccount={isEmployerAccount}
-            employerHref={employerHref}
-          />
+          <MobileMenu employerHref={EMPLOYER_HREF} />
         </div>
       </Container>
     </header>

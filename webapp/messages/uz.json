@@ -23,7 +23,8 @@
     "openMenu": "Menyuni ochish",
     "closeMenu": "Menyuni yopish",
     "pricing": "Narxlar",
-    "language": "Til"
+    "language": "Til",
+    "tabBar": "Asosiy navigatsiya"
   },
   "explore": {
     "title": "Ishlar xaritasi",
@@ -127,7 +128,14 @@
       "sections": "{done}/{total} bo'lim to'ldirilgan",
       "build": "Rezyumeni to'ldirish",
       "edit": "Rezyumeni tahrirlash",
-      "seen": "Ish beruvchilar rezyumengizni ko'radi"
+      "seen": "Ish beruvchilar rezyumengizni ko'radi",
+      "photoAdd": "Rezyumega foto qo'shing",
+      "photoChange": "Rezyume fotosi",
+      "photoHint": "JPG yoki PNG, 5 MB gacha. Fotoli rezyume ko'proq e'tibor tortadi.",
+      "photoCta": "Foto yuklash",
+      "photoSaved": "Foto saqlandi",
+      "photoFailed": "Fotoni yuklab bo'lmadi. Qayta urinib ko'ring.",
+      "photoInvalid": "JPG yoki PNG, 5 MB gacha bo'lsin."
     }
   },
   "chat": {
@@ -155,8 +163,8 @@
     "stepPersonal": "Shaxsiy ma'lumotlar",
     "stepExperience": "Ish tajribasi",
     "stepContacts": "Kontaktlar",
-    "position": "Qaysi lavozim uchun rezyume?",
-    "positionHint": "Lavozim nomini yozing",
+    "position": "Qaysi lavozimlar uchun rezyume?",
+    "positionHint": "Lavozim nomini yozing va tanlang",
     "fullName": "To'liq ism",
     "city": "Hudud / shahar",
     "birthDate": "Tug'ilgan sana",
@@ -237,7 +245,14 @@
     "expiryHint": "Muddatsiz bo'lsa — bo'sh qoldiring",
     "addCertificate": "Sertifikat qo'shish",
     "addLanguage": "Qo'shish",
-    "addLanguageHint": "Boshqa til (masalan, Arabcha)"
+    "addLanguageHint": "Boshqa til (masalan, Arabcha)",
+    "positionsHelp": "{max} tagacha lavozim. Taklifdan tanlang yoki o'zingiznikini yozing.",
+    "fullNameHelp": "Ism va familiyani pasportdagidek lotin harflarida yozing.",
+    "region": "Ishlamoqchi bo'lgan hudud",
+    "regionAny": "Farqi yo'q",
+    "district": "Tuman / shahar",
+    "districtAny": "Farqi yo'q",
+    "workHistoryNudge": "Ish tajribasi ko'rsatilgan rezyumelar tezroq javob oladi."
   },
   "bookmarks": {
     "title": "Saqlangan ishlar",
@@ -267,7 +282,14 @@
     "markAllRead": "Hammasini o'qilgan deb belgilash",
     "emptyTitle": "Hozircha bildirishnomalar yo'q",
     "emptyBody": "Qidiruvni saqlang yoki vakansiyalarga ariza bering — yangiliklar shu yerda ko'rinadi.",
-    "toastAction": "Ko'rish"
+    "toastAction": "Ko'rish",
+    "typeApplicationUpdate": "Ariza holati yangilandi",
+    "typeMessage": "Yangi xabar",
+    "typeJobClosed": "Vakansiya yopildi",
+    "bodyJobClosed": "«{title}» endi ariza qabul qilmayapti.",
+    "typeJobInvite": "Ish taklifi",
+    "bodyJobInvite": "{company} sizni «{title}» lavozimiga taklif qilmoqda.",
+    "bodyApplicationUpdate": "Arizangiz holati: {status}"
   },
   "employer": {
     "dashboard": "Boshqaruv paneli",
@@ -440,7 +462,11 @@
       "paymentInsufficientHint": "Nashr qilish uchun {price} kerak. Hamyonni to'ldiring.",
       "paymentTopUp": "Hamyonga o'tish",
       "publishAndPay": "E’lon qilish va to‘lash",
-      "paymentTierNext": "Bu pullik vakansiya. Keyingi bosqichda tarifni tanlang ({price} dan) va Payme yoki Click orqali to‘lang — to‘lovdan so‘ng darhol efirga chiqadi."
+      "paymentTierNext": "Bu pullik vakansiya. Keyingi bosqichda tarifni tanlang ({price} dan) va Payme yoki Click orqali to‘lang — to‘lovdan so‘ng darhol efirga chiqadi.",
+      "aiOverwriteTitle": "Yozganlaringiz almashtiriladi",
+      "aiOverwriteBody": "AI tavsif, majburiyatlar, talablar va sharoitlar maydonlarini butunlay qayta yozadi. Hozir yozib qo'yganlaringiz saqlanmaydi.",
+      "aiOverwriteConfirm": "Ha, qayta yozilsin",
+      "aiOverwriteCancel": "Yo'q, qolsin"
     },
     "jobPromoted": "Reklama yoqildi! Vakansiyangiz ajratib ko'rsatiladi.",
     "viewResume": "Rezyumeni ko'rish",
@@ -477,7 +503,8 @@
       "myJobs": "Mening vakansiyalarim",
       "confirmingTitle": "To‘lovingiz tasdiqlanmoqda…",
       "confirmingSub": "Bu bir necha soniya olishi mumkin. Sahifa avtomatik yangilanadi."
-    }
+    },
+    "openCertificate": "Sertifikatni ochish"
   },
   "wallet": {
     "title": "Hamyon",
@@ -487,7 +514,7 @@
     "topUpSub": "Summani tanlang va hisobingizni to'ldiring.",
     "topUpPending": "To'ldirish so'rovi qabul qilindi — to'lov tasdiqlangach balans yangilanadi.",
     "amountHint": "Summa",
-    "errAmount": "Kamida 1 000 miqdorida summa kiriting",
+    "errAmount": "Kamida 5 000 so'm kiriting",
     "errUnknown": "Xatolik yuz berdi",
     "history": "Tranzaksiyalar",
     "historyEmpty": "Hali tranzaksiyalar yo'q",
@@ -500,7 +527,9 @@
     "status": {
       "pending": "Kutilmoqda",
       "cancelled": "Bekor qilingan"
-    }
+    },
+    "payWith": "{provider} orqali to'lash",
+    "payNote": "To'lov tasdiqlangach balans avtomatik yangilanadi."
   },
   "apply": {
     "applyTo": "Ariza topshirish",
@@ -553,7 +582,11 @@
     "empty": "Hozircha mos ish topilmadi",
     "emptyHint": "Rezyumengizni to'ldiring (lavozim, shahar, ko'nikmalar) — moslik aniqroq bo'ladi. Yoki barcha ishlarni ko'ring.",
     "completeResume": "Rezyumeni to'ldirish",
-    "browseAll": "Barcha ishlar"
+    "browseAll": "Barcha ishlar",
+    "savedTitle": "Rezyumeyingiz saqlandi",
+    "savedBody": "Endi bir bosishda ariza yuborishingiz mumkin, ish beruvchilar esa siz ariza yuborgan vakansiya bo'yicha rezyumeyingizni ko'radi. Quyida — rezyumeyingizga mos ishlar.",
+    "savedEdit": "Rezyumeni tahrirlash",
+    "savedAccount": "Kabinetga o'tish"
   },
   "home": {
     "heroTitle": "O'zbekiston bo'ylab mos ishni toping",
@@ -639,6 +672,7 @@
     "factCitiesNa": "—"
   },
   "jobs": {
+    "positionClosed": "Vakansiya yopilgan",
     "title": "Ishlar",
     "searchPlaceholder": "Lavozim yoki kompaniya",
     "search": "Qidirish",
@@ -771,7 +805,10 @@
     "tagline": "Ishonchli ish bozori.",
     "rights": "Barcha huquqlar himoyalangan.",
     "privacy": "Maxfiylik",
-    "terms": "Shartlar"
+    "terms": "Shartlar",
+    "byRegion": "Hududlar bo'yicha ish",
+    "byCategory": "Sohalar bo'yicha",
+    "aboutHeading": "Yollla"
   },
   "common": {
     "loading": "Yuklanmoqda…",
@@ -796,8 +833,15 @@
     "light": "Yorug' rejim",
     "dark": "Tungi rejim"
   },
+  "sound": {
+    "mute": "Ovozni o'chirish",
+    "unmute": "Ovozni yoqish"
+  },
   "localeSwitcher": {
-    "label": "Til"
+    "label": "Til",
+    "sheetTitle": "Tilni tanlang",
+    "sheetBody": "Vakansiyalarni qaysi tilda ko'rishni xohlaysiz? Keyinroq profilda o'zgartirishingiz mumkin.",
+    "close": "Yopish"
   },
   "landing": {
     "how": {
@@ -832,29 +876,22 @@
     "title": "Vakansiyani reklama qilish",
     "subtitle": "Vakansiyangizni ro'yxat tepasida va kategoriyada ajratib ko'rsating.",
     "forJob": "Vakansiya: {title}",
-    "balance": "Hamyon balansi",
-    "duration": "{days} kun",
-    "activeUntil": "Reklama {date} gacha faol.",
-    "buyFor": "{price} — sotib olish",
-    "buying": "Amalga oshirilmoqda…",
-    "insufficientTitle": "Hamyonda mablag' yetarli emas",
-    "insufficientHint": "Reklama uchun mablag' yetarli emas. Hamyonni to'ldiring.",
-    "topUp": "Hamyonni to'ldirish",
-    "errUnknown": "Xatolik yuz berdi",
     "notOpenTitle": "Avval e'lonni nashr qiling",
     "notOpenHint": "Faqat ochiq (nashr qilingan) vakansiyani reklama qilish mumkin.",
     "back": "Vakansiyalarga qaytish",
     "heroTitle": "Vakansiyangizni yuqoriga ko'taring",
-    "heroSubtitle": "TOP e'lonlar 3 barobar ko'p ko'riladi va nomzodni tezroq topadi. Bir necha kunga ajratib ko'rsating.",
-    "benefitTop": "Ro'yxat tepasida birinchi",
+    "heroSubtitle": "Yuqori darajadagi e'lonlar ro'yxatda ko'zga tashlanadi va tezroq nomzod topadi. Vakansiyangiz allaqachon efirda — endi uni ajratib ko'rsating.",
     "benefitViews": "3x ko'proq ko'rish",
-    "benefitFeatured": "Kategoriyada ajratilgan",
-    "bestValue": "Eng foydali",
-    "perDay": "≈{price} so'm/kun",
-    "previewLabel": "Reklamadan keyin",
-    "previewOther": "Boshqa vakansiyalar",
-    "topUpFor": "Hamyonni to'ldirish — {price}",
-    "cheaper": "{pct}% arzon"
+    "benefitStandOut": "Ro'yxatda ajralib turadi",
+    "benefitMap": "Xaritada ham ko'zga tashlanadi",
+    "currentTier": "Hozirgi darajangiz",
+    "tierBase": "Oddiy e'lon",
+    "tierBrand": "Brend",
+    "atTopTitle": "Bu e'lon allaqachon eng yuqori darajada",
+    "atTopHint": "Premium — eng ko'zga tashlanadigan daraja. Undan yuqorisi yo'q, shuning uchun qo'shimcha to'lov kerak emas.",
+    "shareInstead": "E'lonni ulashish",
+    "notAnUpgrade": "Bu daraja e'loningizda allaqachon bor. Faqat yuqoriroq darajaga o'tish mumkin.",
+    "upgradeNote": "To'lov tasdiqlangan zahoti yangi daraja e'longa qo'llanadi — qayta nashr qilish shart emas."
   },
   "pricing": {
     "title": "Narxlar",
@@ -862,34 +899,34 @@
     "heroSubtitle": "Minglab ishchi Yollla'da ish qidiradi. Birinchi vakansiyangiz — mutlaqo bepul.",
     "tiers": {
       "heading": "Har bir e'lon — o'z ko'rinishi bilan",
-      "sub": "Birinchi e'lon bepul. Keyingilari uchun ko'rinishni tanlang — qancha ko'rinsa, shuncha ko'p nomzod.",
+      "sub": "Birinchi e'lon bepul. Har bir daraja o'zidan pastdagining hamma imkoniyatini o'z ichiga oladi — qancha ko'rinsa, shuncha ko'p nomzod.",
       "firstFree": "Birinchi e'lon — bepul",
       "cta": "E'lon joylash",
       "standard": {
         "name": "Standart",
-        "tagline": "E'loningiz e'lon qilinadi",
-        "f1": "Ikkala ilovada (mobil + web) ko'rinadi",
-        "f2": "AI bilan 5 daqiqada to'ldiring",
-        "f3": "Cheksiz nomzod arizasi",
-        "angle": "Bir kunlik bo'sh ish o'rnidan arzon."
+        "tagline": "E'loningiz ishga tushadi",
+        "f1": "Mobil ilova va saytda — o'z kategoriyangizda",
+        "f2": "Matnni AI 5 daqiqada yozib beradi",
+        "f3": "Nomzodlar soni cheklanmagan",
+        "angle": "Bo'sh turgan ish o'rni bir kunda shundan ko'p zarar keltiradi."
       },
       "brand": {
         "name": "Brend",
-        "badge": "Eng ommabop",
-        "tagline": "Logotipingiz yonib turadi",
-        "f1": "Standart'dagi hamma narsa",
-        "f2": "Yaltiroq logotip — kartada va xaritada",
-        "f3": "Ishonch belgisi + qidiruvda yuqori",
-        "angle": "Tanish brendga ko'proq ishonch — ~2× ko'proq bosiladi."
+        "badge": "Eng ko'p tanlanadi",
+        "tagline": "Ro'yxatda ko'zga tashlanib turasiz",
+        "f1": "Kompaniya belgingiz ro'yxatda yorqin halqa bilan ajraladi",
+        "f2": "Xaritadagi belgingiz ham shunday ajraladi",
+        "f3": "Bepul va Standart e'lonlardan yuqorida turadi",
+        "angle": "Ko'zga tashlangan e'lon ko'proq bosiladi."
       },
       "premium": {
         "name": "Premium",
         "badge": "Eng tez natija",
-        "tagline": "Hammadan ajralib turing",
-        "f1": "Brend'dagi hamma narsa",
-        "f2": "Volt bilan ajratilgan e'lon",
-        "f3": "Ro'yxat va xarita tepasida",
-        "angle": "Kirgan zahoti e'tiborni tortadi — ~3× ko'proq nomzod."
+        "tagline": "Hammadan ko'zga tashlanadi",
+        "f1": "E'lon yorqin ramka bilan butunlay ajralib turadi",
+        "f2": "Xaritada ★ belgisi bilan, kattaroq ko'rinadi",
+        "f3": "Bepul va Standart e'lonlardan yuqorida turadi",
+        "angle": "Shoshilinch ish o'rni uchun — eng ko'zga tashlanadigani."
       }
     },
     "benefit1Title": "Tez",
@@ -969,6 +1006,109 @@
     "deleteInProgress": "O'chirilmoqda…",
     "deleteErrConfirm": "Tasdiqlash uchun aynan DELETE deb yozing.",
     "deleteErrSession": "Siz kirmagansiz.",
-    "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring."
+    "deleteErrUnknown": "Xatolik yuz berdi. Qayta urinib ko'ring.",
+    "notifTitle": "Bildirishnomalar va email",
+    "notifSubtitle": "Qaysi xabarlar telefoningizga, qaysilari pochtangizga kelishini o'zingiz tanlaysiz.",
+    "notifPushGroup": "Ilova bildirishnomalari",
+    "notifEmailGroup": "Email xabarlar",
+    "notifJobMatch": "Yangi mos vakansiyalar",
+    "notifJobMatchHint": "Saqlagan qidiruvingiz yoki obuna bo'lgan kompaniyangiz bo'yicha yangi ish chiqqanda.",
+    "notifApplication": "Ariza holati o'zgarishi",
+    "notifMessages": "Yangi xabarlar",
+    "notifReviews": "Sharhlar",
+    "emailJobMatch": "Yangi vakansiyalar haqida email",
+    "emailJobMatchHint": "Kuniga bir marta, bitta xatda — har bir vakansiya uchun alohida emas.",
+    "emailApplication": "Ariza holati haqida email",
+    "emailMessages": "Yangi xabarlar haqida email",
+    "emailReviews": "Sharhlar haqida email",
+    "emailMarketing": "Yolla yangiliklari va tavsiyalari",
+    "emailMarketingHint": "Platforma yangiliklari, foydali maslahatlar. Istalgan vaqtda bekor qilishingiz mumkin.",
+    "notifSave": "Saqlash",
+    "notifSaving": "Saqlanmoqda…",
+    "notifSaved": "Saqlandi"
+  },
+  "regionPage": {
+    "title": "{region}da ish va bo'sh ish o'rinlari",
+    "metaTitle": "{region}da ish — bo'sh ish o'rinlari",
+    "metaDescription": "{region}dagi ochiq vakansiyalar: maosh, jadval va ish beruvchi haqida to'liq ma'lumot. Ro'yxatdan o'tmasdan ariza topshiring — Yollla.",
+    "intro": "{region}dagi barcha ochiq vakansiyalar bir joyda. Soha bo'yicha tanlang yoki eng yangi e'lonlarni ko'ring — maosh va jadval kartaning ustida, ariza esa ikki bosishda.",
+    "latest": "{region}dagi eng yangi vakansiyalar",
+    "otherRegions": "Boshqa hududlar",
+    "allCategories": "Barcha sohalar",
+    "vacancyCount": "{count} ta vakansiya"
+  },
+  "regionFaq": {
+    "heading": "{region}da ish topish — savol-javob",
+    "q1": "{region}da qanday ish topsa bo'ladi?",
+    "a1": "Sahifadagi soha kartalaridan o'zingizga mosini tanlang: har bir kartada shu hududdagi ochiq vakansiyalar soni ko'rsatilgan. Kartani bosganingizda faqat o'sha soha va shu hudud bo'yicha e'lonlar chiqadi.",
+    "q2": "Ariza topshirish uchun ro'yxatdan o'tish shartmi?",
+    "a2": "Yo'q. Vakansiyani ko'rish va ariza shaklini to'ldirish uchun hisob kerak emas — tizimga kirish faqat oxirgi bosqichda, arizani yuborishda so'raladi va yozganlaringiz saqlanib qoladi.",
+    "q3": "{region}da eng ko'p qaysi sohada ish bor?",
+    "a3": "Bu sahifadagi kartalar ochiq vakansiyalar soni bo'yicha tartiblangan — eng yuqoridagi soha ayni paytda shu hududda eng ko'p odam qidirayotgan yo'nalish. Raqamlar jonli, ya'ni yangi e'lon joylanishi bilan yangilanadi.",
+    "q4": "Vakansiyalar qanchalik yangi?",
+    "a4": "Ro'yxat ish beruvchilar joylagan tartibda yangilanadi va muddati o'tganlari avtomatik chiqib ketadi. Eng yangi e'lonlar ushbu sahifaning \"eng yangi vakansiyalar\" bo'limida turadi.",
+    "q5": "Maosh ko'rsatilganmi?",
+    "a5": "Ha, Yollla qoidasi bo'yicha har bir e'londa maosh ko'rsatiladi — aniq summa yoki oraliq. Bundan tashqari ish jadvali, rasmiylashtirish va qo'shimcha shartlar ham kartada ko'rinadi."
+  },
+  "employerLanding": {
+    "metaTitle": "Ish beruvchilar uchun — vakansiya joylash bepul",
+    "metaDescription": "Vakansiyangizni bepul joylang: u saytda, sohangiz va hududingiz bo'yicha Telegram kanallarida chiqadi, mos nomzodlar esa o'zi taklif qilinadi.",
+    "heroLead": "Ko'proq",
+    "heroAccent": "mos nomzod",
+    "heroTail": "— kamroq behuda suhbat.",
+    "heroSub": "Vakansiyani bir marta joylaysiz: u saytda ham, sohangiz va hududingiz uchun Telegram kanalida ham chiqadi. Rezyumelar bo'yicha mos nomzodlarni esa tizim o'zi topib beradi.",
+    "postFree": "Vakansiya joylash — bepul",
+    "seePricing": "Narxlarni ko'rish",
+    "statJobs": "ochiq vakansiya",
+    "statCompanies": "xodim qidirayotgan kompaniya",
+    "statRegions": "hudud",
+    "methodsTitle": "Xodimni qanday topasiz",
+    "m1Title": "Bir marta joylang — hamma joyda chiqsin",
+    "m1Body": "E'lon darhol saytda, kategoriya sahifalarida va xaritada paydo bo'ladi. Shu bilan birga sohangiz va hududingiz uchun ochilgan Telegram kanalimizga avtomatik yuboriladi — qo'shimcha ish ham, qo'shimcha to'lov ham yo'q.",
+    "m2Title": "Nomzodlar o'zi keladi",
+    "m2Body": "Vakansiya joylanishi bilan tizim rezyumelar bazasidan mos nomzodlarni tanlab beradi: lavozim, tajriba va hudud bo'yicha. Yoqqanini bir bosishda taklif qilasiz.",
+    "m2Cta": "Sinab ko'rish",
+    "m3Title": "Shoshilinch bo'lsa — tezlashtiring",
+    "m3Body": "TOP va ko'tarish xizmatlari e'lonni ro'yxatning boshiga chiqaradi. To'lov faqat siz tanlagan muddat uchun, hamyon orqali.",
+    "m3Cta": "Narxlar",
+    "channelsKicker": "Bizning Telegram kanallarimiz",
+    "channelsTitle": "Vakansiyangiz kanal obunachilariga ham yetib boradi",
+    "channelsBody": "E'lonlar soha va hudud bo'yicha ochilgan kanallarimizda chop etiladi — nomzodlar allaqachon o'sha yerda.",
+    "channelAllRegions": "Barcha hududlar",
+    "ctaTitle": "Bugun e'lon joylang — ertaga nomzodlar bilan gaplashing",
+    "ctaBody": "Joylash bepul. Ro'yxatdan o'tish faqat oxirgi bosqichda so'raladi."
+  },
+  "employerFaq": {
+    "heading": "Ish beruvchilar uchun savol-javob",
+    "q1": "Vakansiya joylash rostdan bepulmi?",
+    "a1": "Ha. E'lonni joylash va nomzodlardan ariza olish bepul. Pullik xizmatlar faqat ixtiyoriy tezlashtirish — TOP va ko'tarish.",
+    "q2": "E'lonim qayerlarda ko'rinadi?",
+    "a2": "Saytda (bosh sahifa, soha va hudud sahifalari, xarita va qidiruv), mobil ilovada, hamda sohangiz va hududingizga mos Telegram kanalimizda. Bularning hammasi avtomatik.",
+    "q3": "Ro'yxatdan o'tmasdan e'lon yozsam bo'ladimi?",
+    "a3": "Ha, formani to'liq to'ldirishingiz mumkin — kirish faqat chop etish bosqichida so'raladi va yozganlaringiz saqlanib qoladi.",
+    "q4": "Nomzodlarni o'zim qidira olamanmi?",
+    "a4": "Vakansiya joylaganingizdan so'ng tizim mos nomzodlarni o'zi tanlab, ro'yxat qilib beradi — lavozim, tajriba va hudud bo'yicha. Har birini bir bosishda ishga taklif qilishingiz mumkin.",
+    "q5": "E'lon qancha turadi?",
+    "a5": "E'lon siz belgilagan muddatgacha ochiq turadi va muddati tugagach avtomatik yopiladi. Xohlagan payt qo'lda yopishingiz yoki tahrirlashingiz mumkin."
+  },
+  "unsubscribe": {
+    "title": "Email xabarlardan chiqish",
+    "subtitle": "Hisobingizga kirish shart emas — quyidagi tugma yetarli.",
+    "confirm": "{scope} bo'yicha email xabarlarni to'xtataylikmi?",
+    "unsubscribeCta": "Ha, to'xtating",
+    "undoCta": "Qaytarish",
+    "manageCta": "Barcha sozlamalar",
+    "done": "Bo'ldi — bu turdagi xatlarni endi yubormaymiz. Ilova ichidagi bildirishnomalar saqlanib qoladi.",
+    "resubscribed": "Obuna tiklandi — xatlar yana keladi.",
+    "working": "Bajarilmoqda…",
+    "invalidLink": "Havola eskirgan yoki noto'g'ri. Sozlamalarni hisobingizdan o'zgartiring.",
+    "failed": "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.",
+    "unknownState": "Joriy sozlamalarni o'qib bo'lmadi, lekin tugma baribir ishlaydi.",
+    "scope_all": "Barcha",
+    "scope_job_match": "Yangi vakansiyalar",
+    "scope_marketing": "Yangiliklar va tavsiyalar",
+    "scope_messages": "Yangi xabarlar",
+    "scope_application": "Ariza holati",
+    "scope_reviews": "Sharhlar"
   }
 }

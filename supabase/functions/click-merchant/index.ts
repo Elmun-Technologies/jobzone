@@ -110,6 +110,7 @@ async function prepare(
         provider: "click",
         provider_txn_id: a.clickTransId,
         order_id: order.orderId,
+        order_kind: order.orderKind,
         amount_uzs: order.expectedUzs,
         state: 1,
         create_time: Date.now(),
@@ -140,16 +141,21 @@ async function complete(
   // Click reports its own failure via a negative `error` → cancel our side.
   if (a.clickError < 0) {
     await supa.from("payment_transactions").update({ state: -1, cancel_time: Date.now() }).eq("id", txn.id);
-    await supa.from("promotion_orders").update({ status: "cancelled" }).eq("id", txn.order_id).eq("status", "pending");
+    await supa.rpc("gateway_settle_order", {
+      p_order_id: txn.order_id,
+      p_status: "cancelled",
+      p_external_ref: txn.id,
+    });
     return json({ ...a.echo, error: ERR.CANCELLED, error_note: "Cancelled" });
   }
-  // Confirm: mark performed + flip the order to paid → trigger publishes the job.
+  // Confirm: mark performed + settle the order — a vacancy order flips to paid
+  // (the trigger publishes it), a top-up becomes a completed wallet credit.
   await supa.from("payment_transactions").update({ state: 2, perform_time: Date.now() }).eq("id", txn.id);
-  await supa
-    .from("promotion_orders")
-    .update({ status: "paid", paid_at: new Date().toISOString(), external_ref: txn.id })
-    .eq("id", txn.order_id)
-    .eq("status", "pending");
+  await supa.rpc("gateway_settle_order", {
+    p_order_id: txn.order_id,
+    p_status: "paid",
+    p_external_ref: txn.id,
+  });
   return json({ ...a.echo, merchant_confirm_id: txn.id, error: OK, error_note: "Success" });
 }
 
@@ -158,25 +164,26 @@ async function complete(
 type Supa = ReturnType<typeof createClient>;
 type Echo = { click_trans_id: string; merchant_trans_id: string };
 
-/** Resolve + validate the order; expected charge from the CATALOG price. */
+/** Resolve + validate the order. `gateway_order` (0085) covers both kinds we
+ * sell: a promotion/listing order (charged at the CATALOG price) and a wallet
+ * top-up (charged at the server-bounded amount it was created with). */
 async function resolveOrder(supa: Supa, orderId: string) {
   if (!orderId) return { error: ERR.ORDER_NOT_FOUND, note: "No order" };
-  const { data: order } = await supa
-    .from("promotion_orders")
-    .select("id, status, product_code")
-    .eq("id", orderId)
-    .maybeSingle();
+  const { data } = await supa.rpc("gateway_order", { p_order_id: orderId });
+  const order = (Array.isArray(data) ? data[0] : data) as
+    | { order_id: string; kind: string; amount_uzs: number; status: string }
+    | null
+    | undefined;
   if (!order) return { error: ERR.ORDER_NOT_FOUND, note: "Order not found" };
   if (order.status === "paid") return { error: ERR.ALREADY_PAID, note: "Already paid" };
   if (order.status !== "pending") return { error: ERR.CANCELLED, note: "Not payable" };
-  const { data: product } = await supa
-    .from("promotion_products")
-    .select("price_uzs")
-    .eq("code", order.product_code)
-    .maybeSingle();
-  const expectedUzs = Number(product?.price_uzs ?? 0);
+  const expectedUzs = Number(order.amount_uzs ?? 0);
   if (!(expectedUzs > 0)) return { error: ERR.AMOUNT, note: "No price" };
-  return { orderId: order.id as string, expectedUzs };
+  return {
+    orderId: order.order_id,
+    orderKind: order.kind === "topup" ? "topup" : "promotion",
+    expectedUzs,
+  };
 }
 
 async function getTxn(supa: Supa, clickTransId: string) {

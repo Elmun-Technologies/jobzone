@@ -43,6 +43,7 @@ import '../../features/employer/presentation/company/manage_gallery_page.dart';
 import '../../features/employer/presentation/company/manage_people_page.dart';
 import '../../features/employer/presentation/dashboard/employer_dashboard_page.dart';
 import '../../features/employer/presentation/employer_shell.dart';
+import '../../features/employer/presentation/wallet_page.dart';
 import '../../features/monetization/presentation/checkout_page.dart';
 import '../../features/monetization/presentation/promotions_history_page.dart';
 import '../../features/monetization/presentation/tiers_page.dart';
@@ -51,6 +52,7 @@ import '../../features/employer/presentation/jobs/post_job_page.dart';
 import '../../features/employer/presentation/onboarding/create_company_page.dart';
 import '../../features/jobs/domain/job.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/jobs/presentation/archived_jobs_page.dart';
 import '../../features/jobs/presentation/bookmarks_page.dart';
 import '../../features/jobs/presentation/job_details_page.dart';
 import '../../features/jobs/presentation/see_all_page.dart';
@@ -346,6 +348,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.employerPromotions,
         builder: (c, s) => const PromotionsHistoryPage(),
       ),
+      GoRoute(
+        // `extra` carries the shortfall from the promote flow, so the amount
+        // the employer needs is already typed in when they land here.
+        path: Routes.employerWallet,
+        builder: (c, s) => WalletPage(initialAmount: s.extra as int?),
+      ),
       GoRoute(path: Routes.employerTiers, builder: (c, s) => const TiersPage()),
       GoRoute(
         path: '/employer/checkout/:jobId/:code',
@@ -505,6 +513,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           application: s.extra as Application?,
           applicationId: s.pathParameters['id'],
         ),
+      ),
+      GoRoute(
+        path: Routes.accountArchived,
+        builder: (c, s) => const ArchivedJobsPage(),
       ),
       GoRoute(
         path: Routes.accountSeekingStatus,

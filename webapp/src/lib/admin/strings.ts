@@ -144,6 +144,10 @@ export const adminStrings = {
     city: "Shahar (ixtiyoriy)",
     cityHint: "Bo'sh qoldirilsa — barcha shaharlar",
     send: "Yuborish",
+    sendEmail: "Email orqali ham yuborilsin",
+    sendEmailHint:
+      "Belgilansa, xabar Yolla brendidagi xat sifatida pochtaga ham boradi — " +
+      "faqat marketing xatlariga rozilik bergan foydalanuvchilarga.",
     sentOne: "Xabar yuborildi",
     sentCount: "ta foydalanuvchiga yuborildi",
     reach: "Qamrov",

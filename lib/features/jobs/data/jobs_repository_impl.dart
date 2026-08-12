@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -137,6 +138,48 @@ class JobsRepositoryImpl implements JobsRepository {
         .select()
         .inFilter('id', ids.toList());
     return rows.map<Job>((r) => Job.fromMap(r)).toList();
+  }
+
+  @override
+  Future<List<Job>> bookmarkedByIds(Iterable<String> ids) async {
+    final wanted = ids.toList();
+    if (wanted.isEmpty) return [];
+    final byId = {for (final j in await byIds(wanted)) j.id: j};
+    final missing = wanted.where((id) => !byId.containsKey(id)).toSet();
+    if (missing.isNotEmpty && _live) {
+      // Whatever `job_feed` withheld is a vacancy that has left the market. The
+      // definer view (0080) carries just enough to render the row — the saved
+      // list shows it with a closed marker rather than dropping it silently.
+      byId.addAll(await _closedBookmarksByIds(missing));
+    }
+    // Keep the caller's order: bookmarks arrive newest-saved first.
+    return [for (final id in wanted) ?byId[id]];
+  }
+
+  /// Minimal [Job] stand-ins for saved vacancies no longer in `job_feed`,
+  /// read from the `my_bookmarked_jobs` definer view (0080).
+  Future<Map<String, Job>> _closedBookmarksByIds(Set<String> ids) async {
+    try {
+      final rows = await _client
+          .from('my_bookmarked_jobs')
+          .select('id, title, status, company_name')
+          .inFilter('id', ids.toList());
+      return {
+        for (final r in rows as List)
+          (r['id'] as String): Job(
+            id: r['id'] as String,
+            title: (r['title'] ?? '') as String,
+            companyId: '',
+            companyName: (r['company_name'] ?? '') as String,
+            status: (r['status'] ?? 'closed') as String,
+          ),
+      };
+    } catch (e) {
+      // A DB behind on 0080 has no such view. Degrade to the old behaviour
+      // (the row is dropped) rather than failing the whole list.
+      if (kDebugMode) debugPrint('my_bookmarked_jobs lookup failed: $e');
+      return const {};
+    }
   }
 
   @override

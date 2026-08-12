@@ -27,7 +27,13 @@ export interface JobFormState {
 }
 
 export interface PayListingState {
-  error?: "unconfigured" | "unknown" | "signedOut" | "notDraft";
+  error?:
+    | "unconfigured"
+    | "unknown"
+    | "signedOut"
+    | "notDraft"
+    /** Live listing, and the picked tier isn't above the one it already has. */
+    | "notAnUpgrade";
 }
 
 /** A short, safe one-liner from a Supabase error for surfacing to the employer
@@ -176,6 +182,12 @@ export async function updateCompany(
     return { error: "unknown" };
   }
 
+  // The company's public profile is prerendered from a cached read — without
+  // this, a renamed company would keep its old name on /companies/[id] (and on
+  // every vacancy card that carries it) until the window expired.
+  revalidateTag("companies", "max");
+  revalidateTag("jobs", "max");
+
   redirect(`/${locale}/employer`);
 }
 
@@ -316,11 +328,13 @@ export async function createJob(
 }
 
 /**
- * Direct pay-per-listing: create the tier order for a draft vacancy and send the
+ * Direct pay-per-listing: create the tier order for a vacancy and send the
  * employer to the Payme/Click checkout. The tier PRICE is resolved server-side
  * by `create_listing_order` (a tampered client amount can never under-pay); the
  * gateway's callback flips the order to paid, which publishes the vacancy with
- * its tier. Merchant ids are public (only the webhook secret keys are private);
+ * its tier. The same action serves the two entry points, because the RPC
+ * decides which is legal: a DRAFT buys any tier (publish-and-pay), a live
+ * vacancy buys only a strict upgrade of its current tier (0075). Merchant ids are public (only the webhook secret keys are private);
  * with none set the checkout can't be built and we report `unconfigured`.
  */
 export async function payListing(
@@ -350,8 +364,13 @@ export async function payListing(
     ? (data[0] as OrderRow | undefined)
     : undefined;
   if (error || !row) {
+    const msg = error?.message ?? "";
     return {
-      error: error?.message.includes("not_draft") ? "notDraft" : "unknown",
+      error: msg.includes("not_an_upgrade")
+        ? "notAnUpgrade"
+        : msg.includes("not_draft")
+          ? "notDraft"
+          : "unknown",
     };
   }
 
@@ -603,6 +622,11 @@ export async function updateJob(
     );
   }
 
+  // The vacancy page and every listing that shows this job are prerendered
+  // from cached reads, so an edit has to flush them — otherwise a corrected
+  // salary or title would sit stale until the window expired.
+  revalidateTag("jobs", "max");
+
   redirect(`/${locale}/employer/jobs?updated=1`);
 }
 
@@ -639,6 +663,11 @@ export async function promoteJob(
     console.error("promoteJob failed", error);
     return { error: "unknown", detail: dbDetail(error) };
   }
+
+  // A boost is a paid change to where this vacancy sits in every feed, and
+  // those feeds are prerendered — flush them so the employer gets what they
+  // just bought immediately.
+  revalidateTag("jobs", "max");
 
   redirect(`/${locale}/employer/jobs?promoted=1`);
 }

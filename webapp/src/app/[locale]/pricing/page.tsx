@@ -24,12 +24,12 @@ export async function generateMetadata({
   };
 }
 
-// The shared SiteHeader reads the session (getCurrentUser) to show
-// account/notifications vs a sign-in button; without this the page was baked
-// as static HTML at build time, so a signed-in visitor saw a signed-out
-// header here (unlike every other page). Trades SSG for correctness — this
-// page isn't a primary organic-search surface, unlike the job/category pages.
-export const dynamic = "force-dynamic";
+// Nothing on this page depends on the request: the prices come from a module
+// constant and the copy from the message catalog. It used to carry
+// `force-dynamic` because the shared header resolved the session on the
+// server, which would have baked a signed-out header into the static HTML —
+// the header asks the browser now (SessionProvider), so this page can be
+// prerendered per locale and served from the CDN.
 
 /** Public "Narxlar" (pricing) marketing page — the employer offer: the first
  * vacancy is free, then every listing picks one of three per-listing
@@ -87,12 +87,12 @@ export default async function PricingPage({
               <li
                 key={tier.code}
                 className={cn(
-                  "rise-in relative flex flex-col overflow-hidden rounded-3xl border p-6",
+                  "rise-in relative flex flex-col overflow-hidden rounded-3xl border p-6 shadow-xl transition-all hover:shadow-2xl",
                   isPremium
-                    ? "border-primary from-primary/10 to-card bg-gradient-to-br"
+                    ? "border-primary from-primary/15 via-primary/5 to-card bg-gradient-to-br shadow-primary/10"
                     : isBrand
-                      ? "border-primary ring-primary/20 bg-accent ring-2"
-                      : "border-border bg-card",
+                      ? "border-primary ring-primary/30 bg-accent ring-2 shadow-primary/15"
+                      : "border-border bg-card shadow-sm",
                 )}
                 style={{ animationDelay: `${60 + i * 80}ms` }}
               >

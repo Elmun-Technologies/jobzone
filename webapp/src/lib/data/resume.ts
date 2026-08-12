@@ -2,106 +2,24 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
+import {
+  EMPTY_RESUME,
+  type CertificateEntry,
+  type EducationEntry,
+  type ExperienceEntry,
+  type ResumeDraft,
+} from "./resume-draft";
 import { hasSupabase } from "./supabase-env";
 
-export interface EducationEntry {
-  /** Set for a row that already exists in `educations`; absent for one the
-   * wizard is about to create. Lets saveResume() update the existing row in
-   * place — preserving mobile-only columns this form doesn't show (`grade`,
-   * `description`) — instead of deleting and recreating it. */
-  id?: string;
-  school: string;
-  degree: string;
-  field: string;
-  startYear: string;
-  endYear: string;
-  isCurrent: boolean;
-}
-
-/** One job in the seeker's work history (the `experiences` table). */
-export interface ExperienceEntry {
-  /** See EducationEntry.id — preserves mobile-only `location` on update. */
-  id?: string;
-  title: string; // position held
-  companyName: string;
-  startYear: string;
-  endYear: string;
-  isCurrent: boolean;
-  description: string;
-}
-
-/** A certificate / course (the `certifications` table). */
-export interface CertificateEntry {
-  /** See EducationEntry.id — preserves mobile-only `credential_id` /
-   * `credential_url` on update. */
-  id?: string;
-  name: string;
-  issuer: string;
-  issuedYear: string;
-  /** "" = no expiry (lifetime). */
-  expiryYear: string;
-}
-
-/** The fields the /resumes/new wizard collects. */
-export interface ResumeDraft {
-  position: string; // headline
-  fullName: string;
-  city: string;
-  gender: string; // "" | "male" | "female"
-  birthDate: string; // "YYYY-MM-DD" | ""
-  maritalStatus: string; // "" | "single" | "married" | "divorced"
-  experienceLevel: string; // "" | none | under_1 | 1_3 | 3_5 | 5_plus
-  expectedSalary: string; // numeric string | ""
-  currency: string; // "UZS" | "USD"
-  phone: string;
-  email: string;
-  /** Free-text professional summary ("About me"), AI-assisted (profiles.summary,
-   * 0044). Read/written separately so a DB behind on that migration still works. */
-  summary: string;
-  /** True while the summary is the untouched AI draft (profiles.summary_ai_generated,
-   * 0046) — set by "Write with AI", cleared when the seeker edits the text. */
-  summaryAiGenerated: boolean;
-  /** language code -> level ("none"|"a1_a2"|"b1_b2"|"c1_c2"|"native"). */
-  languages: Record<string, string>;
-  experiences: ExperienceEntry[];
-  educations: EducationEntry[];
-  certificates: CertificateEntry[];
-  /**
-   * True only when this draft was built from a real, signed-in fetch of the
-   * account's own data (getMyResume() below). False for the blank slate a
-   * signed-out guest starts from (EMPTY_RESUME) — a draft that has never
-   * seen ANY account's real data.
-   *
-   * saveResume() uses this to tell "a signed-in seeker editing their own
-   * résumé" apart from "a guest who filled the public wizard, then signed
-   * into an account that already has one" — the latter used to blind-
-   * delete-then-insert using only the guest's rows, silently destroying
-   * every experience/education/certification the real account had (see the
-   * commit that added this field for the full incident).
-   */
-  resumeExists: boolean;
-}
-
-export const EMPTY_RESUME: ResumeDraft = {
-  position: "",
-  fullName: "",
-  city: "",
-  gender: "",
-  birthDate: "",
-  maritalStatus: "",
-  experienceLevel: "",
-  expectedSalary: "",
-  currency: "UZS",
-  phone: "",
-  email: "",
-  summary: "",
-  summaryAiGenerated: false,
-  languages: {},
-  experiences: [],
-  educations: [],
-  certificates: [],
-  resumeExists: false,
-};
+// Re-exported so every existing `@/lib/data/resume` import keeps working; the
+// shapes themselves live in the client-safe module next door.
+export {
+  EMPTY_RESUME,
+  type CertificateEntry,
+  type EducationEntry,
+  type ExperienceEntry,
+  type ResumeDraft,
+} from "./resume-draft";
 
 function yearOf(v: unknown): string {
   return typeof v === "string" && v.length >= 4 ? v.slice(0, 4) : "";
@@ -210,9 +128,37 @@ export async function getMyResume(): Promise<ResumeDraft> {
     if (typeof sr.summary === "string") summary = sr.summary;
     if (sr.summary_ai_generated === true) summaryAiGenerated = true;
 
+    // desired_positions / desired_region / desired_district are 0082 columns —
+    // read separately, same as summary above, so a DB that hasn't taken the
+    // migration yet still returns a working résumé instead of erroring out.
+    let positions: string[] = [];
+    let region = "";
+    let district = "";
+    const locRes = await supabase
+      .from("profiles")
+      .select("desired_positions, desired_region, desired_district")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!locRes.error) {
+      const lr = (locRes.data ?? {}) as Record<string, unknown>;
+      if (Array.isArray(lr.desired_positions)) {
+        positions = lr.desired_positions.filter(
+          (p): p is string => typeof p === "string" && p.trim() !== "",
+        );
+      }
+      region = str(lr.desired_region);
+      district = str(lr.desired_district);
+    }
+    // Pre-0082 résumés (and DBs behind on it) only have the headline.
+    if (positions.length === 0 && str(r.headline).trim() !== "") {
+      positions = [str(r.headline)];
+    }
+
     return {
-      position: str(r.headline),
+      positions,
       fullName: str(r.full_name),
+      region,
+      district,
       city: str(r.city),
       gender: str(r.gender),
       birthDate: str(r.birth_date),

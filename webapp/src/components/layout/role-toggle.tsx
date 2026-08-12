@@ -20,15 +20,27 @@ const cell =
  */
 export function RoleToggle({
   employerHref = "/employer",
+  tone = "default",
 }: {
   employerHref?: string;
+  /** `onDark` for the home hero's always-dark poster card, where the light
+   * `bg-muted` track and its white thumb both disappear. */
+  tone?: "default" | "onDark";
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const isEmployer = pathname.startsWith("/employer");
+  const onDark = tone === "onDark";
 
   return (
-    <div className="bg-muted relative grid shrink-0 grid-cols-2 items-center rounded-full p-1">
+    <div
+      className={cn(
+        "relative grid shrink-0 grid-cols-2 items-center rounded-full p-1",
+        onDark
+          ? "border border-white/15 bg-white/10 backdrop-blur"
+          : "bg-muted",
+      )}
+    >
       {/* `shrink-0`: grid-cols-2 tracks are `minmax(0,1fr)`, which have no
           protected minimum — sitting in the header's flex row, this pill was
           the first thing squeezed once the `lg:` nav/locale/theme toggles pop
@@ -41,7 +53,8 @@ export function RoleToggle({
       <span
         aria-hidden
         className={cn(
-          "bg-background pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full shadow-sm transition-transform duration-200 ease-out",
+          "pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full shadow-sm transition-transform duration-200 ease-out",
+          onDark ? "bg-white" : "bg-background",
           isEmployer && "translate-x-full",
         )}
       />
@@ -51,8 +64,12 @@ export function RoleToggle({
         className={cn(
           cell,
           isEmployer
-            ? "text-muted-foreground hover:text-foreground"
-            : "text-foreground",
+            ? onDark
+              ? "text-white/70 hover:text-white"
+              : "text-muted-foreground hover:text-foreground"
+            : onDark
+              ? "text-neutral-900"
+              : "text-foreground",
         )}
       >
         {t("seeker")}
@@ -63,8 +80,12 @@ export function RoleToggle({
         className={cn(
           cell,
           isEmployer
-            ? "text-foreground"
-            : "text-muted-foreground hover:text-foreground",
+            ? onDark
+              ? "text-neutral-900"
+              : "text-foreground"
+            : onDark
+              ? "text-white/70 hover:text-white"
+              : "text-muted-foreground hover:text-foreground",
         )}
       >
         {t("employer")}

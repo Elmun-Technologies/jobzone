@@ -12,7 +12,47 @@ AppNotification _n(NotificationType type, Map<String, dynamic> data) =>
       data: data,
     );
 
+/// Which titles are the server's own content and which the client localizes.
+/// notificationTitle() needs a BuildContext for the localized half, so the
+/// decision itself is tested here and the widget just applies it.
+void _titleGroup() {
+  group('usesStoredTitle', () {
+    test('a job match keeps the name the server stored', () {
+      // run_saved_search_alerts() (0036) stores the vacancy's own title and
+      // invite_candidate() (0050) stores "Ish taklifi". Replacing either with
+      // the generic label left the seeker with a company and a city but no
+      // idea what the job was.
+      expect(usesStoredTitle(NotificationType.jobMatch, 'Payvandchi'), isTrue);
+      expect(usesStoredTitle(NotificationType.jobMatch, 'Ish taklifi'), isTrue);
+    });
+
+    test('a job match with no title falls back to the generic label', () {
+      expect(usesStoredTitle(NotificationType.jobMatch, ''), isFalse);
+      expect(usesStoredTitle(NotificationType.jobMatch, '   '), isFalse);
+    });
+
+    test('the trigger-written types are always localized', () {
+      // 0005 writes the literal English 'Application update' / 'New message'.
+      expect(
+        usesStoredTitle(
+          NotificationType.applicationUpdate,
+          'Application update',
+        ),
+        isFalse,
+      );
+      expect(usesStoredTitle(NotificationType.message, 'New message'), isFalse);
+    });
+
+    test('admin copy is shown exactly as written', () {
+      expect(usesStoredTitle(NotificationType.system, 'Texnik ishlar'), isTrue);
+      expect(usesStoredTitle(NotificationType.review, 'Yangi sharh'), isTrue);
+    });
+  });
+}
+
 void main() {
+  _titleGroup();
+
   // The list rows and the in-app toast both route through this, so a
   // regression here breaks two entry points at once.
   group('notificationDestination', () {

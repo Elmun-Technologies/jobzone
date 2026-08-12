@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { useSession } from "@/components/auth/session-provider";
 import { buttonVariants } from "@/components/ui/button";
+import { SoundToggle } from "@/components/ui/sound-toggle";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -22,17 +24,10 @@ import { ThemeToggle } from "./theme-toggle";
  * can actually reach Jobs / Companies / About / Saved and switch audience.
  * Closes on navigation, backdrop tap, or Escape.
  */
-export function MobileMenu({
-  signedIn,
-  isEmployerAccount,
-  employerHref,
-}: {
-  signedIn: boolean;
-  isEmployerAccount: boolean;
-  employerHref: string;
-}) {
+export function MobileMenu({ employerHref }: { employerHref: string }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const { signedIn, isEmployer } = useSession();
   const [open, setOpen] = useState(false);
   // The overlay is portaled to <body>: the sticky header uses backdrop-blur,
   // which creates a containing block that would otherwise trap our `fixed`
@@ -40,7 +35,7 @@ export function MobileMenu({
   const [mounted, setMounted] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
-  const { links, cta } = navModel(pathname, signedIn, isEmployerAccount);
+  const { links, cta } = navModel(pathname, signedIn === true, isEmployer);
 
   // Close on route change.
   useEffect(() => {
@@ -126,11 +121,18 @@ export function MobileMenu({
                   })}
                 </nav>
 
-                {/* Locale + theme live here below lg (hidden in the header
-                    to keep it from overflowing on phones/tablets). */}
-                <div className="mt-auto flex items-center justify-between gap-3">
+                {/* Locale, theme and sound live here below xl (hidden in the
+                    header to keep it from overflowing on phones/tablets).
+                    Stacked, not one row: the three language pills already fill
+                    the drawer's 288px, so a row with the icon buttons beside
+                    them pushed them off its right edge — where they were
+                    focusable and completely untappable. */}
+                <div className="mt-auto flex flex-col gap-2">
                   <LocaleSwitcher compact={false} />
-                  <ThemeToggle />
+                  <div className="flex items-center gap-1">
+                    <ThemeToggle />
+                    <SoundToggle />
+                  </div>
                 </div>
 
                 <Link

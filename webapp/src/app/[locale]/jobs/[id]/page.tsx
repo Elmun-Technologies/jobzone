@@ -5,20 +5,17 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { PageEvent } from "@/components/analytics/page-event";
+import { EmployerOnly } from "@/components/auth/employer-only";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
+import { ApplyCta } from "@/components/jobs/apply-cta";
 import { BookmarkButton } from "@/components/jobs/bookmark-button";
 import { PhoneLink } from "@/components/jobs/phone-link";
-import { QuickApplyButton } from "@/components/jobs/quick-apply-button";
 import { RichText } from "@/components/jobs/rich-text";
 import { ShareCreative } from "@/components/jobs/share-creative";
 import { ReportButton } from "@/components/reports/report-button";
-import { hasApplied } from "@/lib/data/applications";
-import { isBookmarked } from "@/lib/data/bookmarks";
 import { getCompanyById } from "@/lib/data/companies";
-import { getMyRole } from "@/lib/data/employer";
-import { getJobById } from "@/lib/data/jobs";
-import { getCurrentUser } from "@/lib/auth/user";
+import { getPublicJobById } from "@/lib/data/jobs";
 import {
   formatDate,
   locationText,
@@ -33,10 +30,31 @@ import {
   siteUrl,
 } from "@/lib/seo";
 
-// Auth/session-dependent, per-request. Without this the page can be
-// full-route-cached (getCurrentUser swallows cookies() so Next never sees
-// the dynamic signal) and one visitor's render could be served to another.
-export const dynamic = "force-dynamic";
+/**
+ * Rebuilt at most every five minutes, and immediately whenever an employer
+ * publishes, closes, edits or boosts a vacancy (`revalidateTag("jobs")`).
+ *
+ * The tag flush is what makes invariant #3 hold — a new posting is visible at
+ * once. This window is the safety net under it: publishing also happens where
+ * no server action runs, from the `publish_due_jobs()` cron and the payment
+ * webhook, and vacancies expire on a timestamp nobody flushes. Without a
+ * window those changes would sit behind stale HTML indefinitely.
+ */
+export const revalidate = 300;
+
+/**
+ * Rendered on first request and cached from then on — not prebuilt.
+ *
+ * There is no useful list to prebuild: a job board's vacancies are thousands
+ * of rows with a shelf life measured in weeks, so building them all would cost
+ * a long build to bake pages that expire. Each vacancy is rendered once, on the
+ * first visit, and served from the CDN after that; an edit, a close or a boost
+ * flushes it through the "jobs" tag. Next needs the export to consider the
+ * route prerenderable at all.
+ */
+export function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({
   params,
@@ -44,7 +62,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
   const { locale, id } = await params;
-  const job = await getJobById(id);
+  const job = await getPublicJobById(id);
   if (!job) {
     const t = await getTranslations({ locale, namespace: "common" });
     return { title: t("notFound") };
@@ -102,7 +120,7 @@ export default async function JobDetailsPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const job = await getJobById(id);
+  const job = await getPublicJobById(id);
   if (!job) notFound();
 
   const t = await getTranslations("jobs");
@@ -170,17 +188,11 @@ export default async function JobDetailsPage({
         .join(", "),
     });
 
-  const user = await getCurrentUser();
-  const [applied, bookmarked, role, company] = await Promise.all([
-    user ? hasApplied(job.id) : Promise.resolve(false),
-    user ? isBookmarked(job.id) : Promise.resolve(false),
-    user ? getMyRole() : Promise.resolve(null),
-    getCompanyById(job.companyId),
-  ]);
-  // The share-creative block (ready-made Instagram Story/Post images + link)
-  // is an employer tool — it lets a company advertise a vacancy without
-  // paying a designer. Guests and job seekers don't see it; only employers do.
-  const isEmployer = role === "employer";
+  // Everything this page needs from the server is the same for every visitor.
+  // Whether *you* already applied, saved it, or are an employer is asked in
+  // the browser (ApplyCta / BookmarkButton / EmployerOnly) — that is what
+  // keeps the site's largest indexable surface prerenderable.
+  const company = await getCompanyById(job.companyId);
   // A job needs the full apply form only when it has a required screening
   // question (the sidebar CTA one-taps otherwise). Guest-first throughout:
   // QuickApplyButton routes an unauthenticated tap to sign-in and back.
@@ -388,20 +400,14 @@ export default async function JobDetailsPage({
             <p className="text-foreground mt-1 text-xl font-bold">
               {salary ?? t("negotiable")}
             </p>
-            {applied ? (
-              <p className="bg-muted text-muted-foreground mt-4 w-full rounded-full py-3 text-center text-sm font-semibold">
-                {t("applied")}
-              </p>
-            ) : (
-              <QuickApplyButton
-                jobId={id}
-                needsForm={needsForm}
-                className="mt-4 h-12 w-full text-base"
-              />
-            )}
+            <ApplyCta
+              jobId={id}
+              needsForm={needsForm}
+              className="mt-4 h-12 w-full text-base"
+            />
             <BookmarkButton
               jobId={id}
-              initial={bookmarked}
+              initial={false}
               className="mt-2 w-full justify-center"
             />
             {job.contactPhone ? (
@@ -418,13 +424,16 @@ export default async function JobDetailsPage({
             ) : null}
           </div>
 
-          {isEmployer ? (
+          {/* Ready-made Instagram Story/Post images + link: an employer tool,
+              so a company can advertise a vacancy without paying a designer.
+              Guests and job seekers have no use for it. */}
+          <EmployerOnly>
             <ShareCreative
               basePath={`/${locale}/jobs/${id}`}
               shareUrl={`${siteUrl()}/${locale}/jobs/${id}`}
               title={job.title}
             />
-          ) : null}
+          </EmployerOnly>
 
           <div className="mt-4 flex justify-center">
             <ReportButton targetType="job" targetId={id} />

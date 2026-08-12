@@ -4,6 +4,7 @@ import '../../../core/config/env.dart';
 import '../../../core/supabase/supabase_providers.dart';
 import '../../applications/domain/application.dart';
 import '../../../shared/enums/enums.dart';
+import '../../profile/domain/cv_models.dart';
 import '../domain/applicant.dart';
 import 'mock_applicants.dart';
 
@@ -206,6 +207,59 @@ class ApplicantsRepository {
     return out;
   }
 
+  /// The candidate's certifications, for the applicant screen.
+  ///
+  /// Scoped explicitly to [profileId]: a plain `select()` would lean on RLS,
+  /// which for an employer legitimately covers *every* candidate who applied
+  /// to them — right for the database, wrong for one applicant's screen.
+  ///
+  /// Read access comes from the `is_recruiter_of()` policy in 0077; the
+  /// attached file is signed separately when the employer opens it.
+  Future<List<Certification>> certificationsOf(String profileId) async {
+    if (!_live || profileId.isEmpty) return const [];
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('certifications')
+        .select()
+        .eq('profile_id', profileId)
+        .order('issued_date', ascending: false);
+    return (rows as List)
+        .map((e) => Certification.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// The candidate's work history, most recent first.
+  ///
+  /// Scoped to [profileId] for the same reason as [certificationsOf]: an
+  /// employer's RLS view legitimately spans every candidate who applied to
+  /// them, which is not what one applicant's screen should show.
+  Future<List<Experience>> experiencesOf(String profileId) async {
+    if (!_live || profileId.isEmpty) return const [];
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('experiences')
+        .select()
+        .eq('profile_id', profileId)
+        .order('start_date', ascending: false);
+    return (rows as List)
+        .map((e) => Experience.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// The candidate's education, most recent first.
+  Future<List<Education>> educationsOf(String profileId) async {
+    if (!_live || profileId.isEmpty) return const [];
+    final rows = await _ref
+        .read(supabaseClientProvider)
+        .from('educations')
+        .select()
+        .eq('profile_id', profileId)
+        .order('start_date', ascending: false);
+    return (rows as List)
+        .map((e) => Education.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
   void _seedOffline() {
     if (_seeded) return;
     _seeded = true;
@@ -227,3 +281,24 @@ final jobApplicantsProvider = FutureProvider.family<List<Applicant>, String>(
   (ref, jobId) =>
       ref.read(applicantsRepositoryProvider).applicantsForJob(jobId),
 );
+
+/// One candidate's certifications, keyed by their profile id.
+final applicantCertificationsProvider =
+    FutureProvider.family<List<Certification>, String>(
+      (ref, profileId) =>
+          ref.read(applicantsRepositoryProvider).certificationsOf(profileId),
+    );
+
+/// One candidate's work history, keyed by their profile id.
+final applicantExperiencesProvider =
+    FutureProvider.family<List<Experience>, String>(
+      (ref, profileId) =>
+          ref.read(applicantsRepositoryProvider).experiencesOf(profileId),
+    );
+
+/// One candidate's education, keyed by their profile id.
+final applicantEducationsProvider =
+    FutureProvider.family<List<Education>, String>(
+      (ref, profileId) =>
+          ref.read(applicantsRepositoryProvider).educationsOf(profileId),
+    );

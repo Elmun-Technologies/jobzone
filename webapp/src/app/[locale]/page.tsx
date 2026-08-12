@@ -8,33 +8,44 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingMap } from "@/components/landing/landing-map";
 import { pickLandingMapJobs } from "@/components/landing/landing-map-shared";
 import { JobCard } from "@/components/jobs/job-card";
+import { RoleToggle } from "@/components/layout/role-toggle";
 import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { AnimatedSearchInput } from "@/components/ui/animated-search-input";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { categoryEmoji } from "@/lib/categories-meta";
-import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import { getCategoriesWithCounts } from "@/lib/data/categories";
 import { getCompanies, getCompanyRatings } from "@/lib/data/companies";
-import {
-  getCities,
-  getJobCount,
-  getOpenJobs,
-  getRecentJobs,
-} from "@/lib/data/jobs";
+import { getCities, getPublicJobCount, getPublicJobs } from "@/lib/data/jobs";
 import { groupNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { orgJsonLd, websiteJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
-// Reads per-user bookmarks + the auth-aware header and the live job feed, but
-// getCurrentUser()'s try/catch swallows the cookies() dynamic signal — so
-// without this the homepage bakes as static logged-out HTML: a signed-out
-// header for logged-in users, saved jobs shown as unsaved, and a job list/map
-// frozen at build time (new postings must appear immediately — invariant #3).
-// Render per request, matching the gated pages' pattern.
-export const dynamic = "force-dynamic";
+// Nothing here is read per visitor any more, so the home page is prerendered
+// and served from the CDN — the single biggest thing standing between a
+// first-time visitor and a painted page.
+//
+// The feed reads go through the cached public readers, which a publish, close
+// or edit flushes via the "jobs" tag, so a new vacancy still shows up at once
+// (invariant #3). The saved hearts fill in from the browser
+// (SavedJobsProvider). What the page gives up is the seeker's personal
+// archive: a vacancy someone dismissed still appears in the showcase here, as
+// it already did on the region and category landings. The archive still
+// governs where a seeker actually browses — /jobs and /explore.
+
+/**
+ * Rebuilt at most every five minutes, and immediately whenever an employer
+ * publishes, closes, edits or boosts a vacancy (`revalidateTag("jobs")`).
+ *
+ * The tag flush is what makes invariant #3 hold — a new posting is visible at
+ * once. This window is the safety net under it: publishing also happens where
+ * no server action runs, from the `publish_due_jobs()` cron and the payment
+ * webhook, and vacancies expire on a timestamp nobody flushes. Without a
+ * window those changes would sit behind stale HTML indefinitely.
+ */
+export const revalidate = 300;
 
 export default async function HomePage({
   params,
@@ -58,28 +69,19 @@ export default async function HomePage({
     answer: tfaq(`a${i + 1}`),
   }));
 
-  const [
-    recent,
-    mapJobs,
-    ratings,
-    categories,
-    total,
-    cities,
-    savedIds,
-    topCompanies,
-  ] = await Promise.all([
-    getRecentJobs(6),
-    // The landing showcase pins up to 8 jobs — fetch a small salaried set so
-    // pins actually populate; the full pannable feed lives on /explore.
-    getOpenJobs({ limit: 24 }),
-    // Live company ratings for the pins' hover cards.
-    getCompanyRatings(),
-    getCategoriesWithCounts(),
-    getJobCount(),
-    getCities(),
-    getBookmarkedJobIds(),
-    getCompanies({ limit: 8 }),
-  ]);
+  const [recent, mapJobs, ratings, categories, total, cities, topCompanies] =
+    await Promise.all([
+      getPublicJobs({ limit: 6 }),
+      // The landing showcase pins up to 8 jobs — fetch a small salaried set so
+      // pins actually populate; the full pannable feed lives on /explore.
+      getPublicJobs({ limit: 24 }),
+      // Live company ratings for the pins' hover cards.
+      getCompanyRatings(),
+      getCategoriesWithCounts(),
+      getPublicJobCount(),
+      getCities(),
+      getCompanies({ limit: 8 }),
+    ]);
 
   // Popular-search shortcuts, reusing existing job-filter labels.
   const presets = [
@@ -110,6 +112,15 @@ export default async function HomePage({
         <div className="relative isolate overflow-hidden rounded-3xl bg-[#171716] px-5 py-16 sm:px-10 sm:py-24">
           <HeroMapBackdrop />
           <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
+            {/* Seeker ⇄ employer, on phones only: the header hides this pill
+                below `sm` (it doesn't fit next to the logo and the auth
+                buttons), which left the entire employer side of the
+                marketplace reachable only through the drawer. At the top of
+                the hero it is the first thing a visitor sees, which is where
+                the audience split belongs. */}
+            <div className="sm:hidden">
+              <RoleToggle tone="onDark" />
+            </div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-xs font-semibold tracking-wide text-white/80 uppercase backdrop-blur">
               {/* Inside the hero card, which is a literal #171716 background
                   regardless of site theme — not the page surface `--primary-ink`
@@ -232,29 +243,29 @@ export default async function HomePage({
           <Container className="py-16">
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {activeCategories.map((c) => (
-              <li key={c.id}>
-                <Link
-                  // Deep-link into the SEO landing (/ish/[category]) instead
-                  // of a faceted /jobs?category= URL — the landing has its
-                  // own H1, canonical, and JSON-LD, and inbound internal
-                  // links from the home page are how Google ranks it.
-                  href={`/ish/${c.slug}`}
-                  className="border-border bg-card hover:border-primary/40 flex h-full flex-col gap-2 rounded-xl border p-4 transition-all hover:shadow-sm"
-                >
-                  <span className="text-3xl leading-none">
-                    {categoryEmoji(c)}
-                  </span>
-                  <span className="text-foreground leading-snug font-semibold">
-                    {c.name}
-                  </span>
-                  <span className="text-muted-foreground mt-auto text-sm">
-                    {t("vacancyCount", { count: groupNumber(c.count) })}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Container>
+                <li key={c.id}>
+                  <Link
+                    // Deep-link into the SEO landing (/ish/[category]) instead
+                    // of a faceted /jobs?category= URL — the landing has its
+                    // own H1, canonical, and JSON-LD, and inbound internal
+                    // links from the home page are how Google ranks it.
+                    href={`/ish/${c.slug}`}
+                    className="border-border bg-card hover:border-primary/40 flex h-full flex-col gap-2 rounded-xl border p-4 transition-all hover:shadow-sm"
+                  >
+                    <span className="text-3xl leading-none">
+                      {categoryEmoji(c)}
+                    </span>
+                    <span className="text-foreground leading-snug font-semibold">
+                      {c.name}
+                    </span>
+                    <span className="text-muted-foreground mt-auto text-sm">
+                      {t("vacancyCount", { count: groupNumber(c.count) })}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Container>
         ) : null;
       })()}
 
@@ -302,7 +313,7 @@ export default async function HomePage({
           <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {recent.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
+                <JobCard job={job} />
               </li>
             ))}
           </ul>

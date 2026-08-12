@@ -8,6 +8,7 @@ import type { Job } from "@/lib/data/types";
 export function makeJob(overrides: Partial<Job> = {}): Job {
   return {
     id: "j1",
+    status: "open",
     title: "Role",
     description: null,
     responsibilities: null,

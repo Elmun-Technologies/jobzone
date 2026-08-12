@@ -6,6 +6,17 @@ on:
   pull_request:
 
 jobs:
+  # Migrations never run in CI — they reach the database through the operator's
+  # `supabase db push` — so this is the only automated check they get. It costs
+  # seconds and catches the one mistake that would otherwise surface as a
+  # missing table in production.
+  migrations:
+    name: Migration versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/check-migrations.sh
+
   flutter:
     name: Analyze & test
     runs-on: ubuntu-latest

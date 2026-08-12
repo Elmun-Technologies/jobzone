@@ -31,30 +31,16 @@ class _ResumeReviewPageState extends ConsumerState<ResumeReviewPage> {
     final repo = ref.read(cvRepositoryProvider);
     setState(() => _saving = true);
     try {
-      // saveAbout writes all three columns, so passing a null the model simply
-      // didn't extract would blank the seeker's real value. A CV that yielded
-      // only a bio used to erase their name and headline outright — and
-      // `headline` is the title-match term in recommended_jobs() (0051), so
-      // their job matches went with it. Keep whatever is already on the
-      // profile for anything the parse didn't produce.
-      String? merge(String? parsed, String? existing) {
-        final v = parsed?.trim();
-        return (v != null && v.isNotEmpty) ? v : existing;
-      }
-
-      final parsedAbout = [
-        p.fullName,
-        p.headline,
-        p.bio,
-      ].map((v) => v?.trim() ?? '').any((v) => v.isNotEmpty);
-      if (parsedAbout) {
-        final current = await ref.read(currentProfileProvider.future);
-        await repo.saveAbout(
-          fullName: merge(p.fullName, current?.fullName),
-          headline: merge(p.headline, current?.headline),
-          bio: merge(p.bio, current?.bio),
-        );
-      }
+      // mergeAbout, not saveAbout: a null here means the parser found
+      // nothing, not that the seeker wants the field cleared. saveAbout
+      // wrote all three unconditionally, so a PDF that yielded a summary
+      // but no name blanked out an existing full_name — which also
+      // silently disabled one-tap apply, since that gates on the name.
+      await repo.mergeAbout(
+        fullName: p.fullName,
+        headline: p.headline,
+        bio: p.bio,
+      );
       if (p.skills.isNotEmpty) {
         final existing = await repo.skills();
         await repo.setSkills([...existing, ...p.skills]);

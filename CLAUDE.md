@@ -102,7 +102,8 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   languages, pay basis, screening questions editor, markdown description, OSM
   location picker, scheduled publish), applicants pipeline with status history,
   distance sort + applicants map (official Yandex SDK on device, OSM on web),
-  company/people/gallery admin, monetization (promote sheet, wallet).
+  company/people/gallery admin, monetization (promote sheet, Hamyon wallet with
+  gateway top-up, pay-per-vacancy tiers).
 - **l10n:** `lib/localization/l10n/app_{en,ru,uz}.arb` → `flutter gen-l10n`.
   `test/localization/arb_parity_test.dart` enforces identical keys across the
   three files, **ignoring `@`-metadata** — so placeholder metadata lives in the
@@ -135,7 +136,8 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   `docs/go-live-checklist.md` §2–4.
 - **Employer web:** onboarding (creating a company promotes `profiles.role` to
   employer), post vacancy (guest-first), my jobs, applicants, company edit,
-  wallet (Hamyon) with top-up form (records pending transactions only).
+  wallet (Hamyon) with a real top-up (Payme/Click/Rahmat → the gateway callback
+  completes the credit).
 - **Admin panel (`/admin`, web-only):** dashboard (aggregate stats RPC), jobs /
   companies / reviews moderation, users, orders, finance (top-ups, promotion
   orders, pricing), category CMS, broadcast (one notification to an audience),
@@ -148,7 +150,7 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
 
 ## Backend (`supabase/`)
 
-- **Schema domains** (57 migrations, 0001–0057): profiles/CV (experiences, educations,
+- **Schema domains** (85 migrations, 0001–0085): profiles/CV (experiences, educations,
   skills, resumes…), companies (+people/gallery/reviews), job_categories
   (seeded blue-collar set incl. Foreign-jobs), jobs (rich blue-collar fields +
   screening_questions jsonb + boost + expiry + publish_at), applications
@@ -159,7 +161,21 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   interview_confirmations, telegram_links, saved_searches (+ alert watermark),
   recommendations (recommended_candidates/jobs), dismissed_jobs, and the
   **admin foundation** (0037–0057: audit log, moderation, admin grants, finance,
-  broadcast, category CMS, platform settings).
+  broadcast, category CMS, platform settings), then legal/compliance
+  (content_reports, account_deletion), the per-vacancy paid listing tiers
+  (0063–0065, 0072, 0075–0076), the résumé/matching work (0077, 0082) and the
+  **email channel** (0084: per-category email switches + unsubscribe token,
+  `email_deliveries` send log, alert payloads for the digest, followed-company
+  alerts, welcome-mail triggers on `auth.users`) and the **payable wallet**
+  (0085: `create_topup_order` + the shared `gateway_order` /
+  `gateway_settle_order` every merchant callback settles through, so a Hamyon
+  top-up is charged on the same rails as a vacancy).
+- **Numbering a new migration:** take the next free version — never reuse one.
+  The version is the PK of `supabase_migrations.schema_migrations`, so a
+  duplicate makes `db push` **silently skip** the second file; this has bitten
+  the project three times (0065, 0070, 0078). `scripts/check-migrations.sh`
+  (CI, every PR) now blocks it. Rebase before numbering: another open branch may
+  already have claimed the number.
 - **`job_feed` view — the one feed contract** (0034/0036 era): jobs ⋈ companies
   ⋈ categories, `boost_active` computed, **filters expiry only**; RLS
   (`status='open'` readable by all, owners see their own everything) plus the
@@ -173,10 +189,14 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   go through `application_status_history` inserts — never write
   `current_status` directly.
 - **Notification pipeline:** INSERT into `notifications` → pg_net AFTER-INSERT
-  trigger (0026, reads `app.notify_dispatch_url` + `app.edge_shared_secret`) →
-  `notify-dispatch` fn → Telegram (if linked) + FCM (if configured), honoring
-  `notification_settings`. So any feature notifies all channels by inserting
-  one row.
+  trigger (0026, reads `private.app_secrets`) → `notify-dispatch` fn → Telegram
+  (if linked) + FCM (if configured) + **email** (if `RESEND_API_KEY` is set),
+  honoring `notification_settings` — `push_*` mutes the instant channels,
+  `email_*` the inbox, independently. So any feature notifies every channel by
+  inserting one row. Saved-search/followed-company alerts are the exception:
+  they carry `data.alert = true`, and the email for them is the grouped digest
+  sent by `saved-search-alerts` (one mail per person per run, never one per
+  vacancy).
 - **Saved-search alerts (0036):** `run_saved_search_alerts()` matches jobs
   posted since each search's `last_alerted_at` (keywords ILIKE
   title/company/category + city), inserts `job_match` notifications
@@ -189,7 +209,8 @@ test/           Flutter tests (incl. arb_parity, router guards, repos, widgets)
   delivery, Standard-Webhooks-verified), `telegram-webhook` (/start link),
   `push-dispatch` (FCM), `payment-webhook` (Click/Payme stub),
   `generate-job-content` (AI seam — templates now, Claude when
-  `ANTHROPIC_API_KEY` set), `agora-token` (calls), `send-notification`, and the
+  `ANTHROPIC_API_KEY` set), `lifecycle-email` (welcome mail, fired by the
+  `auth.users` triggers), `agora-token` (calls), `send-notification`, and the
   legacy Meili trio (`meili-sync`/`meili-reindex`/`search-jobs`). All
   server-to-server ones are gated by `EDGE_SHARED_SECRET` (fail closed).
 
@@ -256,14 +277,16 @@ call the same RPC), one-tap apply from any job card (web + mobile), a seeker's
 (moderation/finance/categories/broadcast/audit/settings), and the go-live
 runbook (`docs/go-live-checklist.md`).
 
-**Go-live is ops, not code** (user's side): `supabase db push` (→0057),
+**Go-live is ops, not code** (user's side): `supabase db push` (→0084),
 secrets (`EDGE_SHARED_SECRET`, `TELEGRAM_GATEWAY_TOKEN`, `SEND_SMS_HOOK_SECRET`,
-`TELEGRAM_BOT_TOKEN`…, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), deploy
+`TELEGRAM_BOT_TOKEN`…, `RESEND_API_KEY` + `EMAIL_FROM` + a DKIM/SPF/DMARC-verified
+sending domain for email, `SUPABASE_SERVICE_ROLE_KEY` for the admin panel), deploy
 edge fns, enable Phone auth + register the Send-SMS hook, schedule the cron (§5),
 Vercel envs, store submission.
 
-**Queued next (genuinely needs third-party ops, not just code):** real
-payments via `payment-webhook` (Click/Payme merchant accounts), FCM runtime
+**Queued next (genuinely needs third-party ops, not just code):** live merchant
+accounts for Payme/Click/Rahmat (the code path is complete on both clients —
+vacancies, promotions and wallet top-ups), FCM runtime
 (the code + Firebase config are wired — needs a live Firebase project's
 `google-services.json`/`GoogleService-Info.plist` to send real pushes), Agora
 calls (a real Agora project + app credentials).

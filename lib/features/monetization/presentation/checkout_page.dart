@@ -2,17 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../../../localization/l10n_extension.dart';
 import '../../../shared/options/option_lists.dart';
+import '../../../shared/widgets/snackbars.dart';
+import '../../employer/data/employer_jobs_repository.dart';
+import '../../employer/data/wallet_repository.dart';
 import '../data/monetization_repository.dart';
 import '../domain/promotion.dart';
 
-/// Self-serve checkout for a promotion tariff. The plan and its price are shown
-/// in full (tariffs stay), but the actual payment (Click / Payme) is still
-/// being connected — there is no wallet and no fake charge here. Once the
-/// gateway is live this screen gains the real pay action.
-class CheckoutPage extends ConsumerWidget {
+/// Self-serve checkout for a promotion tariff: pay for the boost out of the
+/// Hamyon balance.
+///
+/// `buy_promotion` (0043) is one atomic step server-side — debit the wallet,
+/// extend the job's boost, record the paid order — so there is no half-charged
+/// state to recover from here. When the balance is short we don't fail: the
+/// screen says how much is missing and sends the employer to the wallet with
+/// that amount already filled in, where the gateway tops it up for real (0085).
+class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({
     super.key,
     required this.jobId,
@@ -23,10 +31,40 @@ class CheckoutPage extends ConsumerWidget {
   final String productCode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CheckoutPage> createState() => _CheckoutPageState();
+}
+
+class _CheckoutPageState extends ConsumerState<CheckoutPage> {
+  bool _busy = false;
+
+  /// Spends the balance on the boost, then refreshes everything the purchase
+  /// moved: the wallet, the order history and the employer's job list (whose
+  /// cards show the boost badge).
+  Future<void> _payFromWallet(PromotionProduct product) async {
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(monetizationRepositoryProvider)
+          .purchase(jobId: widget.jobId, productCode: widget.productCode);
+      ref.invalidate(walletProvider);
+      ref.invalidate(myOrdersProvider);
+      ref.invalidate(myJobsProvider);
+      if (!mounted) return;
+      showInfoSnack(context, context.l10n.checkoutPaid);
+      context.pop();
+    } catch (e) {
+      if (mounted) showErrorSnack(context, localizedError(context, e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
     final productsAsync = ref.watch(promotionProductsProvider);
+    final balance = ref.watch(walletProvider).value?.balanceUzs ?? 0;
 
     return Scaffold(
       body: SafeArea(
@@ -40,7 +78,7 @@ class CheckoutPage extends ConsumerWidget {
           ),
           data: (products) {
             final product = products
-                .where((p) => p.code == productCode)
+                .where((p) => p.code == widget.productCode)
                 .firstOrNull;
             if (product == null) {
               return JzErrorState(
@@ -68,7 +106,10 @@ class CheckoutPage extends ConsumerWidget {
                     children: [
                       _SummaryCard(product: product),
                       const SizedBox(height: AppSpacing.lg),
-                      const _PaymentSoonNotice(),
+                      _BalanceNotice(
+                        balanceUzs: balance,
+                        priceUzs: product.priceUzs,
+                      ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         l.offerNote,
@@ -105,13 +146,24 @@ class CheckoutPage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
-                        // No wallet/instant charge — the pay action is disabled
-                        // until the Click/Payme gateway is connected.
+                        // Enough balance → charge it. Short → the same button
+                        // becomes the way to fix that, carrying the shortfall.
                         Expanded(
-                          child: JzPrimaryButton(
-                            label: l.comingSoon,
-                            onPressed: null,
-                          ),
+                          child: balance >= product.priceUzs
+                              ? JzPrimaryButton(
+                                  label: l.checkoutPayFromWallet,
+                                  loading: _busy,
+                                  onPressed: _busy
+                                      ? null
+                                      : () => _payFromWallet(product),
+                                )
+                              : JzPrimaryButton(
+                                  label: l.topUpWalletCta,
+                                  onPressed: () => context.push(
+                                    Routes.employerWallet,
+                                    extra: (product.priceUzs - balance).ceil(),
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -126,38 +178,51 @@ class CheckoutPage extends ConsumerWidget {
   }
 }
 
-/// Honest placeholder for the payment step while Click / Payme is being wired.
-class _PaymentSoonNotice extends StatelessWidget {
-  const _PaymentSoonNotice();
+/// What the purchase will cost against what the wallet holds — and, when that
+/// isn't enough, exactly how much is missing (guessing is the employer's job
+/// otherwise).
+class _BalanceNotice extends StatelessWidget {
+  const _BalanceNotice({required this.balanceUzs, required this.priceUzs});
+
+  final num balanceUzs;
+  final num priceUzs;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final colors = context.colors;
+    final enough = balanceUzs >= priceUzs;
+    final accent = enough ? colors.primary : colors.warning;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colors.primary.withValues(alpha: 0.10),
+        color: accent.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: colors.primary.withValues(alpha: 0.35)),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.credit_card_rounded, size: 18, color: colors.primary),
+          Icon(
+            enough
+                ? Icons.account_balance_wallet_rounded
+                : Icons.error_outline_rounded,
+            size: 18,
+            color: accent,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l.comingSoon,
+                  '${l.walletBalanceLabel}: ${formatUzs(balanceUzs)}',
                   style: context.text.bodySmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  l.checkoutPaymentSoon,
+                  enough ? l.activatesAfterPayment : l.walletInsufficient,
                   style: context.text.bodySmall?.copyWith(
                     color: colors.textSecondary,
                   ),

@@ -8,7 +8,13 @@ import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
 import { markAllNotificationsRead } from "@/lib/actions/notifications";
 import { getNotifications } from "@/lib/data/notifications";
-import { notificationHref } from "@/lib/notifications";
+import {
+  inviteParts,
+  isJobClosed,
+  notificationHref,
+  notificationStatus,
+  notificationTitleKey,
+} from "@/lib/notifications";
 import { getCurrentUser } from "@/lib/auth/user";
 import { formatDate, tashkentClock } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -42,6 +48,9 @@ export default async function NotificationsPage({
     redirect(`/${locale}/sign-in?next=/${locale}/account/notifications`);
 
   const t = await getTranslations("notifications");
+  // Status labels live with the applications UI; the notification body reuses
+  // them so a row and the list it links to never name a status two ways.
+  const ts = await getTranslations("applications.status");
   const items = await getNotifications();
   const unread = items.filter((n) => !n.isRead).length;
 
@@ -69,22 +78,42 @@ export default async function NotificationsPage({
           <EmptyState title={t("emptyTitle")} description={t("emptyBody")} />
         ) : (
           <ul className="border-border divide-border bg-card divide-y overflow-hidden rounded-2xl border">
-            {items.map((n) => (
-              <NotificationRow
-                key={n.id}
-                id={n.id}
-                kind={n.kind}
-                title={n.title}
-                body={n.body}
-                meta={
-                  n.createdAt
-                    ? `${formatDate(n.createdAt)} · ${tashkentClock(n.createdAt)}`
-                    : ""
-                }
-                unread={!n.isRead}
-                href={notificationHref(n.kind, n.data)}
-              />
-            ))}
+            {items.map((n) => {
+              // The DB stores a fixed-language title for the trigger-raised
+              // types; only content-bearing rows keep what the server wrote.
+              const titleKey = notificationTitleKey(n.kind, n.data);
+              const status = notificationStatus(n.kind, n.data);
+              // 0078 stores the vacancy's title as the body; the sentence
+              // around it is written here, in the reader's language.
+              const closed = isJobClosed(n.data);
+              // 0079 carries the company and role, so the invitation reads in
+              // the seeker's language rather than the one 0050 wrote it in.
+              const invite = inviteParts(n.kind, n.data);
+              return (
+                <NotificationRow
+                  key={n.id}
+                  id={n.id}
+                  kind={n.kind}
+                  title={titleKey ? t(titleKey) : n.title}
+                  body={
+                    closed
+                      ? t("bodyJobClosed", { title: n.body ?? "" })
+                      : invite
+                        ? t("bodyJobInvite", invite)
+                        : status
+                          ? t("bodyApplicationUpdate", { status: ts(status) })
+                          : n.body
+                  }
+                  meta={
+                    n.createdAt
+                      ? `${formatDate(n.createdAt)} · ${tashkentClock(n.createdAt)}`
+                      : ""
+                  }
+                  unread={!n.isRead}
+                  href={notificationHref(n.kind, n.data)}
+                />
+              );
+            })}
           </ul>
         )}
       </div>

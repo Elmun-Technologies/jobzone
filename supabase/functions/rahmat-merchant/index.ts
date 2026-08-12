@@ -1,7 +1,8 @@
 // rahmat-merchant — Rahmat (Multicard) callback endpoint for direct
 // pay-per-listing. Multicard posts here after a payer completes the payment on
 // Rahmat's hosted checkout page (built via the sibling `rahmat-invoice` fn).
-// On a verified successful callback we flip the promotion_orders row to `paid`,
+// On a verified successful callback we settle the order it names — a
+// promotion/listing order flips to `paid`, a wallet top-up to `completed` —
 // which fires the DB trigger `apply_promotion` (migration 0063) that publishes
 // the draft vacancy and stamps its tier. Idempotency lives in
 // `payment_transactions` (migration 0064) keyed by Multicard's payment uuid;
@@ -110,6 +111,7 @@ async function handleCallback(req: Request, env: Env): Promise<Response> {
         provider: "rahmat",
         provider_txn_id: uuid,
         order_id: order.orderId,
+        order_kind: order.orderKind,
         amount_uzs: order.expectedUzs,
         state: 1,
         create_time: Date.now(),
@@ -128,11 +130,11 @@ async function handleCallback(req: Request, env: Env): Promise<Response> {
       .from("payment_transactions")
       .update({ state: -1, cancel_time: Date.now() })
       .eq("id", txnId);
-    await supa
-      .from("promotion_orders")
-      .update({ status: "cancelled" })
-      .eq("id", order.orderId)
-      .eq("status", "pending");
+    await supa.rpc("gateway_settle_order", {
+      p_order_id: order.orderId,
+      p_status: "cancelled",
+      p_external_ref: uuid,
+    });
     return json({ ok: true, status: "cancelled" });
   }
 
@@ -140,33 +142,39 @@ async function handleCallback(req: Request, env: Env): Promise<Response> {
     .from("payment_transactions")
     .update({ state: 2, perform_time: Date.now() })
     .eq("id", txnId);
-  await supa
-    .from("promotion_orders")
-    .update({ status: "paid", paid_at: new Date().toISOString(), external_ref: uuid })
-    .eq("id", order.orderId)
-    .eq("status", "pending");
+  // A vacancy order flips to paid (its trigger publishes the job); a top-up
+  // becomes a completed wallet credit. Replays are no-ops either way.
+  await supa.rpc("gateway_settle_order", {
+    p_order_id: order.orderId,
+    p_status: "paid",
+    p_external_ref: uuid,
+  });
 
   return json({ ok: true, status: "paid" });
 }
 
+/** `gateway_order` (0085) resolves either kind of order we sell — a
+ * promotion/listing order (charged at the catalog price) or a wallet top-up
+ * (charged at its server-bounded amount) — so this callback settles both. */
 async function resolveOrder(
   supa: Supa,
   orderId: string,
-): Promise<{ orderId: string; expectedUzs: number } | { error: string }> {
-  const { data: order } = await supa
-    .from("promotion_orders")
-    .select("id, product_code")
-    .eq("id", orderId)
-    .maybeSingle();
+): Promise<
+  { orderId: string; orderKind: string; expectedUzs: number } | { error: string }
+> {
+  const { data } = await supa.rpc("gateway_order", { p_order_id: orderId });
+  const order = (Array.isArray(data) ? data[0] : data) as
+    | { order_id: string; kind: string; amount_uzs: number; status: string }
+    | null
+    | undefined;
   if (!order) return { error: "order_not_found" };
-  const { data: product } = await supa
-    .from("promotion_products")
-    .select("price_uzs")
-    .eq("code", order.product_code)
-    .maybeSingle();
-  const expectedUzs = Number(product?.price_uzs ?? 0);
+  const expectedUzs = Number(order.amount_uzs ?? 0);
   if (!(expectedUzs > 0)) return { error: "no_price" };
-  return { orderId: order.id as string, expectedUzs };
+  return {
+    orderId: order.order_id,
+    orderKind: order.kind === "topup" ? "topup" : "promotion",
+    expectedUzs,
+  };
 }
 
 interface Env {

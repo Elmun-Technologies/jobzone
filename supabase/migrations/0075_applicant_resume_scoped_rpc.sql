@@ -98,7 +98,8 @@ begin
         'name', c.name,
         'issuer', c.issuer,
         'issued_date', c.issued_date,
-        'expiry_date', c.expiry_date
+        'expiry_date', c.expiry_date,
+        'file_path', c.file_path
       ) order by c.issued_date desc nulls last)
       from public.certifications c where c.profile_id = p_applicant_id
     ), '[]'::jsonb),

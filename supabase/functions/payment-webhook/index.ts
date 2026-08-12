@@ -1,66 +1,66 @@
-// payment-webhook — marks a promotion order paid when the gateway confirms
-// payment. The DB trigger (apply_promotion) then applies the boost; the client
-// never sets status=paid itself.
+// payment-webhook — generic webhook for custom gateways or admin callbacks.
+// Settles either a promotion order or a wallet top-up using the robust
+// gateway_settle_order RPC (migration 0085).
 //
-// This is a SCAFFOLD: it flips an order to `paid` after verifying a shared
-// secret. Wire the real Click / Payme callback shape + signature verification
-// where marked, and set the secrets in the project:
-//   PAYMENT_WEBHOOK_SECRET   — shared secret guarding this endpoint
-//   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY — to update the order (service role)
-// No-ops (501) until PAYMENT_WEBHOOK_SECRET is configured.
+// Required secrets:
+//   PAYMENT_WEBHOOK_SECRET — shared secret guarding this endpoint
+//   SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY — service role DB writes
 
-import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type, x-webhook-secret",
-};
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { corsHeaders, json } from "../_shared/cors.ts";
+import { timingSafeEqual } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
-    return json({ error: "method_not_allowed" }, 405);
+    return json({ ok: false, error: "method_not_allowed" }, 405);
   }
 
   const secret = Deno.env.get("PAYMENT_WEBHOOK_SECRET");
-  if (!secret) return json({ error: "gateway_not_configured" }, 501);
+  if (!secret) {
+    return json({ ok: false, error: "gateway_not_configured" }, 503);
+  }
 
-  // TODO(Click/Payme): replace this shared-secret check with the provider's
-  // signature verification (Click uses an md5 `sign_string`; Payme uses Basic
-  // auth with the merchant key). Map the provider payload → { orderId, paid }.
-  if (req.headers.get("x-webhook-secret") !== secret) {
-    return json({ error: "unauthorized" }, 401);
+  const gotSecret = req.headers.get("x-webhook-secret") ?? "";
+  if (!timingSafeEqual(gotSecret, secret)) {
+    return json({ ok: false, error: "unauthorized" }, 401);
   }
 
   let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
-    return json({ error: "bad_json" }, 400);
+    return json({ ok: false, error: "bad_json" }, 400);
   }
 
   const orderId = body.order_id as string | undefined;
-  const paid = body.paid === true || body.status === "paid";
-  if (!orderId) return json({ error: "missing_order_id" }, 400);
-  if (!paid) return json({ ok: true, ignored: true });
+  const status = (body.status as string | undefined) ?? (body.paid === true ? "paid" : "pending");
+  const externalRef = body.external_ref as string | undefined;
+
+  if (!orderId) {
+    return json({ ok: false, error: "missing_order_id" }, 400);
+  }
 
   const supa = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
-  const { error } = await supa
-    .from("promotion_orders")
-    .update({ status: "paid", paid_at: new Date().toISOString() })
-    .eq("id", orderId)
-    .eq("status", "pending");
-  if (error) return json({ error: error.message }, 500);
 
-  return json({ ok: true });
+  try {
+    const { data: settled, error } = await supa.rpc("gateway_settle_order", {
+      p_order_id: orderId,
+      p_status: status,
+      p_external_ref: externalRef,
+    });
+
+    if (error) {
+      console.error("payment-webhook: gateway_settle_order failed", error);
+      return json({ ok: false, error: error.message }, 500);
+    }
+
+    return json({ ok: true, settled: Boolean(settled) });
+  } catch (e) {
+    console.error("payment-webhook exception", e);
+    return json({ ok: false, error: String(e) }, 500);
+  }
 });
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...cors, "content-type": "application/json" },
-  });
-}

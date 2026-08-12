@@ -227,16 +227,30 @@ class ApplicationStatusPage extends ConsumerWidget {
                         onPressed: () => _confirmWithdraw(context, ref, app),
                       ),
                     const SizedBox(height: AppSpacing.xs),
-                    TextButton(
-                      onPressed: () => context.push(Routes.jobDetails(job.id)),
-                      child: Text(
-                        l.viewJobDetails,
-                        style: context.text.titleMedium?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w700,
+                    // Only while the vacancy is still live. A closed one is not
+                    // in `job_feed` for anyone but its owner, so this button
+                    // used to land the applicant on "no jobs found" — the
+                    // empty-search screen, as if the app had mislaid the job
+                    // rather than the employer having closed it.
+                    if (job.status == 'open')
+                      TextButton(
+                        onPressed: () =>
+                            context.push(Routes.jobDetails(job.id)),
+                        child: Text(
+                          l.viewJobDetails,
+                          style: context.text.titleMedium?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        l.positionClosed,
+                        style: context.text.bodyMedium?.copyWith(
+                          color: colors.textSecondary,
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),

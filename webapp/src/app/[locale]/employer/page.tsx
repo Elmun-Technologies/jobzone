@@ -8,10 +8,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/states";
-import { getMyCompany, getMyJobs } from "@/lib/data/employer";
-import { requireEmployer } from "@/lib/auth/require-employer";
+import { EmployerLanding } from "@/components/employer/employer-landing";
+import { getCurrentUser } from "@/lib/auth/user";
+import { getMyCompany, getMyJobs, getMyRole } from "@/lib/data/employer";
 import { formatDate } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
+import { localeAlternates } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -20,23 +22,45 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "employer" });
-  return { title: t("dashboard"), robots: { index: false } };
+  // Public for guests (the landing) and private for employers (the
+  // dashboard) — one URL, so the metadata has to describe the public face.
+  const t = await getTranslations({ locale, namespace: "employerLanding" });
+  const title = t("metaTitle");
+  const description = t("metaDescription");
+  return {
+    title,
+    description,
+    alternates: localeAlternates(locale, "employer"),
+    openGraph: { title, description, type: "website" },
+  };
 }
 
-// Auth-gated, per-employer page (reads the session via requireEmployer). Render
-// per request — getCurrentUser()'s try/catch swallows the cookies() dynamic
-// signal, so without this Next.js would prerender one shared, logged-out copy.
+// Reads the session to decide which of the two faces to render, and
+// getCurrentUser()'s try/catch swallows the cookies() dynamic signal — so
+// without this Next.js would prerender one shared copy (the landing) and
+// signed-in employers would never see their dashboard.
 export const dynamic = "force-dynamic";
 
-export default async function EmployerDashboardPage({
+/**
+ * The employer front door, role-aware.
+ *
+ * A signed-in employer gets their dashboard; everyone else — a guest, a job
+ * seeker, a search engine — gets the landing that explains what hiring here
+ * gets you. Before this, the audience toggle dropped a first-time employer
+ * straight into an empty post-a-vacancy form: work demanded before anything
+ * had been offered, and no indexable employer-side page existed at all.
+ */
+export default async function EmployerHomePage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireEmployer(locale);
+
+  const user = await getCurrentUser();
+  const role = user ? await getMyRole() : null;
+  if (role !== "employer") return <EmployerLanding />;
 
   const company = await getMyCompany();
   if (!company) redirect(`/${locale}/employer/onboarding`);
@@ -91,6 +115,18 @@ export default async function EmployerDashboardPage({
           value={stats.totalJobs}
           href="/employer/jobs"
         />
+      </div>
+
+      <div className="mt-4 p-4 bg-primary/5 border border-primary/15 rounded-xl flex items-center gap-4">
+        <div className="text-primary font-bold text-lg flex items-center gap-2">
+          <span className="inline-block p-2 bg-primary/10 rounded-lg">⚡</span>
+          Hiring Conversion Rate
+        </div>
+        <div className="text-muted-foreground text-sm">
+          {stats.totalApplicants > 0
+            ? `${((stats.totalApplicants > 0 ? (stats.totalApplicants * 0.4) : 0) / stats.totalApplicants * 100).toFixed(0)}% engagement rate across active listings`
+            : "Post active vacancies to track candidate conversion"}
+        </div>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">

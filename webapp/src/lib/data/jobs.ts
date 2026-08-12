@@ -49,6 +49,51 @@ function postedCutoff(query: JobQuery): string | null {
   return new Date(Date.now() - query.postedWithin * DAY_MS).toISOString();
 }
 
+/**
+ * The filter chain shared by every read of the open-job feed — the browse
+ * feed, its count, and the cached public variants below. One function so the
+ * count can never disagree with the list it counts.
+ */
+// The narrow slice of the PostgREST builder these filters need. Every method
+// on it returns the builder itself, so the chain is type-preserving — stated
+// structurally here because resolving the real generic through the builder's
+// own recursive types makes tsc give up ("excessively deep").
+interface JobFilterable {
+  or(filter: string): JobFilterable;
+  eq(column: string, value: unknown): JobFilterable;
+  gte(column: string, value: unknown): JobFilterable;
+}
+
+function applyJobFilters<T>(req: T, query: JobQuery): T {
+  let r = req as JobFilterable;
+  if (query.q) {
+    const term = ilikeTerm(query.q);
+    // Match title, company, AND category — mirrors the saved-search alert
+    // matcher (0036), so a saved category search (stored as its keyword and
+    // re-run as ?q=) finds its jobs instead of returning empty.
+    if (term)
+      r = r.or(
+        `title.ilike.%${term}%,company_name.ilike.%${term}%,category_name.ilike.%${term}%`,
+      );
+  }
+  if (query.city) r = r.eq("city", query.city);
+  if (query.category) r = r.eq("category_name", query.category);
+  if (query.jobType) r = r.eq("job_type", query.jobType);
+  if (query.workingModel) r = r.eq("working_model", query.workingModel);
+  if (query.experienceLevel)
+    r = r.eq("experience_level", query.experienceLevel);
+  if (query.salaryMin != null) {
+    r = r
+      .eq("currency", query.currency ?? "UZS")
+      .or(
+        `salary_max.gte.${query.salaryMin},salary_min.gte.${query.salaryMin}`,
+      );
+  }
+  const cutoff = postedCutoff(query);
+  if (cutoff) r = r.gte("posted_at", cutoff);
+  return r as T;
+}
+
 /** A page of open jobs matching [query]. Boosted jobs first, then ordered. */
 export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
   const limit = query.limit ?? 20;
@@ -72,32 +117,7 @@ export async function getOpenJobs(query: JobQuery = {}): Promise<Job[]> {
       req = req.order("posted_at", { ascending: false });
     }
 
-    if (query.q) {
-      const term = ilikeTerm(query.q);
-      // Match title, company, AND category — mirrors the saved-search alert
-      // matcher (0036), so a saved category search (stored as its keyword and
-      // re-run as ?q=) finds its jobs instead of returning empty.
-      if (term)
-        req = req.or(
-          `title.ilike.%${term}%,company_name.ilike.%${term}%,category_name.ilike.%${term}%`,
-        );
-    }
-    if (query.city) req = req.eq("city", query.city);
-    if (query.category) req = req.eq("category_name", query.category);
-    if (query.jobType) req = req.eq("job_type", query.jobType);
-    if (query.workingModel) req = req.eq("working_model", query.workingModel);
-    if (query.experienceLevel) {
-      req = req.eq("experience_level", query.experienceLevel);
-    }
-    if (query.salaryMin != null) {
-      req = req
-        .eq("currency", query.currency ?? "UZS")
-        .or(
-          `salary_max.gte.${query.salaryMin},salary_min.gte.${query.salaryMin}`,
-        );
-    }
-    const cutoff = postedCutoff(query);
-    if (cutoff) req = req.gte("posted_at", cutoff);
+    req = applyJobFilters(req, query);
 
     const dismissed = await dismissedJobIds(supabase);
     if (dismissed.length > 0)
@@ -124,31 +144,7 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
       .select("id", { count: "exact", head: true })
       .eq("status", "open");
 
-    if (query.q) {
-      const term = ilikeTerm(query.q);
-      // Same title/company/category match as getOpenJobs, so the live count
-      // stays consistent with the results a query returns.
-      if (term)
-        req = req.or(
-          `title.ilike.%${term}%,company_name.ilike.%${term}%,category_name.ilike.%${term}%`,
-        );
-    }
-    if (query.city) req = req.eq("city", query.city);
-    if (query.category) req = req.eq("category_name", query.category);
-    if (query.jobType) req = req.eq("job_type", query.jobType);
-    if (query.workingModel) req = req.eq("working_model", query.workingModel);
-    if (query.experienceLevel) {
-      req = req.eq("experience_level", query.experienceLevel);
-    }
-    if (query.salaryMin != null) {
-      req = req
-        .eq("currency", query.currency ?? "UZS")
-        .or(
-          `salary_max.gte.${query.salaryMin},salary_min.gte.${query.salaryMin}`,
-        );
-    }
-    const cutoff = postedCutoff(query);
-    if (cutoff) req = req.gte("posted_at", cutoff);
+    req = applyJobFilters(req, query);
 
     // Must match getOpenJobs' exclusions exactly — this count backs the live
     // "N vacancies" button, which has to agree with what actually renders.
@@ -161,6 +157,91 @@ export async function getJobCount(query: JobQuery = {}): Promise<number> {
     return count ?? 0;
   } catch (e) {
     console.error("getJobCount failed", e);
+    return 0;
+  }
+}
+
+/**
+ * The same feed, read as the public sees it: the anon client, no session, no
+ * per-seeker archive filter — and therefore cacheable.
+ *
+ * This pair is what the landing pages use (category, category × city, and the
+ * region pages, which already worked this way). The distinction is the whole
+ * reason those pages can be prerendered and served from the CDN: a read that
+ * touches the session cannot be, no matter how cacheable the rest of the page
+ * is. The trade is deliberate and matches what the region landings have done
+ * since they shipped — a shared landing page shows the market, not one
+ * visitor's edit of it, so a vacancy someone archived still appears there.
+ * `/jobs` and the home feed keep the personal variants above.
+ *
+ * A publish or a close calls `revalidateTag("jobs")` (actions/employer.ts), so
+ * a new posting appears immediately rather than at the end of the window —
+ * which is what invariant #3 actually asks for.
+ */
+const PUBLIC_FEED_REVALIDATE = 300;
+
+const _getPublicJobs = unstable_cache(
+  async (query: JobQuery): Promise<Job[]> => {
+    const limit = query.limit ?? 20;
+    const offset = query.offset ?? 0;
+    const supabase = createPublicClient();
+    let req = supabase
+      .from("job_feed")
+      .select(COLUMNS)
+      .eq("status", "open")
+      .order("boost_active", { ascending: false });
+    if (query.sort === "salary") {
+      req = req
+        .order("salary_max", { ascending: false, nullsFirst: false })
+        .order("salary_min", { ascending: false, nullsFirst: false });
+    } else {
+      req = req.order("posted_at", { ascending: false });
+    }
+    req = applyJobFilters(req, query).range(offset, offset + limit - 1);
+    const { data, error } = await req;
+    if (error) throw error;
+    return (data ?? []).map(toJob);
+  },
+  ["public-jobs"],
+  { tags: ["jobs"], revalidate: PUBLIC_FEED_REVALIDATE },
+);
+
+/** Open jobs matching [query], shared by every visitor. See _getPublicJobs. */
+export async function getPublicJobs(query: JobQuery = {}): Promise<Job[]> {
+  if (!hasSupabase()) return [];
+  try {
+    return await _getPublicJobs(query);
+  } catch (e) {
+    console.error("getPublicJobs failed", e);
+    return [];
+  }
+}
+
+const _getPublicJobCount = unstable_cache(
+  async (query: JobQuery): Promise<number> => {
+    const supabase = createPublicClient();
+    const req = applyJobFilters(
+      supabase
+        .from("job_feed")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open"),
+      query,
+    );
+    const { count, error } = await req;
+    if (error) throw error;
+    return count ?? 0;
+  },
+  ["public-job-count"],
+  { tags: ["jobs"], revalidate: PUBLIC_FEED_REVALIDATE },
+);
+
+/** Count for [query], shared by every visitor. See _getPublicJobs. */
+export async function getPublicJobCount(query: JobQuery = {}): Promise<number> {
+  if (!hasSupabase()) return 0;
+  try {
+    return await _getPublicJobCount(query);
+  } catch (e) {
+    console.error("getPublicJobCount failed", e);
     return 0;
   }
 }
@@ -224,7 +305,43 @@ export async function getRecentJobs(limit = 6): Promise<Job[]> {
   }
 }
 
-/** A single open job by id, or null. */
+const _getPublicJobById = unstable_cache(
+  async (id: string): Promise<Job | null> => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("job_feed")
+      .select(COLUMNS)
+      .eq("id", id)
+      .eq("status", "open")
+      .maybeSingle();
+    if (error) throw error;
+    return data ? toJob(data) : null;
+  },
+  ["public-job"],
+  { tags: ["jobs"], revalidate: PUBLIC_FEED_REVALIDATE },
+);
+
+/**
+ * A single open vacancy as the public sees it — the read behind the vacancy
+ * page, and the reason that page can be prerendered.
+ *
+ * Narrower than `getJobById` on purpose. That one reads through the session,
+ * so an employer could open their own draft at its public URL; here the
+ * `status = 'open'` filter is explicit and a draft or closed vacancy is a 404
+ * for everyone, owner included. Employers preview and edit from
+ * `/employer/jobs/[id]/edit`, which is where that belongs.
+ */
+export async function getPublicJobById(id: string): Promise<Job | null> {
+  if (!hasSupabase()) return null;
+  try {
+    return await _getPublicJobById(id);
+  } catch (e) {
+    console.error("getPublicJobById failed", e);
+    return null;
+  }
+}
+
+/** A single job by id as the *caller* may see it (owners include drafts). */
 export async function getJobById(id: string): Promise<Job | null> {
   if (!hasSupabase()) return null;
   try {

@@ -30,6 +30,7 @@ const EMPTY = {
   phone: "",
   city: "",
   country: "",
+  avatarUrl: "",
 };
 
 export default async function EditProfilePage({

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { useSession } from "@/components/auth/session-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -31,16 +32,15 @@ const ctaCls = cn(
  * toggle's own shrink-0 fix, silently squashed into overlapping text
  * instead). 1280px has confirmed room to spare.
  */
-export function HeaderNav({
-  signedIn,
-  isEmployerAccount,
-}: {
-  signedIn: boolean;
-  isEmployerAccount: boolean;
-}) {
+export function HeaderNav() {
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const { links, cta } = navModel(pathname, signedIn, isEmployerAccount);
+  const { signedIn, isEmployer } = useSession();
+  // `signedIn === null` (the session is still being read in the browser) falls
+  // through as "not yet an employer": the only difference it makes is the
+  // employer-mode CTA, and "Post a vacancy" is the right invitation for anyone
+  // we can't identify.
+  const { links, cta } = navModel(pathname, signedIn === true, isEmployer);
 
   return (
     <>

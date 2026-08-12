@@ -1,6 +1,6 @@
-// rahmat-invoice — creates a Rahmat (Multicard) invoice for one of our
-// `promotion_orders` rows and returns the hosted checkout URL for the client
-// to open. Sibling of `rahmat-merchant`, which is the callback endpoint that
+// rahmat-invoice — creates a Rahmat (Multicard) invoice for one of our orders
+// (a promotion/listing order, or a wallet top-up) and returns the hosted
+// checkout URL for the client to open. Sibling of `rahmat-merchant`, which is the callback endpoint that
 // flips the order to `paid` once Multicard confirms payment.
 //
 // The webapp server action and the mobile app both call this with the user's
@@ -143,6 +143,7 @@ Deno.serve(async (req) => {
           provider: "rahmat",
           provider_txn_id: uuid,
           order_id: order.orderId,
+          order_kind: order.orderKind,
           amount_uzs: order.expectedUzs,
           state: 1,
           create_time: Date.now(),
@@ -158,32 +159,37 @@ Deno.serve(async (req) => {
   }
 });
 
+/** Resolve the order the caller wants to pay. `gateway_order` (0085) covers
+ * both kinds — a promotion/listing order and a wallet top-up — and returns the
+ * owning employer, so the ownership check below is the same for either. */
 async function resolveOrder(
   supa: Supa,
   orderId: string,
   userId: string,
-): Promise<{ orderId: string; expectedUzs: number } | { error: string }> {
-  const { data: order } = await supa
-    .from("promotion_orders")
-    .select("id, status, product_code, company_id, companies!inner(owner_id)")
-    .eq("id", orderId)
-    .maybeSingle();
+): Promise<
+  { orderId: string; orderKind: string; expectedUzs: number } | { error: string }
+> {
+  const { data } = await supa.rpc("gateway_order", { p_order_id: orderId });
+  const order = (Array.isArray(data) ? data[0] : data) as
+    | {
+      order_id: string;
+      kind: string;
+      amount_uzs: number;
+      status: string;
+      owner_id: string | null;
+    }
+    | null
+    | undefined;
   if (!order) return { error: "order_not_found" };
-  // Ownership: caller must own the company the order belongs to.
-  const ownerId = (order as { companies?: { owner_id?: string } | { owner_id?: string }[] }).companies;
-  const ownerVal = Array.isArray(ownerId) ? ownerId[0]?.owner_id : ownerId?.owner_id;
-  if (ownerVal !== userId) return { error: "not_owner" };
-  if ((order as { status: string }).status !== "pending") {
-    return { error: "order_not_payable" };
-  }
-  const { data: product } = await supa
-    .from("promotion_products")
-    .select("price_uzs")
-    .eq("code", (order as { product_code: string }).product_code)
-    .maybeSingle();
-  const expectedUzs = Number(product?.price_uzs ?? 0);
+  if (order.owner_id !== userId) return { error: "not_owner" };
+  if (order.status !== "pending") return { error: "order_not_payable" };
+  const expectedUzs = Number(order.amount_uzs ?? 0);
   if (!(expectedUzs > 0)) return { error: "no_price" };
-  return { orderId: (order as { id: string }).id, expectedUzs };
+  return {
+    orderId: order.order_id,
+    orderKind: order.kind === "topup" ? "topup" : "promotion",
+    expectedUzs,
+  };
 }
 
 interface Env {

@@ -45,6 +45,10 @@ class AppNotification {
 }
 
 /// Per-channel notification preferences (`public.notification_settings`).
+///
+/// The defaults mirror the column defaults (0001, widened in 0084): job alerts
+/// and application updates reach the inbox, chatter doesn't. Getting them wrong
+/// here would show a switch in the opposite position to what the backend does.
 class NotificationSettings {
   const NotificationSettings({
     this.pushMessages = true,
@@ -53,7 +57,9 @@ class NotificationSettings {
     this.pushReviews = true,
     this.emailMessages = false,
     this.emailApplication = true,
-    this.emailJobMatch = false,
+    this.emailJobMatch = true,
+    this.emailReviews = false,
+    this.emailMarketing = true,
   });
 
   final bool pushMessages;
@@ -63,6 +69,8 @@ class NotificationSettings {
   final bool emailMessages;
   final bool emailApplication;
   final bool emailJobMatch;
+  final bool emailReviews;
+  final bool emailMarketing;
 
   NotificationSettings copyWith({
     bool? pushMessages,
@@ -72,6 +80,8 @@ class NotificationSettings {
     bool? emailMessages,
     bool? emailApplication,
     bool? emailJobMatch,
+    bool? emailReviews,
+    bool? emailMarketing,
   }) => NotificationSettings(
     pushMessages: pushMessages ?? this.pushMessages,
     pushApplication: pushApplication ?? this.pushApplication,
@@ -80,6 +90,8 @@ class NotificationSettings {
     emailMessages: emailMessages ?? this.emailMessages,
     emailApplication: emailApplication ?? this.emailApplication,
     emailJobMatch: emailJobMatch ?? this.emailJobMatch,
+    emailReviews: emailReviews ?? this.emailReviews,
+    emailMarketing: emailMarketing ?? this.emailMarketing,
   );
 
   factory NotificationSettings.fromMap(Map<String, dynamic> m) =>
@@ -90,7 +102,9 @@ class NotificationSettings {
         pushReviews: (m['push_reviews'] ?? true) as bool,
         emailMessages: (m['email_messages'] ?? false) as bool,
         emailApplication: (m['email_application'] ?? true) as bool,
-        emailJobMatch: (m['email_job_match'] ?? false) as bool,
+        emailJobMatch: (m['email_job_match'] ?? true) as bool,
+        emailReviews: (m['email_reviews'] ?? false) as bool,
+        emailMarketing: (m['email_marketing'] ?? true) as bool,
       );
 
   Map<String, dynamic> toMap() => {
@@ -101,5 +115,7 @@ class NotificationSettings {
     'email_messages': emailMessages,
     'email_application': emailApplication,
     'email_job_match': emailJobMatch,
+    'email_reviews': emailReviews,
+    'email_marketing': emailMarketing,
   };
 }

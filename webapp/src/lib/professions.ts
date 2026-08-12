@@ -97,6 +97,31 @@ function norm(s: string): string {
 }
 
 /**
+ * Profession labels to offer while the visitor types a job title.
+ *
+ * Ranked so the most literal match wins: titles that *start* with what was
+ * typed come first, then titles that merely contain it. Matching runs through
+ * `norm`, so "bog'bon", "bogbon" and "Bogʻbon" all find the same entry — the
+ * three apostrophe glyphs are otherwise a dead end on a phone keyboard.
+ *
+ * Returns nothing until the second character: one letter matches a third of
+ * the list, which is noise, not a suggestion.
+ */
+export function suggestProfessions(query: string, limit = 8): string[] {
+  const n = norm(query);
+  if (n.length < 2) return [];
+  const starts: string[] = [];
+  const contains: string[] = [];
+  for (const p of PROFESSIONS) {
+    const pn = norm(p.label);
+    if (pn.startsWith(n)) starts.push(p.label);
+    else if (pn.includes(n)) contains.push(p.label);
+    if (starts.length >= limit) break;
+  }
+  return [...starts, ...contains].slice(0, limit);
+}
+
+/**
  * Best-guess `job_categories.slug` for a typed title, or null. Matches a
  * profession by exact/prefix, then by the title containing a profession word.
  */

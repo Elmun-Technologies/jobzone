@@ -7,12 +7,12 @@ import { FaqSection } from "@/components/seo/faq-section";
 import { JsonLd } from "@/components/seo/json-ld";
 import { QuickFacts } from "@/components/seo/quick-facts";
 import { Container } from "@/components/ui/container";
-import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import {
+  getCategories,
   getCategoryByHistoricalSlug,
   getCategoryBySlug,
 } from "@/lib/data/categories";
-import { getCities, getJobCount, getOpenJobs } from "@/lib/data/jobs";
+import { getCities, getPublicJobCount, getPublicJobs } from "@/lib/data/jobs";
 import { Link } from "@/i18n/navigation";
 import { groupNumber, salaryRangeUzsText } from "@/lib/format";
 import { latestPostedAt, uzsSalaryRange } from "@/lib/geo-stats";
@@ -25,11 +25,41 @@ import {
 } from "@/lib/seo";
 import { slugify } from "@/lib/slug";
 
-// Live feed — new postings must show here immediately (invariant #3).
-export const dynamic = "force-dynamic";
+// This page reads only cached public data — `getPublicJobs`/`getPublicJobCount`
+// go through the anon client, carry a short window and are flushed by the
+// "jobs" tag on publish/close/edit — and nothing per-visitor. That is what
+// lets it be prerendered and served from the CDN, while a new posting still
+// appears the moment it is published, which is what invariant #3 asks for.
+// The one thing it gives up is the seeker's personal archive: a vacancy
+// someone dismissed still shows here, exactly as it already does on the region
+// landings. A shared page shows the market, not one visitor's edit of it.
+//
 // Cap: enough to satisfy the ItemList schema without blowing up TTFB when a
 // hot category has thousands of postings. Deeper browsing goes through /jobs.
 const LANDING_LIMIT = 30;
+
+/**
+ * Rebuilt at most every five minutes, and immediately whenever an employer
+ * publishes, closes, edits or boosts a vacancy (`revalidateTag("jobs")`).
+ *
+ * The tag flush is what makes invariant #3 hold — a new posting is visible at
+ * once. This window is the safety net under it: publishing also happens where
+ * no server action runs, from the `publish_due_jobs()` cron and the payment
+ * webhook, and vacancies expire on a timestamp nobody flushes. Without a
+ * window those changes would sit behind stale HTML indefinitely.
+ */
+export const revalidate = 300;
+
+/**
+ * Prebuild every trade we have. Categories are a curated set of a couple of
+ * dozen, so this is cheap; a category added later is rendered on first request
+ * and cached from then on (`dynamicParams` defaults to true). A build without
+ * backend credentials gets an empty list and the same on-demand path.
+ */
+export async function generateStaticParams() {
+  const categories = await getCategories();
+  return categories.map((c) => ({ category: c.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -79,16 +109,15 @@ export default async function CategoryLandingPage({
   }));
   const faqHeading = tfaq("heading", { category: cat.name });
 
-  const [jobs, count, cities, savedIds] = await Promise.all([
-    getOpenJobs({ category: cat.name, limit: LANDING_LIMIT }),
-    getJobCount({ category: cat.name }),
+  const [jobs, count, cities] = await Promise.all([
+    getPublicJobs({ category: cat.name, limit: LANDING_LIMIT }),
+    getPublicJobCount({ category: cat.name }),
     // Every city already has at least one job on the platform (getCities()
     // is derived from postings), so the internal-links row on this landing
     // shows only cities that actually resolve to jobs somewhere on Yolla —
     // filtering to "cities with this category" would require N extra head
     // counts and doesn't move the SEO needle.
     getCities(),
-    getBookmarkedJobIds(),
   ]);
 
   const base = siteUrl();
@@ -183,7 +212,7 @@ export default async function CategoryLandingPage({
           <ul className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
+                <JobCard job={job} />
               </li>
             ))}
           </ul>
@@ -197,9 +226,7 @@ export default async function CategoryLandingPage({
             This is the mesh Google crawls to discover the deep landing set. */}
         {cities.length > 0 ? (
           <section className="mt-14">
-            <h2 className="text-foreground text-xl font-bold">
-              {t("byCity")}
-            </h2>
+            <h2 className="text-foreground text-xl font-bold">{t("byCity")}</h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {cities.map((c) => (
                 <li key={c}>

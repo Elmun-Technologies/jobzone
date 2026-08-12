@@ -63,16 +63,20 @@ export function JobCard({
   }
   // Same gate the job-detail page's QuickApplyButton already uses.
   const needsForm = job.screeningQuestions.some((q) => q.required);
+  // Only the saved list can render a closed vacancy — every other list reads
+  // job_feed, which withholds them. There the record is the point, and the
+  // job page would 404, so the card says so and stops being a link.
+  const closed = job.status !== "open";
+  const cardClass = `group block rounded-2xl border p-4 shadow-sm transition-all duration-200 sm:p-5 ${
+    closed ? "opacity-75" : "hover:-translate-y-0.5 hover:shadow-lg"
+  } ${
+    standout
+      ? "border-primary bg-primary/[0.04] ring-primary/20 shadow-[0_6px_28px_-8px_rgba(199,251,0,0.55)] ring-2"
+      : "border-border bg-card hover:border-primary/40"
+  }`;
 
-  return (
-    <Link
-      href={`/jobs/${job.id}`}
-      className={`group block rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:p-5 ${
-        standout
-          ? "border-primary bg-primary/[0.04] ring-primary/20 shadow-[0_6px_28px_-8px_rgba(199,251,0,0.55)] ring-2"
-          : "border-border bg-card hover:border-primary/40"
-      }`}
-    >
+  const body = (
+    <>
       <div className="flex gap-3">
         {/* Company logo or brand-initial fallback. The seed_prod placeholder
             path is gone; every logo now either comes from Supabase Storage
@@ -130,7 +134,11 @@ export function JobCard({
                 ) : null}
               </div>
               <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-sm">
-                <span className="truncate">{job.companyName}</span>
+                <span className="truncate">
+                  {closed
+                    ? `${job.companyName} · ${t("positionClosed")}`
+                    : job.companyName}
+                </span>
                 {job.companyVerified ? (
                   <BadgeCheck className="text-primary-ink size-4 shrink-0" />
                 ) : null}
@@ -208,6 +216,16 @@ export function JobCard({
           </div>
         </div>
       </div>
+    </>
+  );
+
+  // A closed vacancy is not a link: its page would 404. The card stays, since
+  // in the saved list the record is the point.
+  return closed ? (
+    <div className={cardClass}>{body}</div>
+  ) : (
+    <Link href={`/jobs/${job.id}`} className={cardClass}>
+      {body}
     </Link>
   );
 }

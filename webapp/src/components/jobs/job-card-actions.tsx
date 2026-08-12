@@ -4,6 +4,8 @@ import { Archive, Bookmark, Check, Share2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
+import { useSavedJob } from "@/components/jobs/saved-jobs-provider";
+import { toast } from "@/components/ui/toast";
 import { toggleBookmark } from "@/lib/actions/bookmark";
 import { toggleDismiss } from "@/lib/actions/dismiss";
 import { cn } from "@/lib/utils";
@@ -28,8 +30,15 @@ export function JobCardActions({
 }) {
   const t = useTranslations("jobs");
   const tb = useTranslations("bookmarks");
+  const tc = useTranslations("common");
   const locale = useLocale();
+  // Same split as BookmarkButton: `initialSaved` is the server's answer where
+  // it has one, the provider supplies it on pages that must stay cacheable,
+  // and a tap wins over both from then on.
+  const hydrated = useSavedJob(jobId);
   const [saved, setSaved] = useState(initialSaved);
+  const [touched, setTouched] = useState(false);
+  const shown = touched || hydrated === null ? saved : initialSaved || hydrated;
   const [dismissed, setDismissed] = useState(initialDismissed);
   const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -42,7 +51,8 @@ export function JobCardActions({
 
   function onBookmark(event: React.MouseEvent) {
     cancel(event);
-    setSaved((s) => !s);
+    setTouched(true);
+    setSaved(!shown);
     startTransition(async () => {
       const result = await toggleBookmark(jobId);
       if (result.signedOut) {
@@ -53,7 +63,12 @@ export function JobCardActions({
         window.location.href = `/${locale}/sign-in?next=${next}`;
         return;
       }
+      // `result.saved` is the server's truth either way, so a failed write
+      // snaps the icon back instead of leaving a filled bookmark on a job
+      // that was never saved. Say so too — silently reverting looks like a
+      // misfired tap.
       setSaved(result.saved);
+      if (result.error) toast({ title: tc("error"), variant: "error" });
     });
   }
 
@@ -69,6 +84,7 @@ export function JobCardActions({
         return;
       }
       setDismissed(result.dismissed);
+      if (result.error) toast({ title: tc("error"), variant: "error" });
     });
   }
 
@@ -110,11 +126,17 @@ export function JobCardActions({
         type="button"
         onClick={onBookmark}
         disabled={pending}
-        aria-pressed={saved}
-        aria-label={saved ? tb("saved") : tb("save")}
-        className={cn(iconButton, saved && "text-primary-ink hover:text-primary-ink")}
+        aria-pressed={shown}
+        aria-label={shown ? tb("saved") : tb("save")}
+        className={cn(iconButton, shown && "text-primary hover:text-primary")}
       >
-        <Bookmark className="size-4" fill={saved ? "currentColor" : "none"} />
+        {/* Keyed so the pop replays on each toggle, and only after a tap —
+            see BookmarkButton for why the provider's fill must stay silent. */}
+        <Bookmark
+          key={touched ? `saved-${shown}` : "initial"}
+          className={cn("size-4", touched && "tap-pop")}
+          fill={shown ? "currentColor" : "none"}
+        />
       </button>
       <button
         type="button"

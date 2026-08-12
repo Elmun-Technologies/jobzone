@@ -3,8 +3,12 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useTransition } from "react";
 
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
+import { setPreferredLocale } from "@/lib/actions/profile";
+import { captureDrafts } from "@/lib/draft-stash";
+import { goToLocale } from "@/lib/locale-nav";
+import { rememberLocaleChoice } from "@/lib/locale-choice";
 import { cn } from "@/lib/utils";
 
 /** Full names for the drawer, two-letter codes for the header pill. */
@@ -39,15 +43,34 @@ const inactive = "text-muted-foreground hover:text-foreground";
 export function LocaleSwitcher({ compact = true }: { compact?: boolean }) {
   const locale = useLocale();
   const t = useTranslations("nav");
-  const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   function switchTo(next: Locale) {
     if (next === locale) return;
-    startTransition(() => {
-      router.replace(pathname, { locale: next });
-    });
+    // An explicit switch here is the same decision the first-visit sheet asks
+    // for — record it so the sheet never interrupts this visitor again.
+    rememberLocaleChoice(next);
+    // Fire-and-forget: the backend composes push/Telegram server-side, where
+    // the URL prefix and the next-intl cookie are invisible, so the profile is
+    // the only place it can learn which language to write in. Not awaited —
+    // the switch must feel instant and must not fail if this does.
+    void setPreferredLocale(next);
+    // `usePathname` is next-intl's useBasePathname, which wraps Next's
+    // usePathname — path only, no query. Passing it alone sent a seeker who
+    // had searched /jobs?q=haydovchi&city=Toshkent to a bare /ru/jobs, i.e.
+    // changing language silently cleared their search. Read the live query at
+    // click time (rather than useSearchParams, which would drag a Suspense
+    // requirement into the header on every page) and carry it across.
+    // The locale change rebuilds everything under `[locale]`, so any form on
+    // screen goes back to empty. Park the drafts first; each form restores its
+    // own on mount, the same way it already does after the sign-in detour.
+    captureDrafts();
+    // A document load, not a client navigation — see lib/locale-nav.ts for why
+    // the whole app's rendering model depends on that distinction. The query
+    // (and hash) ride along, so a seeker who had searched
+    // /jobs?q=haydovchi&city=Toshkent keeps their search.
+    startTransition(() => goToLocale(next, pathname));
   }
 
   return (

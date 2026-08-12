@@ -8,7 +8,6 @@ import { JobCard } from "@/components/jobs/job-card";
 import { ReportButton } from "@/components/reports/report-button";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
-import { getBookmarkedJobIds } from "@/lib/data/bookmarks";
 import {
   getCompanyById,
   getCompanyJobs,
@@ -22,10 +21,32 @@ import {
   siteUrl,
 } from "@/lib/seo";
 
-// Auth/session-dependent, per-request. Without this the page can be
-// full-route-cached (getCurrentUser swallows cookies() so Next never sees
-// the dynamic signal) and one visitor's render could be served to another.
-export const dynamic = "force-dynamic";
+/**
+ * Rebuilt at most every five minutes, and immediately whenever an employer
+ * publishes, closes, edits or boosts a vacancy (`revalidateTag("jobs")`).
+ *
+ * The tag flush is what makes invariant #3 hold — a new posting is visible at
+ * once. This window is the safety net under it: publishing also happens where
+ * no server action runs, from the `publish_due_jobs()` cron and the payment
+ * webhook, and vacancies expire on a timestamp nobody flushes. Without a
+ * window those changes would sit behind stale HTML indefinitely.
+ */
+export const revalidate = 300;
+
+/**
+ * Rendered on first request and cached from then on — not prebuilt.
+ *
+ * Everything on this page is the same for every visitor: the profile, the open
+ * vacancies and the reviews all come from cached public reads, flushed by the
+ * "companies", "jobs" and "reviews" tags. The saved hearts fill in from the
+ * browser (SavedJobsProvider), which is what it used to read the session for.
+ * Prebuilding is not worth it — a directory of companies is long and mostly
+ * unvisited, so each profile is built by its first visitor and served from the
+ * CDN after that.
+ */
+export function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({
   params,
@@ -60,10 +81,9 @@ export default async function CompanyPage({
   if (!company) notFound();
 
   const t = await getTranslations("company");
-  const [jobs, reviews, savedIds] = await Promise.all([
+  const [jobs, reviews] = await Promise.all([
     getCompanyJobs(id),
     getCompanyReviews(id),
-    getBookmarkedJobIds(),
   ]);
 
   const tb = await getTranslations("landingPage");
@@ -155,7 +175,7 @@ export default async function CompanyPage({
           <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {jobs.map((job) => (
               <li key={job.id}>
-                <JobCard job={job} saved={savedIds.has(job.id)} />
+                <JobCard job={job} />
               </li>
             ))}
           </ul>

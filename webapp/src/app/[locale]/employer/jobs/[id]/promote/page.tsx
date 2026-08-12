@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
-import { ArrowUpToLine, Eye, Megaphone, Sparkles } from "lucide-react";
+import { BadgeCheck, Eye, MapPin, Megaphone, Sparkles } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { PromotePicker } from "@/components/employer/promote-picker";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/states";
+import { UpgradeForm } from "@/components/employer/upgrade-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getEmployerJobBoost, getMyCompany } from "@/lib/data/employer";
-import { getPromotionProducts } from "@/lib/data/pricing";
-import { getWallet } from "@/lib/data/wallet";
 import { requireEmployer } from "@/lib/auth/require-employer";
-import { formatDate } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +25,18 @@ export async function generateMetadata({
 // Auth-gated, per-employer. Render per request (see the wallet/dashboard note).
 export const dynamic = "force-dynamic";
 
+/**
+ * "Reklama" for a vacancy that is already live: upgrade its listing tier.
+ *
+ * Until 0075 this page sold the old time-boxed TOP/featured boosts from the
+ * Hamyon balance — but 0063 deactivated every one of those products, so the
+ * catalog read came back empty by construction and the page rendered a pitch,
+ * no packages, and a "top up the wallet — 0 so'm" button. Every open vacancy
+ * linked here, so this was the employer's most reachable dead end.
+ *
+ * Now it sells the same three tiers as the post-time picker, minus the ones
+ * the listing already has, through the same Payme/Click/Rahmat checkout.
+ */
 export default async function PromoteJobPage({
   params,
 }: {
@@ -40,19 +49,29 @@ export default async function PromoteJobPage({
   const company = await getMyCompany();
   if (!company) redirect(`/${locale}/employer/onboarding`);
 
-  const [t, job, products, wallet] = await Promise.all([
+  const [t, job] = await Promise.all([
     getTranslations("promote"),
     getEmployerJobBoost(id),
-    getPromotionProducts(),
-    getWallet(company.id),
   ]);
   // getEmployerJobBoost already confirmed ownership; null → not theirs / gone.
   if (!job) notFound();
 
+  // A draft is not "promoted" — it is published-and-paid, which is /pay's job.
+  // Sending them there beats telling them to publish first and then come back.
+  if (job.status === "draft") redirect(`/${locale}/employer/jobs/${id}/pay`);
+
+  const currentTier =
+    job.boostKind === "premium"
+      ? "premium"
+      : job.boostKind === "brand"
+        ? "brand"
+        : null;
+  const atTop = currentTier === "premium";
+
   const benefits = [
-    { Icon: ArrowUpToLine, label: t("benefitTop") },
+    { Icon: BadgeCheck, label: t("benefitStandOut") },
     { Icon: Eye, label: t("benefitViews") },
-    { Icon: Sparkles, label: t("benefitFeatured") },
+    { Icon: MapPin, label: t("benefitMap") },
   ];
 
   return (
@@ -93,6 +112,24 @@ export default async function PromoteJobPage({
             </Link>
           </div>
         </>
+      ) : atTop ? (
+        <>
+          <EmptyState title={t("atTopTitle")} description={t("atTopHint")} />
+          <div className="mt-4 flex justify-center gap-2">
+            <Link
+              href={`/employer/jobs/${job.id}/share`}
+              className={cn(buttonVariants({ variant: "primary", size: "sm" }))}
+            >
+              {t("shareInstead")}
+            </Link>
+            <Link
+              href="/employer/jobs"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              {t("back")}
+            </Link>
+          </div>
+        </>
       ) : (
         <>
           {/* Value props */}
@@ -111,19 +148,18 @@ export default async function PromoteJobPage({
             ))}
           </div>
 
-          {job.boostActive ? (
-            <div className="border-primary/40 bg-accent text-accent-foreground mb-6 rounded-xl border px-4 py-3 text-sm font-medium">
-              {t("activeUntil", { date: formatDate(job.boostedUntil) })}
-            </div>
-          ) : null}
+          {/* Where they are today, so the upgrade reads as a step up. */}
+          <div className="border-border bg-card mb-5 flex items-center justify-between rounded-xl border px-4 py-3 text-sm">
+            <span className="text-muted-foreground">{t("currentTier")}</span>
+            <span className="text-foreground inline-flex items-center gap-1.5 font-semibold">
+              {currentTier === "brand" ? (
+                <Sparkles className="text-primary size-4" />
+              ) : null}
+              {currentTier === "brand" ? t("tierBrand") : t("tierBase")}
+            </span>
+          </div>
 
-          <PromotePicker
-            jobId={job.id}
-            jobTitle={job.title}
-            locale={locale}
-            products={products}
-            balanceUzs={wallet.balanceUzs}
-          />
+          <UpgradeForm jobId={job.id} currentTier={currentTier} />
         </>
       )}
     </Container>

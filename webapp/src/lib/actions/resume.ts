@@ -114,12 +114,22 @@ export async function saveResume(
   }
 
   const pay = Number(draft.expectedSalary);
+  // Up to three, trimmed and de-duplicated — the DB check constraint (0082)
+  // rejects a longer array outright, which would fail the whole save.
+  const positions = Array.from(
+    new Set((draft.positions ?? []).map((p) => p.trim()).filter(Boolean)),
+  ).slice(0, 3);
+  // `city` is derived, not typed: the wizard asks for a canonical region and
+  // district, and the district (or the region, if that's all they picked) is
+  // what the cards show and what pre-0082 rows are matched on.
+  const city = draft.district.trim() || draft.region.trim();
   const { error } = await supabase
     .from("profiles")
     .update({
       full_name: clean(draft.fullName),
-      headline: clean(draft.position),
-      city: clean(draft.city),
+      // Position #1 stays the headline every card and chat header renders.
+      headline: positions[0] ?? null,
+      city: clean(city),
       gender: clean(draft.gender),
       birth_date: clean(draft.birthDate),
       marital_status: clean(draft.maritalStatus),
@@ -134,6 +144,19 @@ export async function saveResume(
     .eq("id", user.id);
 
   if (error) return { error: true };
+
+  // The 0082 columns ride their own best-effort write, like summary below: a DB
+  // that hasn't taken the migration yet still saves the rest of the résumé
+  // (headline + city above already carry the same information in the old
+  // shape), instead of failing the save with an unknown-column error.
+  await supabase
+    .from("profiles")
+    .update({
+      desired_positions: positions.length > 0 ? positions : null,
+      desired_region: clean(draft.region),
+      desired_district: clean(draft.district),
+    })
+    .eq("id", user.id);
 
   // Summary (+ its AI flag) ride a separate best-effort write: profiles.summary
   // (0044) and summary_ai_generated (0046) are late columns, so a DB behind on
@@ -193,21 +216,45 @@ export async function saveResume(
     }),
   );
 
-  const certRows = (draft.certificates ?? []).filter(
-    (c) => c.name.trim() !== "",
-  );
-  const certOk = await reconcileRows<CertificateEntry>(
-    supabase,
-    "certifications",
-    user.id,
-    certRows,
-    (c) => ({
+  // Replace the user's certificates/courses with the wizard's set.
+  //
+  // These rows are deleted and re-inserted, and the wizard has no field for
+  // the attached scan (0077) — so a certificate whose document was attached in
+  // the mobile app would silently lose it the next time the seeker touched
+  // their résumé here, leaving an orphaned object in the bucket and an
+  // employer with nothing to open. Carry the attachment across by name, the
+  // only key the wizard round-trips.
+  const attachedByName = new Map<string, Record<string, unknown>>();
+  const existingCerts = await supabase
+    .from("certifications")
+    .select("name, file_path, file_size, mime_type")
+    .eq("profile_id", user.id);
+  for (const row of (existingCerts.data ?? []) as Record<string, unknown>[]) {
+    const path = typeof row.file_path === "string" ? row.file_path : "";
+    const name = typeof row.name === "string" ? row.name.trim() : "";
+    if (path && name && !attachedByName.has(name)) {
+      attachedByName.set(name, {
+        file_path: path,
+        file_size: row.file_size ?? null,
+        mime_type: row.mime_type ?? null,
+      });
+    }
+  }
+  const certRows = (draft.certificates ?? [])
+    .filter((c) => c.name.trim() !== "")
+    .map((c) => ({
       profile_id: user.id,
       name: c.name.trim(),
       issuer: clean(c.issuer),
       issued_date: year(c.issuedYear),
       expiry_date: year(c.expiryYear),
-    }),
+      ...(attachedByName.get(c.name.trim()) ?? {}),
+    }));
+  const certOk = await replaceRows(
+    supabase,
+    "certifications",
+    user.id,
+    certRows,
   );
 
   if (!eduOk || !expOk || !certOk) return { error: true };
