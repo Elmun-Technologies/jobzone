@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { BadgeCheck } from "lucide-react";
 import { JobStatusPill } from "@/components/employer/job-status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";

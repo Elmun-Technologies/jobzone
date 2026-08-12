@@ -141,7 +141,6 @@ export function ResumeWizard({
     stepRef.current = step;
   }, [draft, step]);
   const [error, setError] = useState(false);
-  const [conflict, setConflict] = useState(false);
   const [pending, start] = useTransition();
   const locale = useLocale();
 
@@ -264,46 +263,6 @@ export function ResumeWizard({
       ),
     }));
 
-  const addCert = () =>
-    setDraft((d) => ({
-      ...d,
-      certificates: [...d.certificates, { ...EMPTY_CERT }],
-    }));
-  const removeCert = (i: number) =>
-    setDraft((d) => ({
-      ...d,
-      certificates: d.certificates.filter((_, j) => j !== i),
-    }));
-  const setCert = <K extends keyof CertificateEntry>(
-    i: number,
-    key: K,
-    value: CertificateEntry[K],
-  ) =>
-    setDraft((d) => ({
-      ...d,
-      certificates: d.certificates.map((c, j) =>
-        j === i ? { ...c, [key]: value } : c,
-      ),
-    }));
-
-  // Custom languages: add any language beyond the fixed set (stored by name).
-  const [newLang, setNewLang] = useState("");
-  const addLang = () => {
-    const name = newLang.trim();
-    if (!name) return;
-    setDraft((d) => ({
-      ...d,
-      languages: { ...d.languages, [name]: d.languages[name] ?? "a1_a2" },
-    }));
-    setNewLang("");
-  };
-  const removeLang = (code: string) =>
-    setDraft((d) => {
-      const next = { ...d.languages };
-      delete next[code];
-      return { ...d, languages: next };
-    });
-
   const steps = [
     t("stepPersonal"),
     t("stepExperience"),
@@ -327,7 +286,6 @@ export function ResumeWizard({
       return;
     }
     setError(false);
-    setConflict(false);
     start(async () => {
       const res = await saveResume(draft);
       if (res.signedOut) {
@@ -759,19 +717,6 @@ export function ResumeWizard({
                 {t("saveError")}
               </div>
             )}
-
-            {conflict && (
-              <div className="bg-destructive/10 text-destructive rounded-xl p-3 text-sm font-medium">
-                {t("saveConflict")}
-                <button
-                  type="button"
-                  onClick={() => window.location.reload()}
-                  className="ml-1 underline"
-                >
-                  {t("reload")}
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -809,28 +754,3 @@ export function ResumeWizard({
     </div>
   );
 }
-
-const EMPTY_CERT_ENTRY: CertificateEntry = {
-  name: "",
-  organization: "",
-  issueDate: null,
-};
-
-const EMPTY_EDU_ENTRY: EducationEntry = {
-  institution: "",
-  degree: "",
-  field: "",
-  startYear: null,
-  endYear: null,
-};
-
-const EMPTY_EXP_ENTRY: ExperienceEntry = {
-  title: "",
-  companyName: "",
-  description: "",
-  startYear: null,
-  startMonth: null,
-  endYear: null,
-  endMonth: null,
-  current: false,
-};
