@@ -125,3 +125,46 @@ export interface JobQuery {
   limit?: number;
   offset?: number;
 }
+
+/** Seeker work history entry (experiences table). */
+export interface ApplicantExperience {
+  title: string;
+  companyName: string;
+  startYear: number | null;
+  endYear: number | null;
+  isCurrent: boolean;
+  description: string;
+}
+
+/** Seeker education entry (educations table). */
+export interface ApplicantEducation {
+  school: string;
+  degree: string;
+  field: string;
+  startYear: number | null;
+  endYear: number | null;
+  isCurrent: boolean;
+}
+
+/** Seeker certification entry (certifications table). */
+export interface ApplicantCertificate {
+  name: string;
+  issuer: string;
+  issuedYear: number | null;
+  expiryYear: number | null;
+  fileUrl: string;
+}
+
+/** The full seeker résumé (CV) for the employer view. */
+export interface ApplicantResume {
+  summary: string;
+  summaryAiGenerated: boolean;
+  languages: Record<string, string>;
+  experienceLevel: string;
+  desiredPayMin: number | null;
+  desiredPayCurrency: string;
+  experiences: ApplicantExperience[];
+  educations: ApplicantEducation[];
+  certificates: ApplicantCertificate[];
+  skills: string[];
+}

@@ -368,7 +368,7 @@ export function ResumeWizard({
               </label>
               <SuggestInput
                 value={draft.positions[0] || ""}
-                onChange={(v) => set("positions", v ? [v] : [])}
+                onValueChange={(v) => set("positions", v ? [v] : [])}
                 placeholder={t("desiredPositionHint")}
                 suggest={suggestProfessions}
                 className={inputClass}
@@ -521,14 +521,18 @@ export function ResumeWizard({
                     <Trash2 className="size-4" />
                   </button>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <SuggestInput
-                      value={exp.title}
-                      onChange={(v) => setExp(i, "title", v)}
-                      label={t("jobTitle")}
-                      placeholder={t("jobTitleHint")}
-                      suggest={suggestProfessions}
-                      className={inputClass}
-                    />
+                    <div>
+                      <label className="text-muted-foreground mb-1 block text-xs font-medium">
+                        {t("jobTitle")}
+                      </label>
+                      <SuggestInput
+                        value={exp.title}
+                        onValueChange={(v) => setExp(i, "title", v)}
+                        placeholder={t("jobTitleHint")}
+                        suggest={suggestProfessions}
+                        className={inputClass}
+                      />
+                    </div>
                     <div>
                       <label className="text-muted-foreground mb-1 block text-xs font-medium">
                         {t("company")}
