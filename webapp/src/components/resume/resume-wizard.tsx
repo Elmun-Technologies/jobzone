@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
-  X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -34,7 +33,6 @@ import { UZ_REGIONS } from "@/lib/uz-regions";
 // pulls the server client into the browser bundle.
 import {
   EMPTY_RESUME,
-  type CertificateEntry,
   type EducationEntry,
   type ExperienceEntry,
   type ResumeDraft,
@@ -66,20 +64,20 @@ const EMPTY_EXP: ExperienceEntry = {
   current: false,
 };
 
-const EMPTY_CERT: CertificateEntry = {
-  name: "",
-  organization: "",
-  issueDate: null,
-};
-
-function reviveDraft(d: any): ResumeDraft {
+function reviveDraft(d: Record<string, unknown>): ResumeDraft {
+  const certs = Array.isArray(d.certificates) ? d.certificates : [];
   return {
     ...EMPTY_RESUME,
-    ...d,
-    certificates: (d.certificates || []).map((c: any) => ({
-      ...c,
-      issueDate: c.issueDate ? new Date(c.issueDate) : null,
-    })),
+    ...(d as Partial<ResumeDraft>),
+    certificates: certs.map((c: unknown) => {
+      const cert = (c ?? {}) as Record<string, unknown>;
+      const issueDate = cert.issueDate;
+      return {
+        name: typeof cert.name === "string" ? cert.name : "",
+        organization: typeof cert.organization === "string" ? cert.organization : "",
+        issueDate: typeof issueDate === "string" ? new Date(issueDate) : issueDate instanceof Date ? issueDate : null,
+      };
+    }),
   };
 }
 

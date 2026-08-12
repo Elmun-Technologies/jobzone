@@ -13,6 +13,10 @@ interface JobJsonLdProps {
   salaryMax?: number;
 }
 
+const DEFAULT_VALID_THROUGH = new Date(
+  Date.now() + 30 * 24 * 60 * 60 * 1000,
+).toISOString();
+
 export function JobJsonLd({
   title,
   description,
@@ -31,7 +35,7 @@ export function JobJsonLd({
     title,
     description,
     datePosted,
-    validThrough: validThrough || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    validThrough: validThrough || DEFAULT_VALID_THROUGH,
     employmentType: employmentType.toUpperCase().replace('-', '_'),
     hiringOrganization: {
       '@type': 'Organization',
