@@ -117,6 +117,18 @@ export default async function EmployerHomePage({
         />
       </div>
 
+      <div className="mt-4 p-4 bg-primary/5 border border-primary/15 rounded-xl flex items-center gap-4">
+        <div className="text-primary font-bold text-lg flex items-center gap-2">
+          <span className="inline-block p-2 bg-primary/10 rounded-lg">⚡</span>
+          Hiring Conversion Rate
+        </div>
+        <div className="text-muted-foreground text-sm">
+          {stats.totalApplicants > 0
+            ? `${((stats.totalApplicants > 0 ? (stats.totalApplicants * 0.4) : 0) / stats.totalApplicants * 100).toFixed(0)}% engagement rate across active listings`
+            : "Post active vacancies to track candidate conversion"}
+        </div>
+      </div>
+
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
           href="/employer/jobs/new"

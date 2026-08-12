@@ -1,2 +1,9 @@
-packages: ["."]
-ignoredBuiltDependencies: ["sharp", "unrs-resolver"]
+packages: [ "." ]
+allowBuilds:
+  '@parcel/watcher': set this to true or false
+  '@sentry/cli': set this to true or false
+  '@swc/core': set this to true or false
+  core-js: set this to true or false
+  sharp: set this to true or false
+  unrs-resolver: set this to true or false
+ignoredBuiltDependencies: [ "sharp", "unrs-resolver" ]

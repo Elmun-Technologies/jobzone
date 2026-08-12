@@ -11,6 +11,7 @@ import { MeiliSearch } from "https://esm.sh/meilisearch@0.41.0";
 import { corsHeaders, json } from "../_shared/cors.ts";
 import { JOBS_INDEX } from "../_shared/job_document.ts";
 import { requireEdgeSecret } from "../_shared/auth.ts";
+import { checkRateLimit } from "../_shared/rate-limit.ts";
 
 const meili = new MeiliSearch({
   host: Deno.env.get("MEILI_HOST")!,
@@ -44,6 +45,12 @@ Deno.serve(async (req) => {
 
   const denied = requireEdgeSecret(req);
   if (denied) return denied;
+
+  const clientIp = req.headers.get("x-forwarded-for") ?? "anonymous";
+  const rl = checkRateLimit(clientIp, 120, 60);
+  if (!rl.allowed) {
+    return json({ error: "Rate limit exceeded", retryAfter: rl.retryAfter }, 429);
+  }
 
   const {
     q = "",

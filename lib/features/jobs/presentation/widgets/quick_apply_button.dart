@@ -84,6 +84,9 @@ class _QuickApplyButtonState extends ConsumerState<QuickApplyButton> {
       await ref
           .read(applicationsControllerProvider.notifier)
           .apply(job: widget.job, resumeId: resumeId);
+      if (mounted) {
+        showSuccessSnack(context, "Ariza muvaffaqiyatli yuborildi!");
+      }
     } on PostgrestException catch (e) {
       // 23505 = unique(job_id, applicant_id) — already applied is a success
       // state here, not an error.
