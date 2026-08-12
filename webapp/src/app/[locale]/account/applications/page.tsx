@@ -74,7 +74,7 @@ export default async function MyApplicationsPage({
           {/* Sends the confirmation chime — the seeker landed here from a
               redirect, so the tap that earned it is already gone. */}
           <Celebrate />
-          <CheckCircle2 className="text-primary size-5 shrink-0" />
+          <CheckCircle2 className="text-foreground size-5 shrink-0" />
           {t("appliedBanner")}
         </div>
       ) : null}

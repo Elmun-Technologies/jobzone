@@ -251,11 +251,11 @@ export default async function JobDetailsPage({
               </h1>
               <Link
                 href={`/companies/${job.companyId}`}
-                className="text-muted-foreground hover:text-primary mt-1 inline-flex items-center gap-1"
+                className="text-muted-foreground hover:text-foreground mt-1 inline-flex items-center gap-1"
               >
                 {job.companyName}
                 {job.companyVerified ? (
-                  <BadgeCheck className="text-primary size-4" />
+                  <BadgeCheck className="text-foreground size-4" />
                 ) : null}
               </Link>
               {loc ? (
@@ -359,11 +359,11 @@ export default async function JobDetailsPage({
                   <div className="min-w-0">
                     <Link
                       href={`/companies/${company.id}`}
-                      className="text-foreground hover:text-primary flex items-center gap-1 font-semibold"
+                      className="text-foreground hover:text-foreground flex items-center gap-1 font-semibold"
                     >
                       {company.name}
                       {company.isVerified ? (
-                        <BadgeCheck className="text-primary size-4" />
+                        <BadgeCheck className="text-foreground size-4" />
                       ) : null}
                     </Link>
                     {[company.industry, company.size, company.headquarters]
@@ -384,7 +384,7 @@ export default async function JobDetailsPage({
                 ) : null}
                 <Link
                   href={`/companies/${company.id}`}
-                  className="text-primary mt-3 inline-flex text-sm font-semibold hover:underline"
+                  className="text-foreground mt-3 inline-flex text-sm font-semibold hover:underline"
                 >
                   {t("viewCompany")}
                 </Link>

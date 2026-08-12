@@ -14,6 +14,7 @@ class _HelpCenterPageState extends State<HelpCenterPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tab = TabController(length: 2, vsync: this);
   int _catIndex = 0;
+  String _query = '';
 
   @override
   void dispose() {
@@ -47,6 +48,7 @@ class _HelpCenterPageState extends State<HelpCenterPage>
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                 ),
                 child: TextField(
+                  onChanged: (v) => setState(() => _query = v),
                   decoration: InputDecoration(
                     hintText: l.search,
                     hintStyle: context.text.bodyMedium?.copyWith(
@@ -86,6 +88,7 @@ class _HelpCenterPageState extends State<HelpCenterPage>
                 children: [
                   _FaqTab(
                     catIndex: _catIndex,
+                    query: _query,
                     onCatChanged: (i) => setState(() => _catIndex = i),
                   ),
                   const _ContactTab(),
@@ -102,8 +105,13 @@ class _HelpCenterPageState extends State<HelpCenterPage>
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
 
 class _FaqTab extends StatelessWidget {
-  const _FaqTab({required this.catIndex, required this.onCatChanged});
+  const _FaqTab({
+    required this.catIndex,
+    required this.query,
+    required this.onCatChanged,
+  });
   final int catIndex;
+  final String query;
   final ValueChanged<int> onCatChanged;
 
   @override
@@ -115,15 +123,22 @@ class _FaqTab extends StatelessWidget {
       l.faqCatGeneral,
       l.faqCatAccount,
     ];
+    // 0 all, 1 services (apply/track), 2 general (support/review), 3 account
     final faqs = [
-      (l.faqQ1, l.faqA1),
-      (l.faqQ2, l.faqA2),
-      (l.faqQ3, l.faqA3),
-      (l.faqQ4, l.faqA4),
-      (l.faqQ5, l.faqA5),
-      (l.faqQ6, l.faqA6),
-      (l.faqQ7, l.faqA7),
+      (l.faqQ1, l.faqA1, 1),
+      (l.faqQ2, l.faqA2, 1),
+      (l.faqQ3, l.faqA3, 3),
+      (l.faqQ4, l.faqA4, 3),
+      (l.faqQ5, l.faqA5, 1),
+      (l.faqQ6, l.faqA6, 2),
+      (l.faqQ7, l.faqA7, 2),
     ];
+    final q = query.trim().toLowerCase();
+    final visible = faqs.where((f) {
+      if (catIndex != 0 && f.$3 != catIndex) return false;
+      if (q.isEmpty) return true;
+      return f.$1.toLowerCase().contains(q) || f.$2.toLowerCase().contains(q);
+    }).toList();
 
     return ListView(
       padding: const EdgeInsets.symmetric(

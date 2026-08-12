@@ -11,31 +11,37 @@ class JzCircleButton extends StatelessWidget {
     required this.onTap,
     this.filled = false,
     this.size = 48,
+    this.semanticLabel,
   });
 
   final IconData icon;
   final VoidCallback onTap;
   final bool filled;
   final double size;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
-      color: filled ? colors.primary : colors.surface,
-      shape: CircleBorder(
-        side: filled ? BorderSide.none : BorderSide(color: colors.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            icon,
-            size: size * 0.42,
-            color: filled ? colors.onPrimary : colors.textPrimary,
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Material(
+        color: filled ? colors.primary : colors.surface,
+        shape: CircleBorder(
+          side: filled ? BorderSide.none : BorderSide(color: colors.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              icon,
+              size: size * 0.42,
+              color: filled ? colors.onPrimary : colors.textPrimary,
+            ),
           ),
         ),
       ),

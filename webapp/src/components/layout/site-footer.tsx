@@ -34,7 +34,7 @@ export async function SiteFooter() {
     .slice(0, FOOTER_CATEGORIES);
   const regions = regionNames();
 
-  const linkClass = "hover:text-primary block py-1 transition-colors";
+  const linkClass = "hover:text-foreground block py-1 transition-colors";
 
   return (
     <footer className="border-border text-muted-foreground border-t text-sm">
@@ -122,7 +122,7 @@ export async function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <CookieSettingsButton className="hover:text-primary block cursor-pointer py-1 transition-colors" />
+                <CookieSettingsButton className="hover:text-foreground block cursor-pointer py-1 transition-colors" />
               </li>
             </ul>
           </nav>

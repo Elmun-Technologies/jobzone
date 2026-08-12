@@ -50,6 +50,10 @@ class JzColors extends ThemeExtension<JzColors> {
   static const Color _paper = Color(0xFFF3F3F1);
   static const Color _volt = Color(0xFFC7FB00);
 
+  /// Brand ink — use for hero/chat headers so they stay black in both themes
+  /// (`primary` flips to paper in dark mode and would wash those surfaces).
+  static const Color brandInk = _ink;
+
   static const JzColors light = JzColors(
     primary: _ink,
     onPrimary: Colors.white,

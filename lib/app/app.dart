@@ -69,7 +69,19 @@ class YollaApp extends ConsumerWidget {
         // Above the Navigator so an incoming notification pops over whatever
         // route the user is on. A system push only fires when the app is
         // backgrounded — this is the foreground half of the same alert.
-        return NotificationToastHost(child: child ?? const SizedBox.shrink());
+        // Blue-collar users often run 150–200% system fonts. Clamp so
+        // fixed-height cards / the 5-tab bar stay usable, while still
+        // honouring a comfortable increase.
+        final media = MediaQuery.of(context);
+        final clamped = media.copyWith(
+          textScaler: media.textScaler.clamp(maxScaleFactor: 1.3),
+        );
+        return MediaQuery(
+          data: clamped,
+          child: NotificationToastHost(
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
       },
     );
   }

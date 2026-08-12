@@ -74,7 +74,9 @@ export async function EmployerLanding() {
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-foreground text-4xl font-bold tracking-tight text-balance sm:text-5xl">
             {t("heroLead")}{" "}
-            <span className="text-primary">{t("heroAccent")}</span>{" "}
+            <span className="underline decoration-primary decoration-4 underline-offset-4">
+              {t("heroAccent")}
+            </span>{" "}
             {t("heroTail")}
           </h1>
           <p className="text-muted-foreground mt-4 text-lg text-pretty">
@@ -129,7 +131,7 @@ export async function EmployerLanding() {
                   <span className="bg-foreground text-background flex size-9 items-center justify-center rounded-full font-mono text-xs font-bold">
                     {m.n}
                   </span>
-                  <m.Icon className="text-primary size-5" />
+                  <m.Icon className="text-foreground size-5" />
                 </div>
                 <h3 className="text-foreground mt-4 text-lg font-bold text-balance">
                   {m.title}
@@ -139,7 +141,7 @@ export async function EmployerLanding() {
                 </p>
                 <Link
                   href={m.href}
-                  className="text-primary mt-auto pt-5 text-sm font-semibold hover:underline"
+                  className="text-foreground mt-auto pt-5 text-sm font-semibold hover:underline"
                 >
                   {m.cta} →
                 </Link>
@@ -153,7 +155,7 @@ export async function EmployerLanding() {
           channel map — no channel, no section. */}
       {channels.length > 0 ? (
         <Container className="py-14">
-          <span className="text-primary font-mono text-xs font-semibold tracking-wide uppercase">
+          <span className="text-foreground font-mono text-xs font-semibold tracking-wide uppercase">
             {t("channelsKicker")}
           </span>
           <h2 className="text-foreground mt-2 text-2xl font-bold tracking-tight text-balance sm:text-3xl">

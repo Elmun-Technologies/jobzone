@@ -178,7 +178,7 @@ function Labeled({
     <label className="block">
       <span className="text-foreground mb-1.5 block text-sm font-medium">
         {label}
-        {required ? <span className="text-primary"> *</span> : null}
+        {required ? <span className="text-foreground"> *</span> : null}
       </span>
       {children}
     </label>
@@ -681,7 +681,7 @@ export function PostJobForm({
                 full professional posting from them. */}
             <div className="border-primary/40 bg-accent rounded-xl border p-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="text-primary size-4" />
+                <Sparkles className="text-foreground size-4" />
                 <span className="text-accent-foreground text-sm font-semibold">
                   {tp("aiTitle")}
                 </span>
@@ -1145,7 +1145,7 @@ function PreviewBlock({ heading, body }: { heading: string; body: string }) {
               key={i}
               className="text-foreground/90 flex gap-2 text-sm leading-relaxed"
             >
-              <span className="text-primary mt-1.5 size-1.5 shrink-0 rounded-full bg-current" />
+              <span className="text-foreground mt-1.5 size-1.5 shrink-0 rounded-full bg-current" />
               <span>{l}</span>
             </li>
           ))}
@@ -1192,7 +1192,7 @@ function JobPreview({
 
   return (
     <div>
-      <p className="text-primary font-mono text-xs font-semibold tracking-wider uppercase">
+      <p className="text-foreground font-mono text-xs font-semibold tracking-wider uppercase">
         {title}
       </p>
       <p className="text-muted-foreground mt-1 mb-4 text-sm">{sub}</p>

@@ -28,6 +28,11 @@ class EmployerDashboardPage extends ConsumerWidget {
           onRefresh: () async {
             ref.invalidate(employerStatsProvider);
             ref.invalidate(allApplicantsProvider);
+            ref.invalidate(myCompanyProvider);
+            await Future.wait([
+              ref.read(employerStatsProvider.future),
+              ref.read(allApplicantsProvider.future),
+            ]);
           },
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -75,20 +80,26 @@ class EmployerDashboardPage extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: context.colors.primary.withOpacity(0.06),
+                        color: context.colors.primary.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(color: context.colors.primary.withOpacity(0.15)),
+                        border: Border.all(
+                          color: context.colors.primary.withValues(alpha: 0.15),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.insights_rounded, color: context.colors.primary, size: 28),
+                          Icon(
+                            Icons.insights_rounded,
+                            color: context.colors.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Hiring Conversion Rate",
+                                  l.hiringConversionTitle,
                                   style: context.text.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: context.colors.primary,
@@ -96,9 +107,13 @@ class EmployerDashboardPage extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  s.totalApplicants > 0 
-                                      ? "${((s.interviews / s.totalApplicants) * 100).toStringAsFixed(1)}% of applicants reached interview"
-                                      : "Post active vacancies to track conversion",
+                                  s.totalApplicants > 0
+                                      ? l.hiringConversionBody(
+                                          ((s.interviews / s.totalApplicants) *
+                                                  100)
+                                              .toStringAsFixed(1),
+                                        )
+                                      : l.hiringConversionEmpty,
                                   style: context.text.bodySmall?.copyWith(
                                     color: context.colors.textSecondary,
                                   ),

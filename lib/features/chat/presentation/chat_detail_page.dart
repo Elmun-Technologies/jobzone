@@ -124,13 +124,21 @@ class _ChatDetailPageState extends ConsumerState<ChatDetailPage> {
                 return ListView.builder(
                   controller: _scroll,
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: messages.length + 1,
+                  itemCount: messages.length,
                   itemBuilder: (_, i) {
-                    if (i == 0) return const _DateChip();
-                    return _MessageItem(
-                      message: messages[i - 1],
-                      peerName: convo?.title ?? '',
-                      peerAvatar: convo?.avatarUrl,
+                    final msg = messages[i];
+                    final prev = i == 0 ? null : messages[i - 1];
+                    final showDate = prev == null ||
+                        !_sameDay(prev.createdAt, msg.createdAt);
+                    return Column(
+                      children: [
+                        if (showDate) _DateChip(date: msg.createdAt),
+                        _MessageItem(
+                          message: msg,
+                          peerName: convo?.title ?? '',
+                          peerAvatar: convo?.avatarUrl,
+                        ),
+                      ],
                     );
                   },
                 );
@@ -151,7 +159,6 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final colors = context.colors;
     final topPad = MediaQuery.of(context).padding.top;
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -160,14 +167,15 @@ class _Header extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.lg,
       ),
-      decoration: BoxDecoration(
-        color: colors.primary,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+      decoration: const BoxDecoration(
+        color: JzColors.brandInk,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Row(
         children: [
           JzCircleButton(
             icon: Icons.arrow_back_rounded,
+            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
             onTap: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -210,15 +218,31 @@ class _Header extends StatelessWidget {
   }
 }
 
+bool _sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
 class _DateChip extends StatelessWidget {
-  const _DateChip();
+  const _DateChip({required this.date});
+  final DateTime date;
+
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final that = DateTime(date.year, date.month, date.day);
+    final label = that == today
+        ? l.today
+        : that == today.subtract(const Duration(days: 1))
+        ? l.yesterday
+        : '${date.day.toString().padLeft(2, '0')}.'
+            '${date.month.toString().padLeft(2, '0')}.'
+            '${date.year}';
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg, top: AppSpacing.sm),
       child: Center(
         child: Text(
-          context.l10n.today.toUpperCase(),
+          label.toUpperCase(),
           style: context.text.labelSmall?.copyWith(
             color: context.colors.textSecondary,
             letterSpacing: 2,
@@ -477,9 +501,10 @@ class _Composer extends StatelessWidget {
                 // fallback icon — an empty composer just doesn't get a
                 // send button, no false affordance.
                 final hasText = controller.text.trim().isNotEmpty;
+                if (!hasText) return const SizedBox(width: 48, height: 48);
                 return _RoundIcon(
                   icon: Icons.send_rounded,
-                  onTap: hasText ? onSend : () {},
+                  onTap: onSend,
                 );
               },
             ),

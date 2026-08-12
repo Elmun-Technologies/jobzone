@@ -117,7 +117,7 @@ export function JobCardActions({
         className={iconButton}
       >
         {copied ? (
-          <Check className="text-primary size-4" />
+          <Check className="text-foreground size-4" />
         ) : (
           <Share2 className="size-4" />
         )}
@@ -128,7 +128,7 @@ export function JobCardActions({
         disabled={pending}
         aria-pressed={shown}
         aria-label={shown ? tb("saved") : tb("save")}
-        className={cn(iconButton, shown && "text-primary hover:text-primary")}
+        className={cn(iconButton, shown && "text-foreground hover:text-foreground")}
       >
         {/* Keyed so the pop replays on each toggle, and only after a tap —
             see BookmarkButton for why the provider's fill must stay silent. */}
@@ -147,7 +147,7 @@ export function JobCardActions({
         title={dismissed ? t("dismissed") : t("dismiss")}
         className={cn(
           iconButton,
-          dismissed && "text-primary hover:text-primary",
+          dismissed && "text-foreground hover:text-foreground",
         )}
       >
         <Archive className="size-4" />

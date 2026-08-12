@@ -141,7 +141,7 @@ function ToastCard({
           <a
             href={item.href}
             onClick={() => dismissToast(item.id)}
-            className="text-primary mt-2 inline-block text-sm font-semibold hover:underline"
+            className="text-foreground mt-2 inline-block text-sm font-semibold hover:underline"
           >
             {item.actionLabel}
           </a>

@@ -275,8 +275,14 @@ class _ListTab extends StatelessWidget {
     final l = context.l10n;
     return results.when(
       loading: () => const JobListSkeleton(),
-      error: (_, _) =>
-          JzEmptyState(icon: Icons.error_outline_rounded, title: l.errUnknown),
+      error: (_, _) => JzErrorState(
+        title: l.errorTitle,
+        message: l.errUnknown,
+        retryLabel: l.retry,
+        onRetry: () {
+          onRefresh();
+        },
+      ),
       data: (jobs) => jobs.isEmpty
           ? JzEmptyState(icon: Icons.work_outline_rounded, title: l.noJobsTitle)
           : RefreshIndicator(
@@ -298,58 +304,99 @@ class _ListTab extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerWidget {
   const _SearchBar();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final colors = context.colors;
+    final active = ref
+        .watch(searchControllerProvider.notifier)
+        .filters
+        .activeCount;
     return Row(
       children: [
         Expanded(
-          child: GestureDetector(
-            onTap: () => context.push(Routes.search),
-            child: Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search_rounded, color: colors.textSecondary),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    l.search,
-                    style: context.text.bodyMedium?.copyWith(
-                      color: colors.textSecondary,
+          child: Semantics(
+            button: true,
+            label: l.search,
+            child: GestureDetector(
+              onTap: () => context.push(Routes.search),
+              child: Container(
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search_rounded, color: colors.textSecondary),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      l.search,
+                      style: context.text.bodyMedium?.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: AppSpacing.md),
-        GestureDetector(
-          onTap: () => context.push(Routes.filter),
-          child: Container(
-            height: 52,
-            width: 52,
-            decoration: BoxDecoration(
-              color: colors.gold,
-              borderRadius: BorderRadius.circular(AppRadius.md),
+        Semantics(
+          button: true,
+          label: l.filterTitle,
+          child: GestureDetector(
+            onTap: () => context.push(Routes.filter),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  height: 52,
+                  width: 52,
+                  decoration: BoxDecoration(
+                    color: colors.gold,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Icon(Icons.tune_rounded, color: colors.onGold),
+                ),
+                if (active > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 18),
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      height: 18,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: colors.danger,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Text(
+                        '$active',
+                        style: context.text.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            child: Icon(Icons.tune_rounded, color: colors.onGold),
           ),
         ),
       ],

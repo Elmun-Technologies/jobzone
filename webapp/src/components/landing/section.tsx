@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 /** Small volt-tinted mono label that sits above a section heading. */
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="text-primary font-mono text-xs font-semibold tracking-wider uppercase">
+    <span className="text-foreground font-mono text-xs font-semibold tracking-wider uppercase">
       {children}
     </span>
   );

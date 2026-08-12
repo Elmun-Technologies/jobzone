@@ -96,7 +96,7 @@ export function UpgradeForm({
       <ul className="text-muted-foreground mt-4 space-y-1.5 text-sm">
         {(["f1", "f2", "f3"] as const).map((f) => (
           <li key={f} className="flex items-start gap-2">
-            <Check className="text-primary mt-0.5 size-4 shrink-0" />
+            <Check className="text-foreground mt-0.5 size-4 shrink-0" />
             <span>{tp(`${tier}.${f}`)}</span>
           </li>
         ))}

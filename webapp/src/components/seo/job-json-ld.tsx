@@ -31,7 +31,13 @@ export function JobJsonLd({
     title,
     description,
     datePosted,
-    validThrough: validThrough || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    // Derive from the posted date (pure) — Date.now() during render fails
+    // react-hooks/purity and would also drift the JSON-LD on every render.
+    validThrough:
+      validThrough ||
+      new Date(
+        new Date(datePosted).getTime() + 30 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
     employmentType: employmentType.toUpperCase().replace('-', '_'),
     hiringOrganization: {
       '@type': 'Organization',

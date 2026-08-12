@@ -214,7 +214,7 @@ export default async function HomePage({
                   nearMeCta: tm("nearMe"),
                   youAreHere: tm("youAreHere"),
                   pinHint: t("mapLead"),
-                  cityLabel: "TOSHKENT",
+                  cityLabel: (cities[0] ?? "Toshkent").toUpperCase(),
                   negotiable: tj("negotiable"),
                   zoomIn: t("map.zoomIn"),
                   zoomOut: t("map.zoomOut"),
@@ -301,7 +301,7 @@ export default async function HomePage({
             </h2>
             <Link
               href="/jobs"
-              className="text-primary text-sm font-semibold hover:underline"
+              className="text-foreground text-sm font-semibold hover:underline"
             >
               {t("viewAll")}
             </Link>
@@ -325,7 +325,7 @@ export default async function HomePage({
             </h2>
             <Link
               href="/companies"
-              className="text-primary text-sm font-semibold hover:underline"
+              className="text-foreground text-sm font-semibold hover:underline"
             >
               {t("viewAll")}
             </Link>

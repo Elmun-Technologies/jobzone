@@ -443,7 +443,7 @@
   "notifReviews": "Reviews",
   "notifEmailApplicationUpdates": "Email: application status updates",
   "notifEmailDigestHint": "One email with all the matches — not one per vacancy.",
-  "notifEmailMarketing": "Yolla news and tips",
+  "notifEmailMarketing": "Yollla news and tips",
   "notifEmailMarketingHint": "Product news and useful tips. You can switch this off at any time.",
   "pushNotifications": "Push notifications",
   "emailNotifications": "Email notifications",
@@ -1056,5 +1056,16 @@
   "certificateFileNotSavedYet": "Uploads when you save",
   "certificateFileView": "Open",
   "certificateFileReplace": "Replace",
-  "certificateFileRemove": "Remove"
+  "certificateFileRemove": "Remove",
+  "hiringConversionTitle": "Interview conversion",
+  "hiringConversionBody": "{rate}% of applicants reached interview",
+  "@hiringConversionBody": {
+    "placeholders": {
+      "rate": { "type": "String" }
+    }
+  },
+  "hiringConversionEmpty": "Post active vacancies to track conversion",
+  "discardChangesTitle": "Discard changes?",
+  "discardChangesBody": "You have unsaved edits. Leave without saving?",
+  "anyCity": "Any city"
 }

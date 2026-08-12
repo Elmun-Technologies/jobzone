@@ -93,7 +93,7 @@ export default async function WalletPage({
   return (
     <Container className="max-w-2xl py-10">
       <div className="mb-6 flex items-center gap-2">
-        <Wallet className="text-primary size-6" />
+        <Wallet className="text-foreground size-6" />
         <h1 className="text-foreground text-2xl font-bold">{t("title")}</h1>
       </div>
 

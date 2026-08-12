@@ -443,7 +443,7 @@
   "notifReviews": "Отзывы",
   "notifEmailApplicationUpdates": "Эл. почта: обновления статуса отклика",
   "notifEmailDigestHint": "Одно письмо со всеми совпадениями, а не отдельное на каждую вакансию.",
-  "notifEmailMarketing": "Новости и советы Yolla",
+  "notifEmailMarketing": "Новости и советы Yollla",
   "notifEmailMarketingHint": "Новости платформы и полезные советы. Отключить можно в любой момент.",
   "pushNotifications": "Push-уведомления",
   "emailNotifications": "Email-уведомления",
@@ -955,5 +955,16 @@
   "certificateFileNotSavedYet": "Загрузится после сохранения",
   "certificateFileView": "Открыть",
   "certificateFileReplace": "Заменить",
-  "certificateFileRemove": "Удалить"
+  "certificateFileRemove": "Удалить",
+  "hiringConversionTitle": "Конверсия в собеседование",
+  "hiringConversionBody": "{rate}% кандидатов дошли до собеседования",
+  "@hiringConversionBody": {
+    "placeholders": {
+      "rate": { "type": "String" }
+    }
+  },
+  "hiringConversionEmpty": "Опубликуйте вакансии, чтобы видеть конверсию",
+  "discardChangesTitle": "Отменить изменения?",
+  "discardChangesBody": "Есть несохранённые правки. Выйти без сохранения?",
+  "anyCity": "Любой город"
 }

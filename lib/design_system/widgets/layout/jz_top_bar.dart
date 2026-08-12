@@ -14,12 +14,17 @@ class JzTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canPop = Navigator.of(context).canPop();
     return Row(
       children: [
-        JzCircleButton(
-          icon: Icons.arrow_back_rounded,
-          onTap: () => Navigator.of(context).maybePop(),
-        ),
+        if (canPop)
+          JzCircleButton(
+            icon: Icons.arrow_back_rounded,
+            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
+            onTap: () => Navigator.of(context).maybePop(),
+          )
+        else
+          const SizedBox(width: 48),
         Expanded(
           child: Center(
             child: title == null

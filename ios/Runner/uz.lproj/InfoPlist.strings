@@ -1,3 +1,4 @@
 /* iOS system permission dialogs — Uzbek (product default). */
 "NSLocationWhenInUseUsageDescription" = "Yaqin atrofdagi vakansiyalarni koʻrsatish uchun Yollla joylashuvingizdan foydalanadi.";
 "NSPhotoLibraryUsageDescription" = "Profil rasmini oʻrnatish va kompaniyalarga sharhlarga rasm biriktirish uchun Yollla suratlaringizga ruxsat soʻraydi.";
+"NSCameraUsageDescription" = "Profil rasmini olish uchun Yollla kameradan foydalanadi.";

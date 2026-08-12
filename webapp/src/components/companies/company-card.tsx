@@ -38,7 +38,7 @@ export function CompanyCard({ company }: { company: CompanyWithJobs }) {
           <h3 className="text-foreground flex items-center gap-1 font-semibold">
             <span className="truncate">{company.name}</span>
             {company.isVerified ? (
-              <BadgeCheck className="text-primary size-4 shrink-0" />
+              <BadgeCheck className="text-foreground size-4 shrink-0" />
             ) : null}
           </h3>
           {meta ? (
