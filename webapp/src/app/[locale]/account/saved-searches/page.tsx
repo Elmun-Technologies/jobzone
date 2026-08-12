@@ -66,7 +66,7 @@ export default async function SavedSearchesPage({
             const summary = [s.keywords, s.city].filter(Boolean).join(" · ");
             return (
               <li key={s.id} className="flex items-center gap-3 p-4">
-                <span className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-full">
+                <span className="bg-muted text-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
                   <Search className="size-4" />
                 </span>
                 <Link

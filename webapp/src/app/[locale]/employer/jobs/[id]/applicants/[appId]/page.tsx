@@ -125,7 +125,7 @@ export default async function ApplicantResumePage({
               <p className="text-foreground flex items-center gap-1 text-lg font-bold">
                 <span className="truncate">{applicant.name}</span>
                 {applicant.workerVerified ? (
-                  <BadgeCheck className="text-primary size-4 shrink-0" />
+                  <BadgeCheck className="text-foreground size-4 shrink-0" />
                 ) : null}
               </p>
               {applicant.headline ? (
@@ -297,7 +297,7 @@ export default async function ApplicantResumePage({
                       href={c.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary mt-1 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                      className="text-foreground mt-1 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
                     >
                       <FileText className="size-3.5" />
                       {t("openCertificate")}

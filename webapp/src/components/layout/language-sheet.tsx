@@ -147,7 +147,7 @@ export function LanguageSheet() {
                   >
                     {NAMES[l]}
                   </span>
-                  {on ? <Check className="text-primary size-5" /> : null}
+                  {on ? <Check className="text-foreground size-5" /> : null}
                 </button>
               </li>
             );

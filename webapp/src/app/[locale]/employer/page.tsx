@@ -98,7 +98,7 @@ export default async function EmployerHomePage({
         <h1 className="text-foreground flex items-center gap-1.5 text-2xl font-bold">
           {company.name}
           {company.isVerified ? (
-            <BadgeCheck className="text-primary size-5 shrink-0" />
+            <BadgeCheck className="text-foreground size-5 shrink-0" />
           ) : null}
         </h1>
       </div>
@@ -118,7 +118,7 @@ export default async function EmployerHomePage({
       </div>
 
       <div className="mt-4 p-4 bg-primary/5 border border-primary/15 rounded-xl flex items-center gap-4">
-        <div className="text-primary font-bold text-lg flex items-center gap-2">
+        <div className="text-foreground font-bold text-lg flex items-center gap-2">
           <span className="inline-block p-2 bg-primary/10 rounded-lg">⚡</span>
           Hiring Conversion Rate
         </div>

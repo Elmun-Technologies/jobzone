@@ -70,7 +70,7 @@ export default async function JobApplicantsPage({
         className="border-primary/40 bg-accent text-accent-foreground hover:border-primary mb-6 flex items-center justify-between gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-colors"
       >
         <span className="flex items-center gap-2">
-          <Sparkles className="text-primary size-4" />
+          <Sparkles className="text-foreground size-4" />
           {t("recommendedCandidates")}
         </span>
         <span aria-hidden>→</span>
@@ -127,7 +127,7 @@ export default async function JobApplicantsPage({
                   <div className="min-w-0">
                     <Link
                       href={`/employer/jobs/${id}/applicants/${a.applicationId}`}
-                      className="text-foreground hover:text-primary block truncate font-semibold hover:underline"
+                      className="text-foreground hover:text-foreground block truncate font-semibold hover:underline"
                     >
                       {a.name}
                     </Link>
@@ -176,7 +176,7 @@ export default async function JobApplicantsPage({
               <div className="mt-3">
                 <Link
                   href={`/employer/jobs/${id}/applicants/${a.applicationId}`}
-                  className="text-primary text-sm font-medium hover:underline"
+                  className="text-foreground text-sm font-medium hover:underline"
                 >
                   {t("viewResume")} →
                 </Link>

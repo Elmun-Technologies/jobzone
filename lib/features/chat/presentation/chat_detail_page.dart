@@ -235,7 +235,9 @@ class _DateChip extends StatelessWidget {
         ? l.today
         : that == today.subtract(const Duration(days: 1))
         ? l.yesterday
-        : '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+        : '${date.day.toString().padLeft(2, '0')}.'
+            '${date.month.toString().padLeft(2, '0')}.'
+            '${date.year}';
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg, top: AppSpacing.sm),
       child: Center(

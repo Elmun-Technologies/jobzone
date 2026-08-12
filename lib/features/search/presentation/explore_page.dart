@@ -311,7 +311,10 @@ class _SearchBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final colors = context.colors;
-    final active = ref.watch(searchControllerProvider.notifier).filters.activeCount;
+    final active = ref
+        .watch(searchControllerProvider.notifier)
+        .filters
+        .activeCount;
     return Row(
       children: [
         Expanded(

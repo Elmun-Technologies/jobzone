@@ -140,7 +140,7 @@ export default async function PromoteJobPage({
                 className="rise-in border-border bg-card flex items-center gap-3 rounded-2xl border p-4"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <b.Icon className="text-primary size-5 shrink-0" />
+                <b.Icon className="text-foreground size-5 shrink-0" />
                 <span className="text-foreground text-sm font-medium">
                   {b.label}
                 </span>
@@ -153,7 +153,7 @@ export default async function PromoteJobPage({
             <span className="text-muted-foreground">{t("currentTier")}</span>
             <span className="text-foreground inline-flex items-center gap-1.5 font-semibold">
               {currentTier === "brand" ? (
-                <Sparkles className="text-primary size-4" />
+                <Sparkles className="text-foreground size-4" />
               ) : null}
               {currentTier === "brand" ? t("tierBrand") : t("tierBase")}
             </span>

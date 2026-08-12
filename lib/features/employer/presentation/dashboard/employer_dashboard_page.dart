@@ -28,6 +28,11 @@ class EmployerDashboardPage extends ConsumerWidget {
           onRefresh: () async {
             ref.invalidate(employerStatsProvider);
             ref.invalidate(allApplicantsProvider);
+            ref.invalidate(myCompanyProvider);
+            await Future.wait([
+              ref.read(employerStatsProvider.future),
+              ref.read(allApplicantsProvider.future),
+            ]);
           },
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -75,13 +80,19 @@ class EmployerDashboardPage extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: context.colors.primary.withOpacity(0.06),
+                        color: context.colors.primary.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(color: context.colors.primary.withOpacity(0.15)),
+                        border: Border.all(
+                          color: context.colors.primary.withValues(alpha: 0.15),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.insights_rounded, color: context.colors.primary, size: 28),
+                          Icon(
+                            Icons.insights_rounded,
+                            color: context.colors.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Column(

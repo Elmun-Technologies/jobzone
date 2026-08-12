@@ -210,7 +210,10 @@ class _FilterPageState extends ConsumerState<FilterPage> {
                   const SizedBox(height: AppSpacing.xl),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(l.fieldNightShift, style: _sectionStyle(context)),
+                    title: Text(
+                      l.fieldNightShift,
+                      style: _sectionStyle(context),
+                    ),
                     value: _draft.nightShift,
                     onChanged: (v) => setState(
                       () => _draft = _draft.copyWith(nightShift: v),
