@@ -17,6 +17,12 @@ void showInfoSnack(BuildContext context, String message) {
     ..showSnackBar(SnackBar(content: Text(message)));
 }
 
+void showSuccessSnack(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+}
+
 /// Maps a caught [error] to a localized, user-safe message so raw
 /// PostgrestException / Auth internals are never shown to users (uz/ru/en).
 /// Falls back to a generic "something went wrong".
