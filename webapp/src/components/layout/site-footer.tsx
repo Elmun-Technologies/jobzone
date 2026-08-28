@@ -85,6 +85,16 @@ export async function SiteFooter() {
             >
               {t("aboutHeading")}
             </h2>
+            <div className="mb-4 space-y-1">
+              <p className="text-foreground font-medium">{t("contactHeading")}</p>
+              <a className="hover:text-primary block transition-colors" href="tel:+998979620705">
+                +998 97 962 07 05
+              </a>
+              <a className="hover:text-primary block transition-colors" href="tel:+998889330705">
+                +998 88 933 07 05
+              </a>
+              <p className="pt-1 text-xs">{t("workingHours")}</p>
+            </div>
             <ul>
               <li>
                 <Link href="/jobs" className={linkClass}>

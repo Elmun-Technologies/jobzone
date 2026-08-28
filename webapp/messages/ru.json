@@ -805,7 +805,9 @@
     "terms": "Условия",
     "byRegion": "Работа по регионам",
     "byCategory": "По сферам",
-    "aboutHeading": "Yollla"
+    "aboutHeading": "Yollla",
+    "contactHeading": "Контакты",
+    "workingHours": "Понедельник–пятница, 09:00–18:00"
   },
   "common": {
     "loading": "Загрузка…",

@@ -805,7 +805,9 @@
     "terms": "Shartlar",
     "byRegion": "Hududlar bo'yicha ish",
     "byCategory": "Sohalar bo'yicha",
-    "aboutHeading": "Yollla"
+    "aboutHeading": "Yollla",
+    "contactHeading": "Aloqa",
+    "workingHours": "Dushanba–juma, 09:00–18:00"
   },
   "common": {
     "loading": "Yuklanmoqda…",
