@@ -63,7 +63,7 @@ export default async function JobMatchesPage({
         ← {t("backToApplicants")}
       </Link>
       <h1 className="text-foreground mt-4 flex items-center gap-2 text-2xl font-bold">
-        <Sparkles className="text-primary size-6" />
+        <Sparkles className="text-primary-ink size-6" />
         {t("recommendedCandidates")}
       </h1>
       <p className="text-muted-foreground mt-1 text-sm">
@@ -101,7 +101,7 @@ export default async function JobMatchesPage({
                     <p className="text-foreground flex items-center gap-1 font-semibold">
                       <span className="truncate">{c.name}</span>
                       {c.workerVerified ? (
-                        <BadgeCheck className="text-primary size-4 shrink-0" />
+                        <BadgeCheck className="text-primary-ink size-4 shrink-0" />
                       ) : null}
                     </p>
                     {c.headline ? (

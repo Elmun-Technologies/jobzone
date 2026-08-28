@@ -81,7 +81,7 @@ export default async function RecommendedJobsPage({
       ) : null}
 
       <h1 className="text-foreground flex items-center gap-2 text-2xl font-bold">
-        <Sparkles className="text-primary size-6" />
+        <Sparkles className="text-primary-ink size-6" />
         {t("title")}
       </h1>
       <p className="text-muted-foreground mt-1 mb-6 text-sm">{t("subtitle")}</p>

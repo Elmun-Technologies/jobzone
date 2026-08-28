@@ -2,130 +2,56 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { hasSupabase } from "./supabase-env";
-
-export interface ApplicantExperience {
-  title: string;
-  companyName: string;
-  startYear: string;
-  endYear: string;
-  isCurrent: boolean;
-  description: string;
-}
-
-export interface ApplicantEducation {
-  school: string;
-  degree: string;
-  field: string;
-  startYear: string;
-  endYear: string;
-  isCurrent: boolean;
-}
-
-export interface ApplicantCertificate {
-  name: string;
-  issuer: string;
-  issuedYear: string;
-  expiryYear: string;
-  /**
-   * Short-lived signed URL to the scanned certificate (0077), or "" when the
-   * candidate only described it. The bucket is private and readable by a
-   * recruiter the candidate actually applied to (`is_recruiter_of`), so the
-   * URL is minted per request rather than stored.
-   */
-  fileUrl: string;
-}
-
-export interface ApplicantResume {
-  summary: string;
-  /** True when the summary is an untouched AI draft (surfaced as a badge). */
-  summaryAiGenerated: boolean;
-  experienceLevel: string; // "" | none | under_1 | 1_3 | 3_5 | 5_plus
-  expectedSalary: string; // numeric string | ""
-  currency: string; // "UZS" | "USD"
-  /** language code / name -> level ("a1_a2"|"b1_b2"|"c1_c2"|"native"|...). */
-  languages: Record<string, string>;
-  experiences: ApplicantExperience[];
-  educations: ApplicantEducation[];
-  certificates: ApplicantCertificate[];
-  skills: string[];
-  /** True once any section has content (else the page shows an empty note). */
-  hasAny: boolean;
-}
-
-function yearOf(v: unknown): string {
-  return typeof v === "string" && v.length >= 4 ? v.slice(0, 4) : "";
-}
-const str = (v: unknown) => (typeof v === "string" ? v : "");
+import {
+  type ApplicantCertificate,
+  type ApplicantEducation,
+  type ApplicantExperience,
+  type ApplicantResume,
+} from "./types";
 
 const EMPTY: ApplicantResume = {
   summary: "",
   summaryAiGenerated: false,
-  experienceLevel: "",
-  expectedSalary: "",
-  currency: "UZS",
   languages: {},
+  experienceLevel: "",
+  desiredPayMin: null,
+  desiredPayCurrency: "UZS",
   experiences: [],
   educations: [],
   certificates: [],
   skills: [],
-  hasAny: false,
 };
 
 /**
- * The full résumé of a candidate who applied to one of the caller's jobs.
+ * Reads an applicant's full résumé (CV) for the employer view.
  *
- * The sub-tables (experiences/educations/certifications/profile_skills) are
- * `selectable by authenticated` (0001) and read directly; the profile-level
- * fields (summary + AI flag, languages, experience level, expected pay) live on
- * the owner-only `profiles` table (0027) and come through the
- * `is_job_owner`-gated `applicant_profiles` view (0047). Everything is additive
- * and best-effort — a DB behind on 0047 still returns the sub-table sections.
- *
- * This reader does NOT enforce ownership on its own; the résumé page gates the
- * route (requireEmployer + the application must belong to the owner's job).
+ * Secure: uses a SECURITY DEFINER RPC (`get_applicant_resume`) that re-checks
+ * recruiter authorization itself. This closes a bulk-scraping side channel where
+ * a recruiter could otherwise issue unfiltered REST calls to the base tables
+ * and harvest every applicant's full work history in one go (0075).
  */
 export async function getApplicantResume(
   applicantId: string,
 ): Promise<ApplicantResume> {
-  if (!hasSupabase()) return EMPTY;
   try {
     const supabase = await createClient();
 
-    const [expR, eduR, certR, skillR, profR] = await Promise.all([
-      supabase
-        .from("experiences")
-        .select(
-          "title, company_name, start_date, end_date, is_current, description",
-        )
-        .eq("profile_id", applicantId)
-        // nullsFirst: an ongoing role has end_date=null and is the most recent —
-        // it must sort to the TOP, not the bottom.
-        .order("end_date", { ascending: false, nullsFirst: true }),
-      supabase
-        .from("educations")
-        .select("school, degree, field, start_date, end_date, is_current")
-        .eq("profile_id", applicantId)
-        .order("end_date", { ascending: false, nullsFirst: true }),
-      supabase
-        .from("certifications")
-        .select("name, issuer, issued_date, expiry_date, file_path")
-        .eq("profile_id", applicantId)
-        .order("issued_date", { ascending: false, nullsFirst: false }),
-      supabase
-        .from("profile_skills")
-        .select("skills(name)")
-        .eq("profile_id", applicantId),
-      supabase
-        .from("applicant_profiles")
-        .select(
-          "summary, summary_ai_generated, languages, experience_level, desired_pay_min, desired_pay_currency",
-        )
-        .eq("applicant_id", applicantId)
-        .maybeSingle(),
-    ]);
+    const { data, error } = await supabase.rpc("get_applicant_resume", {
+      p_applicant_id: applicantId,
+    });
+    if (error || !data) return EMPTY;
+    const payload = data as Record<string, unknown>;
 
-    const experiences: ApplicantExperience[] = (expR.data ?? []).map((e) => {
+    const str = (v: unknown) => (typeof v === "string" ? v : "");
+    const yearOf = (v: unknown) => {
+      if (typeof v !== "string") return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d.getFullYear();
+    };
+
+    const experiences: ApplicantExperience[] = (
+      (payload.experiences as unknown[]) ?? []
+    ).map((e) => {
       const row = e as Record<string, unknown>;
       return {
         title: str(row.title),
@@ -137,7 +63,9 @@ export async function getApplicantResume(
       };
     });
 
-    const educations: ApplicantEducation[] = (eduR.data ?? []).map((e) => {
+    const educations: ApplicantEducation[] = (
+      (payload.educations as unknown[]) ?? []
+    ).map((e) => {
       const row = e as Record<string, unknown>;
       return {
         school: str(row.school),
@@ -152,9 +80,10 @@ export async function getApplicantResume(
     // Sign the attached documents in one batch. Best-effort like everything
     // else here: a DB behind on 0077 has no file_path column, and a storage
     // hiccup costs the link, not the section.
-    const certRows = (certR.data ?? []) as Record<string, unknown>[];
+    const certRows = (payload.certificates as unknown[]) ?? [];
     const certUrls = await Promise.all(
-      certRows.map(async (row) => {
+      certRows.map(async (c) => {
+        const row = c as Record<string, unknown>;
         const path = str(row.file_path);
         if (!path) return "";
         try {
@@ -167,59 +96,43 @@ export async function getApplicantResume(
         }
       }),
     );
-    const certificates: ApplicantCertificate[] = certRows.map((row, i) => ({
-      name: str(row.name),
-      issuer: str(row.issuer),
-      issuedYear: yearOf(row.issued_date),
-      expiryYear: yearOf(row.expiry_date),
-      fileUrl: certUrls[i] ?? "",
-    }));
 
-    const skills: string[] = (skillR.data ?? [])
-      .map((s) => {
-        const sk = (s as Record<string, unknown>).skills as Record<
-          string,
-          unknown
-        > | null;
-        return sk && typeof sk.name === "string" ? sk.name : "";
-      })
-      .filter((n): n is string => n !== "");
+    const certificates: ApplicantCertificate[] = certRows.map((c, i) => {
+      const row = c as Record<string, unknown>;
+      return {
+        name: str(row.name),
+        issuer: str(row.issuer),
+        issuedYear: yearOf(row.issued_date),
+        expiryYear: yearOf(row.expiry_date),
+        fileUrl: certUrls[i] ?? "",
+      };
+    });
 
-    const pr = (profR.data ?? {}) as Record<string, unknown>;
+    const skills: string[] = ((payload.skills as unknown[]) ?? []).filter(
+      (n): n is string => typeof n === "string" && n !== "",
+    );
+
     const languages =
-      pr.languages && typeof pr.languages === "object"
-        ? (pr.languages as Record<string, string>)
+      payload.languages && typeof payload.languages === "object"
+        ? (payload.languages as Record<string, string>)
         : {};
-    const summary = str(pr.summary);
-    const experienceLevel = str(pr.experience_level);
-    const expectedSalary =
-      pr.desired_pay_min != null ? String(pr.desired_pay_min) : "";
-
-    const hasAny =
-      summary !== "" ||
-      experiences.length > 0 ||
-      educations.length > 0 ||
-      certificates.length > 0 ||
-      skills.length > 0 ||
-      Object.keys(languages).length > 0 ||
-      experienceLevel !== "" ||
-      expectedSalary !== "";
+    const summary = str(payload.summary);
+    const experienceLevel = str(payload.experience_level);
 
     return {
       summary,
-      summaryAiGenerated: pr.summary_ai_generated === true,
-      experienceLevel,
-      expectedSalary,
-      currency: str(pr.desired_pay_currency) || "UZS",
+      summaryAiGenerated: payload.summary_ai_generated === true,
       languages,
+      experienceLevel,
+      desiredPayMin: (payload.desired_pay_min as number) || null,
+      desiredPayCurrency: str(payload.desired_pay_currency) || "UZS",
       experiences,
       educations,
       certificates,
       skills,
-      hasAny,
     };
   } catch (e) {
-    console.error("getApplicantResume failed", e);
+    console.error("Failed to read applicant resume:", e);
     return EMPTY;
   }
 }

@@ -387,6 +387,63 @@ void main() {
       );
     });
 
+    test('onboarded employer can reach account settings, language, '
+        'password, notifications, help and privacy', () {
+      // EmployerShell has no account tab, so these are only reachable via
+      // CompanyManagePage's settings entry / deep link — the guard must not
+      // bounce them. App Store 5.1.1(v) requires delete-account (settings)
+      // stay reachable in-app for any account-creating role.
+      for (final location in [
+        Routes.accountSettings,
+        Routes.accountLanguage,
+        Routes.accountPassword,
+        Routes.accountNotificationSettings,
+        Routes.accountHelp,
+        Routes.accountPrivacy,
+      ]) {
+        expect(
+          resolveRedirect(
+            hasSupabase: true,
+            signedIn: true,
+            onboardingSeen: true,
+            profileComplete: true,
+            role: UserRole.employer,
+            location: location,
+          ),
+          isNull,
+          reason: '$location should be reachable by an employer',
+        );
+      }
+    });
+
+    test('onboarded employer is still kept out of seeker-only account '
+        'screens', () {
+      // Only the role-agnostic slice of /account/* opened up above — résumé,
+      // applications, seeking status, saved searches and subscriptions are
+      // seeker concepts an employer account has no use for.
+      for (final location in [
+        Routes.accountPersonalInfo,
+        Routes.accountAnalytics,
+        Routes.accountApplications,
+        Routes.accountSeekingStatus,
+        Routes.savedSearches,
+        Routes.subscriptions,
+      ]) {
+        expect(
+          resolveRedirect(
+            hasSupabase: true,
+            signedIn: true,
+            onboardingSeen: true,
+            profileComplete: true,
+            role: UserRole.employer,
+            location: location,
+          ),
+          Routes.employerDashboard,
+          reason: '$location should still bounce an employer',
+        );
+      }
+    });
+
     test('offline mode never redirects regardless of role', () {
       expect(
         resolveRedirect(

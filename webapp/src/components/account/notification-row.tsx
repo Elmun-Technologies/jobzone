@@ -68,7 +68,7 @@ export function NotificationRow({
       >
         <span
           className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full ${
-            unread ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+            unread ? "bg-primary/15 text-primary-ink" : "bg-muted text-muted-foreground"
           }`}
         >
           <Icon className="size-4" />

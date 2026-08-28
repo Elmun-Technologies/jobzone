@@ -178,7 +178,7 @@ function Labeled({
     <label className="block">
       <span className="text-foreground mb-1.5 block text-sm font-medium">
         {label}
-        {required ? <span className="text-primary"> *</span> : null}
+        {required ? <span className="text-primary-ink"> *</span> : null}
       </span>
       {children}
     </label>
@@ -286,8 +286,21 @@ export function PostJobForm({
   const locale = useLocale();
   const router = useRouter();
   const isEdit = editJob != null;
+  // React 19 resets an uncontrolled `<form action={fn}>` (all fields here use
+  // defaultValue/defaultChecked) as part of the SAME transition that runs the
+  // action — before this component's passive effects run. So by the time the
+  // `state.signedOut`/`noCompany` effect below fired, `new
+  // FormData(formRef.current)` was reading an already-reset (empty, for a
+  // first-time guest) DOM instead of what was submitted. The FormData object
+  // React hands the action itself is an immutable snapshot taken at submit
+  // time, unaffected by that later DOM reset — so capture THAT instead of
+  // re-deriving one from the DOM after the fact.
+  const submittedFormDataRef = useRef<FormData | null>(null);
   const [state, action, pending] = useActionState<JobFormState, FormData>(
-    isEdit ? updateJob : createJob,
+    (prevState, formData) => {
+      submittedFormDataRef.current = formData;
+      return (isEdit ? updateJob : createJob)(prevState, formData);
+    },
     {},
   );
   const [restored, setRestored] = useState<JobDraft | null>(
@@ -370,7 +383,6 @@ export function PostJobForm({
 
   useEffect(() => {
     if (!state.signedOut && !state.noCompany) return;
-    if (!formRef.current) return;
     // Edit mode: the edit page reloads the job from the DB on return, so DON'T
     // stash a post-a-job draft — restoring it on /jobs/new would publish a
     // duplicate and leave the original unchanged. Just re-auth and come back to
@@ -382,7 +394,10 @@ export function PostJobForm({
       );
       return;
     }
-    stashDraft(draftFromFormData(new FormData(formRef.current)));
+    // The submitted snapshot (see submittedFormDataRef above), NOT the live
+    // DOM — React has already reset the uncontrolled fields by now.
+    if (!submittedFormDataRef.current) return;
+    stashDraft(draftFromFormData(submittedFormDataRef.current));
     const postJobPath = `/${locale}/employer/jobs/new`;
     if (state.signedOut) {
       router.push(
@@ -681,7 +696,7 @@ export function PostJobForm({
                 full professional posting from them. */}
             <div className="border-primary/40 bg-accent rounded-xl border p-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="text-primary size-4" />
+                <Sparkles className="text-primary-ink size-4" />
                 <span className="text-accent-foreground text-sm font-semibold">
                   {tp("aiTitle")}
                 </span>
@@ -1145,7 +1160,7 @@ function PreviewBlock({ heading, body }: { heading: string; body: string }) {
               key={i}
               className="text-foreground/90 flex gap-2 text-sm leading-relaxed"
             >
-              <span className="text-primary mt-1.5 size-1.5 shrink-0 rounded-full bg-current" />
+              <span className="text-primary-ink mt-1.5 size-1.5 shrink-0 rounded-full bg-current" />
               <span>{l}</span>
             </li>
           ))}
@@ -1192,7 +1207,7 @@ function JobPreview({
 
   return (
     <div>
-      <p className="text-primary font-mono text-xs font-semibold tracking-wider uppercase">
+      <p className="text-primary-ink font-mono text-xs font-semibold tracking-wider uppercase">
         {title}
       </p>
       <p className="text-muted-foreground mt-1 mb-4 text-sm">{sub}</p>

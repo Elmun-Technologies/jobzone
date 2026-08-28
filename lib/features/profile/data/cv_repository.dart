@@ -252,6 +252,10 @@ class CvRepository {
     await _ref
         .read(supabaseClientProvider)
         .from('profiles')
+        // Deliberately NOT null-aware: the About editor passes null to clear a
+        // headline or bio, and that has to keep working. Callers holding only
+        // partial data must not call this with nulls for the rest — see
+        // ResumeReviewPage, which merges before writing.
         .update({'full_name': fullName, 'headline': headline, 'bio': bio})
         .eq('id', uid);
   }
@@ -300,6 +304,16 @@ class CvRepository {
     }
     await client
         .from('profiles')
+        // `city`/`country` are null-aware; `full_name`/`phone` are not.
+        //
+        // The Personal Information screen — the only caller — has no city or
+        // country input and passes neither, so writing them unconditionally
+        // NULLed both on every save. That silently erased the location the
+        // seeker set during onboarding, which no mobile screen can re-enter,
+        // and which feeds the city term in recommended_jobs() (0051).
+        //
+        // `phone` stays unconditional because that screen passes null on
+        // purpose to clear the field.
         .update({
           'full_name': fullName,
           'phone': phone,

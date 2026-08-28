@@ -59,7 +59,7 @@ export default async function TermsPage({
       </div>
       <section className="border-border mt-12 border-t pt-8">
         <p className="text-muted-foreground text-sm">{doc.contactLead}</p>
-        <p className="text-primary mt-2 text-sm font-semibold">
+        <p className="text-primary-ink mt-2 text-sm font-semibold">
           <a href={`mailto:${doc.contactEmail}`}>{doc.contactEmail}</a>
         </p>
       </section>

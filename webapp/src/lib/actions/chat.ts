@@ -1,64 +1,49 @@
 "use server";
 
-import { redirect } from "next/navigation";
-
 import { createClient } from "@/lib/supabase/server";
 
+export interface StartConversationState {
+  ok?: boolean;
+  conversationId?: string;
+  signedOut?: boolean;
+  error?: boolean;
+}
+
 /**
- * Opens (or creates) a direct conversation with another user and navigates to
- * it. Participant rows are inserted self-first so the RLS with-check on the
- * second row passes (the inserter is then already a participant).
+ * Opens (or creates) the direct conversation with another user.
+ *
+ * Goes through `get_or_create_direct_conversation` (0067) — the ONLY way a
+ * client can create a conversation. `conversations` has had no client INSERT
+ * policy since 0010, and `conversation_participants` none since 0027
+ * ("Membership is created solely by start_direct_conversation() (SECURITY
+ * DEFINER)"). This used to insert into both tables directly: every write hit
+ * RLS, the caught error just redirected to `/account/messages`, and the
+ * seeker landed on an empty inbox with no indication anything failed. No
+ * conversation could ever be created from the web — mobile already calls this
+ * same RPC (`ChatRepository.getOrCreateDirectConversation`).
+ *
+ * Returns a result instead of redirecting itself, so the caller can navigate
+ * on success and show an error otherwise — the "Message" button silently
+ * doing nothing was as much the bug as the RLS failure underneath it.
  */
 export async function startConversationWith(
   otherProfileId: string,
-  locale: string,
-): Promise<void> {
+): Promise<StartConversationState> {
+  if (!otherProfileId) return { error: true };
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/${locale}/sign-in`);
-  if (!otherProfileId || otherProfileId === user.id) {
-    redirect(`/${locale}/account/messages`);
-  }
+  if (!user) return { signedOut: true };
+  if (otherProfileId === user.id) return { error: true };
 
-  // Look for an existing shared conversation.
-  const { data: mine } = await supabase
-    .from("conversation_participants")
-    .select("conversation_id")
-    .eq("profile_id", user.id);
-  const myIds = (mine ?? []).map((m) =>
-    String((m as { conversation_id: unknown }).conversation_id),
+  const { data, error } = await supabase.rpc(
+    "get_or_create_direct_conversation",
+    { p_other: otherProfileId },
   );
-
-  if (myIds.length) {
-    const { data: shared } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("profile_id", otherProfileId)
-      .in("conversation_id", myIds);
-    const existing = shared?.[0]
-      ? String((shared[0] as { conversation_id: unknown }).conversation_id)
-      : null;
-    if (existing) redirect(`/${locale}/account/messages/${existing}`);
+  if (error || !data) {
+    console.error("startConversationWith failed", error);
+    return { error: true };
   }
-
-  const { data: convo, error } = await supabase
-    .from("conversations")
-    .insert({ type: "direct" })
-    .select("id")
-    .single();
-  if (error || !convo) redirect(`/${locale}/account/messages`);
-
-  const conversationId = String((convo as { id: unknown }).id);
-  // Insert self first (with-check: profile_id = auth.uid()), then the other
-  // (with-check: is_conversation_participant — now true).
-  await supabase
-    .from("conversation_participants")
-    .insert({ conversation_id: conversationId, profile_id: user.id });
-  await supabase
-    .from("conversation_participants")
-    .insert({ conversation_id: conversationId, profile_id: otherProfileId });
-
-  redirect(`/${locale}/account/messages/${conversationId}`);
+  return { ok: true, conversationId: String(data) };
 }

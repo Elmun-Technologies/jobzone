@@ -86,7 +86,7 @@ export function ConsentBanner({
             {t("body")}{" "}
             <Link
               href="/privacy"
-              className="text-primary font-medium hover:underline"
+              className="text-primary-ink font-medium hover:underline"
             >
               {t("learnMore")}
             </Link>

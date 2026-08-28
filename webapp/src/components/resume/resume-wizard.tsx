@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
-  X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -34,7 +33,6 @@ import { UZ_REGIONS } from "@/lib/uz-regions";
 // pulls the server client into the browser bundle.
 import {
   EMPTY_RESUME,
-  type CertificateEntry,
   type EducationEntry,
   type ExperienceEntry,
   type ResumeDraft,
@@ -42,312 +40,71 @@ import {
 import { cn } from "@/lib/utils";
 
 const inputClass =
-  "border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none";
+  "border-border bg-card text-foreground focus:ring-primary focus:border-primary block w-full rounded-lg border px-3 py-2 text-sm outline-none transition-all focus:ring-1";
 
-const EXP = ["none", "under_1", "1_3", "3_5", "5_plus"] as const;
-const MARITAL = ["single", "married", "divorced"] as const;
-const LANGS = ["ru", "en", "tr", "tg", "uz"] as const;
-const LEVELS = ["none", "a1_a2", "b1_b2", "c1_c2", "native"] as const;
-
-// Where an in-progress résumé is parked while a guest signs in at save-time.
-const STASH_KEY = "yolla-resume-draft";
-// …and which step they were on, written only when the wizard is parked
-// mid-flow (a language switch). The sign-in detour happens at save-time and
-// deliberately returns to the last step, so it leaves this unset.
-const STASH_STEP_KEY = "yolla-resume-draft-step";
+const STASH_KEY = "jz_resume_draft";
+const STASH_STEP_KEY = "jz_resume_step";
 
 const EMPTY_EDU: EducationEntry = {
-  school: "",
+  institution: "",
   degree: "",
   field: "",
-  startYear: "",
-  endYear: "",
-  isCurrent: false,
+  startYear: null,
+  endYear: null,
 };
 
 const EMPTY_EXP: ExperienceEntry = {
   title: "",
   companyName: "",
-  startYear: "",
-  endYear: "",
-  isCurrent: false,
   description: "",
+  startYear: null,
+  startMonth: null,
+  endYear: null,
+  endMonth: null,
+  current: false,
 };
 
-const EMPTY_CERT: CertificateEntry = {
-  name: "",
-  issuer: "",
-  issuedYear: "",
-  expiryYear: "",
-};
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="text-foreground mb-1.5 block text-sm font-medium">
-        {label}
-        {required ? <span className="text-primary"> *</span> : null}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function ChipGroup({
-  options,
-  value,
-  onChange,
-}: {
-  options: { value: string; label: string }[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((o) => {
-        const on = value === o.value;
-        return (
-          <button
-            key={o.value}
-            type="button"
-            aria-pressed={on}
-            onClick={() => onChange(o.value)}
-            className={cn(
-              "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-              on
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background text-foreground hover:border-primary/40",
-            )}
-          >
-            {o.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Groups a digit string for display: "15000000" -> "15 000 000". */
-const groupDigits = (s: string) => s.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-
-/** How many job titles one résumé may carry (mirrors the 0082 constraint). */
-const MAX_POSITIONS = 3;
-
-/**
- * The résumé's desired job titles, as removable chips over a suggestion field.
- *
- * A blue-collar seeker is rarely one title: the same person is "Sotuvchi",
- * "Kassir" and "Sotuvchi-konsultant", and with a single headline they matched
- * only the vacancies that happened to use their one word. Three is the cap —
- * enough to cover a trade, few enough that the list still means something.
- */
-function PositionsField({
-  values,
-  onChange,
-  placeholder,
-  removeLabel,
-}: {
-  values: string[];
-  onChange: (next: string[]) => void;
-  placeholder: string;
-  removeLabel: string;
-}) {
-  const [text, setText] = useState("");
-  const full = values.length >= MAX_POSITIONS;
-
-  function add(raw: string) {
-    const value = raw.trim();
-    if (!value || full) return;
-    // Case-insensitive de-dupe: "Sotuvchi" and "sotuvchi" are one title.
-    if (values.some((v) => v.toLowerCase() === value.toLowerCase())) {
-      setText("");
-      return;
-    }
-    onChange([...values, value]);
-    setText("");
-  }
-
-  return (
-    <div>
-      {values.length > 0 ? (
-        <ul className="mb-2 flex flex-wrap gap-2">
-          {values.map((v) => (
-            <li key={v}>
-              <span className="border-primary/40 bg-accent text-accent-foreground inline-flex items-center gap-1.5 rounded-full border py-1.5 pr-2 pl-3 text-sm font-medium">
-                {v}
-                <button
-                  type="button"
-                  onClick={() => onChange(values.filter((x) => x !== v))}
-                  aria-label={`${removeLabel}: ${v}`}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="size-4" />
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {!full ? (
-        <SuggestInput
-          className={inputClass}
-          placeholder={placeholder}
-          value={text}
-          onValueChange={setText}
-          // Picking from the list is the choice — no extra "add" tap after it.
-          // Enter commits a title we don't list; blur keeps the text so a
-          // half-typed trade isn't thrown away by tapping elsewhere.
-          onPick={add}
-          onSubmitValue={add}
-          onBlur={add}
-          suggest={suggestProfessions}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-/**
- * Restores a stashed draft written by an older build.
- *
- * A guest who was filling the wizard when the deploy landed comes back from
- * sign-in with `{ position: "Sotuvchi", city: "Toshkent" }` in sessionStorage —
- * the pre-0082 shape. Without this the wizard would remount straight onto
- * `draft.positions.length` and blank-screen them at the exact moment they
- * finally signed in, which is the one moment auth-last cannot afford to lose.
- */
-function reviveDraft(raw: unknown): ResumeDraft {
-  const d = (raw ?? {}) as Partial<ResumeDraft> & { position?: unknown };
-  const positions = Array.isArray(d.positions)
-    ? d.positions.filter(
-        (p): p is string => typeof p === "string" && !!p.trim(),
-      )
-    : typeof d.position === "string" && d.position.trim() !== ""
-      ? [d.position.trim()]
-      : [];
+function reviveDraft(d: Record<string, unknown>): ResumeDraft {
+  const certs = Array.isArray(d.certificates) ? d.certificates : [];
   return {
     ...EMPTY_RESUME,
-    ...d,
-    positions,
-    region: typeof d.region === "string" ? d.region : "",
-    district: typeof d.district === "string" ? d.district : "",
+    ...(d as Partial<ResumeDraft>),
+    certificates: certs.map((c: unknown) => {
+      const cert = (c ?? {}) as Record<string, unknown>;
+      const issueDate = cert.issueDate;
+      return {
+        name: typeof cert.name === "string" ? cert.name : "",
+        organization: typeof cert.organization === "string" ? cert.organization : "",
+        issueDate: typeof issueDate === "string" ? new Date(issueDate) : issueDate instanceof Date ? issueDate : null,
+      };
+    }),
   };
 }
 
-/**
- * Year picker for the history sections (worked / studied / certified from–to).
- *
- * These were free numeric inputs, which accept "20026" and "1899" as happily
- * as a real year — and the value is stored as a date (`YYYY-01-01`), so a typo
- * lands in the database and then sorts the seeker's own history wrongly. The
- * range runs from this year back 60, newest first: nearly every entry a seeker
- * adds is recent, and the one they want should be at the top of the list.
- */
 function YearSelect({
   value,
   onChange,
   label,
-  disabled,
-  future = 0,
+  className,
 }: {
-  value: string;
-  onChange: (v: string) => void;
+  value: number | null;
+  onChange: (v: number | null) => void;
   label: string;
-  disabled?: boolean;
-  /** Years ahead of today to offer (a certificate's expiry is in the future). */
-  future?: number;
+  className?: string;
 }) {
-  const thisYear = new Date().getFullYear();
-  const years = Array.from({ length: 61 + future }, (_, i) =>
-    String(thisYear + future - i),
-  );
+  const current = new Date().getFullYear();
+  const years = Array.from({ length: 60 }, (_, i) => current - i);
   return (
-    <select
-      className={inputClass}
-      value={disabled ? "" : value}
-      disabled={disabled}
-      aria-label={label}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      <option value="">{label}</option>
-      {years.map((y) => (
-        <option key={y} value={y}>
-          {y}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-/** Day / month / year dropdowns for a birth date — far clearer than the native
- * date picker's endless year scroll. Value + onChange are "YYYY-MM-DD" (or ""
- * while incomplete). Month names are localized via Intl (no extra strings). */
-function BirthDatePicker({
-  value,
-  onChange,
-  locale,
-  labels,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  locale: string;
-  labels: { day: string; month: string; year: string };
-}) {
-  const [yy = "", mm = "", dd = ""] = value ? value.split("-") : [];
-  const thisYear = new Date().getFullYear();
-  const years = Array.from({ length: 66 }, (_, i) => String(thisYear - 14 - i));
-  const months = Array.from({ length: 12 }, (_, i) => ({
-    value: String(i + 1).padStart(2, "0"),
-    label: new Intl.DateTimeFormat(locale, { month: "long" }).format(
-      new Date(2000, i, 1),
-    ),
-  }));
-  const days = Array.from({ length: 31 }, (_, i) =>
-    String(i + 1).padStart(2, "0"),
-  );
-  const emit = (y: string, m: string, d: string) =>
-    onChange(y && m && d ? `${y}-${m}-${d}` : "");
-  const cls = cn(inputClass, "bg-background");
-  return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className={className}>
+      <label className="text-muted-foreground mb-1 block text-xs font-medium">
+        {label}
+      </label>
       <select
-        className={cls}
-        value={dd}
-        onChange={(e) => emit(yy, mm, e.target.value)}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
+        className={inputClass}
       >
-        <option value="">{labels.day}</option>
-        {days.map((d) => (
-          <option key={d} value={d}>
-            {Number(d)}
-          </option>
-        ))}
-      </select>
-      <select
-        className={cls}
-        value={mm}
-        onChange={(e) => emit(yy, e.target.value, dd)}
-      >
-        <option value="">{labels.month}</option>
-        {months.map((m) => (
-          <option key={m.value} value={m.value}>
-            {m.label}
-          </option>
-        ))}
-      </select>
-      <select
-        className={cls}
-        value={yy}
-        onChange={(e) => emit(e.target.value, mm, dd)}
-      >
-        <option value="">{labels.year}</option>
+        <option value="">—</option>
         {years.map((y) => (
           <option key={y} value={y}>
             {y}
@@ -504,46 +261,6 @@ export function ResumeWizard({
       ),
     }));
 
-  const addCert = () =>
-    setDraft((d) => ({
-      ...d,
-      certificates: [...d.certificates, { ...EMPTY_CERT }],
-    }));
-  const removeCert = (i: number) =>
-    setDraft((d) => ({
-      ...d,
-      certificates: d.certificates.filter((_, j) => j !== i),
-    }));
-  const setCert = <K extends keyof CertificateEntry>(
-    i: number,
-    key: K,
-    value: CertificateEntry[K],
-  ) =>
-    setDraft((d) => ({
-      ...d,
-      certificates: d.certificates.map((c, j) =>
-        j === i ? { ...c, [key]: value } : c,
-      ),
-    }));
-
-  // Custom languages: add any language beyond the fixed set (stored by name).
-  const [newLang, setNewLang] = useState("");
-  const addLang = () => {
-    const name = newLang.trim();
-    if (!name) return;
-    setDraft((d) => ({
-      ...d,
-      languages: { ...d.languages, [name]: d.languages[name] ?? "a1_a2" },
-    }));
-    setNewLang("");
-  };
-  const removeLang = (code: string) =>
-    setDraft((d) => {
-      const next = { ...d.languages };
-      delete next[code];
-      return { ...d, languages: next };
-    });
-
   const steps = [
     t("stepPersonal"),
     t("stepExperience"),
@@ -601,379 +318,324 @@ export function ResumeWizard({
         {t("subtitle")}
       </p>
 
-      {/* Stepper */}
-      <ol className="mt-8 flex items-center justify-center gap-2">
-        {steps.map((label, i) => (
-          <li key={label} className="flex items-center gap-2">
-            <span
+      {/* Progress */}
+      <div className="mt-8 flex items-center justify-between px-2">
+        {steps.map((s, i) => (
+          <div key={s} className="flex flex-1 items-center last:flex-none">
+            <div
               className={cn(
-                "flex size-8 items-center justify-center rounded-full text-sm font-bold",
-                i < step
+                "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                i <= step
                   ? "bg-primary text-primary-foreground"
-                  : i === step
-                    ? "border-primary text-primary border-2"
-                    : "border-border text-muted-foreground border",
+                  : "bg-muted text-muted-foreground",
               )}
             >
               {i < step ? <Check className="size-4" /> : i + 1}
-            </span>
-            <span
-              className={cn(
-                "hidden text-sm font-medium sm:inline",
-                i === step ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {label}
-            </span>
-            {/* The connector fills in behind you, so progress reads at a
-                glance on a phone, where the step labels are hidden. */}
-            {i < steps.length - 1 ? (
-              <span
+            </div>
+            {i < steps.length - 1 && (
+              <div
                 className={cn(
-                  "mx-1 h-px w-6 transition-colors",
-                  i < step ? "bg-primary" : "bg-border",
+                  "mx-2 h-0.5 flex-1 transition-colors",
+                  i < step ? "bg-primary" : "bg-muted",
                 )}
               />
-            ) : null}
-          </li>
+            )}
+          </div>
         ))}
-      </ol>
+      </div>
 
-      <div className="border-border bg-card mt-8 space-y-5 rounded-2xl border p-6">
-        {step === 0 ? (
-          <>
-            <Field label={t("position")} required>
-              {/* Type-and-pick over the curated blue-collar list: the seekers
-                  this product is built for name their trade a dozen different
-                  ways ("prodavets", "sotuvchi konsultant"), and a title that
-                  matches the postings is what makes the two-way résumé match
-                  fire. Free text still wins if their trade isn't listed. */}
-              <PositionsField
-                values={draft.positions}
-                onChange={(v) => set("positions", v)}
-                placeholder={t("positionHint")}
-                removeLabel={t("remove")}
-              />
-              <p className="text-muted-foreground mt-1.5 text-xs">
-                {t("positionsHelp", { max: MAX_POSITIONS })}
-              </p>
-            </Field>
-            <Field label={t("fullName")} required>
+      <div className="mt-8">
+        {step === 0 && (
+          <div className="rise-in space-y-6">
+            <div>
+              <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                {t("fullName")}
+              </label>
               <input
-                className={inputClass}
+                type="text"
                 value={draft.fullName}
                 onChange={(e) => set("fullName", e.target.value)}
+                placeholder={t("fullNameHint")}
+                className={inputClass}
               />
-              {/* Uzbek passports are in Latin script; an employer comparing a
-                  Cyrillic résumé name against a passport at the door is a real
-                  first-day problem, so ask for it the way the document has it. */}
-              <p className="text-muted-foreground mt-1.5 text-xs">
-                {t("fullNameHelp")}
-              </p>
-            </Field>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("birthDate")}>
-                <BirthDatePicker
-                  value={draft.birthDate}
-                  onChange={(v) => set("birthDate", v)}
-                  locale={locale}
-                  labels={{
-                    day: t("dobDay"),
-                    month: t("dobMonth"),
-                    year: t("dobYear"),
-                  }}
-                />
-              </Field>
-              <Field label={t("gender")}>
-                <ChipGroup
-                  value={draft.gender}
-                  onChange={(v) => set("gender", v)}
-                  options={[
-                    { value: "male", label: t("male") },
-                    { value: "female", label: t("female") },
-                  ]}
-                />
-              </Field>
             </div>
-            {/* Where they want to work, from the same viloyat/tuman list the
-                employer form writes into jobs.region/district — typed city
-                names ("Ташкент" vs "Toshkent" vs "toshkent sh.") compared
-                equal to nothing, which is most of why location matching used
-                to miss. District is optional: plenty of seekers will take the
-                whole region. */}
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label={t("region")}>
-                <select
-                  className={inputClass}
-                  value={draft.region}
-                  onChange={(e) =>
-                    // A new region invalidates the district under it.
-                    setDraft((d) => ({
-                      ...d,
-                      region: e.target.value,
-                      district: "",
-                    }))
-                  }
-                >
-                  <option value="">{t("regionAny")}</option>
-                  {UZ_REGIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={t("district")}>
-                <select
-                  className={inputClass}
-                  value={draft.district}
-                  disabled={!draft.region}
-                  onChange={(e) => set("district", e.target.value)}
-                >
-                  <option value="">{t("districtAny")}</option>
-                  {districtsFor(draft.region).map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-            <Field label={t("maritalStatus")}>
-              <ChipGroup
-                value={draft.maritalStatus}
-                onChange={(v) => set("maritalStatus", v)}
-                options={MARITAL.map((m) => ({ value: m, label: t(m) }))}
-              />
-            </Field>
-          </>
-        ) : null}
 
-        {step === 1 ? (
-          <>
-            <Field label={t("experience")} required>
-              <ChipGroup
-                value={draft.experienceLevel}
-                onChange={(v) => set("experienceLevel", v)}
-                options={EXP.map((e) => ({ value: e, label: t(`exp.${e}`) }))}
-              />
-            </Field>
-
-            {/* Real work history — one card per job (experiences table). */}
             <div>
-              <p className="text-foreground text-sm font-medium">
-                {t("workHistory")}
-              </p>
-              {/* Why it's worth the typing: a past job title is a matching
-                  signal in its own right (recommended_jobs scores it), so this
-                  is a promise the product actually keeps, not a nag. */}
-              <p className="text-muted-foreground mt-0.5 mb-2 text-xs">
-                {t("workHistoryNudge")}
-              </p>
-              {draft.experiences.map((exp, i) => (
-                <div
-                  key={i}
-                  className="border-border mb-3 rounded-xl border p-4"
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-foreground text-sm font-semibold">
-                      {t("jobLabel")} #{i + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeExp(i)}
-                      aria-label={t("remove")}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    <input
-                      className={inputClass}
-                      placeholder={t("jobPosition")}
-                      value={exp.title}
-                      onChange={(e) => setExp(i, "title", e.target.value)}
-                    />
-                    <input
-                      className={inputClass}
-                      placeholder={t("company")}
-                      value={exp.companyName}
-                      onChange={(e) => setExp(i, "companyName", e.target.value)}
-                    />
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <YearSelect
-                        label={t("startYear")}
-                        value={exp.startYear}
-                        onChange={(v) => setExp(i, "startYear", v)}
-                      />
-                      <YearSelect
-                        label={t("endYear")}
-                        value={exp.endYear}
-                        disabled={exp.isCurrent}
-                        onChange={(v) => setExp(i, "endYear", v)}
-                      />
-                    </div>
-                    <label className="text-foreground flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={exp.isCurrent}
-                        onChange={(e) =>
-                          setExp(i, "isCurrent", e.target.checked)
-                        }
-                      />
-                      {t("currentlyWorking")}
-                    </label>
-                    <textarea
-                      className={cn(inputClass, "h-auto min-h-[4rem] py-2.5")}
-                      placeholder={t("jobDutiesHint")}
-                      value={exp.description}
-                      onChange={(e) => setExp(i, "description", e.target.value)}
-                    />
-                  </div>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addExp}
-                className="border-border text-foreground hover:border-primary/40 inline-flex items-center gap-2 rounded-lg border border-dashed px-4 py-2 text-sm font-medium"
-              >
-                <Plus className="size-4" /> {t("addJob")}
-              </button>
+              <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                {t("desiredPosition")}
+              </label>
+              <SuggestInput
+                value={draft.positions[0] || ""}
+                onValueChange={(v) => set("positions", v ? [v] : [])}
+                placeholder={t("desiredPositionHint")}
+                suggest={suggestProfessions}
+                className={inputClass}
+              />
             </div>
 
-            <Field label={t("expectedSalary")}>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  className={inputClass}
-                  placeholder={t("salaryHint")}
-                  value={
-                    draft.expectedSalary
-                      ? groupDigits(draft.expectedSalary)
-                      : ""
-                  }
-                  onChange={(e) =>
-                    set(
-                      "expectedSalary",
-                      e.target.value.replace(/\D/g, "").slice(0, 12),
-                    )
-                  }
+            <div>
+              <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                {t("summary")}
+              </label>
+              <div className="relative">
+                <textarea
+                  value={draft.summary}
+                  onChange={(e) => {
+                    set("summary", e.target.value);
+                    if (draft.summaryAiGenerated) {
+                      set("summaryAiGenerated", false);
+                    }
+                  }}
+                  placeholder={t("summaryHint")}
+                  rows={4}
+                  className={cn(inputClass, "pr-10")}
                 />
-                <div className="bg-muted inline-flex shrink-0 items-center rounded-lg p-0.5 text-sm font-semibold">
-                  {["UZS", "USD"].map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => set("currency", c)}
-                      className={cn(
-                        "rounded-md px-3 py-1.5 transition-colors",
-                        draft.currency === c
-                          ? "bg-background text-foreground shadow-sm"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </Field>
-            <Field label={t("summaryLabel")}>
-              <textarea
-                rows={5}
-                className={cn(
-                  inputClass,
-                  "h-auto min-h-[7rem] py-2.5 leading-relaxed",
-                )}
-                placeholder={t("summaryHint")}
-                value={draft.summary}
-                // A manual edit makes it the seeker's own words → clear the AI
-                // flag (they've taken ownership).
-                onChange={(e) =>
-                  setDraft((d) => ({
-                    ...d,
-                    summary: e.target.value,
-                    summaryAiGenerated: false,
-                  }))
-                }
-              />
-              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={writeSummaryWithAi}
-                  disabled={aiPending}
+                  disabled={aiPending || draft.positions.length === 0}
                   className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "absolute right-2 top-2 rounded-lg p-1.5 transition-colors",
+                    aiPending
+                      ? "bg-muted text-muted-foreground"
+                      : "text-primary hover:bg-primary/10",
                   )}
+                  title={t("aiWrite")}
                 >
                   {aiPending ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <Sparkles className="size-4" />
                   )}
-                  {aiPending ? t("aiWriting") : t("aiWrite")}
                 </button>
-                <span className="text-muted-foreground text-xs">
-                  {t("aiHint")}
-                </span>
               </div>
-              {/* Keep it honest — the AI is a helper, not a fabricator. */}
-              <p className="text-muted-foreground mt-2 flex items-start gap-1.5 text-xs">
-                <ShieldCheck className="text-primary mt-px size-3.5 shrink-0" />
-                {draft.summaryAiGenerated
-                  ? t("aiRealityCheckOn")
-                  : t("aiRealityCheck")}
-              </p>
-              {aiFellBack ? (
+              {aiFellBack && (
                 <p className="text-muted-foreground mt-1.5 text-xs">
                   {t("aiFellBack")}
                 </p>
-              ) : null}
-            </Field>
-          </>
-        ) : null}
+              )}
+            </div>
 
-        {step === 2 ? (
-          <>
-            {draft.educations.map((edu, i) => (
-              <div key={i} className="border-border rounded-xl border p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-foreground text-sm font-semibold">
-                    {t("education")} #{i + 1}
-                  </span>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                  {t("region")}
+                </label>
+                <select
+                  value={draft.region || ""}
+                  onChange={(e) => {
+                    set("region", e.target.value || null);
+                    set("city", null);
+                  }}
+                  className={inputClass}
+                >
+                  <option value="">—</option>
+                  {UZ_REGIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                  {t("city")}
+                </label>
+                <select
+                  value={draft.city || ""}
+                  onChange={(e) => set("city", e.target.value || null)}
+                  disabled={!draft.region}
+                  className={inputClass}
+                >
+                  <option value="">—</option>
+                  {draft.region &&
+                    districtsFor(draft.region).map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="rise-in space-y-8">
+            <div>
+              <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                {t("experienceLevel")}
+              </label>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {[
+                  { v: "entry", l: t("expEntry") },
+                  { v: "junior", l: t("expJunior") },
+                  { v: "mid", l: t("expMid") },
+                  { v: "senior", l: t("expSenior") },
+                  { v: "lead", l: t("expLead") },
+                ].map((l) => (
+                  <button
+                    key={l.v}
+                    type="button"
+                    onClick={() => set("experienceLevel", l.v)}
+                    className={cn(
+                      "rounded-xl border px-3 py-2 text-sm font-medium transition-all",
+                      draft.experienceLevel === l.v
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border bg-card text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {l.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-foreground text-sm font-semibold">
+                  {t("workHistory")}
+                </h2>
+                <button
+                  type="button"
+                  onClick={addExp}
+                  className="text-primary flex items-center gap-1 text-xs font-bold hover:underline"
+                >
+                  <Plus className="size-3" />
+                  {t("addExperience")}
+                </button>
+              </div>
+
+              {draft.experiences.map((exp, i) => (
+                <div
+                  key={i}
+                  className="border-border bg-card relative space-y-4 rounded-2xl border p-4"
+                >
                   <button
                     type="button"
-                    onClick={() => removeEdu(i)}
-                    aria-label={t("remove")}
-                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => removeExp(i)}
+                    className="text-muted-foreground hover:text-destructive absolute right-2 top-2 p-1 transition-colors"
                   >
                     <Trash2 className="size-4" />
                   </button>
-                </div>
-                <div className="space-y-3">
-                  <input
-                    className={inputClass}
-                    placeholder={t("school")}
-                    value={edu.school}
-                    onChange={(e) => setEdu(i, "school", e.target.value)}
-                  />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <input
-                      className={inputClass}
-                      placeholder={t("degree")}
-                      value={edu.degree}
-                      onChange={(e) => setEdu(i, "degree", e.target.value)}
-                    />
-                    <input
-                      className={inputClass}
-                      placeholder={t("field")}
-                      value={edu.field}
-                      onChange={(e) => setEdu(i, "field", e.target.value)}
-                    />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="text-muted-foreground mb-1 block text-xs font-medium">
+                        {t("jobTitle")}
+                      </label>
+                      <SuggestInput
+                        value={exp.title}
+                        onValueChange={(v) => setExp(i, "title", v)}
+                        placeholder={t("jobTitleHint")}
+                        suggest={suggestProfessions}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-muted-foreground mb-1 block text-xs font-medium">
+                        {t("company")}
+                      </label>
+                      <input
+                        type="text"
+                        value={exp.companyName}
+                        onChange={(e) => setExp(i, "companyName", e.target.value)}
+                        placeholder={t("companyHint")}
+                        className={inputClass}
+                      />
+                    </div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <YearSelect
+                      label={t("startYear")}
+                      value={exp.startYear}
+                      onChange={(v) => setExp(i, "startYear", v)}
+                    />
+                    <div className="opacity-0 sm:block" />
+                    {!exp.current && (
+                      <YearSelect
+                        label={t("endYear")}
+                        value={exp.endYear}
+                        onChange={(v) => setExp(i, "endYear", v)}
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`exp-current-${i}`}
+                      checked={exp.current}
+                      onChange={(e) => setExp(i, "current", e.target.checked)}
+                      className="text-primary focus:ring-primary size-4 rounded border-gray-300"
+                    />
+                    <label
+                      htmlFor={`exp-current-${i}`}
+                      className="text-muted-foreground text-xs font-medium"
+                    >
+                      {t("currentlyWorkHere")}
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="rise-in space-y-8">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-foreground text-sm font-semibold">
+                  {t("education")}
+                </h2>
+                <button
+                  type="button"
+                  onClick={addEdu}
+                  className="text-primary flex items-center gap-1 text-xs font-bold hover:underline"
+                >
+                  <Plus className="size-3" />
+                  {t("addEducation")}
+                </button>
+              </div>
+
+              {draft.educations.map((edu, i) => (
+                <div
+                  key={i}
+                  className="border-border bg-card relative space-y-4 rounded-2xl border p-4"
+                >
+                  <button
+                    type="button"
+                    onClick={() => removeEdu(i)}
+                    className="text-muted-foreground hover:text-destructive absolute right-2 top-2 p-1 transition-colors"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="text-muted-foreground mb-1 block text-xs font-medium">
+                        {t("institution")}
+                      </label>
+                      <input
+                        type="text"
+                        value={edu.institution}
+                        onChange={(e) => setEdu(i, "institution", e.target.value)}
+                        placeholder={t("institutionHint")}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-muted-foreground mb-1 block text-xs font-medium">
+                        {t("degree")}
+                      </label>
+                      <input
+                        type="text"
+                        value={edu.degree}
+                        onChange={(e) => setEdu(i, "degree", e.target.value)}
+                        placeholder={t("degreeHint")}
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <YearSelect
                       label={t("startYear")}
                       value={edu.startYear}
@@ -982,246 +644,113 @@ export function ResumeWizard({
                     <YearSelect
                       label={t("endYear")}
                       value={edu.endYear}
-                      disabled={edu.isCurrent}
                       onChange={(v) => setEdu(i, "endYear", v)}
                     />
                   </div>
-                  <label className="text-foreground flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={edu.isCurrent}
-                      onChange={(e) => setEdu(i, "isCurrent", e.target.checked)}
-                    />
-                    {t("studying")}
-                  </label>
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addEdu}
-              className="border-border text-foreground hover:border-primary/40 inline-flex items-center gap-2 rounded-lg border border-dashed px-4 py-2 text-sm font-medium"
-            >
-              <Plus className="size-4" /> {t("addEducation")}
-            </button>
-
-            {/* Certificates & courses (with / without expiry) — certifications. */}
-            <div>
-              <p className="text-foreground mb-2 text-sm font-medium">
-                {t("certificates")}
-              </p>
-              {draft.certificates.map((cert, i) => (
-                <div
-                  key={i}
-                  className="border-border mb-3 rounded-xl border p-4"
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-foreground text-sm font-semibold">
-                      {t("certificate")} #{i + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeCert(i)}
-                      aria-label={t("remove")}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    <input
-                      className={inputClass}
-                      placeholder={t("certName")}
-                      value={cert.name}
-                      onChange={(e) => setCert(i, "name", e.target.value)}
-                    />
-                    <input
-                      className={inputClass}
-                      placeholder={t("issuer")}
-                      value={cert.issuer}
-                      onChange={(e) => setCert(i, "issuer", e.target.value)}
-                    />
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <YearSelect
-                        label={t("issuedYear")}
-                        value={cert.issuedYear}
-                        onChange={(v) => setCert(i, "issuedYear", v)}
-                      />
-                      {/* Certificates may expire after today, unlike a job or
-                          a degree — so this one list runs forward as well. */}
-                      <YearSelect
-                        label={t("expiryYear")}
-                        value={cert.expiryYear}
-                        future={10}
-                        onChange={(v) => setCert(i, "expiryYear", v)}
-                      />
-                    </div>
-                    <p className="text-muted-foreground text-xs">
-                      {t("expiryHint")}
-                    </p>
-                  </div>
                 </div>
               ))}
-              <button
-                type="button"
-                onClick={addCert}
-                className="border-border text-foreground hover:border-primary/40 inline-flex items-center gap-2 rounded-lg border border-dashed px-4 py-2 text-sm font-medium"
-              >
-                <Plus className="size-4" /> {t("addCertificate")}
-              </button>
             </div>
 
-            <div>
-              <p className="text-foreground mb-3 text-sm font-medium">
-                {t("languages")}
-              </p>
-              <div className="space-y-3">
-                {LANGS.map((code) => (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-foreground text-sm font-semibold">
+                  {t("languages")}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[
+                  { c: "uz", n: "O'zbek tili" },
+                  { c: "ru", n: "Rus tili" },
+                  { c: "en", n: "Ingliz tili" },
+                ].map((l) => (
                   <div
-                    key={code}
-                    className="flex flex-col gap-2 sm:flex-row sm:items-center"
+                    key={l.c}
+                    className="border-border bg-card flex items-center justify-between rounded-xl border p-3"
                   >
-                    <span className="text-foreground w-24 shrink-0 text-sm">
-                      {t(`lang.${code}`)}
+                    <span className="text-foreground text-sm font-medium">
+                      {l.n}
                     </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {LEVELS.map((lvl) => {
-                        const on = (draft.languages[code] ?? "none") === lvl;
-                        return (
-                          <button
-                            key={lvl}
-                            type="button"
-                            onClick={() => setLang(code, lvl)}
-                            className={cn(
-                              "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-                              on
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-background text-muted-foreground hover:border-primary/40",
-                            )}
-                          >
-                            {t(`level.${lvl}`)}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <select
+                      value={draft.languages[l.c] ?? ""}
+                      onChange={(e) => setLang(l.c, e.target.value)}
+                      className="bg-accent text-foreground rounded-lg border-none px-2 py-1 text-xs outline-none"
+                    >
+                      <option value="">—</option>
+                      <option value="a1_a2">A1 / A2</option>
+                      <option value="b1_b2">B1 / B2</option>
+                      <option value="c1_c2">C1 / C2</option>
+                      <option value="native">Native</option>
+                    </select>
                   </div>
                 ))}
-                {/* Languages the seeker added themselves (stored by name). */}
-                {Object.keys(draft.languages)
-                  .filter((k) => !LANGS.includes(k as (typeof LANGS)[number]))
-                  .map((code) => (
-                    <div
-                      key={code}
-                      className="flex flex-col gap-2 sm:flex-row sm:items-center"
-                    >
-                      <span className="text-foreground flex w-24 shrink-0 items-center gap-1 text-sm">
-                        {code}
-                        <button
-                          type="button"
-                          onClick={() => removeLang(code)}
-                          aria-label={t("remove")}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <X className="size-3" />
-                        </button>
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {LEVELS.filter((l) => l !== "none").map((lvl) => {
-                          const on = draft.languages[code] === lvl;
-                          return (
-                            <button
-                              key={lvl}
-                              type="button"
-                              onClick={() => setLang(code, lvl)}
-                              className={cn(
-                                "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-                                on
-                                  ? "border-primary bg-primary text-primary-foreground"
-                                  : "border-border bg-background text-muted-foreground hover:border-primary/40",
-                              )}
-                            >
-                              {t(`level.${lvl}`)}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-              {/* Add any other language */}
-              <div className="mt-3 flex gap-2">
-                <input
-                  className={inputClass}
-                  placeholder={t("addLanguageHint")}
-                  value={newLang}
-                  onChange={(e) => setNewLang(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addLang();
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={addLang}
-                  className="border-border text-foreground hover:border-primary/40 inline-flex shrink-0 items-center gap-1 rounded-lg border px-3 text-sm font-medium"
-                >
-                  <Plus className="size-4" /> {t("addLanguage")}
-                </button>
               </div>
             </div>
-          </>
-        ) : null}
+          </div>
+        )}
 
-        {step === 3 ? (
-          <>
-            <Field label={t("phone")} required>
-              {/* The number an employer will actually dial — see uz-phone.ts
-                  for why it is collected as nine digits behind a pinned +998
-                  rather than as free text. */}
+        {step === 3 && (
+          <div className="rise-in space-y-6">
+            <div>
+              <label className="text-foreground mb-1.5 block text-sm font-semibold">
+                {t("phone")}
+              </label>
               <UzPhoneInput
                 value={draft.phone}
                 onChange={(v) => set("phone", v)}
-                required
-              />
-            </Field>
-            <Field label={t("email")}>
-              <input
-                type="email"
                 className={inputClass}
-                value={draft.email}
-                onChange={(e) => set("email", e.target.value)}
               />
-            </Field>
-          </>
-        ) : null}
+              <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-xs">
+                <ShieldCheck className="size-3.5 shrink-0" />
+                {t("phonePrivacy")}
+              </p>
+            </div>
 
-        {error ? (
-          <p className="text-destructive text-sm">{t("errSave")}</p>
-        ) : null}
+            <div className="bg-primary/5 border-primary/20 rounded-2xl border p-4">
+              <h3 className="text-primary text-sm font-bold">
+                {t("readyToSave")}
+              </h3>
+              <p className="text-muted-foreground mt-1 text-xs">
+                {t("saveNotice")}
+              </p>
+            </div>
+
+            {error && (
+              <div className="bg-destructive/10 text-destructive rounded-xl p-3 text-sm font-medium">
+                {t("saveError")}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="mt-6 flex items-center justify-between">
+      {/* Actions */}
+      <div className="mt-10 flex items-center justify-between gap-4">
         <button
           type="button"
-          onClick={() => setStep((s) => Math.max(0, s - 1))}
-          disabled={step === 0 || pending}
+          onClick={() => (step > 0 ? setStep((s) => s - 1) : router.back())}
           className={cn(
             buttonVariants({ variant: "outline", size: "md" }),
-            step === 0 && "invisible",
+            "flex-1",
           )}
         >
-          {t("back")}
+          {step === 0 ? t("cancel") : t("back")}
         </button>
         <button
           type="button"
           onClick={next}
           disabled={!valid || pending}
-          className={cn(buttonVariants({ variant: "primary", size: "md" }))}
+          className={cn(
+            buttonVariants({ variant: "primary", size: "md" }),
+            "flex-1",
+          )}
         >
-          {pending ? <Loader2 className="size-4 animate-spin" /> : null}
-          {step === steps.length - 1 ? t("finish") : t("next")}
+          {pending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : step === steps.length - 1 ? (
+            t("finish")
+          ) : (
+            t("next")
+          )}
         </button>
       </div>
     </div>

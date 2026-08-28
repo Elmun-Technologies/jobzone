@@ -73,11 +73,44 @@ export async function setCompanyBlocked(formData: FormData): Promise<void> {
   );
 }
 
+/**
+ * `profiles.suspended_at` is not read by proxy.ts, any RLS policy, or
+ * anywhere else that would actually stop a suspended user — the only real
+ * enforcement is the Supabase Auth ban (`ban_duration`), which blocks sign-in
+ * at the auth layer. This used to write the DB flag via the RPC first and
+ * apply the ban as a "best-effort" afterthought: on failure (no
+ * SUPABASE_SERVICE_ROLE_KEY, a transient API error), the console.error was
+ * the only trace. The admin saw "suspended" in the list; the account kept
+ * signing in and using the app normally, indefinitely.
+ *
+ * Fixed the same way as setProfileAdmin: apply the real ban first, write the
+ * DB flag (+ audit row) only once that is confirmed.
+ */
 export async function setProfileSuspended(formData: FormData): Promise<void> {
   const backTo = backPath(formData, "users");
   const id = field(formData, "id");
   const suspended = field(formData, "suspended") === "1";
   if (!id) redirect(`${backTo}?notice=err`);
+
+  if (!hasSupabase()) {
+    revalidatePath(backTo);
+    return;
+  }
+
+  const admin = createAdminClient();
+  if (!admin) {
+    console.error("setProfileSuspended: no service-role client configured");
+    redirect(`${backTo}?notice=authkey`);
+  }
+  try {
+    await admin.auth.admin.updateUserById(id, {
+      ban_duration: suspended ? "87600h" : "none",
+    });
+  } catch (e) {
+    console.error("setProfileSuspended: auth ban update failed", e);
+    redirect(`${backTo}?notice=authkey`);
+  }
+
   await runAdminRpc(
     "admin_set_profile_suspended",
     {
@@ -87,18 +120,6 @@ export async function setProfileSuspended(formData: FormData): Promise<void> {
     },
     backTo,
   );
-  // Best-effort auth ban so a suspended account can't sign in at all. Needs
-  // the service key; without it the profile flag still stands (RLS-guarded).
-  const admin = createAdminClient();
-  if (admin) {
-    try {
-      await admin.auth.admin.updateUserById(id, {
-        ban_duration: suspended ? "87600h" : "none",
-      });
-    } catch (e) {
-      console.error("auth ban update failed", e);
-    }
-  }
 }
 
 const COMPANY_VERIFY_METHODS = new Set(["legal_entity", "licensed_agency"]);

@@ -87,7 +87,7 @@ export default async function ApplyPage({
       {!applied ? (
         job.applicantsCount > 0 ? (
           <div className="border-primary/40 bg-accent text-accent-foreground mt-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm">
-            <Flame className="text-primary size-4 shrink-0" />
+            <Flame className="text-primary-ink size-4 shrink-0" />
             <span className="font-semibold">
               {t("socialProof", { count: job.applicantsCount })}
             </span>
@@ -97,7 +97,7 @@ export default async function ApplyPage({
           </div>
         ) : (
           <div className="border-border bg-card text-foreground mt-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm">
-            <Zap className="text-primary size-4 shrink-0" />
+            <Zap className="text-primary-ink size-4 shrink-0" />
             <span className="font-medium">{t("beFirst")}</span>
           </div>
         )

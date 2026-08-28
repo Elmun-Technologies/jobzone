@@ -183,7 +183,7 @@ export function ScreeningEditor({
                 <button
                   type="button"
                   onClick={() => update(i, { options: [...q.options, ""] })}
-                  className="text-primary inline-flex items-center gap-1 text-sm font-medium"
+                  className="text-primary-ink inline-flex items-center gap-1 text-sm font-medium"
                 >
                   <Plus className="size-4" /> {t("addOption")}
                 </button>

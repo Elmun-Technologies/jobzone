@@ -23,6 +23,18 @@
   --accent-foreground: #0a0a0a;
   --ring: #c7fb00;
 
+  /* Volt AS TEXT, not as a fill. `--primary` on `--background` is ~1.2:1 —
+     effectively invisible — because volt only works as a fill with dark ink
+     on top (`bg-primary text-primary-foreground`, ~16:1). Every link/icon/
+     required-field-asterisk that wanted "the brand accent, as text" was
+     reaching for `text-primary` anyway and silently disappearing in light
+     mode: the sign-up Terms/Privacy consent links, the résumé wizard's
+     required-field asterisk, "clear filters", every toast action link. This
+     token is the same hue, darkened to ~7.4:1 (AAA) against white — it reads
+     as "volt" without being unreadable. Dark mode needs no such correction:
+     volt-on-ink already clears ~14.6:1, so this equals --primary there. */
+  --primary-ink: #4a5c00;
+
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
@@ -64,6 +76,7 @@
 
   --primary: #c7fb00;
   --primary-foreground: #0a0a0a;
+  --primary-ink: #c7fb00;
   --accent: #2a2a28;
   --accent-foreground: #c7fb00;
   --ring: #c7fb00;
@@ -85,6 +98,7 @@
   --color-input: var(--input);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-ink: var(--primary-ink);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);

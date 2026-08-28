@@ -192,3 +192,30 @@ const Map<String, List<String>> uzbekistanRegions = {
 /// Returns the districts/cities for [region], or empty list if not found.
 List<String> districtsFor(String? region) =>
     region == null ? const [] : (uzbekistanRegions[region] ?? const []);
+
+/// [region] → the matching key of `cityOptions` (`lib/shared/options/
+/// option_lists.dart`), for regions the seeker's city filter actually offers.
+///
+/// The employer post-job form used to write the *district* the employer
+/// picked (e.g. `'Chilonzor'`) straight into `jobs.city`, while the seeker's
+/// filter, the onboarding city picker and `recommended_jobs()`'s city-match
+/// score all compare against this small set of English canonical names.
+/// `.eq('city', 'Tashkent')` can never match a row stored as `'Chilonzor'` —
+/// the country's largest job market (5 of the 7 filter options, once every
+/// Tashkent district is counted) was unreachable by city filter.
+///
+/// Deliberately partial: `uzbekistanRegions` has 14 regions, `cityOptions`
+/// only 7. Expanding the filter to the other 7 is a product decision (which
+/// cities to expose, matching l10n in three languages), not a bug fix — this
+/// only repairs the mapping for regions the filter already claims to cover.
+/// Qoraqalpog'iston maps to Nukus (its capital and the option's namesake)
+/// since that region has no city-level entry otherwise.
+const Map<String, String> regionToCityOption = {
+  'Toshkent shahri': 'Tashkent',
+  'Samarqand': 'Samarkand',
+  'Buxoro': 'Bukhara',
+  'Andijon': 'Andijan',
+  'Namangan': 'Namangan',
+  'Farg\'ona': 'Fergana',
+  'Qoraqalpog\'iston': 'Nukus',
+};

@@ -2,7 +2,6 @@ import { BadgeCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-
 import { JobStatusPill } from "@/components/employer/job-status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -98,7 +97,7 @@ export default async function EmployerHomePage({
         <h1 className="text-foreground flex items-center gap-1.5 text-2xl font-bold">
           {company.name}
           {company.isVerified ? (
-            <BadgeCheck className="text-primary size-5 shrink-0" />
+            <BadgeCheck className="text-primary-ink size-5 shrink-0" />
           ) : null}
         </h1>
       </div>
@@ -164,7 +163,7 @@ export default async function EmployerHomePage({
           {jobs.length > recentJobs.length ? (
             <Link
               href="/employer/jobs"
-              className="text-primary text-sm font-medium hover:underline"
+              className="text-primary-ink text-sm font-medium hover:underline"
             >
               {t("viewAll")}
             </Link>

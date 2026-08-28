@@ -24,6 +24,15 @@ export const adminStrings = {
   prev: "Oldingi",
   next: "Keyingi",
   actionFailed: "Amal bajarilmadi — qaytadan urinib ko'ring",
+  // Distinct from actionFailed: the enforcement call (JWT claim / auth ban)
+  // needs SUPABASE_SERVICE_ROLE_KEY, which the panel can otherwise run
+  // without (CLAUDE.md: "degraded on the anon client"). Silently no-op'ing a
+  // revoke/suspend here would leave the target with real access while the
+  // list shows them as revoked — see actions/admin/users.ts and
+  // moderation.ts. Failing loudly instead means the admin knows to fix the
+  // env instead of trusting a UI that lied.
+  actionNeedsServiceKey:
+    "Amal bajarilmadi: SUPABASE_SERVICE_ROLE_KEY sozlanmagan. Bu holat real ravishda o'zgarmadi.",
   mod: {
     reasonPlaceholder: "Sabab (ixtiyoriy)",
     block: "Bloklash",

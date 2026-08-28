@@ -142,6 +142,8 @@ export default async function AdminUsersPage({
       </div>
       {pickParam(sp.notice) === "err" ? (
         <ActionNote error={adminStrings.actionFailed} />
+      ) : pickParam(sp.notice) === "authkey" ? (
+        <ActionNote error={adminStrings.actionNeedsServiceKey} />
       ) : null}
       <DataTable columns={columns} rows={list.rows} rowKey={(u) => u.id} />
       <Pagination
