@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { hasSupabase } from "@/lib/data/supabase-env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -33,10 +34,8 @@ function backPath(formData: FormData): string {
  *
  * Fixed by making enforcement authoritative: the JWT claim is flipped FIRST,
  * and the DB mirror (+ audit row) is written only once that has actually
- * succeeded. `admin_set_profile_admin`'s own `is_admin()` check still
- * authorizes the CALLER regardless of this order — it isn't about the
- * target's JWT, so moving it after the claim update changes nothing about
- * who is allowed to call this.
+ * succeeded. Authorize the caller before using the service-role client;
+ * `admin_set_profile_admin` independently re-checks and audits the caller.
  */
 export async function setProfileAdmin(formData: FormData): Promise<void> {
   const backTo = backPath(formData);
@@ -48,6 +47,8 @@ export async function setProfileAdmin(formData: FormData): Promise<void> {
     revalidatePath(backTo);
     return;
   }
+
+  await requireAdmin(field(formData, "locale") || "uz");
 
   // The Auth Admin API is the only way to set app_metadata — it cannot be
   // done from SQL — so without the service key this action cannot make any
@@ -71,9 +72,10 @@ export async function setProfileAdmin(formData: FormData): Promise<void> {
     } else if (nextAppMetadata.role === "admin") {
       delete nextAppMetadata.role;
     }
-    await admin.auth.admin.updateUserById(id, {
+    const { error: updateErr } = await admin.auth.admin.updateUserById(id, {
       app_metadata: nextAppMetadata,
     });
+    if (updateErr) throw updateErr;
   } catch (e) {
     console.error("setProfileAdmin: auth claim update failed", e);
     redirect(`${backTo}?notice=authkey`);
