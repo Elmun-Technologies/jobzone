@@ -1,7 +1,11 @@
 # Phase 8 — Real calls (WebRTC/Agora) & push notifications (FCM)
 
-Phases 0–7 ship a complete app that runs offline and against Supabase +
-Meilisearch. Phase 8 swaps two **seams** to enable real-time voice/video calls
+> Historical integration notes. For current clone/run instructions use
+> [CONTRIBUTING.md](../CONTRIBUTING.md#3-getting-started); for deployment use
+> [the go-live checklist](go-live-checklist.md). The running app requires
+> Supabase; mock repositories are test-only and Meilisearch is optional.
+
+Phase 8 introduced two **seams** to enable real-time voice/video calls
 and remote push. Everything below is scaffolded: interfaces, default no-op
 implementations, provider seams, DB migration, and Edge Function stubs. No UI
 changes are needed to go live — you bind a different implementation to one
