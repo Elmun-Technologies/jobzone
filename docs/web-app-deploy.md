@@ -1,4 +1,4 @@
-# Jobzone Web — Deploy & Go-Live Checklist
+# Yolla Web — Deploy & Go-Live Checklist
 
 The Next.js web client (`webapp/`) is feature-complete for both audiences. This
 is the step-by-step to put it live. It shares the **existing Supabase backend**
@@ -41,17 +41,22 @@ In the Supabase dashboard → **Authentication → URL Configuration**:
   once the project is reachable and the user is authenticated.
 
 ## What works without any of the above
-With no env vars the app still builds and runs on **mock data** (mirrors the
-Flutter `Env.hasSupabase` gate), so previews and local dev never hard-fail.
+With no Supabase env vars the web app still builds and renders **empty states**,
+not mock data; auth/session is disabled. The Flutter app instead shows a
+misconfigured-build screen without its compile-time Supabase configuration.
 
 ## CI
 `.github/workflows/webapp-ci.yml` runs `typecheck → lint → test → build` on any
 `webapp/**` change, independent of the Flutter CI.
 
 ## Local development
+
+Install Node.js 22.13+ (22.x) and pnpm 10 first; see
+[the onboarding guide](../CONTRIBUTING.md#31-prerequisites). From repository root:
+
 ```bash
 cd webapp
-pnpm install
+pnpm install --frozen-lockfile
 cp .env.example .env.local   # optional; fill Supabase URL + anon key
 pnpm dev                     # http://localhost:3000 → /uz
 ```
