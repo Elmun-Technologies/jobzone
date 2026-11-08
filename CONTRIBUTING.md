@@ -61,64 +61,136 @@ These are user-mandated. Breaking one is a bug even if tests pass.
 
 ### 3.1 Prerequisites
 
-| Tool | Version | For |
-|---|---|---|
-| Flutter SDK | `3.44.2` (stable; matches CI) | Mobile + Flutter web |
-| Dart | `^3.12` (bundled with Flutter) | — |
-| Node.js | 20+ | Web app |
-| pnpm | 9+ | Web app package manager |
-| Supabase CLI | latest | DB migrations, edge functions (optional) |
-| Deno | latest | Edit/run edge functions (optional) |
+Start with Git and a fresh clone (see [README](README.md#start-here)). Run commands
+from the repository root unless a block explicitly changes directories. The web
+and mobile clients can be installed independently; neither test suite needs
+backend credentials. Use a shell such as Bash for the commands below.
 
-The apps are online-only: without Supabase credentials the web app renders
-empty states and the mobile app boots to a "misconfigured build" screen.
-Point them at a backend (below) to see content.
+| Tool | Version | Installation / purpose |
+|---|---|---|
+| Git | current | [Install Git](https://git-scm.com/downloads) |
+| Flutter SDK | `3.44.2` stable | [Install Flutter](https://docs.flutter.dev/install), selecting this version from the [SDK archive](https://docs.flutter.dev/install/archive); matches CI |
+| Dart | `3.12` bundled with Flutter | Do not install a separate Dart SDK for mobile checks |
+| Node.js | `22.13+` in the `22.x` line | [Install Node](https://nodejs.org/en/download); CI uses Node 22 |
+| pnpm | `10.x` | After Node: `npm install --global pnpm@10` ([alternatives](https://pnpm.io/installation)) |
+| Supabase CLI | `3.0.0` (tested) | Optional, for backend work (§3.4) |
+| Docker Engine / Desktop | current, daemon running | Optional, for local Supabase only |
+| Deno | current | Optional, for edge-function development |
+
+Check `flutter --version`, `node --version`, and `pnpm --version` for your chosen
+client. Older Node 20 releases and pnpm 9 are not the documented web toolchain;
+the locked test dependencies need newer Node versions than Next alone does.
+Flutter installation also needs the OS prerequisites listed in its installer.
 
 ### 3.2 Run the mobile app
 
+For a credential-free check, no emulator or native SDK is needed:
+
 ```bash
 flutter pub get
-flutter gen-l10n            # generate AppLocalizations from the .arb files
-flutter run --dart-define-from-file=env/dev.json   # see below
+flutter gen-l10n
+flutter analyze
+flutter test
 ```
 
-Copy `env/dev.example.json` → `env/dev.json` and fill in the Supabase keys
-first — `Env` (`lib/core/config/env.dart`) reads them via `--dart-define`, and
-without them a debug build stops at the "misconfigured build" screen (unit
-tests still exercise the repos' offline branch directly).
+For an actual app session, first obtain a development Supabase backend (§3.4):
 
-> **Release/profile builds default to the live demo backend.** In a *debug*
-> build (`flutter run`, `flutter test`) an absent `SUPABASE_URL` keeps the app
-> in offline/mock mode, as above. In a *release* or *profile* build (a shipped
-> iOS/Android/web build), if no `--dart-define` was passed, `Env` falls back to
-> the public, RLS-protected publishable key baked into the CI workflows — so a
-> bare Xcode iOS build behaves the same as the Android APK instead of silently
-> showing offline mock data. Pass explicit `--dart-define`s to target a
-> different backend.
+```bash
+cp env/dev.example.json env/dev.json
+# Edit env/dev.json: fill SUPABASE_URL and SUPABASE_ANON_KEY.
+flutter doctor -v
+flutter devices
+flutter run --dart-define-from-file=env/dev.json
+```
+
+For Android, install Android Studio/SDK and JDK 21 (the Gradle project targets
+Java/Kotlin JVM 21), accept licenses with
+`flutter doctor --android-licenses`, and start an emulator or connect a device.
+For iOS, use macOS with Xcode and CocoaPods; follow `flutter doctor` for missing
+components. Firebase push, Yandex maps, signing, and store release configuration
+are separate integration steps; see `docs/phase-8-realtime-and-push.md` and
+`docs/android-signing.md`.
+
+`Env` (`lib/core/config/env.dart`) reads compile-time defines, not a dotenv file.
+Changing `env/dev.json` requires rerunning the app with the flag above. There is
+**no baked-in backend or offline demo in any build mode**: missing URL/key shows
+a misconfigured-build screen. Unit tests exercise mock repository seams directly.
+`SEARCH_PROXY_URL` can stay empty for the normal Postgres-backed job search.
 
 ### 3.3 Run the web app
 
+From the repository root:
+
 ```bash
 cd webapp
-pnpm install
-pnpm dev                    # http://localhost:3000 — empty states without env
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm dev                    # http://localhost:3000 → /uz
 ```
 
-For a real backend, copy `webapp/.env.example` → `webapp/.env.local` and fill
-`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`. For the **admin
-panel's** cross-owner reads you also need a server-only `SUPABASE_SERVICE_ROLE_KEY`
-(see §6.3).
+Tests and the production build require no secrets. Without Supabase variables,
+the running site renders empty states and auth is disabled, not mock data.
+`pnpm start` serves an existing `pnpm build`; it does not compile the app.
 
-### 3.4 Backend (optional, for schema work)
+For a backend, stop the server, then from `webapp/`:
 
 ```bash
-supabase db push            # applies supabase/migrations/*.sql to your project
-supabase functions deploy <name>
+cp .env.example .env.local
+# Edit .env.local: fill NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.
+pnpm dev
 ```
 
-Migrations are **not** run in CI — they reach the DB via a maintainer's
-`supabase db push`. That means **SQL ships on careful review**; call it out
-explicitly in your PR.
+Do not commit real environment files. Admin cross-owner reads also need a
+server-only `SUPABASE_SERVICE_ROLE_KEY` (see §6.3); it is unnecessary for public
+pages or tests. Never prefix this key with `NEXT_PUBLIC_`. Maps, analytics,
+payments, email, and other third-party variables are optional for the basic
+build/test path; the template describes them.
+
+### 3.4 Backend (optional)
+
+Backend setup is **not** required for the checks above. For live client work,
+ask a maintainer for an approved development project's URL and public anon key,
+or use a local stack. Never reset a shared database or use production secrets
+for onboarding.
+
+See the [Supabase CLI installation guide](https://supabase.com/docs/guides/local-development/cli/getting-started).
+The tracked config targets CLI 3.0.0 (`local_smtp`, project-root template paths);
+check `supabase --version` before continuing. Do not run `supabase init` to
+overwrite this repository's configuration. Docker must be running for a local stack; `supabase db reset` alone does not
+provision a hosted project or start Docker. Run local commands at repository
+root.
+
+```bash
+docker info
+supabase start -x vector    # omit the optional Vector logging collector
+supabase db reset          # DESTRUCTIVE: only the local development database
+supabase status            # local API URL, public anon key, Studio, mail UI
+```
+
+Copy only the public URL/anon key into the client files in §3.2/§3.3. Do not
+copy service-role/secret keys into client config. Local data is disposable;
+`supabase stop` stops the stack when finished. See the [setup audit](docs/setup-audit.md)
+for the tested CLI version and any local-stack verification limits.
+
+**Hosted deployment is maintainer-only, not part of the quick start.** With
+permission and a disposable/development project, authenticate and link before
+pushing; replace placeholders rather than pasting them literally:
+
+```bash
+supabase login
+supabase link --project-ref <development-project-ref>
+supabase db push
+supabase functions deploy <function-name>
+```
+
+Do not run a bulk legacy Meilisearch deployment to enable normal job search.
+For function-specific secrets, auth providers/hooks, and cron, follow
+`docs/go-live-checklist.md`. Migrations are not applied in CI; SQL changes need
+explicit review. `bash scripts/check-migrations.sh` checks filenames/versions,
+not SQL execution.
 
 ---
 
@@ -145,7 +217,7 @@ webapp/         Next.js 16 web client + admin panel
   src/proxy.ts        auth gate for /account + /employer + /admin (guest carve-outs)
 
 supabase/
-  migrations/   0001…0057 — entire schema, RLS, triggers, views, buckets
+  migrations/   versioned SQL — entire schema, RLS, triggers, views, buckets
   functions/    edge functions (see §7)
   seed.sql
 
@@ -252,7 +324,7 @@ secrets) — see `docs/go-live-checklist.md` §2–4.
 
 ## 7. Backend (`supabase/`)
 
-- **Schema (57 migrations, `0001`–`0057`):** profiles/CV, companies
+- **Schema (`supabase/migrations/` is the source of truth):** profiles/CV, companies
   (+people/gallery/reviews), job_categories (blue-collar set incl. Foreign-jobs),
   jobs (rich fields + `screening_questions` jsonb + boost + expiry + `publish_at`),
   applications (+status-history trigger), bookmarks, chat, notifications,
@@ -316,7 +388,7 @@ server-to-server function is gated by `EDGE_SHARED_SECRET` (fail closed).
 flutter pub get && flutter gen-l10n
 flutter analyze
 flutter test
-dart format --set-exit-if-changed $(git ls-files '*.dart')
+dart format --output=none --set-exit-if-changed $(git ls-files '*.dart')
 ```
 
 > **The #1 CI break is `dart format`.** If you can't run Flutter locally, at
@@ -393,7 +465,7 @@ algorithm per side, both clients call the same RPC); one-tap apply from any card
 seeker "archive"/dismiss control; map-first mobile Home with the **official
 Yandex SDK**; **Firebase push wired**; the go-live runbook.
 
-**Go-live is ops, not code** (maintainer's side): `supabase db push` (→`0057`),
+**Go-live is ops, not code** (maintainer's side): `supabase db push` (all pending migrations),
 secrets (`EDGE_SHARED_SECRET`, `TELEGRAM_GATEWAY_TOKEN`, `SEND_SMS_HOOK_SECRET`,
 `TELEGRAM_BOT_TOKEN`…, plus `SUPABASE_SERVICE_ROLE_KEY` for the admin panel),
 deploy edge functions, enable Phone auth + register the Send-SMS hook, schedule
